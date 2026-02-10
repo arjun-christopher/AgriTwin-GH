@@ -1,0 +1,85 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.1.2 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36" version="28.1.2">
+  <diagram id="prtHgNgQTEPvFCAcTncT" name="Page-1">
+    <mxGraphModel dx="856" dy="529" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="mC23_XhWaikeHLuGKKnI-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="mC23_XhWaikeHLuGKKnI-2" target="mC23_XhWaikeHLuGKKnI-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-2" value="" style="swimlane;startSize=0;dashed=1;dashPattern=8 8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="129" width="200" height="390" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-8" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-2">
+          <mxGeometry x="30" y="250" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-7" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-2">
+          <mxGeometry x="30" y="90" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-5" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Sensor Data&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-2">
+          <mxGeometry x="40" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-6" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Image Data&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-2">
+          <mxGeometry x="40" y="240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="mC23_XhWaikeHLuGKKnI-19" target="mC23_XhWaikeHLuGKKnI-29">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-19" value="" style="swimlane;startSize=0;" vertex="1" parent="1">
+          <mxGeometry x="349" y="129" width="200" height="390" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-25" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-19">
+          <mxGeometry x="30" y="175" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-24" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-19">
+          <mxGeometry x="28" y="30" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-20" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-19">
+          <mxGeometry x="40" y="165" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-21" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-19">
+          <mxGeometry x="38" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-22" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;AI - Inference Engine&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-19">
+          <mxGeometry x="48" y="50" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-23" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Data Engineering&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-19">
+          <mxGeometry x="50" y="155" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-26" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-19">
+          <mxGeometry x="30" y="290" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-27" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-19">
+          <mxGeometry x="40" y="300" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-28" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Digital Twin &amp;amp;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 18px;&quot;&gt;MPC&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-19">
+          <mxGeometry x="50" y="310" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-29" value="" style="swimlane;startSize=0;dashed=1;dashPattern=8 8;" vertex="1" parent="1">
+          <mxGeometry x="620" y="129" width="200" height="390" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-32" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Crop Health &amp;amp; Disease Risk Indicator&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-29">
+          <mxGeometry x="25" y="81" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-39" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Crop Health &amp;amp; Disease Risk Indicator&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-29">
+          <mxGeometry x="35" y="91" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-41" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-29">
+          <mxGeometry x="22.5" y="241" width="155" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-44" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Growth Stage &amp;amp; Harvest Readiness Signal&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="mC23_XhWaikeHLuGKKnI-29">
+          <mxGeometry x="32.5" y="251" width="155" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-34" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Input&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="40" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-35" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Modules&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="349" y="40" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mC23_XhWaikeHLuGKKnI-36" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Output&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="40" width="200" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
