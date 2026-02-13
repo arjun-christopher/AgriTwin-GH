@@ -1,0 +1,55 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main  # Change to your default branch if different
+  workflow_dispatch:  # Allows manual triggering
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper git info
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Configure Git
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+      - name: Build and deploy to GitHub Pages
+        run: mkdocs gh-deploy --force --clean --verbose
+
+      # Alternative: Deploy to Netlify (uncomment if preferred)
+      # - name: Build MkDocs
+      #   run: mkdocs build
+      
+      # - name: Deploy to Netlify
+      #   uses: nwtgck/actions-netlify@v2.1
+      #   with:
+      #     publish-dir: './site'
+      #     production-branch: main
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     deploy-message: "Deploy from GitHub Actions"
+      #     enable-pull-request-comment: false
+      #     enable-commit-comment: true
+      #   env:
+      #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      #     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
