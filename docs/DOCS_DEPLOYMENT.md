@@ -2,11 +2,40 @@
 
 This repository includes a **MkDocs Material** documentation site that automatically publishes all markdown files as a beautiful, searchable website - **publicly accessible even from this private repository**.
 
+## 🔓 Accessing All Markdown Files
+
+**Important:** All markdown files in the repository are converted to HTML and publicly accessible on the website, even if they don't appear in the navigation menu!
+
+### How to Access Any Markdown File:
+
+Simply convert the file path to a URL:
+
+**Pattern:** `https://arjun-christopher.github.io/AgriTwin-GH/` + `path/to/file` (without .md extension)
+
+**Examples:**
+
+| Repository File | Public URL |
+|----------------|------------|
+| `docs/index.md` | https://arjun-christopher.github.io/AgriTwin-GH/docs/ |
+| `feature_demos/FEATURE_DEMOS_GUIDE.md` | https://arjun-christopher.github.io/AgriTwin-GH/feature_demos/FEATURE_DEMOS_GUIDE/ |
+| `README.md` | https://arjun-christopher.github.io/AgriTwin-GH/README/ |
+| `docs/DOCS_DEPLOYMENT.md` | https://arjun-christopher.github.io/AgriTwin-GH/docs/DOCS_DEPLOYMENT/ |
+
+### Benefits:
+
+- ✅ **Share specific documentation links** - Send colleagues direct links to any markdown file
+- ✅ **Repository stays private** - Only the HTML documentation is public, not your source code
+- ✅ **No GitHub account required** - Anyone with the link can read the documentation
+- ✅ **Automatic updates** - New markdown files are automatically accessible when you push changes
+- ✅ **Full search** - All content is searchable using the built-in search feature
+
+---
+
 ## 🌐 Deployment Options
 
 ### Option 1: GitHub Pages (Recommended)
 
-The easiest option - your site will be publicly accessible at `https://YOUR_USERNAME.github.io/AgriTwin-GH/`
+The easiest option - your site will be publicly accessible at `https://arjun-christopher.github.io/AgriTwin-GH/`
 
 #### Setup Steps:
 
@@ -29,7 +58,7 @@ The easiest option - your site will be publicly accessible at `https://YOUR_USER
 4. **Automatic Deployment:**
    - The GitHub Action will automatically build and deploy your site
    - Check the "Actions" tab to monitor the deployment
-   - Your site will be live at: `https://YOUR_USERNAME.github.io/AgriTwin-GH/`
+   - Your site will be live at: `https://arjun-christopher.github.io/AgriTwin-GH/`
 
 5. **Share the URL:**
    - Anyone with the link can view your documentation

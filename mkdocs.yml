@@ -8,6 +8,15 @@ repo_name: AgriTwin-GH
 docs_dir: .
 site_dir: site
 
+# Exclude files from the documentation site
+exclude_docs: |
+  site/
+  .git/
+  .github/
+  __pycache__/
+  *.pyc
+  .ipynb_checkpoints/
+  
 theme:
   name: material
   palette:
@@ -76,8 +85,11 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/arjun-christopher
 
-# Optional: Customize navigation (or let awesome-pages auto-generate)
+# Navigation structure - all markdown files are accessible even if not listed here
+# Users can navigate to any .md file via direct URL: https://yoursite.com/path/to/file/
 nav:
   - Home: docs/index.md
   - Feature Demos:
     - Guide: feature_demos/FEATURE_DEMOS_GUIDE.md
+  - Deployment Guide: docs/DOCS_DEPLOYMENT.md
+  - Repository README: README.md
