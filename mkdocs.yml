@@ -4,6 +4,10 @@ site_author: AgriTwin Team
 repo_url: https://github.com/arjun-christopher/AgriTwin-GH
 repo_name: AgriTwin-GH
 
+# Set docs directory to repository root to include all markdown files
+docs_dir: .
+site_dir: site
+
 theme:
   name: material
   palette:
@@ -74,8 +78,6 @@ extra:
 
 # Optional: Customize navigation (or let awesome-pages auto-generate)
 nav:
-  - Home: index.md
+  - Home: docs/index.md
   - Feature Demos:
     - Guide: feature_demos/FEATURE_DEMOS_GUIDE.md
-  - Documentation:
-    - docs/
