@@ -1,0 +1,20 @@
+# Sample environment-specific configuration
+# Copy this file to settings.local.yaml and customize for your environment
+# settings.local.yaml is ignored by git
+
+app:
+  environment: "local"
+  debug: true
+
+greenhouse:
+  area_m2: 500
+  crop_type: "lettuce"
+
+database:
+  type: "postgresql"
+  host: "localhost"
+  port: 5432
+  # Set credentials in .env file:
+  # DB_USER=your_user
+  # DB_PASSWORD=your_password
+  # DB_NAME=agritwin_db

@@ -29,3 +29,25 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Data files (keep only .gitkeep and README.md)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/external/*
+!data/external/.gitkeep
+!data/README.md
+
+# Logs
+logs/*
+!logs/.gitkeep
+*.log
+
+# Configuration (environment-specific)
+config/*.local.yaml
+config/*.secret.yaml
+.env
+.env.local

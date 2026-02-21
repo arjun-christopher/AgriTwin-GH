@@ -1,0 +1,49 @@
+# AgriTwin-GH Configuration
+# Default settings for the application
+
+app:
+  name: "AgriTwin-GH"
+  version: "0.1.0"
+  environment: "development"
+
+greenhouse:
+  # Default greenhouse parameters
+  area_m2: 1000
+  crop_type: "tomato"
+  target_temperature: 22.0  # Celsius
+  target_humidity: 70.0     # Percentage
+  target_co2: 800.0         # ppm
+
+sensors:
+  # Sensor data collection settings
+  polling_interval: 300     # seconds (5 minutes)
+  data_retention_days: 90
+  
+digital_twin:
+  # Digital twin simulation settings
+  update_frequency: 300     # seconds
+  prediction_horizon: 24    # hours
+  
+disease_risk:
+  # Disease risk assessment
+  risk_thresholds:
+    low: 0.3
+    medium: 0.6
+    high: 0.8
+    
+control:
+  # Control policy settings
+  mpc_horizon: 12           # hours
+  action_interval: 3600     # seconds (1 hour)
+  
+database:
+  # Database connection (use .env for secrets)
+  type: "sqlite"
+  path: "data/processed/agritwin.db"
+  
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/agritwin.log"
+  max_bytes: 10485760       # 10 MB
+  backup_count: 5
