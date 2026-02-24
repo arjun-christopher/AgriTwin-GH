@@ -35,10 +35,14 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+!data/processed/Greenhouse Indoor Conditions/
+!data/processed/Greenhouse Indoor Conditions/*.csv
 data/interim/*
 !data/interim/.gitkeep
 data/external/*
 !data/external/.gitkeep
+!data/external/Weather Data/
+!data/external/Weather Data/*.csv
 !data/README.md
 
 # Logs
