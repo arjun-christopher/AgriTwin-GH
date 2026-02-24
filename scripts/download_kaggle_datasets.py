@@ -182,22 +182,22 @@ def main():
     datasets_to_download = [
 
         {
-            'name': 'arjuntejaswi/plant-village',
-            'unzip': True,
-            'force': False
-        },
-        {
             'name': 'trainingdatapro/ripe-strawberries-detection',
             'unzip': True,
             'force': False
         },
         {
-            'name': 'arjunsudheer326/tomato-plant-stages-dataset',
+            'name': 'cookiefinder/tomato-disease-multiple-sources',
             'unzip': True,
             'force': False
         },
         {
-            'name': 'chaitanyagopidesi/smart-agriculture-dataset',
+            'name': 'jawadulkarim117/tomato-flower-3-class',
+            'unzip': True,
+            'force': False
+        },
+        {
+            'name': 'arjunsudheer326/tomato-plant-stages-dataset',
             'unzip': True,
             'force': False
         },
@@ -208,11 +208,6 @@ def main():
         },
         {
             'name': 'zakariamuhammad/strawberry',
-            'unzip': True,
-            'force': False
-        },
-        {
-            'name': 'noulam/tomato',
             'unzip': True,
             'force': False
         },
