@@ -36,7 +36,7 @@ uv.lock
 .DS_Store
 Thumbs.db
 
-# Data files (keep only .gitkeep and README.md)
+# Data files (keep only .gitkeep)
 data/raw/*
 !data/raw/.gitkeep
 data/processed/*
@@ -46,6 +46,8 @@ data/interim/*
 data/external/*
 !data/external/.gitkeep
 !data/README.md
+feature_demos/data/*
+feature_demos/figures/*
 
 # Logs
 logs/*
