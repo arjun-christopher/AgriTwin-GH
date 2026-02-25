@@ -14,8 +14,8 @@ import pandas as pd
 # Add src to path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from src.agritwin.utils.database import get_db_manager
-from src.agritwin.models.timeseries import WeatherData, GreenhouseData
+from src.agritwin_gh.utils.database import get_db_manager
+from src.agritwin_gh.models.timeseries import WeatherData, GreenhouseData
 from sqlalchemy import func, and_, or_
 
 

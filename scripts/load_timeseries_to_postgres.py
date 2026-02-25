@@ -20,8 +20,8 @@ from tqdm import tqdm
 # Add src to path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from src.agritwin.models.timeseries import Base, WeatherData, GreenhouseData, create_hypertables
-from src.agritwin.utils.database import get_db_manager
+from src.agritwin_gh.models.timeseries import Base, WeatherData, GreenhouseData, create_hypertables
+from src.agritwin_gh.utils.database import get_db_manager
 
 
 def create_tables(engine, use_timescaledb: bool = False):

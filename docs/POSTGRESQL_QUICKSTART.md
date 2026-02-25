@@ -4,7 +4,7 @@
 
 ### Install packages
 ```powershell
-pip install -r requirements.txt
+uv add -r requirements.txt
 ```
 
 ### Start PostgreSQL (Docker)

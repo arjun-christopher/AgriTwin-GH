@@ -12,10 +12,6 @@ This directory contains all data files for the AgriTwin-GH project.
   - Final datasets used by the application
   - Feature-engineered datasets
 
-- **interim/**: Intermediate data transformations
-  - Temporary processing stages
-  - Data in transformation pipeline
-
 - **external/**: External reference data from third-party sources
   - Weather databases
   - Plant disease databases
