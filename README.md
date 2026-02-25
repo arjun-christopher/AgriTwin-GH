@@ -66,10 +66,67 @@ Traditional greenhouse systems focus on basic climate control. AgriTwin-GH exten
 ## 🛠️ Technology Stack
 
 - **Python 3.8+** — Core implementation language
+- **UV** — Fast Python package manager
 - **NumPy & Pandas** — Data processing and analysis
 - **Matplotlib & Seaborn** — Visualization and dashboards
 - **Jupyter Notebooks** — Interactive demonstrations
 - **MkDocs Material** — Documentation website
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+This project uses **UV** as the Python package manager for faster dependency management and virtual environment handling.
+
+#### Install UV (if not already installed)
+
+**Windows:**
+```powershell
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+**macOS/Linux:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/arjun-christopher/AgriTwin-GH.git
+   cd AgriTwin-GH
+   ```
+
+2. **Create virtual environment and install dependencies:**
+   ```bash
+   uv venv
+   uv pip install -e .
+   ```
+
+3. **Activate the virtual environment:**
+   
+   **Windows:**
+   ```powershell
+   .venv\Scripts\activate
+   ```
+   
+   **macOS/Linux:**
+   ```bash
+   source .venv/bin/activate
+   ```
+
+4. **Run feature demonstrations:**
+   ```bash
+   jupyter notebook feature_demos/
+   ```
+
+### Development Installation
+
+For development with additional tools:
+```bash
+uv pip install -e ".[dev]"
+```
 
 ## 📚 Documentation
 
@@ -77,6 +134,8 @@ Traditional greenhouse systems focus on basic climate control. AgriTwin-GH exten
 
 ### Quick Links
 
+- **[🚀 Setup Guide](SETUP_GUIDE.md)** — Comprehensive UV package manager setup and usage instructions
+- **[🤝 Contributing Guide](CONTRIBUTING.md)** — Guidelines for contributing to the project
 - **[Feature Demonstrations Guide](feature_demos/FEATURE_DEMOS_GUIDE.md)** — Comprehensive walkthrough of all system capabilities with interactive notebooks
 - **[Deployment Instructions](docs/DOCS_DEPLOYMENT.md)** — Documentation website setup and configuration guide
 

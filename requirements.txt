@@ -8,3 +8,17 @@ mkdocs-minify-plugin>=0.8.0
 
 # Markdown extensions
 pymdown-extensions>=10.7
+
+# Database - PostgreSQL and SQLAlchemy
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.9  # PostgreSQL adapter
+python-dotenv>=1.0.0    # Environment variable management
+pyyaml>=6.0            # YAML configuration files
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+tqdm>=4.65.0           # Progress bars
+
+# Optional: TimescaleDB support (requires PostgreSQL with TimescaleDB extension)
+# No special Python package required, uses standard psycopg2

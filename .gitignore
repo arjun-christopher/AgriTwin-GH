@@ -9,11 +9,17 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 *.egg-info/
 .eggs/
 dist/
 build/
+
+# UV package manager
+.uv-cache/
+uv.lock
+.python-version.bak
 
 # Jupyter Notebook
 .ipynb_checkpoints

@@ -1,0 +1,20 @@
+[project]
+name = "agritwin-gh"
+version = "0.1.0"
+description = "AgriTwin-GH is a software-based digital twin for precision greenhouse horticulture. It integrates open-source sensor and image data with AI/ML models to predict crop health, disease risk, and growth stages, enabling predictive control, resource optimization, and human-centric decision support for tomato and strawberry cultivation."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "mkdocs>=1.5.3",
+    "mkdocs-awesome-pages-plugin>=2.9.2",
+    "mkdocs-material>=9.5.3",
+    "mkdocs-minify-plugin>=0.8.0",
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "psycopg2-binary>=2.9.9",
+    "pymdown-extensions>=10.7",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0",
+    "sqlalchemy>=2.0.0",
+    "tqdm>=4.65.0",
+]
