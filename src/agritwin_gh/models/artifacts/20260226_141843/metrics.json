@@ -1,0 +1,22 @@
+{
+  "overall_accuracy": 0.9823477493380406,
+  "precision_macro": 0.9804156652993862,
+  "recall_macro": 0.9867255735072574,
+  "f1_macro": 0.9833938861394134,
+  "precision_weighted": 0.9827135436774387,
+  "recall_weighted": 0.9823477493380406,
+  "f1_weighted": 0.9823138843806887,
+  "roc_auc_macro_ovr": 0.999914488933698,
+  "roc_auc_weighted_ovr": 0.9999138706571596,
+  "per_class_accuracy": {
+    "tomato_early_blight": 0.98,
+    "tomato_late_blight": 1.0,
+    "tomato_leaf_healthy": 1.0,
+    "tomato_leaf_mold": 0.9587020648967551,
+    "tomato_powdery_mildew": 1.0,
+    "tomato_spider_mites": 0.981651376146789
+  },
+  "num_test_samples": 1133,
+  "run_id": "20260226_141843",
+  "backbone": "EfficientNetB0"
+}
