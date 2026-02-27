@@ -26,6 +26,8 @@ pandas>=2.0.0
 numpy>=1.24.0
 tqdm>=4.65.0           # Progress bars
 tabulate>=0.9.0        # Pretty-print tables
+opencv-python>=4.5.0         # OpenCV for image processing
+opencv-python-headless>=4.5.0  # OpenCV without GUI dependencies
 
 # Optional: TimescaleDB support (requires PostgreSQL with TimescaleDB extension)
 # No special Python package required, uses standard psycopg2
@@ -41,3 +43,4 @@ tensorflow >=2.0.0         # TensorFlow for machine learning
 # Visualization
 matplotlib>=3.0.0        # Plotting library
 seaborn>=0.11.0         # Statistical data visualization
+

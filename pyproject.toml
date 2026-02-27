@@ -12,6 +12,7 @@ dependencies = [
     "mkdocs-material>=9.5.3",
     "mkdocs-minify-plugin>=0.8.0",
     "numpy>=1.24.0",
+    "opencv-python-headless>=4.13.0.92",
     "pandas>=2.0.0",
     "pillow>=10.0.0",
     "psycopg2-binary>=2.9.9",
