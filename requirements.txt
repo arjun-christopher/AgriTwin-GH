@@ -36,11 +36,15 @@ opencv-python-headless>=4.5.0  # OpenCV without GUI dependencies
 kaggle==2.0.0
 
 # Machine learning
-tensorflow[and-cuda] >=2.0.0         # TensorFlow with GPU support
-scikit-learn>=1.0.0                   # Machine learning library
-tensorflow >=2.0.0         # TensorFlow for machine learning
+tensorflow>=2.0.0          # TensorFlow (use tensorflow[and-cuda] on Linux for GPU)
+scikit-learn>=1.0.0        # Machine learning library
+torch>=1.0.0               # PyTorch for deep learning
 
 # Visualization
 matplotlib>=3.0.0        # Plotting library
 seaborn>=0.11.0         # Statistical data visualization
 
+# Generative Models
+diffusers>=0.10.0         # Hugging Face Diffusers for generative models
+transformers>=4.30.0      # Required by StableDiffusionPipeline
+accelerate>=0.20.0        # Required for fast model loading with diffusers
