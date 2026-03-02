@@ -1,0 +1,12 @@
+                             precision    recall  f1-score   support
+
+            Stage1_Seedling       1.00      1.00      1.00         9
+    Stage2_Early_Vegetative       1.00      1.00      1.00        23
+Stage3_Flowering_Initiation       1.00      1.00      1.00        21
+           Stage4_Flowering       1.00      1.00      1.00       300
+              Stage5_Unripe       0.94      0.99      0.97       132
+                Stage6_Ripe       0.99      0.95      0.97       167
+
+                   accuracy                           0.99       652
+                  macro avg       0.99      0.99      0.99       652
+               weighted avg       0.99      0.99      0.99       652

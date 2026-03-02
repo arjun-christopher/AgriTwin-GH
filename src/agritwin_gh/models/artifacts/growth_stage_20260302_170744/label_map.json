@@ -1,0 +1,33 @@
+{
+  "idx_to_label": {
+    "0": "Stage1_Seedling",
+    "1": "Stage2_Early_Vegetative",
+    "2": "Stage3_Flowering_Initiation",
+    "3": "Stage4_Flowering",
+    "4": "Stage5_Unripe",
+    "5": "Stage6_Ripe"
+  },
+  "label_to_idx": {
+    "Stage1_Seedling": 0,
+    "Stage2_Early_Vegetative": 1,
+    "Stage3_Flowering_Initiation": 2,
+    "Stage4_Flowering": 3,
+    "Stage5_Unripe": 4,
+    "Stage6_Ripe": 5
+  },
+  "label_names": [
+    "Stage1_Seedling",
+    "Stage2_Early_Vegetative",
+    "Stage3_Flowering_Initiation",
+    "Stage4_Flowering",
+    "Stage5_Unripe",
+    "Stage6_Ripe"
+  ],
+  "num_classes": 6,
+  "backbone": "EfficientNetB3",
+  "image_size": [
+    300,
+    300
+  ],
+  "run_id": "growth_stage_20260302_170744"
+}

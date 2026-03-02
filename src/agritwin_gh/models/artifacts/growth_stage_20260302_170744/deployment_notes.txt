@@ -1,0 +1,121 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║          TOMATO GROWTH STAGE CLASSIFIER — DEPLOYMENT NOTES                 ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Run ID    : growth_stage_20260302_170744
+Backbone  : EfficientNetB3
+Image size: (300, 300)
+Classes   : 6
+Trained   : 2026-03-03 02:17
+
+──────────────────────────────────────────────────────────────────────────────
+ARTIFACT LOCATIONS (relative to src/agritwin_gh/models/)
+──────────────────────────────────────────────────────────────────────────────
+  Final model     : growth_stage_20260302_170744.keras
+  Best checkpoint : growth_stage_20260302_170744_best.keras
+  Label map       : artifacts/growth_stage_20260302_170744/label_map.json
+  Metrics         : artifacts/growth_stage_20260302_170744/metrics.json
+  Training report : artifacts/growth_stage_20260302_170744/classification_report.txt
+  Confusion matrix: artifacts/growth_stage_20260302_170744/confusion_matrix.png
+  ROC curves      : artifacts/growth_stage_20260302_170744/roc_curves.png
+  History CSV     : artifacts/growth_stage_20260302_170744/training_history.csv
+
+──────────────────────────────────────────────────────────────────────────────
+1. MODEL LOADING
+──────────────────────────────────────────────────────────────────────────────
+Using the standalone inference module (recommended):
+
+    from agritwin_gh.models.growth_stage_inference import predict_growth_stage
+
+    # Paths are auto-resolved — just call the function:
+    result = predict_growth_stage("path/to/image.jpg")
+
+Using Keras directly:
+
+    import keras
+    model = keras.models.load_model(
+        "src/agritwin_gh/models/growth_stage_20260302_170744.keras"
+    )
+
+──────────────────────────────────────────────────────────────────────────────
+2. LABEL MAP USAGE
+──────────────────────────────────────────────────────────────────────────────
+    import json
+    with open("artifacts/growth_stage_20260302_170744/label_map.json") as f:
+        label_map = json.load(f)
+
+    # Integer index → class name
+    idx_to_label = {int(k): v for k, v in label_map["idx_to_label"].items()}
+    # e.g. {0: "Stage1_Seedling", 1: "Stage2_Early_Vegetative", ...}
+
+    # Model output argmax → class name
+    import numpy as np
+    probs      = model.predict(img_tensor)[0]   # shape [6]
+    class_name = idx_to_label[int(np.argmax(probs))]
+
+──────────────────────────────────────────────────────────────────────────────
+3. CALLING THE PREDICTION FUNCTION
+──────────────────────────────────────────────────────────────────────────────
+Signature:
+    predict_growth_stage(
+        image_bytes_or_path,   # str | Path | bytes | bytearray
+        *,
+        model_path=None,       # auto-resolved if None
+        label_map_path=None,   # auto-resolved if None
+        k=3,                   # number of top-k classes returned
+        tta=False,             # enable Test-Time Augmentation
+        tta_steps=5,           # TTA forward passes to average
+    ) -> dict
+
+Example — file path:
+    from agritwin_gh.models.growth_stage_inference import predict_growth_stage
+
+    result = predict_growth_stage("data/external/Tomato Growth Stages/Stage3_Flowering_Initiation/img001.jpg")
+    print(result["class_name"])    # "Stage3_Flowering_Initiation"
+    print(result["confidence"])    # 0.9213
+    print(result["topk"])
+    # [("Stage3_Flowering_Initiation", 0.9213),
+    #  ("Stage4_Flowering",            0.0612),
+    #  ("Stage2_Early_Vegetative",     0.0103)]
+
+Example — raw bytes (e.g. from HTTP upload or MQTT payload):
+    with open("leaf.jpg", "rb") as fh:
+        result = predict_growth_stage(fh.read())
+
+Example — with TTA for higher-confidence edge cases:
+    result = predict_growth_stage(img_path, tta=True, tta_steps=8)
+
+──────────────────────────────────────────────────────────────────────────────
+4. CLASS LABELS (ordered by integer index)
+──────────────────────────────────────────────────────────────────────────────
+  0 → Stage1_Seedling
+  1 → Stage2_Early_Vegetative
+  2 → Stage3_Flowering_Initiation
+  3 → Stage4_Flowering
+  4 → Stage5_Unripe
+  5 → Stage6_Ripe
+
+──────────────────────────────────────────────────────────────────────────────
+5. PREPROCESSING CONTRACT (must match training, handled automatically by
+   growth_stage_inference.py)
+──────────────────────────────────────────────────────────────────────────────
+  • Decode image → RGB
+  • Resize to (300, 300) using bilinear interpolation
+  • Cast to float32
+  • Apply keras.applications.efficientnet.preprocess_input (scales to [-1, 1])
+  • Expand dims to [1, H, W, 3] for model input
+
+──────────────────────────────────────────────────────────────────────────────
+6. RUNTIME DEPENDENCIES
+──────────────────────────────────────────────────────────────────────────────
+  tensorflow >= 2.13
+  keras      >= 2.13
+  numpy      >= 1.24
+  Pillow     (optional, for PIL-based loading in custom pipelines)
+
+Install with:
+  uv pip install tensorflow keras numpy pillow
+
+──────────────────────────────────────────────────────────────────────────────
+END OF DEPLOYMENT NOTES
+──────────────────────────────────────────────────────────────────────────────

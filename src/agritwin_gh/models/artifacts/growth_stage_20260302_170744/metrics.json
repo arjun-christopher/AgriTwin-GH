@@ -1,0 +1,27 @@
+{
+  "accuracy": 0.9861963190184049,
+  "precision_macro": 0.9893660071942447,
+  "recall_macro": 0.9907533418012459,
+  "f1_macro": 0.9898777886861437,
+  "precision_weighted": 0.986747128370923,
+  "recall_weighted": 0.9861963190184049,
+  "f1_weighted": 0.9862268495201415,
+  "roc_auc_macro_ovr": 0.9990037257808417,
+  "per_class_accuracy": {
+    "Stage1_Seedling": 1.0,
+    "Stage2_Early_Vegetative": 1.0,
+    "Stage3_Flowering_Initiation": 1.0,
+    "Stage4_Flowering": 1.0,
+    "Stage5_Unripe": 0.9924242424242424,
+    "Stage6_Ripe": 0.9520958083832335
+  },
+  "run_id": "growth_stage_20260302_170744",
+  "backbone": "EfficientNetB3",
+  "image_size": [
+    300,
+    300
+  ],
+  "num_classes": 6,
+  "tta": true,
+  "tta_steps": 5
+}
