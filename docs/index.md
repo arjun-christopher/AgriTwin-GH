@@ -1,34 +1,39 @@
 # AgriTwin-GH 🌱
 
+[![Documentation](https://img.shields.io/badge/docs-online-brightgreen.svg)](https://arjun-christopher.github.io/AgriTwin-GH/)
+[![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/arjun-christopher/AgriTwin-GH/blob/main/LICENSE)
+
 > **An Advanced Digital Twin System for Precision Greenhouse Agriculture**
 
-AgriTwin-GH is a comprehensive cyber-physical system that combines real-time environmental monitoring, disease risk prediction, growth stage detection, and model predictive control for intelligent greenhouse management. It goes beyond traditional climate control systems by integrating machine learning, simulation-based decision support, and automated resource optimization.
+AgriTwin-GH is a comprehensive cyber-physical system combining real-time environmental monitoring, ML-based disease and growth stage detection, physics-based digital twin simulation, and model predictive control for intelligent greenhouse management.
 
 ## 🌟 Overview
 
-Traditional greenhouse systems focus on basic climate control. AgriTwin-GH extends this paradigm with:
+- **Predictive Disease Management** — Risk indexing from environmental sensor data to prevent fungal outbreaks before they occur
+- **Growth-Aware Control** — Adaptive MPC policies that respond to detected crop development stages
+- **Digital Twin Simulation** — Physics-based virtual replica enabling what-if scenario analysis
+- **Image Intelligence** — EfficientNet classifiers for tomato leaf disease detection and growth stage classification
+- **Data Infrastructure** — PostgreSQL + TimescaleDB for time-series, MinIO for image object storage
+- **Operator Decision Support** — Visual dashboards and non-verbal alert systems
 
-- **Predictive Disease Management** — Machine learning-based risk indexing to prevent diseases before they occur
-- **Growth-Aware Control** — Adaptive control policies that adjust to detected crop development stages
-- **Digital Twin Simulation** — Virtual replica enabling what-if scenario analysis and predictive optimization
-- **Resource Efficiency** — Intelligent tracking and optimization of energy and water consumption
-- **Operator Decision Support** — Visual dashboards and non-verbal alert systems for human-machine collaboration
-
-## 🚀 Key Features
-
-### Implemented Components
+## ✅ Components
 
 | Component | Description | Status |
 |-----------|-------------|--------|
-| **Synthetic Data Generator** | Realistic greenhouse sensor data with configurable parameters | ✅ Complete |
-| **Disease Risk Index** | ML-based fungal disease risk prediction from environmental data | ✅ Complete |
-| **Growth Stage Detection** | Automated crop phenology classification (germination → harvest) | ✅ Complete |
+| **Synthetic Data Generator** | Configurable greenhouse sensor data generation | ✅ Complete |
+| **Indoor Dataset Generator** | Passive greenhouse physics model from outdoor weather | ✅ Complete |
+| **Disease Risk Index** | ML-based fungal risk prediction from environmental data | ✅ Complete |
+| **Disease Classifier** | EfficientNetB0 — 6-class tomato leaf disease classification | ✅ Complete |
+| **Growth Stage Classifier** | EfficientNetB3 — 6-stage tomato plant growth classification | ✅ Complete |
 | **Digital Twin Simulator** | Physics-based greenhouse model for scenario simulation | ✅ Complete |
 | **MPC-Like Control Policy** | Model predictive control for actuator management | ✅ Complete |
 | **What-If Analysis** | Comparative scenario evaluation and decision support | ✅ Complete |
 | **Non-Verbal Alerts** | Visual operator notifications for critical events | ✅ Complete |
-| **Dashboard Visualizations** | Interactive monitoring and performance comparison tools | ✅ Complete |
+| **Dashboard Visualizations** | Interactive monitoring and performance comparison | ✅ Complete |
 | **Resource Tracking** | Energy and water usage optimization and reporting | ✅ Complete |
+| **Time-Series Database** | PostgreSQL + TimescaleDB hypertables for sensor data | ✅ Complete |
+| **Image Storage** | MinIO (S3-compatible) with PostgreSQL metadata indexing | ✅ Complete |
 
 ## 📊 System Architecture
 
@@ -59,67 +64,80 @@ Traditional greenhouse systems focus on basic climate control. AgriTwin-GH exten
                     └──────────────────┘
 ```
 
+## 🗄️ Data Infrastructure
+
+- **TimescaleDB** — Hypertable storage for weather and indoor greenhouse time-series (5-min and hourly) → [Database Reference](DATABASE_REFERENCE.md)
+- **MinIO** — S3-compatible image object storage with PostgreSQL metadata indexing → [Image Storage Setup](IMAGE_STORAGE_SETUP.md)
+- **Indoor Dataset** — Passive greenhouse physics model deriving indoor conditions from outdoor weather data → [Dataset Guide](INDOOR_GREENHOUSE_DATASET.md)
+- **Data Directory Guide** — Structure and management conventions → [Data Guide](DATA.md)
+
+## 🤖 ML Models
+
+- **Disease Classifier** — EfficientNetB0, 6 classes: Early Blight, Late Blight, Leaf Mold, Powdery Mildew, Septoria Leaf Spot, Spider Mites + Healthy → [Disease Classification](TOMATO_DISEASE_CLASSIFICATION.md)
+- **Growth Stage Classifier** — EfficientNetB3, 6 stages: Seedling → Early Vegetative → Flowering Initiation → Flowering → Unripe → Ripe, with TTA support → [Growth Stage Classification](TOMATO_GROWTH_STAGE_CLASSIFICATION.md)
+
 ## 🛠️ Technology Stack
 
-- **Python 3.8+** — Core implementation language
-- **NumPy & Pandas** — Data processing and analysis
-- **Matplotlib & Seaborn** — Visualization and dashboards
+- **Python 3.8+** · **UV** (package manager)
+- **TensorFlow / Keras** — EfficientNet model training and inference
+- **NumPy · Pandas** — Data processing and analysis
+- **Matplotlib · Seaborn** — Visualization and dashboards
+- **PostgreSQL 15 + TimescaleDB** — Time-series database
+- **MinIO** — S3-compatible object storage
 - **Jupyter Notebooks** — Interactive demonstrations
+- **MkDocs Material** — Documentation website
 
-## 📚 Quick Navigation
+## 🚀 Quick Start
 
-### 📖 Feature Demonstrations
-**[Complete Feature Guide →](../feature_demos/FEATURE_DEMOS_GUIDE.md)**
+```powershell
+git clone https://github.com/arjun-christopher/AgriTwin-GH.git
+cd AgriTwin-GH
+uv venv
+uv pip install -e .
+.venv\Scripts\activate      # Windows: or `source .venv/bin/activate` on macOS/Linux
+jupyter notebook feature_demos/
+```
 
-Comprehensive walkthrough of all system capabilities with interactive Jupyter notebooks covering:
+> **Install UV first (Windows):** `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`
 
-1. Environment setup and dependencies
-2. Synthetic greenhouse data generation
-3. Disease risk indexing and growth stage detection
-4. Digital twin simulation and what-if analysis
-5. Control policies with MPC-like actions and alerts
-6. Dashboard visualizations and performance comparisons
+## 📚 Documentation
 
-### 🔧 Documentation
-- **[Deployment Instructions](DOCS_DEPLOYMENT.md)** — Documentation website setup guide
-
-## 🎯 Use Cases
-
-- **Research** — Digital twin modeling in controlled environment agriculture
-- **Commercial Agriculture** — Smart greenhouse operations and management
-- **Education** — Teaching cyber-physical systems and precision agriculture
-- **IoT Development** — Reference implementation for agricultural IoT platforms
-
-## 🔬 Research & Development
-
-This system demonstrates advanced concepts in:
-
-- Cyber-physical system design for agriculture
-- Digital twin technology and simulation
-- Model predictive control in greenhouse environments
-- Machine learning for agricultural risk assessment
-- Human-machine interface design for agricultural systems
-
----
+| Guide | Description |
+|-------|-------------|
+| [Feature Demos Guide](../feature_demos/FEATURE_DEMOS_GUIDE.md) | Walkthrough of all 6 interactive notebooks |
+| [Database Reference](DATABASE_REFERENCE.md) | Schema, queries, and time-series data guide |
+| [PostgreSQL Quick Start](POSTGRESQL_QUICKSTART.md) | Database setup and data loading |
+| [Image Storage Setup](IMAGE_STORAGE_SETUP.md) | MinIO + PostgreSQL image pipeline |
+| [Indoor Greenhouse Dataset](INDOOR_GREENHOUSE_DATASET.md) | Synthetic dataset generation methodology |
+| [Disease Classification](TOMATO_DISEASE_CLASSIFICATION.md) | EfficientNetB0 leaf disease model |
+| [Growth Stage Classification](TOMATO_GROWTH_STAGE_CLASSIFICATION.md) | EfficientNetB3 growth stage model |
+| [Deployment Guide](DOCS_DEPLOYMENT.md) | MkDocs documentation site setup |
 
 ## 📂 Repository Structure
 
 ```
 AgriTwin-GH/
-├── feature_demos/          # Interactive Jupyter notebook demonstrations
-│   ├── 01_uv_setup_and_imports.ipynb
-│   ├── 02_synthetic_greenhouse_data_generator.ipynb
-│   ├── 03_disease_risk_index_and_growth_stage.ipynb
-│   ├── 04_digital_twin_simulator_and_whatif.ipynb
-│   ├── 05_control_policy_mpc_like_actions_and_nonverbal_alerts.ipynb
-│   ├── 06_dashboard_visualizations_comparison_ready.ipynb
-│   ├── FEATURE_DEMOS_GUIDE.md
-│   ├── data/               # Generated datasets
-│   └── figures/            # Visualization outputs
-├── docs/                   # Documentation source files
-└── .github/workflows/      # CI/CD automation
+├── feature_demos/          # Interactive Jupyter notebook demonstrations (01–06)
+├── notebooks/              # ML training notebooks (disease & growth stage classifiers)
+├── scripts/                # Data loading, upload, and classification scripts
+├── src/agritwin_gh/        # Core library — API, models, services, utils
+├── data/                   # Raw, processed, and external datasets
+├── database/               # PostgreSQL schema files
+└── docs/                   # Documentation source files
 ```
+
+## 🔬 Research Areas
+
+- Cyber-physical system design for controlled environment agriculture
+- Digital twin technology and physics-based simulation
+- Transfer learning for plant pathology and phenology classification
+- Model predictive control in greenhouse environments
+- Human-machine interface design for agricultural systems
+
+## 📄 License
+
+MIT License — see [LICENSE](https://github.com/arjun-christopher/AgriTwin-GH/blob/main/LICENSE) for details.
 
 ---
 
-**[View on GitHub](https://github.com/arjun-christopher/AgriTwin-GH)** | **[Feature Guide](../feature_demos/FEATURE_DEMOS_GUIDE.md)**
+**[🔗 View on GitHub](https://github.com/arjun-christopher/AgriTwin-GH)** | **[📓 Feature Guide](../feature_demos/FEATURE_DEMOS_GUIDE.md)**
