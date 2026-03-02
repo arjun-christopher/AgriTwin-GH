@@ -1,0 +1,82 @@
+AgriTwin-GH — Tomato Disease Classifier
+Deployment Notes
+Run ID  : disease_20260226_141843
+Backbone: EfficientNetB0
+Generated: 2026-02-26T22:33:36
+========================================================
+
+MODEL ARTIFACTS
+---------------
+Model file  : src/agritwin_gh/models/disease_20260226_141843.keras
+Best ckpt   : src/agritwin_gh/models/disease_20260226_141843_best.keras
+label_map   : src/agritwin_gh/models/artifacts/disease_20260226_141843/label_map.json
+metrics     : src/agritwin_gh/models/artifacts/disease_20260226_141843/metrics.json
+Inference   : src/agritwin_gh/models/disease_inference.py
+
+
+LOADING THE MODEL
+-----------------
+    from src.agritwin_gh.models.disease_inference import load_inference_assets, predict_image
+
+    model, label_map = load_inference_assets(
+        model_path     = "src/agritwin_gh/models/disease_20260226_141843.keras",
+        label_map_path = "src/agritwin_gh/models/artifacts/disease_20260226_141843/label_map.json",
+    )
+
+
+RUNNING INFERENCE
+-----------------
+# (a) From a file path:
+    result = predict_image(
+        image_input      = "/path/to/leaf.jpg",
+        inference_model  = model,
+        loaded_label_map = label_map,
+        top_k            = 3,
+    )
+
+# (b) From raw bytes (MinIO-compatible):
+    image_bytes = open("/path/to/leaf.jpg", "rb").read()
+    # — or — image_bytes = minio_client.get_object(bucket, key).read()
+    result = predict_image(
+        image_input      = image_bytes,
+        inference_model  = model,
+        loaded_label_map = label_map,
+    )
+
+# Result structure:
+    {
+        "class_name" : "tomato_early_blight",
+        "confidence" : 0.9721,
+        "probs"      : { "tomato_early_blight": 0.9721, ... },
+        "topk"       : [("tomato_early_blight", 0.9721), ...],
+        "input_mode" : "path"  # or "bytes"
+    }
+
+
+IMAGE PREPROCESSING (must match training)
+------------------------------------------
+  image_size : (224, 224)   (H × W)
+  backbone   : EfficientNetB0
+  normaliser : keras.applications.efficientnetb0.preprocess_input
+  (handled automatically by predict_image / decode_image_bytes_to_tensor)
+
+
+CLASSES (6 total)
+-----------------------------------------
+  0: tomato_early_blight
+  1: tomato_late_blight
+  2: tomato_leaf_healthy
+  3: tomato_leaf_mold
+  4: tomato_powdery_mildew
+  5: tomato_spider_mites
+  (verify order against label_map.json — it is the authoritative source)
+
+
+MINIO INTEGRATION (Task 2 — stub ready)
+-----------------------------------------
+MinioLoader is defined in the notebook. To enable:
+  1. pip install minio
+  2. Implement the methods marked NotImplementedError in MinioLoader.
+  3. In CONFIG set: "loader": "minio"
+  4. Provide minio_endpoint, bucket_name, label_prefix_map, credentials.
+  5. fetch_image_bytes(key) returns bytes → pass directly to predict_image().

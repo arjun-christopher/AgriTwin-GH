@@ -505,7 +505,7 @@ How often the correct class appears in the model's **top 2 or top 3** prediction
 Training produces an **artifact bundle** — a set of files that represent the fully trained model, ready to be loaded and used:
 
 ```
-src/agritwin_gh/models/artifacts/run_<timestamp>/
+src/agritwin_gh/models/artifacts/diseease_<timestamp>/
 ├── best_model.keras          ← Full trained model (weights + architecture)
 ├── label_encoder.json        ← Maps class index (0–5) to disease name
 ├── class_weights.json        ← Class weights used during training
@@ -515,13 +515,13 @@ src/agritwin_gh/models/artifacts/run_<timestamp>/
 
 ### Making a Prediction
 
-The inference pipeline (`src/agritwin_gh/models/inference.py`) provides a simple function:
+The inference pipeline (`src/agritwin_gh/models/disease_inference.py`) provides a simple function:
 
 ```python
-from agritwin_gh.models.inference import load_inference_assets, predict_image
+from agritwin_gh.models.disease_inference import load_inference_assets, predict_image
 
 # Load once at startup
-assets = load_inference_assets("src/agritwin_gh/models/artifacts/run_20260225_123456")
+assets = load_inference_assets("src/agritwin_gh/models/artifacts/disease_20260225_123456")
 
 # Predict from an image file
 result = predict_image(assets, image_source="path/to/leaf_photo.jpg")

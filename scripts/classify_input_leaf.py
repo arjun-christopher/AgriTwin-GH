@@ -65,9 +65,9 @@ def _find_latest_artifacts() -> Tuple[pathlib.Path, pathlib.Path]:
     models_dir    = _REPO_ROOT / "src" / "agritwin_gh" / "models"
     artifacts_dir = models_dir / "artifacts"
 
-    keras_files = sorted(models_dir.glob("*_best.keras"), reverse=True)
+    keras_files = sorted(models_dir.glob("disease_*_best.keras"), reverse=True)
     if not keras_files:
-        keras_files = sorted(models_dir.glob("*.keras"), reverse=True)
+        keras_files = sorted(models_dir.glob("disease_*.keras"), reverse=True)
     if not keras_files:
         raise FileNotFoundError(
             f"No .keras model files found in {models_dir}.\n"
@@ -101,7 +101,7 @@ def _load_model():
     if src_path not in sys.path:
         sys.path.insert(0, src_path)
 
-    from agritwin_gh.models.inference import load_inference_assets
+    from agritwin_gh.models.disease_inference import load_inference_assets
 
     print("Loading classifier model ...", end=" ", flush=True)
     model_path, label_map_path = _find_latest_artifacts()
@@ -140,7 +140,7 @@ def classify_folder() -> None:
 
     inference_model, loaded_label_map = _load_model()  # also sets up sys.path
 
-    from agritwin_gh.models.inference import predict_image
+    from agritwin_gh.models.disease_inference import predict_image
 
     print(f"{'#':<4}  {'File Name':<40}  {'Predicted Class':<22}  {'Confidence':>10}")
     print("-" * 82)
@@ -256,7 +256,7 @@ def generate_and_classify() -> None:
     # ── Load classifier and predict ───────────────────────────────────────────
     inference_model, loaded_label_map = _load_model()  # also sets up sys.path
 
-    from agritwin_gh.models.inference import predict_image
+    from agritwin_gh.models.disease_inference import predict_image
 
     print("Classifying generated image ...\n")
     result = predict_image(

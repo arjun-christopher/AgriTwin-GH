@@ -39,6 +39,7 @@ kaggle==2.0.0
 tensorflow>=2.0.0          # TensorFlow (use tensorflow[and-cuda] on Linux for GPU)
 scikit-learn>=1.0.0        # Machine learning library
 torch>=1.0.0               # PyTorch for deep learning
+keras>=2.0.0              # High-level neural networks API
 
 # Visualization
 matplotlib>=3.0.0        # Plotting library

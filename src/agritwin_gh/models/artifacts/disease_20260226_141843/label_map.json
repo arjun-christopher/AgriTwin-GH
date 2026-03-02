@@ -1,0 +1,33 @@
+{
+  "idx_to_label": {
+    "0": "tomato_early_blight",
+    "1": "tomato_late_blight",
+    "2": "tomato_leaf_healthy",
+    "3": "tomato_leaf_mold",
+    "4": "tomato_powdery_mildew",
+    "5": "tomato_spider_mites"
+  },
+  "label_to_idx": {
+    "tomato_early_blight": 0,
+    "tomato_late_blight": 1,
+    "tomato_leaf_healthy": 2,
+    "tomato_leaf_mold": 3,
+    "tomato_powdery_mildew": 4,
+    "tomato_spider_mites": 5
+  },
+  "label_names": [
+    "tomato_early_blight",
+    "tomato_late_blight",
+    "tomato_leaf_healthy",
+    "tomato_leaf_mold",
+    "tomato_powdery_mildew",
+    "tomato_spider_mites"
+  ],
+  "num_classes": 6,
+  "backbone": "EfficientNetB0",
+  "image_size": [
+    224,
+    224
+  ],
+  "run_id": "disease_20260226_141843"
+}
