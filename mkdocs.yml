@@ -4,19 +4,14 @@ site_author: AgriTwin Team
 repo_url: https://github.com/arjun-christopher/AgriTwin-GH
 repo_name: AgriTwin-GH
 
-# Set docs directory to repository root to include all markdown files
-docs_dir: .
+docs_dir: docs
 site_dir: site
 
-# Exclude files from the documentation site
-exclude_docs: |
-  site/
-  .git/
-  .github/
-  __pycache__/
-  *.pyc
-  .ipynb_checkpoints/
-  
+validation:
+  links:
+    not_found: ignore
+    unrecognized_links: ignore
+
 theme:
   name: material
   palette:
@@ -48,11 +43,15 @@ plugins:
   - search
   - awesome-pages  # Auto-discovers markdown files
 
+hooks:
+  - scripts/hooks.py
+
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      base_path: ['.']
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -83,17 +82,16 @@ extra:
 
 # Navigation structure
 nav:
-  - Home: docs/index.md
+  - Home: index.md
   - Feature Demos:
-    - Guide: feature_demos/FEATURE_DEMOS_GUIDE.md
+    - Guide: FEATURE_DEMOS_GUIDE.md
   - Data & Database:
-    - Database Reference: docs/DATABASE_REFERENCE.md
-    - PostgreSQL Quick Start: docs/POSTGRESQL_QUICKSTART.md
-    - Image Storage Setup: docs/IMAGE_STORAGE_SETUP.md
-    - Indoor Greenhouse Dataset: docs/INDOOR_GREENHOUSE_DATASET.md
-    - Data Directory: docs/DATA.md
+    - Database Reference: DATABASE_REFERENCE.md
+    - PostgreSQL Quick Start: POSTGRESQL_QUICKSTART.md
+    - Image Storage Setup: IMAGE_STORAGE_SETUP.md
+    - Indoor Greenhouse Dataset: INDOOR_GREENHOUSE_DATASET.md
+    - Data Directory: DATA.md
   - ML Models:
-    - Disease Classification: docs/TOMATO_DISEASE_CLASSIFICATION.md
-    - Growth Stage Classification: docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md
-  - Deployment Guide: docs/DOCS_DEPLOYMENT.md
-  - Repository README: README.md
+    - Disease Classification: TOMATO_DISEASE_CLASSIFICATION.md
+    - Growth Stage Classification: TOMATO_GROWTH_STAGE_CLASSIFICATION.md
+  - Deployment Guide: DOCS_DEPLOYMENT.md

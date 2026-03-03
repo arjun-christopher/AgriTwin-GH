@@ -2,7 +2,7 @@
 
 [![Documentation](https://img.shields.io/badge/docs-online-brightgreen.svg)](https://arjun-christopher.github.io/AgriTwin-GH/)
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/arjun-christopher/AgriTwin-GH/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 > **An Advanced Digital Twin System for Precision Greenhouse Agriculture**
 
@@ -66,15 +66,15 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 
 ## 🗄️ Data Infrastructure
 
-- **TimescaleDB** — Hypertable storage for weather and indoor greenhouse time-series (5-min and hourly) → [Database Reference](DATABASE_REFERENCE.md)
-- **MinIO** — S3-compatible image object storage with PostgreSQL metadata indexing → [Image Storage Setup](IMAGE_STORAGE_SETUP.md)
-- **Indoor Dataset** — Passive greenhouse physics model deriving indoor conditions from outdoor weather data → [Dataset Guide](INDOOR_GREENHOUSE_DATASET.md)
-- **Data Directory Guide** — Structure and management conventions → [Data Guide](DATA.md)
+- **TimescaleDB** — Hypertable storage for weather and indoor greenhouse time-series (5-min and hourly) → [Database Reference](docs/DATABASE_REFERENCE.md)
+- **MinIO** — S3-compatible image object storage with PostgreSQL metadata indexing → [Image Storage Setup](docs/IMAGE_STORAGE_SETUP.md)
+- **Indoor Dataset** — Passive greenhouse physics model deriving indoor conditions from outdoor weather data → [Dataset Guide](docs/INDOOR_GREENHOUSE_DATASET.md)
+- **Data Directory Guide** — Structure and management conventions → [Data Guide](docs/DATA.md)
 
 ## 🤖 ML Models
 
-- **Disease Classifier** — EfficientNetB0, 6 classes: Early Blight, Late Blight, Leaf Mold, Powdery Mildew, Septoria Leaf Spot, Spider Mites + Healthy → [Disease Classification](TOMATO_DISEASE_CLASSIFICATION.md)
-- **Growth Stage Classifier** — EfficientNetB3, 6 stages: Seedling → Early Vegetative → Flowering Initiation → Flowering → Unripe → Ripe, with TTA support → [Growth Stage Classification](TOMATO_GROWTH_STAGE_CLASSIFICATION.md)
+- **Disease Classifier** — EfficientNetB0, 6 classes: Early Blight, Late Blight, Leaf Mold, Powdery Mildew, Septoria Leaf Spot, Spider Mites + Healthy → [Disease Classification](docs/TOMATO_DISEASE_CLASSIFICATION.md)
+- **Growth Stage Classifier** — EfficientNetB3, 6 stages: Seedling → Early Vegetative → Flowering Initiation → Flowering → Unripe → Ripe, with TTA support → [Growth Stage Classification](docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md)
 
 ## 🛠️ Technology Stack
 
@@ -104,14 +104,16 @@ jupyter notebook feature_demos/
 
 | Guide | Description |
 |-------|-------------|
-| [Feature Demos Guide](../feature_demos/FEATURE_DEMOS_GUIDE.md) | Walkthrough of all 6 interactive notebooks |
-| [Database Reference](DATABASE_REFERENCE.md) | Schema, queries, and time-series data guide |
-| [PostgreSQL Quick Start](POSTGRESQL_QUICKSTART.md) | Database setup and data loading |
-| [Image Storage Setup](IMAGE_STORAGE_SETUP.md) | MinIO + PostgreSQL image pipeline |
-| [Indoor Greenhouse Dataset](INDOOR_GREENHOUSE_DATASET.md) | Synthetic dataset generation methodology |
-| [Disease Classification](TOMATO_DISEASE_CLASSIFICATION.md) | EfficientNetB0 leaf disease model |
-| [Growth Stage Classification](TOMATO_GROWTH_STAGE_CLASSIFICATION.md) | EfficientNetB3 growth stage model |
-| [Deployment Guide](DOCS_DEPLOYMENT.md) | MkDocs documentation site setup |
+| [Feature Demos Guide](feature_demos/FEATURE_DEMOS_GUIDE.md) | Walkthrough of all 6 interactive notebooks |
+| [Database Reference](docs/DATABASE_REFERENCE.md) | Schema, queries, and time-series data guide |
+| [PostgreSQL Quick Start](docs/POSTGRESQL_QUICKSTART.md) | Database setup and data loading |
+| [Image Storage Setup](docs/IMAGE_STORAGE_SETUP.md) | MinIO + PostgreSQL image pipeline |
+| [Indoor Greenhouse Dataset](docs/INDOOR_GREENHOUSE_DATASET.md) | Synthetic dataset generation methodology |
+| [Disease Classification](docs/TOMATO_DISEASE_CLASSIFICATION.md) | EfficientNetB0 leaf disease model |
+| [Growth Stage Classification](docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md) | EfficientNetB3 growth stage model |
+| [Deployment Guide](docs/DOCS_DEPLOYMENT.md) | MkDocs documentation site setup |
+
+**[📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)**
 
 ## 📂 Repository Structure
 
@@ -136,8 +138,8 @@ AgriTwin-GH/
 
 ## 📄 License
 
-MIT License — see [LICENSE](https://github.com/arjun-christopher/AgriTwin-GH/blob/main/LICENSE) for details.
+MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-**[🔗 View on GitHub](https://github.com/arjun-christopher/AgriTwin-GH)** | **[📓 Feature Guide](../feature_demos/FEATURE_DEMOS_GUIDE.md)**
+**[📖 View Live Documentation](https://arjun-christopher.github.io/AgriTwin-GH/)**

@@ -92,13 +92,16 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 ```powershell
 git clone https://github.com/arjun-christopher/AgriTwin-GH.git
 cd AgriTwin-GH
-uv venv
-uv pip install -e .
-.venv\Scripts\activate      # Windows: or `source .venv/bin/activate` on macOS/Linux
+python setup.py           # installs uv, sets up venv, syncs deps, and optionally downloads the dataset
 jupyter notebook feature_demos/
 ```
 
-> **Install UV first (Windows):** `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`
+> **`setup.py`** handles everything automatically — installing uv (if missing), initialising the project, creating the virtual environment, syncing dependencies, and optionally downloading the Kaggle dataset with an interactive token setup. You can also run the steps manually:
+>
+> ```powershell
+> uv venv && uv sync
+> .venv\Scripts\activate   # Windows — or `source .venv/bin/activate` on macOS/Linux
+> ```
 
 ## 📚 Documentation
 
@@ -119,6 +122,7 @@ jupyter notebook feature_demos/
 
 ```
 AgriTwin-GH/
+├── setup.py                # Interactive setup — uv install, venv, deps, Kaggle dataset
 ├── feature_demos/          # Interactive Jupyter notebook demonstrations (01–06)
 ├── notebooks/              # ML training notebooks (disease & growth stage classifiers)
 ├── scripts/                # Data loading, upload, and classification scripts
@@ -142,4 +146,4 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-**[📖 View Live Documentation](https://arjun-christopher.github.io/AgriTwin-GH/)** | **[📓 Feature Guide](feature_demos/FEATURE_DEMOS_GUIDE.md)**
+**[📖 View Live Documentation](https://arjun-christopher.github.io/AgriTwin-GH/)**
