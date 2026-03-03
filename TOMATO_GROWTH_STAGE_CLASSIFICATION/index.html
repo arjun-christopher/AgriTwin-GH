@@ -1,0 +1,3884 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AgriTwin Greenhouse Digital Twin - Documentation and Feature Demos">
+      
+      
+        <meta name="author" content="AgriTwin Team">
+      
+      
+        <link rel="canonical" href="https://arjun-christopher.github.io/AgriTwin-GH/TOMATO_GROWTH_STAGE_CLASSIFICATION/">
+      
+      
+        <link rel="prev" href="../TOMATO_DISEASE_CLASSIFICATION/">
+      
+      
+        <link rel="next" href="../DOCS_DEPLOYMENT/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+    
+    
+      
+        <title>Growth Stage Classification - AgriTwin-GH Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#tomato-growth-stage-classification" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="AgriTwin-GH Documentation" class="md-header__button md-logo" aria-label="AgriTwin-GH Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AgriTwin-GH Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Growth Stage Classification
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/arjun-christopher/AgriTwin-GH" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AgriTwin-GH
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../FEATURE_DEMOS_GUIDE/" class="md-tabs__link">
+          
+  
+  
+  Feature Demos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../DATABASE_REFERENCE/" class="md-tabs__link">
+          
+  
+  
+  Data & Database
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../TOMATO_DISEASE_CLASSIFICATION/" class="md-tabs__link">
+          
+  
+  
+  ML Models
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../DOCS_DEPLOYMENT/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Deployment Guide
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="AgriTwin-GH Documentation" class="md-nav__button md-logo" aria-label="AgriTwin-GH Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AgriTwin-GH Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/arjun-christopher/AgriTwin-GH" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AgriTwin-GH
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature Demos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Feature Demos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FEATURE_DEMOS_GUIDE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data & Database
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data & Database
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DATABASE_REFERENCE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../POSTGRESQL_QUICKSTART/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PostgreSQL Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../IMAGE_STORAGE_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Image Storage Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../INDOOR_GREENHOUSE_DATASET/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Indoor Greenhouse Dataset
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DATA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Directory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ML Models
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ML Models
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_DISEASE_CLASSIFICATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Growth Stage Classification
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Growth Stage Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-why-does-this-matter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Why Does This Matter?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-the-six-growth-stages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. The Six Growth Stages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. The Six Growth Stages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-stage-1-seedling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Stage 1 — Seedling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-stage-2-early-vegetative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Stage 2 — Early Vegetative
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-stage-3-flowering-initiation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Stage 3 — Flowering Initiation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-stage-4-flowering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Stage 4 — Flowering
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-stage-5-unripe-fruit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Stage 5 — Unripe Fruit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-stage-6-ripe-fruit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Stage 6 — Ripe Fruit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-what-is-image-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. What is Image Classification?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-how-does-a-computer-see-a-plant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. How Does a Computer "See" a Plant?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-what-is-deep-learning-no-maths-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. What is Deep Learning? (No maths required)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. What is Deep Learning? (No maths required)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-analogy-a-layered-detective" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Analogy: A Layered Detective
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a-neuron" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is a Neuron?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-learning-happens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Learning Happens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a-convolutional-neural-network-cnn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is a Convolutional Neural Network (CNN)?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-transfer-learning-standing-on-giants-shoulders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Transfer Learning — Standing on Giants' Shoulders
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Transfer Learning — Standing on Giants&#39; Shoulders">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-idea" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Idea
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-transfer-learning-works-so-well-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Transfer Learning Works So Well Here
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-our-model-efficientnetb3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Our Model: EfficientNetB3
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Our Model: EfficientNetB3">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-efficientnetb3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is EfficientNetB3?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-efficientnetb3-and-not-b0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why EfficientNetB3 (and not B0)?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#our-custom-head" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Our Custom Head
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-the-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. The Dataset
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. The Dataset">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#structure-on-disk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Structure on Disk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#class-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Class Labels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#train-validation-test-split" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Train / Validation / Test Split
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#class-imbalance-and-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Class Imbalance and Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-data-augmentation-teaching-with-variations-growth-stage-safe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Data Augmentation — Teaching with Variations (Growth-Stage Safe)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Data Augmentation — Teaching with Variations (Growth-Stage Safe)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-solution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-growth-stage-augmentation-must-be-milder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Growth Stage Augmentation Must Be Milder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technical-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-training-the-model-phase-by-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Training the Model — Phase by Phase
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Training the Model — Phase by Phase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-warm-up-8-epochs-frozen-backbone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Warm-Up (8 epochs, frozen backbone)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-fine-tuning-15-epochs-top-backbone-layers-unfrozen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Fine-Tuning (15 epochs, top backbone layers unfrozen)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-a-lower-fine-tuning-learning-rate-than-the-disease-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why a Lower Fine-Tuning Learning Rate Than the Disease Model?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loss-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loss Function
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Loss Function">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-categorical-cross-entropy-with-label-smoothing-default-ce" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: Categorical Cross-Entropy with Label Smoothing (default, 'ce')
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-multiclass-focal-loss-focal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: Multiclass Focal Loss ('focal')
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#callbacks-automatic-training-assistants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Callbacks (Automatic Training Assistants)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixed-precision-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixed Precision Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-progressive-resizing-a-resolution-boost-trick" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Progressive Resizing — A Resolution Boost Trick
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Progressive Resizing — A Resolution Boost Trick">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-solution-progressive-resizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Solution: Progressive Resizing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implementation-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Details
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-test-time-augmentation-tta-more-confident-at-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Test-Time Augmentation (TTA) — More Confident at Inference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Test-Time Augmentation (TTA) — More Confident at Inference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-solution-averaging-multiple-augmented-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Solution: Averaging Multiple Augmented Views
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-how-we-measure-success" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. How We Measure Success
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. How We Measure Success">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#during-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        During Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#final-evaluation-on-the-test-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final Evaluation on the Test Set
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Final Evaluation on the Test Set">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accuracy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-class-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-Class Accuracy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#confusion-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Confusion Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#precision-recall-f1-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Precision, Recall, F1 Score
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#roc-auc-macro-one-vs-rest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ROC-AUC (Macro One-vs-Rest)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#misclassified-samples-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Misclassified Samples Grid
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-deploying-the-model-making-it-useful" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Deploying the Model — Making it Useful
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Deploying the Model — Making it Useful">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#making-a-prediction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Making a Prediction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto-resolution-of-artifact-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-Resolution of Artifact Paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#preprocessing-at-inference-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preprocessing at Inference Time
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runtime-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-end-to-end-flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. End-to-End Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-common-questions-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Common Questions (FAQ)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-glossary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Glossary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOCS_DEPLOYMENT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-why-does-this-matter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Why Does This Matter?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-the-six-growth-stages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. The Six Growth Stages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. The Six Growth Stages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-stage-1-seedling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Stage 1 — Seedling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-stage-2-early-vegetative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Stage 2 — Early Vegetative
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-stage-3-flowering-initiation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Stage 3 — Flowering Initiation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-stage-4-flowering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Stage 4 — Flowering
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-stage-5-unripe-fruit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Stage 5 — Unripe Fruit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-stage-6-ripe-fruit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Stage 6 — Ripe Fruit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-what-is-image-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. What is Image Classification?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-how-does-a-computer-see-a-plant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. How Does a Computer "See" a Plant?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-what-is-deep-learning-no-maths-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. What is Deep Learning? (No maths required)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. What is Deep Learning? (No maths required)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-analogy-a-layered-detective" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Analogy: A Layered Detective
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a-neuron" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is a Neuron?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-learning-happens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Learning Happens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-is-a-convolutional-neural-network-cnn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is a Convolutional Neural Network (CNN)?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-transfer-learning-standing-on-giants-shoulders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Transfer Learning — Standing on Giants' Shoulders
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Transfer Learning — Standing on Giants&#39; Shoulders">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-idea" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Idea
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-transfer-learning-works-so-well-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Transfer Learning Works So Well Here
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-our-model-efficientnetb3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Our Model: EfficientNetB3
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Our Model: EfficientNetB3">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-efficientnetb3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is EfficientNetB3?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-efficientnetb3-and-not-b0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why EfficientNetB3 (and not B0)?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#our-custom-head" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Our Custom Head
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-the-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. The Dataset
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. The Dataset">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#structure-on-disk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Structure on Disk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#class-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Class Labels
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#train-validation-test-split" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Train / Validation / Test Split
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#class-imbalance-and-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Class Imbalance and Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-data-augmentation-teaching-with-variations-growth-stage-safe" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Data Augmentation — Teaching with Variations (Growth-Stage Safe)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Data Augmentation — Teaching with Variations (Growth-Stage Safe)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-solution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Solution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-growth-stage-augmentation-must-be-milder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Growth Stage Augmentation Must Be Milder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technical-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-training-the-model-phase-by-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Training the Model — Phase by Phase
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Training the Model — Phase by Phase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-warm-up-8-epochs-frozen-backbone" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Warm-Up (8 epochs, frozen backbone)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-fine-tuning-15-epochs-top-backbone-layers-unfrozen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Fine-Tuning (15 epochs, top backbone layers unfrozen)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-a-lower-fine-tuning-learning-rate-than-the-disease-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why a Lower Fine-Tuning Learning Rate Than the Disease Model?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loss-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loss Function
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Loss Function">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-categorical-cross-entropy-with-label-smoothing-default-ce" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: Categorical Cross-Entropy with Label Smoothing (default, 'ce')
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-multiclass-focal-loss-focal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: Multiclass Focal Loss ('focal')
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#callbacks-automatic-training-assistants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Callbacks (Automatic Training Assistants)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixed-precision-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixed Precision Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-progressive-resizing-a-resolution-boost-trick" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Progressive Resizing — A Resolution Boost Trick
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Progressive Resizing — A Resolution Boost Trick">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-solution-progressive-resizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Solution: Progressive Resizing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implementation-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Details
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-test-time-augmentation-tta-more-confident-at-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Test-Time Augmentation (TTA) — More Confident at Inference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Test-Time Augmentation (TTA) — More Confident at Inference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-problem_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Problem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-solution-averaging-multiple-augmented-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Solution: Averaging Multiple Augmented Views
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-how-we-measure-success" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. How We Measure Success
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. How We Measure Success">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#during-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        During Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#final-evaluation-on-the-test-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final Evaluation on the Test Set
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Final Evaluation on the Test Set">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accuracy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-class-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-Class Accuracy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#confusion-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Confusion Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#precision-recall-f1-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Precision, Recall, F1 Score
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#roc-auc-macro-one-vs-rest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ROC-AUC (Macro One-vs-Rest)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#misclassified-samples-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Misclassified Samples Grid
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-deploying-the-model-making-it-useful" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Deploying the Model — Making it Useful
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Deploying the Model — Making it Useful">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#making-a-prediction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Making a Prediction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#auto-resolution-of-artifact-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Auto-Resolution of Artifact Paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#preprocessing-at-inference-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preprocessing at Inference Time
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runtime-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime Dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-end-to-end-flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. End-to-End Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-common-questions-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Common Questions (FAQ)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-glossary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Glossary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="tomato-growth-stage-classification">Tomato Growth Stage Classification<a class="headerlink" href="#tomato-growth-stage-classification" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>Who is this for?</strong><br />
+This document is written for anyone — farmer, student, developer, or curious reader — with zero prior knowledge of machine learning or plant biology. Every concept is explained from the ground up, with analogies and plain language throughout.</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#1-why-does-this-matter">Why Does This Matter?</a></li>
+<li><a href="#2-the-six-growth-stages">The Six Growth Stages</a></li>
+<li><a href="#21-stage-1--seedling">Stage 1 — Seedling</a></li>
+<li><a href="#22-stage-2--early-vegetative">Stage 2 — Early Vegetative</a></li>
+<li><a href="#23-stage-3--flowering-initiation">Stage 3 — Flowering Initiation</a></li>
+<li><a href="#24-stage-4--flowering">Stage 4 — Flowering</a></li>
+<li><a href="#25-stage-5--unripe-fruit">Stage 5 — Unripe Fruit</a></li>
+<li><a href="#26-stage-6--ripe-fruit">Stage 6 — Ripe Fruit</a></li>
+<li><a href="#3-what-is-image-classification">What is Image Classification?</a></li>
+<li><a href="#4-how-does-a-computer-see-a-plant">How Does a Computer "See" a Plant?</a></li>
+<li><a href="#5-what-is-deep-learning-no-maths-required">What is Deep Learning? (No maths required)</a></li>
+<li><a href="#6-transfer-learning--standing-on-giants-shoulders">Transfer Learning — Standing on Giants' Shoulders</a></li>
+<li><a href="#7-our-model-efficientnetb3">Our Model: EfficientNetB3</a></li>
+<li><a href="#8-the-dataset">The Dataset</a></li>
+<li><a href="#9-data-augmentation--teaching-with-variations-growth-stage-safe">Data Augmentation — Teaching with Variations (Growth-Stage Safe)</a></li>
+<li><a href="#10-training-the-model--phase-by-phase">Training the Model — Phase by Phase</a></li>
+<li><a href="#11-progressive-resizing--a-resolution-boost-trick">Progressive Resizing — A Resolution Boost Trick</a></li>
+<li><a href="#12-test-time-augmentation-tta--more-confident-at-inference">Test-Time Augmentation (TTA) — More Confident at Inference</a></li>
+<li><a href="#13-how-we-measure-success">How We Measure Success</a></li>
+<li><a href="#14-deploying-the-model--making-it-useful">Deploying the Model — Making it Useful</a></li>
+<li><a href="#15-end-to-end-flow-diagram">End-to-End Flow Diagram</a></li>
+<li><a href="#16-common-questions-faq">Common Questions (FAQ)</a></li>
+<li><a href="#17-glossary">Glossary</a></li>
+</ol>
+<hr />
+<h2 id="1-why-does-this-matter">1. Why Does This Matter?<a class="headerlink" href="#1-why-does-this-matter" title="Permanent link">&para;</a></h2>
+<p>Tomatoes are not a single product — they pass through a sequence of distinct biological phases from the moment a seed germinates to the moment a ripe fruit is harvested. Every stage has different needs:</p>
+<ul>
+<li><strong>Water requirements</strong> differ — seedlings need gentle irrigation, flowering plants need precise amounts.</li>
+<li><strong>Fertilisation schedules</strong> differ — nitrogen for early growth, potassium and phosphorus at fruiting.</li>
+<li><strong>Pest and disease risk</strong> differs — certain diseases strike at specific stages, and early detection requires knowing where in the cycle the plant is.</li>
+<li><strong>Harvest timing</strong> is determined entirely by stage — picking too early or too late degrades quality and revenue.</li>
+</ul>
+<p><strong>The problem:</strong> In a large greenhouse with hundreds or thousands of plants, manually assessing the growth stage of every plant daily is:</p>
+<ol>
+<li>Labour-intensive and slow.</li>
+<li>Subjective — different workers may classify the same plant differently.</li>
+<li>Error-prone — misidentification leads to wrong interventions at the wrong time.</li>
+</ol>
+<p><strong>The solution this project provides:</strong> A camera captures a photo of the tomato plant. An AI model analyses the photo within milliseconds and identifies the exact growth stage — <em>Seedling</em>, <em>Early Vegetative</em>, <em>Flowering Initiation</em>, <em>Flowering</em>, <em>Unripe</em>, or <em>Ripe</em>. This enables:</p>
+<ul>
+<li><strong>Automated growth tracking</strong> across all plants simultaneously.</li>
+<li><strong>Precise, stage-aware control</strong> of irrigation, lighting, and fertilisation.</li>
+<li><strong>Harvest prediction</strong> based on the distribution of stages across the crop.</li>
+<li><strong>Integration with the AgriTwin-GH digital twin</strong> — growth stage feeds the disease risk model, control policy, and what-if simulations.</li>
+</ul>
+<hr />
+<h2 id="2-the-six-growth-stages">2. The Six Growth Stages<a class="headerlink" href="#2-the-six-growth-stages" title="Permanent link">&para;</a></h2>
+<p>Our model classifies tomato plants into <strong>6 sequential growth stages</strong>. The stages are ordered — a plant always passes through them in this exact sequence.</p>
+<h3 id="21-stage-1-seedling">2.1 Stage 1 — Seedling<a class="headerlink" href="#21-stage-1-seedling" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Duration</strong></td>
+<td>Days 1–14 after germination</td>
+</tr>
+<tr>
+<td><strong>Key visual features</strong></td>
+<td>2–4 small, oval seed leaves (cotyledons); short, fragile stem</td>
+</tr>
+<tr>
+<td><strong>Colour</strong></td>
+<td>Pale, light green</td>
+</tr>
+<tr>
+<td><strong>Size</strong></td>
+<td>Very small — typically 2–8 cm tall</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What it looks like:</strong><br />
+The seedling stage begins the moment a seed germinates and pushes through the soil surface. The plant first shows its two rounded <em>cotyledons</em> (seed leaves), which are simple and oval — quite unlike the distinctive jagged tomato leaf that appears later. The stem is very thin and bright green. The plant is extremely fragile at this stage.</p>
+<p><strong>Why it matters for management:</strong><br />
+Seedlings need <strong>high humidity</strong> (95%+), <strong>gentle lighting</strong> (avoid intense direct light), and <strong>low, careful irrigation</strong>. Overwatering at this stage is one of the most common causes of seedling death (<em>damping off</em>). Temperature control is critical — below 15 °C slows development significantly.</p>
+<p><strong>Decision trigger:</strong> Begin counting days to transplant. Seedlings are typically moved to larger containers or growing beds after 14–21 days.</p>
+<hr />
+<h3 id="22-stage-2-early-vegetative">2.2 Stage 2 — Early Vegetative<a class="headerlink" href="#22-stage-2-early-vegetative" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Duration</strong></td>
+<td>Days 14–35 after germination</td>
+</tr>
+<tr>
+<td><strong>Key visual features</strong></td>
+<td>First true leaves visible; compound leaf structure developing</td>
+</tr>
+<tr>
+<td><strong>Colour</strong></td>
+<td>Medium green; leaf surface begins to show texture</td>
+</tr>
+<tr>
+<td><strong>Size</strong></td>
+<td>10–30 cm tall; multiple leaf nodes appearing</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What it looks like:</strong><br />
+The true tomato leaves begin to appear above the cotyledons. These compound leaves have a distinctive pinnate structure — a central stem with multiple leaflets on each side. The plant is actively building its root and stem infrastructure at this stage. Leaves are medium green and begin showing the characteristic slightly rough, hairy texture tomato leaves are known for.</p>
+<p><strong>Why it matters for management:</strong><br />
+This is the primary <strong>vegetative growth phase</strong> — the plant is investing all energy into building structure. Management decisions:
+- <strong>Nitrogen-rich fertilisation</strong> to support leaf and stem development.
+- <strong>Training and staking</strong> — the main stem should be guided upright.
+- <strong>Light levels</strong> should increase (16–18 hours per day for rapid growth).
+- <strong>Humidity</strong> can be reduced slightly (80–85%) as the plant is more robust.</p>
+<p><strong>Decision trigger:</strong> Begin applying full nutrient solution. Prune suckers (side shoots) to direct energy to the main stem.</p>
+<hr />
+<h3 id="23-stage-3-flowering-initiation">2.3 Stage 3 — Flowering Initiation<a class="headerlink" href="#23-stage-3-flowering-initiation" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Duration</strong></td>
+<td>Days 35–50 after germination</td>
+</tr>
+<tr>
+<td><strong>Key visual features</strong></td>
+<td>First flower buds (trusses) visible; plant reaches 40–60 cm</td>
+</tr>
+<tr>
+<td><strong>Colour</strong></td>
+<td>Dark, rich green leaves; small yellow bud clusters appearing</td>
+</tr>
+<tr>
+<td><strong>Size</strong></td>
+<td>40–70 cm tall</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What it looks like:</strong><br />
+The first flower clusters (<em>trusses</em>) become visible — small yellow-green bud formations emerging at leaf axils. The leaves are now fully mature in form and a deep, rich green. The plant's height accelerates and the stem thickens. This is a critical transition from pure vegetative growth to the reproductive phase.</p>
+<p><strong>Why it matters for management:</strong><br />
+Flowering initiation requires a <strong>precise environmental shift</strong>:
+- <strong>Temperature</strong> must be in the 18–26 °C range — too cold or too hot prevents flowers from setting later.
+- <strong>Fertilisation</strong> shifts from nitrogen emphasis to a <strong>balanced NPK</strong> formula.
+- <strong>Air circulation</strong> increases — poor ventilation at this stage leads to pollination failure.
+- <strong>Humidity</strong> drops to 65–75% — high humidity at flowering causes pollen to clump, preventing fertilisation.</p>
+<p><strong>Decision trigger:</strong> Trigger the system to begin vibrating the trusses or using bumblebees for pollination in the next stage. Begin monitoring CO₂ levels closely.</p>
+<hr />
+<h3 id="24-stage-4-flowering">2.4 Stage 4 — Flowering<a class="headerlink" href="#24-stage-4-flowering" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Duration</strong></td>
+<td>Days 50–65 after germination</td>
+</tr>
+<tr>
+<td><strong>Key visual features</strong></td>
+<td>Open yellow flowers; multiple trusses at different stages</td>
+</tr>
+<tr>
+<td><strong>Colour</strong></td>
+<td>Vivid yellow flowers against deep green foliage</td>
+</tr>
+<tr>
+<td><strong>Size</strong></td>
+<td>70–120 cm; first trusses at floor level, newer ones higher</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What it looks like:</strong><br />
+Bright yellow, star-shaped flowers are now fully open. Each flower has reflexed (backwards-pointing) petals and a prominent central cone of stamens. Multiple trusses may be visible, each at a slightly different developmental stage. The plant is tall, lush, and architecturally complex.</p>
+<p><strong>Why it matters for management:</strong><br />
+This is the <strong>most sensitive stage for yield determination</strong>:
+- <strong>Pollination</strong> must occur — bumblebees (common in commercial greenhouses) or manual/electric truss vibrators ensure pollen transfer.
+- <strong>Temperature</strong> is critical — above 30 °C or below 10 °C at night causes flower drop (<em>blossom drop</em>), destroying potential fruit.
+- <strong>Calcium supply</strong> must be adequate — calcium deficiency at this stage causes <em>blossom end rot</em> later.
+- <strong>Irrigation precision</strong> peaks — stress during flowering reduces fruit set.</p>
+<p><strong>Decision trigger:</strong> Trigger automated truss vibration system. Alert if temperature exceeds 30 °C or drops below 12 °C.</p>
+<hr />
+<h3 id="25-stage-5-unripe-fruit">2.5 Stage 5 — Unripe Fruit<a class="headerlink" href="#25-stage-5-unripe-fruit" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Duration</strong></td>
+<td>Days 65–90 after germination</td>
+</tr>
+<tr>
+<td><strong>Key visual features</strong></td>
+<td>Small to medium green fruits; flowers may still be present on upper trusses</td>
+</tr>
+<tr>
+<td><strong>Colour</strong></td>
+<td>Solid mid-to-dark green fruits (often with a whitish-green shoulder)</td>
+</tr>
+<tr>
+<td><strong>Size</strong></td>
+<td>Fruit diameter 1–6 cm depending on variety</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What it looks like:</strong><br />
+Green tomato fruits are now clearly visible, having developed from the fertilised flowers. The fruits are firm and green — they contain high levels of <em>chlorophyll</em> giving them colour, and <em>solanine</em> making them mildly toxic when raw. Upper trusses may still show open flowers while lower trusses bear larger fruits, creating a striking visual mix of yellow and green.</p>
+<p><strong>Why it matters for management:</strong><br />
+The fruit is actively accumulating sugars, acids, and cell mass. Management priorities:
+- <strong>Potassium</strong> supplementation is critical — potassium drives sugar accumulation and fruit quality.
+- <strong>Consistent irrigation</strong> — irregular watering causes <em>blossom end rot</em> and fruit cracking.
+- <strong>Leaf pruning</strong> — removing lower yellowing leaves improves airflow and reduces disease risk.
+- <strong>Truss loading management</strong> — removing excess fruits per truss ensures remaining fruits reach full size.</p>
+<p><strong>Decision trigger:</strong> Estimate harvest date based on fruit size and growth rate. Begin alerting harvesters of predicted readiness window.</p>
+<hr />
+<h3 id="26-stage-6-ripe-fruit">2.6 Stage 6 — Ripe Fruit<a class="headerlink" href="#26-stage-6-ripe-fruit" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Duration</strong></td>
+<td>Days 90–110+ after germination</td>
+</tr>
+<tr>
+<td><strong>Key visual features</strong></td>
+<td>Red (or yellow/orange depending on variety), fully coloured, slightly soft fruits</td>
+</tr>
+<tr>
+<td><strong>Colour</strong></td>
+<td>Vivid red, fully uniform colouration; green colour completely replaced</td>
+</tr>
+<tr>
+<td><strong>Size</strong></td>
+<td>Full size for variety; typically 5–10 cm diameter</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What it looks like:</strong><br />
+The tomato has completed the <em>ethylene-triggered ripening cascade</em> — chlorophyll breaks down, lycopene (the red pigment) is synthesised, sugar content peaks, and the fruit softens slightly. A fully ripe tomato is uniformly coloured, carries no green patches, and has a slight give when pressed gently. The stem end may retain a small green calyx.</p>
+<p><strong>Why it matters for management:</strong><br />
+<strong>Harvest timing is everything for quality:</strong>
+- Fruit left on the vine too long becomes overripe, splitting, and susceptible to <em>Botrytis</em> rot.
+- Harvested too early, tomatoes never develop full flavour even if they redden post-harvest.
+- Ripe fruits are detected automatically, and a <strong>harvest alert</strong> is generated for that plant row.</p>
+<p><strong>Decision trigger:</strong> Immediate harvest scheduling. Log harvest event in the digital twin. Update yield tracking metrics.</p>
+<hr />
+<h2 id="3-what-is-image-classification">3. What is Image Classification?<a class="headerlink" href="#3-what-is-image-classification" title="Permanent link">&para;</a></h2>
+<p>Imagine you show 1,000 photos of plants at different ages to a child. After a while, the child learns to associate certain visual patterns — tiny cotyledons, open yellow flowers, red round fruits — with specific stage names. <strong>Image classification</strong> is teaching a computer to do the same thing.</p>
+<p>In our case:
+- We show the computer thousands of photos of tomato plants.
+- Each photo is labelled with the correct stage name (e.g., "Stage4_Flowering").
+- The computer learns patterns — colours, shapes, textures, spatial arrangements — that distinguish one stage from another.
+- After training, when shown a <strong>new, unseen photo</strong>, the computer predicts which stage it belongs to.</p>
+<p>The output is a set of <strong>confidence percentages</strong>, one per stage:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Stage1_Seedling              :  0.8%
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>Stage2_Early_Vegetative      :  1.2%
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Stage3_Flowering_Initiation  :  3.1%
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>Stage4_Flowering             :  4.7%
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>Stage5_Unripe                :  9.1%
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>Stage6_Ripe                  : 81.1%
+</code></pre></div>
+<p>The model picks the stage with the highest confidence — in this case, <em>Ripe Fruit</em>.</p>
+<hr />
+<h2 id="4-how-does-a-computer-see-a-plant">4. How Does a Computer "See" a Plant?<a class="headerlink" href="#4-how-does-a-computer-see-a-plant" title="Permanent link">&para;</a></h2>
+<p>A digital image is a <strong>grid of pixels</strong>. Each pixel has three numbers representing its colour — <strong>Red, Green, Blue (RGB)</strong> — each ranging from 0 to 255.</p>
+<p>A 300×300 pixel image (our input size) is therefore a grid of:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>300 rows × 300 columns × 3 colour channels = 270,000 numbers
+</code></pre></div></p>
+<p>The computer's job is to find meaning in these ~270,000 numbers. But growth stages are particularly challenging because:</p>
+<ul>
+<li><strong>Colour is a genuine cue</strong> — a green fruit is unripe, a red fruit is ripe. The model must <em>preserve</em> colour information.</li>
+<li><strong>Morphology changes dramatically</strong> — a seedling looks nothing like a flowering plant. The model must detect shape and structure.</li>
+<li><strong>Scale varies</strong> — the same stage can look very different at different camera distances.</li>
+<li><strong>Multiple trusses</strong> may be visible simultaneously at different stages.</li>
+</ul>
+<p>We need an architecture that captures both fine colour gradients <em>and</em> large-scale structural features. This is why our model uses <strong>higher resolution</strong> (300×300 vs 224×224 for the disease model) and a <strong>more powerful backbone</strong>.</p>
+<hr />
+<h2 id="5-what-is-deep-learning-no-maths-required">5. What is Deep Learning? (No maths required)<a class="headerlink" href="#5-what-is-deep-learning-no-maths-required" title="Permanent link">&para;</a></h2>
+<h3 id="the-analogy-a-layered-detective">The Analogy: A Layered Detective<a class="headerlink" href="#the-analogy-a-layered-detective" title="Permanent link">&para;</a></h3>
+<p>Think of a detective who identifies a growth stage by asking a series of questions:</p>
+<ol>
+<li><strong>Layer 1 (Basic shapes):</strong> "Are there any round objects? Is there a stem?"</li>
+<li><strong>Layer 2 (Colours and textures):</strong> "Is the dominant colour green or red? Are leaves rough or smooth?"</li>
+<li><strong>Layer 3 (Patterns):</strong> "Are there small oval leaves (cotyledons)? Star-shaped yellow flowers? Clustered round fruits?"</li>
+<li><strong>Layer 4 (Stage features):</strong> "Yellow star-shaped flowers + deep green foliage = Flowering stage"</li>
+<li><strong>Final Layer (Decision):</strong> "Confidence: 94.7% Stage 4 — Flowering"</li>
+</ol>
+<p>A <strong>deep neural network</strong> does exactly this — it stacks many <strong>layers</strong> of pattern detectors, each layer learning increasingly complex features from the output of the previous layer.</p>
+<h3 id="what-is-a-neuron">What is a Neuron?<a class="headerlink" href="#what-is-a-neuron" title="Permanent link">&para;</a></h3>
+<p>A <strong>neuron</strong> is a tiny mathematical function. It takes numbers in, multiplies each by a <strong>weight</strong> (importance), adds them up, and outputs a new number. The "learning" is simply adjusting these weights based on mistakes.</p>
+<h3 id="how-learning-happens">How Learning Happens<a class="headerlink" href="#how-learning-happens" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Forward pass:</strong> Show the network a plant photo → it predicts a stage.</li>
+<li><strong>Measure the mistake:</strong> Compare the prediction to the correct label. Calculate an error score (<strong>loss</strong>).</li>
+<li><strong>Backward pass (backpropagation):</strong> Adjust every weight slightly in the direction that reduces the error.</li>
+<li><strong>Repeat</strong> millions of times across thousands of images.</li>
+</ol>
+<p>After enough repetitions, the weights settle into values that make good predictions. This process is called <strong>training</strong>.</p>
+<h3 id="what-is-a-convolutional-neural-network-cnn">What is a Convolutional Neural Network (CNN)?<a class="headerlink" href="#what-is-a-convolutional-neural-network-cnn" title="Permanent link">&para;</a></h3>
+<p>A CNN is a type of deep neural network specifically designed for images. Instead of connecting every pixel to every neuron (which would require billions of parameters), it uses <strong>filters</strong> (small sliding windows) that scan across the image detecting local features — exactly like how your eye might track a cluster of yellow flowers across a frame without needing to look at the entire image at once.</p>
+<hr />
+<h2 id="6-transfer-learning-standing-on-giants-shoulders">6. Transfer Learning — Standing on Giants' Shoulders<a class="headerlink" href="#6-transfer-learning-standing-on-giants-shoulders" title="Permanent link">&para;</a></h2>
+<p>Training a powerful CNN from scratch requires:
+- <strong>Millions of images</strong>
+- <strong>Weeks of compute time</strong> on powerful GPU machines
+- <strong>Expert tuning</strong></p>
+<p>We have neither the data volume nor the compute time for that. Instead, we use <strong>Transfer Learning</strong>.</p>
+<h3 id="the-idea">The Idea<a class="headerlink" href="#the-idea" title="Permanent link">&para;</a></h3>
+<p>Large technology companies (Google, Facebook, etc.) train massive models on millions of general images (dogs, cars, buildings, flowers). These models learn extremely powerful general features — edges, textures, patterns, shapes — that transfer well to almost any visual task.</p>
+<p>We take one of these pre-trained models and <strong>adapt it</strong> to our specific task (tomato growth stage classification) by training only a small custom "head" on top, using our stage images.</p>
+<p><strong>Analogy:</strong> Instead of teaching someone to identify fruits from scratch, you hire a botanist who already understands plant biology deeply and just teach them the specific visual cues that distinguish a seedling from a flowering plant in <em>tomatoes specifically</em>. Far faster and far more effective.</p>
+<h3 id="why-transfer-learning-works-so-well-here">Why Transfer Learning Works So Well Here<a class="headerlink" href="#why-transfer-learning-works-so-well-here" title="Permanent link">&para;</a></h3>
+<p>For growth stage classification, the general visual features learned from ImageNet — colour gradients, texture patterns, circular shapes, edge contours — map almost directly to what we need. A network that already recognises green leaves, yellow petals, and round red fruits in its general training has a massive head start on our task.</p>
+<hr />
+<h2 id="7-our-model-efficientnetb3">7. Our Model: EfficientNetB3<a class="headerlink" href="#7-our-model-efficientnetb3" title="Permanent link">&para;</a></h2>
+<h3 id="what-is-efficientnetb3">What is EfficientNetB3?<a class="headerlink" href="#what-is-efficientnetb3" title="Permanent link">&para;</a></h3>
+<p><strong>EfficientNet</strong> is a family of neural network architectures developed by Google Brain in 2019. The "B3" variant is a mid-size model — significantly more powerful and accurate than the smallest B0 variant, while remaining practical for deployment.</p>
+<p>EfficientNet was designed using <strong>Neural Architecture Search (NAS)</strong>: an AI was used to discover the optimal architecture rather than humans hand-tuning it. The key insight is <strong>compound scaling</strong> — instead of making networks just deeper or wider, EfficientNet scales depth, width, and input resolution simultaneously in a mathematically balanced way.</p>
+<h3 id="why-efficientnetb3-and-not-b0">Why EfficientNetB3 (and not B0)?<a class="headerlink" href="#why-efficientnetb3-and-not-b0" title="Permanent link">&para;</a></h3>
+<p>The growth stage task is <strong>harder</strong> than disease classification in one specific way: <strong>colour and morphology both matter simultaneously</strong>. A model must distinguish:
+- A deep-green unripe fruit (Stage 5) from a red ripe fruit (Stage 6) — primarily a colour distinction.
+- A seedling plant (Stage 1) from a flowering plant (Stage 4) — primarily a structural distinction.</p>
+<p>EfficientNetB3 provides:</p>
+<table>
+<thead>
+<tr>
+<th>Reason</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Higher capacity</strong></td>
+<td>12M parameters vs 5.3M for B0 — better at capturing subtle colour and structural differences</td>
+</tr>
+<tr>
+<td><strong>Native 300×300 resolution</strong></td>
+<td>Larger input captures fine detail — critical for distinguishing early bud clusters from full flowers</td>
+</tr>
+<tr>
+<td><strong>Pre-training on ImageNet</strong></td>
+<td>Already trained on 1.28M images across 1,000 classes</td>
+</tr>
+<tr>
+<td><strong>Proven accuracy</strong></td>
+<td>Consistently outperforms B0 on fine-grained visual classification tasks</td>
+</tr>
+<tr>
+<td><strong>Memory efficient</strong></td>
+<td>Scaled thoughtfully — more powerful than B0 without requiring enterprise-grade GPU memory</td>
+</tr>
+</tbody>
+</table>
+<h3 id="our-custom-head">Our Custom Head<a class="headerlink" href="#our-custom-head" title="Permanent link">&para;</a></h3>
+<p>EfficientNetB3 acts as the <strong>feature extractor</strong> (backbone). On top of it, we add a small <strong>custom head</strong> that makes the final stage prediction:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>EfficientNetB3 Backbone (feature extraction, pre-trained on ImageNet)
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>        ↓
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  GlobalAveragePooling2D
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  (collapses spatial feature maps into a single averaged vector)
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        ↓
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  Dropout(40%)    ← randomly switches off 40% of neurons during training
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>        ↓          to prevent overfitting
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  Dense(256 neurons) + ReLU activation
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        ↓
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  BatchNormalisation   ← stabilises training by normalising intermediate outputs
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        ↓
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  Dropout(30%)
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>        ↓
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>  Dense(6 neurons) + Softmax    ← float32 explicit for numerical stability
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>  (one neuron per growth stage; outputs probabilities summing to 1.0)
+</code></pre></div>
+<p><strong>Dropout</strong> is a regularisation technique — during training, we randomly "switch off" a fraction of neurons. This forces the network not to rely too heavily on any single neuron, making it more robust and <strong>reducing overfitting</strong> (memorising training data instead of learning general patterns).</p>
+<p><strong>BatchNormalisation</strong> normalises the outputs of a layer during training, stabilising and accelerating learning. It also acts as a mild regulariser.</p>
+<hr />
+<h2 id="8-the-dataset">8. The Dataset<a class="headerlink" href="#8-the-dataset" title="Permanent link">&para;</a></h2>
+<h3 id="structure-on-disk">Structure on Disk<a class="headerlink" href="#structure-on-disk" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>data/
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>└── external/
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    └── Tomato Growth Stages/
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        ├── Stage1_Seedling/             ← images of seedling plants
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        ├── Stage2_Early_Vegetative/     ← images of young vegetative plants
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        ├── Stage3_Flowering_Initiation/ ← images of plants with first buds
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        ├── Stage4_Flowering/            ← images of plants in full flower
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>        ├── Stage5_Unripe/               ← images of plants bearing green fruit
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>        └── Stage6_Ripe/                 ← images of plants bearing ripe red fruit
+</code></pre></div>
+<p>The <strong>exact folder name</strong> is used directly as the class label — there is no remapping. This means <code>label_map.json</code> is fully human-readable without any translation table.</p>
+<h3 id="class-labels">Class Labels<a class="headerlink" href="#class-labels" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Folder Name</th>
+<th>Index</th>
+<th>What It Represents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Stage1_Seedling</code></td>
+<td>0</td>
+<td>Germinated plant with cotyledons only</td>
+</tr>
+<tr>
+<td><code>Stage2_Early_Vegetative</code></td>
+<td>1</td>
+<td>True leaves forming; active stem growth</td>
+</tr>
+<tr>
+<td><code>Stage3_Flowering_Initiation</code></td>
+<td>2</td>
+<td>First flower bud clusters visible</td>
+</tr>
+<tr>
+<td><code>Stage4_Flowering</code></td>
+<td>3</td>
+<td>Open yellow flowers; pollination phase</td>
+</tr>
+<tr>
+<td><code>Stage5_Unripe</code></td>
+<td>4</td>
+<td>Developed green fruits on trusses</td>
+</tr>
+<tr>
+<td><code>Stage6_Ripe</code></td>
+<td>5</td>
+<td>Fully red, harvest-ready fruits</td>
+</tr>
+</tbody>
+</table>
+<h3 id="train-validation-test-split">Train / Validation / Test Split<a class="headerlink" href="#train-validation-test-split" title="Permanent link">&para;</a></h3>
+<p>The dataset is divided into three <strong>non-overlapping, stratified</strong> subsets:</p>
+<table>
+<thead>
+<tr>
+<th>Subset</th>
+<th>Purpose</th>
+<th>Fraction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Training set (75%)</strong></td>
+<td>Images the model learns from</td>
+<td>75% of each class</td>
+</tr>
+<tr>
+<td><strong>Validation set (15%)</strong></td>
+<td>Used during training to check generalisation (model never trains on these)</td>
+<td>15% of each class</td>
+</tr>
+<tr>
+<td><strong>Test set (10%)</strong></td>
+<td>Held out completely until final evaluation — the true measure of performance</td>
+<td>10% of each class</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Stratified</strong> means the class proportions are preserved in each split. If Stage 4 (Flowering) makes up 18% of the dataset, it will also make up approximately 18% of the training, validation, and test sets. This prevents accidental bias in any split.</p>
+<p><strong>Why three splits?</strong><br />
+Using the same images for both training and measuring accuracy would be like a student memorising an exam answer sheet — the score would look great but mean nothing. The test set is the student's actual exam with questions they've never seen.</p>
+<h3 id="class-imbalance-and-handling">Class Imbalance and Handling<a class="headerlink" href="#class-imbalance-and-handling" title="Permanent link">&para;</a></h3>
+<p>In practice, some growth stages are photographed more often than others. Stage 4 (Flowering) might be heavily photographed because it is visually striking, while Stage 1 (Seedling) might have fewer images because they are small and uninteresting to photographers.</p>
+<p>If the model sees 5× more Flowering images than Seedling images, it will learn to be lazy and always guess Flowering — achieving high accuracy overall but poor performance on underrepresented stages.</p>
+<p>We address this with <strong>class weights</strong> computed via scikit-learn's <code>compute_class_weight("balanced", ...)</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Class weight = (total samples) / (number of classes × samples in this class)
+</code></pre></div>
+<p>A class with fewer images gets a <strong>higher weight</strong> → the model must pay more attention to mistakes on that class. These weights are passed directly to Keras's <code>model.fit()</code> via the <code>class_weight</code> argument.</p>
+<hr />
+<h2 id="9-data-augmentation-teaching-with-variations-growth-stage-safe">9. Data Augmentation — Teaching with Variations (Growth-Stage Safe)<a class="headerlink" href="#9-data-augmentation-teaching-with-variations-growth-stage-safe" title="Permanent link">&para;</a></h2>
+<h3 id="the-problem">The Problem<a class="headerlink" href="#the-problem" title="Permanent link">&para;</a></h3>
+<p>Our dataset has a limited number of images per stage. Deep learning models typically need far more. Also, real-world greenhouse cameras will capture plants from slightly different angles, at different lighting levels, and with different image quality.</p>
+<h3 id="the-solution">The Solution<a class="headerlink" href="#the-solution" title="Permanent link">&para;</a></h3>
+<p><strong>Data Augmentation</strong> artificially expands the dataset by creating modified versions of existing images during training. The key insight: a slightly rotated photo of a flowering tomato plant is <em>still</em> a flowering tomato plant.</p>
+<h3 id="why-growth-stage-augmentation-must-be-milder">Why Growth Stage Augmentation Must Be Milder<a class="headerlink" href="#why-growth-stage-augmentation-must-be-milder" title="Permanent link">&para;</a></h3>
+<p>This is the <strong>most important difference</strong> between this model and the disease classifier:</p>
+<p><strong>For disease classification</strong>, augmentation can be aggressive — heavy hue shifts, colour jitter, vertical flips — because a disease lesion's identity doesn't change with extreme colour shifts. The colour of a spot is less critical than its texture and shape.</p>
+<p><strong>For growth stage classification</strong>, colour is a <em>primary discriminative cue</em>:
+- <strong>Stage 5 (Unripe)</strong> is green; <strong>Stage 6 (Ripe)</strong> is red. Arbitrary hue shifts could make a ripe fruit look unripe.
+- <strong>Stage 1 (Seedling)</strong> is pale green; <strong>Stage 2 (Vegetative)</strong> is richer green. Saturation changes could blur this distinction.
+- Plant orientation matters — vertical flip might suggest the plant is growing downwards, which is biologically incorrect for most growth stages.</p>
+<p>The augmentation is therefore deliberately conservative:</p>
+<table>
+<thead>
+<tr>
+<th>Augmentation</th>
+<th>Setting</th>
+<th>Why It's Controlled</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Horizontal flip</strong></td>
+<td>✓ Enabled</td>
+<td>Left-right symmetry is safe — tomatoes grow symmetrically</td>
+</tr>
+<tr>
+<td><strong>Vertical flip</strong></td>
+<td>✗ Disabled</td>
+<td>Plants grow upward — flipping could mislead the model about plant orientation</td>
+</tr>
+<tr>
+<td><strong>Random rotation</strong></td>
+<td>±8% (≈ ±29°)</td>
+<td>Much gentler than disease model (±54°) — plant structure is a stage cue</td>
+</tr>
+<tr>
+<td><strong>Random zoom</strong></td>
+<td>±10%</td>
+<td>Mild — helps with camera distance variation</td>
+</tr>
+<tr>
+<td><strong>Random brightness</strong></td>
+<td>±12%</td>
+<td>Moderate — greenhouse lighting varies</td>
+</tr>
+<tr>
+<td><strong>Random contrast</strong></td>
+<td>±10%</td>
+<td>Near-symmetric range — preserves overall image tone</td>
+</tr>
+<tr>
+<td><strong>Random hue</strong></td>
+<td>±3%</td>
+<td><strong>Very subtle</strong> — preserves the green→yellow→red gradient critical for stage discrimination</td>
+</tr>
+<tr>
+<td><strong>Random saturation</strong></td>
+<td>0.85 – 1.15 range</td>
+<td>Near-neutral — avoids washing out or over-saturating colour cues</td>
+</tr>
+<tr>
+<td><strong>Random crop</strong></td>
+<td>Retains ≥ 92% of image</td>
+<td>Focuses on different regions while preserving the full plant structure</td>
+</tr>
+<tr>
+<td><strong>Cutout (Random Erasing)</strong></td>
+<td>12% patch, 50% probability</td>
+<td>Smaller and less frequent than disease model — preserves stage-identifying regions</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Important:</strong> Augmentation is applied <strong>only to the training set</strong>. Validation and test sets use the original images — because we want to measure performance on realistic, unmodified inputs.</p>
+</blockquote>
+<h3 id="technical-implementation">Technical Implementation<a class="headerlink" href="#technical-implementation" title="Permanent link">&para;</a></h3>
+<p>Each augmentation is implemented as a <code>tf.data</code> map function operating on individual images in the pipeline, applied on-the-fly during training. This means every time the model sees an image, it sees a <em>different</em> augmented version — effectively multiplying the dataset size.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Example: hue shift is applied after converting to [0,1] scale</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">image</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">random_hue</span><span class="p">(</span><span class="n">image</span> <span class="o">/</span> <span class="mf">255.0</span><span class="p">,</span> <span class="n">max_delta</span><span class="o">=</span><span class="mf">0.03</span><span class="p">)</span> <span class="o">*</span> <span class="mf">255.0</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># max_delta=0.03 means a maximum ±3% shift in the HSV hue channel</span>
+</code></pre></div>
+<hr />
+<h2 id="10-training-the-model-phase-by-phase">10. Training the Model — Phase by Phase<a class="headerlink" href="#10-training-the-model-phase-by-phase" title="Permanent link">&para;</a></h2>
+<p>Training happens in <strong>two phases</strong> — a well-established best practice called <strong>progressive fine-tuning</strong>.</p>
+<h3 id="phase-1-warm-up-8-epochs-frozen-backbone">Phase 1: Warm-Up (8 epochs, frozen backbone)<a class="headerlink" href="#phase-1-warm-up-8-epochs-frozen-backbone" title="Permanent link">&para;</a></h3>
+<p><strong>Epoch</strong> = one complete pass through the entire training dataset.</p>
+<p>In Phase 1, the EfficientNetB3 backbone weights are <strong>frozen</strong> — they cannot change. Only our custom head layers (the Dense, Dropout, and BatchNorm layers we added) are updated.</p>
+<p><strong>Why?</strong><br />
+The pre-trained backbone already knows how to detect visual features from ImageNet. If we immediately allow all layers to update with our small growth stage dataset, the powerful backbone weights get "corrupted" before the head has learned anything useful — a phenomenon called <strong>catastrophic forgetting</strong>. Warming up the head first gives it a sensible starting point before we allow the backbone to fine-tune.</p>
+<p>With <strong>progressive resizing</strong> enabled (see Section 11), Phase 1 trains at a smaller 224×224 resolution for speed, then switches to 300×300 for Phase 2.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Epochs</strong></td>
+<td>8</td>
+</tr>
+<tr>
+<td><strong>Learning rate</strong></td>
+<td><code>0.001</code> (head is learning from scratch — higher rate appropriate)</td>
+</tr>
+<tr>
+<td><strong>What updates</strong></td>
+<td>Custom head only (Dropout, Dense, BatchNorm layers)</td>
+</tr>
+<tr>
+<td><strong>Training dataset</strong></td>
+<td>224×224 progressive-resizing dataset (if enabled)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-2-fine-tuning-15-epochs-top-backbone-layers-unfrozen">Phase 2: Fine-Tuning (15 epochs, top backbone layers unfrozen)<a class="headerlink" href="#phase-2-fine-tuning-15-epochs-top-backbone-layers-unfrozen" title="Permanent link">&para;</a></h3>
+<p>After the head is trained, we <strong>unfreeze the top 40 layers</strong> of the EfficientNetB3 backbone and allow them to fine-tune on our data at the full 300×300 resolution.</p>
+<p><strong>Why only the top layers?</strong><br />
+The bottom layers of a CNN learn very basic features (edges, corners, colour blobs) that are universal — useful for every image task. These don't need to change. The top layers learn high-level, task-specific features — exactly the kind of stage-specific patterns we need.</p>
+<p><strong>Why 40 layers (vs 30 in the disease model)?</strong><br />
+EfficientNetB3 has more layers than B0, and growth stage classification benefits from deeper fine-tuning because the features required (simultaneous colour and morphology discrimination) are more complex than disease lesion recognition.</p>
+<p><strong>BatchNorm layers are kept frozen</strong> even in Phase 2. This is critical for stability — allowing BatchNorm statistics to update with a small dataset at low learning rates causes training instability.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Epochs</strong></td>
+<td>15</td>
+</tr>
+<tr>
+<td><strong>Learning rate</strong></td>
+<td><code>0.00003</code> (3×10⁻⁵, lower than disease model for B3 stability)</td>
+</tr>
+<tr>
+<td><strong>What updates</strong></td>
+<td>Top 40 backbone layers + entire custom head</td>
+</tr>
+<tr>
+<td><strong>Training dataset</strong></td>
+<td>Full 300×300 dataset</td>
+</tr>
+<tr>
+<td><strong>BatchNorm</strong></td>
+<td>Frozen throughout (prevents instability)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-a-lower-fine-tuning-learning-rate-than-the-disease-model">Why a Lower Fine-Tuning Learning Rate Than the Disease Model?<a class="headerlink" href="#why-a-lower-fine-tuning-learning-rate-than-the-disease-model" title="Permanent link">&para;</a></h3>
+<p>EfficientNetB3 is more powerful than B0, which means its pre-trained weights are both more valuable <em>and</em> more sensitive to large updates. A higher learning rate risks overshooting the optimal fine-tuned weights. <code>3×10⁻⁵</code> (vs <code>5×10⁻⁵</code> for B0) ensures the small, careful adjustments that improve stage-specific features without destroying the backbone's general knowledge.</p>
+<h3 id="loss-function">Loss Function<a class="headerlink" href="#loss-function" title="Permanent link">&para;</a></h3>
+<p>The <strong>loss function</strong> measures how wrong the model's predictions are. During training, the optimiser tries to minimise this number.</p>
+<p>We support two loss functions, selectable via <code>CONFIG['loss_type']</code>:</p>
+<h4 id="option-a-categorical-cross-entropy-with-label-smoothing-default-ce">Option A: Categorical Cross-Entropy with Label Smoothing (default, <code>'ce'</code>)<a class="headerlink" href="#option-a-categorical-cross-entropy-with-label-smoothing-default-ce" title="Permanent link">&para;</a></h4>
+<p>The standard loss for multi-class classification. With <strong>label smoothing</strong> (0.1), the model is trained to output 90% confidence for the correct class and distributes the remaining 10% across other classes. This prevents <strong>overconfidence</strong> and improves generalisation.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Without smoothing: target = [0, 0, 0, 0, 0, 1]   ← 100% certain
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>With smoothing:    target = [0.017, 0.017, 0.017, 0.017, 0.017, 0.917]
+</code></pre></div>
+<h4 id="option-b-multiclass-focal-loss-focal">Option B: Multiclass Focal Loss (<code>'focal'</code>)<a class="headerlink" href="#option-b-multiclass-focal-loss-focal" title="Permanent link">&para;</a></h4>
+<p>An alternative loss function specifically designed for <strong>class imbalance</strong>. It down-weights easy, confidently-classified examples and focuses training on hard, misclassified ones.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Focal Loss = α × (1 - p_correct)^γ × Cross-Entropy
+</code></pre></div>
+<p>Where:
+- <code>α = 0.25</code> — balances the relative loss contribution of each class.
+- <code>γ = 2.0</code> — controls the "focusing" effect. Higher γ = more focus on hard examples.</p>
+<p>This is particularly useful if some growth stages are severely underrepresented even after class weights are applied.</p>
+<h3 id="callbacks-automatic-training-assistants">Callbacks (Automatic Training Assistants)<a class="headerlink" href="#callbacks-automatic-training-assistants" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Callback</th>
+<th>What it Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ModelCheckpoint</strong></td>
+<td>Saves the model whenever validation accuracy improves. The best version is always kept. Saved as <code>&lt;run_id&gt;_best.keras</code>.</td>
+</tr>
+<tr>
+<td><strong>ReduceLROnPlateau</strong></td>
+<td>If validation loss stops improving for <strong>3 consecutive epochs</strong>, the learning rate is multiplied by 0.4 (i.e., reduced by 60%). Minimum floor: <code>1×10⁻⁷</code>. Helps escape training plateaus.</td>
+</tr>
+<tr>
+<td><strong>EarlyStopping</strong></td>
+<td>If the model hasn't improved for <strong>6 consecutive epochs</strong>, stop training early. Restores best weights automatically. Prevents overfitting and saves compute time.</td>
+</tr>
+<tr>
+<td><strong>CSVLogger</strong></td>
+<td>Logs loss and accuracy for every epoch to a single CSV file (<code>training_history.csv</code>), appending Phase 2 after Phase 1 in the same file.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mixed-precision-training">Mixed Precision Training<a class="headerlink" href="#mixed-precision-training" title="Permanent link">&para;</a></h3>
+<p>Modern GPUs process <strong>16-bit floating point numbers</strong> (FP16) much faster than traditional <strong>32-bit</strong> (FP32), using less memory. <strong>Mixed precision</strong> training (<code>keras.mixed_precision.set_global_policy("mixed_float16")</code>) uses FP16 for most operations but keeps FP32 where numerical precision matters (the final softmax output layer is explicitly cast to float32).</p>
+<p>This typically provides <strong>1.5–2× speedup</strong> on compatible GPUs (NVIDIA Volta / Turing generation or newer) with no accuracy loss.</p>
+<blockquote>
+<p><strong>Note:</strong> Mixed precision is automatically disabled on CPU. Set <code>CONFIG['mixed_precision'] = False</code> if you observe NaN losses during training.</p>
+</blockquote>
+<hr />
+<h2 id="11-progressive-resizing-a-resolution-boost-trick">11. Progressive Resizing — A Resolution Boost Trick<a class="headerlink" href="#11-progressive-resizing-a-resolution-boost-trick" title="Permanent link">&para;</a></h2>
+<h3 id="the-problem_1">The Problem<a class="headerlink" href="#the-problem_1" title="Permanent link">&para;</a></h3>
+<p>EfficientNetB3 is designed for 300×300 images. Training at 300×300 from the first epoch is slower because each batch contains larger images. Can we train efficiently <em>and</em> achieve the accuracy benefit of high resolution?</p>
+<h3 id="the-solution-progressive-resizing">The Solution: Progressive Resizing<a class="headerlink" href="#the-solution-progressive-resizing" title="Permanent link">&para;</a></h3>
+<p><strong>Progressive resizing</strong> (enabled by <code>CONFIG['progressive_resizing'] = True</code>) runs training in two resolution stages:</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Resolution</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Phase 1 (Warm-up)</strong></td>
+<td>224×224</td>
+<td>Faster per-batch — more epochs per hour. The head is learning from scratch; high resolution isn't needed yet.</td>
+</tr>
+<tr>
+<td><strong>Phase 2 (Fine-tuning)</strong></td>
+<td>300×300</td>
+<td>Full native resolution — the backbone is now fine-tuning on our data, and high resolution provides the detail needed for subtle stage distinctions.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analogy:</strong> Think of studying for an exam by first reading a summary (224px — fast, gets the gist), then re-reading the detailed notes (300px — slower, captures the nuances).</p>
+<h3 id="implementation-details">Implementation Details<a class="headerlink" href="#implementation-details" title="Permanent link">&para;</a></h3>
+<p>Two separate <code>tf.data.Dataset</code> objects are constructed:
+- <code>train_ds_prog</code>: loads and resizes images to 224×224, applies growth-stage-safe augmentation.
+- <code>train_ds</code>: loads and resizes images to 300×300 (full resolution), same augmentation.</p>
+<p>Phase 1 trains on <code>train_ds_prog</code>; Phase 2 switches to <code>train_ds</code>. The validation and test datasets always use the full 300×300 resolution, regardless of the setting.</p>
+<blockquote>
+<p>If <code>prog_image_size == image_size</code>, the system automatically falls back to using a single dataset.</p>
+</blockquote>
+<hr />
+<h2 id="12-test-time-augmentation-tta-more-confident-at-inference">12. Test-Time Augmentation (TTA) — More Confident at Inference<a class="headerlink" href="#12-test-time-augmentation-tta-more-confident-at-inference" title="Permanent link">&para;</a></h2>
+<h3 id="the-problem_2">The Problem<a class="headerlink" href="#the-problem_2" title="Permanent link">&para;</a></h3>
+<p>A trained model's prediction on a single view of an image can be sensitive to small variations — slight rotation, minor crop, camera angle. A single forward pass may give a confident but slightly unlucky prediction.</p>
+<h3 id="the-solution-averaging-multiple-augmented-views">The Solution: Averaging Multiple Augmented Views<a class="headerlink" href="#the-solution-averaging-multiple-augmented-views" title="Permanent link">&para;</a></h3>
+<p><strong>Test-Time Augmentation</strong> (enabled by <code>CONFIG['tta'] = True</code>) applies random augmentations to the <em>same</em> image multiple times at inference, runs the model on each augmented copy, and <strong>averages</strong> the resulting softmax probability distributions.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Original image → augmented view 1 → [0.05, 0.03, 0.08, 0.10, 0.12, 0.62]
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>               → augmented view 2 → [0.04, 0.05, 0.06, 0.09, 0.15, 0.61]
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>               → augmented view 3 → [0.06, 0.02, 0.07, 0.11, 0.11, 0.63]
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>               → augmented view 4 → [0.03, 0.04, 0.08, 0.12, 0.13, 0.60]
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>               → augmented view 5 → [0.05, 0.03, 0.07, 0.10, 0.14, 0.61]
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>Averaged result → [0.046, 0.034, 0.072, 0.104, 0.130, 0.614]
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>→ Predicted class: Stage6_Ripe (61.4%)
+</code></pre></div>
+<p><strong>Why does averaging help?</strong><br />
+Each augmented view is a different "opinion" about the image. Averaging reduces the variance of the prediction — correct-class probabilities tend to agree and reinforce; incorrect-class probabilities tend to disagree and cancel out.</p>
+<p><strong>Our TTA implementation:</strong>
+- <code>tta_steps = 5</code> augmented forward passes are averaged.
+- TTA applies random small rotations (±8%) — same as <code>RandomRotation</code> used in training.
+- TTA is used during the <strong>test set evaluation</strong> (Section E in the notebook) and is available in the inference function.</p>
+<p><strong>Trade-off:</strong> TTA takes <code>tta_steps</code> times longer than a single pass (5× in our case). For real-time applications where every millisecond counts, set <code>tta=False</code>. For batch evaluation or cases where prediction confidence is critical, TTA is recommended.</p>
+<hr />
+<h2 id="13-how-we-measure-success">13. How We Measure Success<a class="headerlink" href="#13-how-we-measure-success" title="Permanent link">&para;</a></h2>
+<h3 id="during-training">During Training<a class="headerlink" href="#during-training" title="Permanent link">&para;</a></h3>
+<p>We track two metrics every epoch, on both the training and validation sets:</p>
+<ul>
+<li><strong>Loss:</strong> Lower is better. Measures how wrong the model's predictions are.</li>
+<li><strong>Accuracy:</strong> Higher is better. What fraction of predictions were correct.</li>
+</ul>
+<p>If training accuracy is high but validation accuracy is low, the model is <strong>overfitting</strong> (memorising training images rather than learning general patterns). Our callbacks (EarlyStopping, Dropout, BatchNorm) all fight overfitting.</p>
+<p>A dashed vertical line on the training history plot marks the boundary between Phase 1 (warm-up) and Phase 2 (fine-tuning) — a useful diagnostic for understanding how each phase contributed.</p>
+<h3 id="final-evaluation-on-the-test-set">Final Evaluation on the Test Set<a class="headerlink" href="#final-evaluation-on-the-test-set" title="Permanent link">&para;</a></h3>
+<p>After training, the best checkpoint (<code>&lt;run_id&gt;_best.keras</code>) is loaded and evaluated on the <strong>test set</strong> — images the model has <em>never</em> seen during training or validation.</p>
+<h4 id="accuracy">Accuracy<a class="headerlink" href="#accuracy" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Accuracy = (correct predictions) / (total predictions)
+</code></pre></div>
+<p>Simple and intuitive, but can be misleading if class sizes are unequal (a model that always guesses "Early Vegetative" could achieve 20%+ accuracy on a balanced 6-class dataset without learning anything).</p>
+<h4 id="per-class-accuracy">Per-Class Accuracy<a class="headerlink" href="#per-class-accuracy" title="Permanent link">&para;</a></h4>
+<p>The fraction of images in each class that the model correctly classified. This reveals if the model is systematically weak on a specific stage.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Stage3_Flowering_Initiation accuracy = 0.8723  (87.2%)
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>Stage4_Flowering accuracy            = 0.9401  (94.0%)
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>Stage5_Unripe accuracy               = 0.9115  (91.1%)
+</code></pre></div>
+<h4 id="confusion-matrix">Confusion Matrix<a class="headerlink" href="#confusion-matrix" title="Permanent link">&para;</a></h4>
+<p>A grid showing, for each actual stage, how the model classified it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>                    Predicted →
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>                    S1    S2    S3    S4    S5    S6
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>Actual ↓ S1         [98]  2     0     0     0     0
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>         S2           1  [91]   5     0     0     0
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>         S3           0    3   [88]   6     0     0
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>         S4           0    0    5   [93]    2     0
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>         S5           0    0    0     3   [89]    4
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>         S6           0    0    0     0     2   [96]
+</code></pre></div>
+<p>Diagonal values (in brackets) = correct predictions. Off-diagonal = mistakes.</p>
+<p><strong>What to look for:</strong> Mistakes should cluster on <em>adjacent</em> stages — confusing Stage 3 with Stage 4 is expected (they share visual similarities during the initiation→open-flower transition). Confusing Stage 1 with Stage 6 would be a red flag indicating something is very wrong.</p>
+<h4 id="precision-recall-f1-score">Precision, Recall, F1 Score<a class="headerlink" href="#precision-recall-f1-score" title="Permanent link">&para;</a></h4>
+<p>Computed both per-class and as macro/weighted averages:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Meaning</th>
+<th>Formula</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Precision</strong></td>
+<td>"Of all plants I <em>said</em> were in Stage 4, how many actually were?"</td>
+<td>TP / (TP + FP)</td>
+</tr>
+<tr>
+<td><strong>Recall</strong></td>
+<td>"Of all the plants that <em>actually were</em> in Stage 4, how many did I correctly identify?"</td>
+<td>TP / (TP + FN)</td>
+</tr>
+<tr>
+<td><strong>F1 Score</strong></td>
+<td>Harmonic mean of precision and recall — balances both</td>
+<td>2 × (P × R) / (P + R)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>TP</strong> = True Positive, <strong>FP</strong> = False Positive, <strong>FN</strong> = False Negative</p>
+</blockquote>
+<p>In growth stage classification, <strong>Recall</strong> matters most for critical stages:
+- Missing a <strong>ripe</strong> fruit (Stage 6) causes harvest delay → quality loss.
+- Missing a <strong>flowering</strong> stage (Stage 4) causes missed pollination trigger → yield loss.</p>
+<h4 id="roc-auc-macro-one-vs-rest">ROC-AUC (Macro One-vs-Rest)<a class="headerlink" href="#roc-auc-macro-one-vs-rest" title="Permanent link">&para;</a></h4>
+<p>For each class, a <strong>Receiver Operating Characteristic</strong> curve plots the trade-off between True Positive Rate and False Positive Rate at different classification thresholds. The <strong>Area Under the Curve (AUC)</strong> summarises this in a single number:</p>
+<ul>
+<li><strong>AUC = 1.0:</strong> Perfect classifier.</li>
+<li><strong>AUC = 0.5:</strong> Random guess.</li>
+<li><strong>AUC = 0.9+:</strong> Excellent.</li>
+</ul>
+<p>We compute macro-averaged AUC across all 6 classes (One-vs-Rest strategy).</p>
+<h4 id="misclassified-samples-grid">Misclassified Samples Grid<a class="headerlink" href="#misclassified-samples-grid" title="Permanent link">&para;</a></h4>
+<p>A visual grid showing the top 25 highest-confidence <strong>wrong</strong> predictions (worst mistakes first). This is more valuable than raw numbers — it shows <em>which</em> images the model finds hard and <em>which</em> stages it confuses them with. Common patterns:
+- Stage 3 images misclassified as Stage 2 (bud clusters look like dense foliage).
+- Stage 5 images misclassified as Stage 4 (early unripe fruits alongside remaining open flowers).</p>
+<hr />
+<h2 id="14-deploying-the-model-making-it-useful">14. Deploying the Model — Making it Useful<a class="headerlink" href="#14-deploying-the-model-making-it-useful" title="Permanent link">&para;</a></h2>
+<p>Training produces an <strong>artifact bundle</strong> — a set of files representing the fully trained model, ready to be loaded and used:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>src/agritwin_gh/models/
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>├── &lt;run_id&gt;.keras                     ← Final saved model (weights + architecture)
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>├── &lt;run_id&gt;_best.keras                ← Best validation-accuracy checkpoint
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>└── artifacts/&lt;run_id&gt;/
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    ├── label_map.json                 ← Stage index (0-5) → stage name mapping
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    ├── metrics.json                   ← Full test set evaluation metrics
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>    ├── classification_report.txt      ← Per-class precision / recall / F1
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>    ├── confusion_matrix.png           ← Visual confusion matrix (normalised + raw)
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>    ├── misclassified_grid.png         ← Grid of worst misclassified samples
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>    ├── roc_curves.png                 ← One-vs-Rest ROC curves per class
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>    ├── training_history.csv           ← Loss and accuracy per epoch (both phases)
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>    ├── training_history_plot.png      ← Training curve visualisation
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>    └── deployment_notes.txt           ← Complete integration guide
+</code></pre></div>
+<h3 id="making-a-prediction">Making a Prediction<a class="headerlink" href="#making-a-prediction" title="Permanent link">&para;</a></h3>
+<p>The standalone inference module (<code>src/agritwin_gh/models/growth_stage_inference.py</code>) is written by the notebook automatically during training. It has <strong>no dependency on notebook globals</strong> — it loads everything from disk and caches the model after the first call.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agritwin_gh.models.growth_stage_inference</span><span class="w"> </span><span class="kn">import</span> <span class="n">predict_growth_stage</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="c1"># Predict from a file path — model and label_map are auto-resolved</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="n">result</span> <span class="o">=</span> <span class="n">predict_growth_stage</span><span class="p">(</span><span class="s2">&quot;path/to/plant_photo.jpg&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="c1"># {</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="c1">#   &quot;class_name&quot; : &quot;Stage4_Flowering&quot;,</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="c1">#   &quot;confidence&quot; : 0.9213,          # 92.1%</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="c1">#   &quot;probs&quot;      : {</span>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="c1">#       &quot;Stage1_Seedling&quot;              : 0.0012,</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="c1">#       &quot;Stage2_Early_Vegetative&quot;      : 0.0031,</span>
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="c1">#       &quot;Stage3_Flowering_Initiation&quot;  : 0.0421,</span>
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="c1">#       &quot;Stage4_Flowering&quot;             : 0.9213,</span>
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="c1">#       &quot;Stage5_Unripe&quot;                : 0.0314,</span>
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a><span class="c1">#       &quot;Stage6_Ripe&quot;                  : 0.0009,</span>
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="c1">#   },</span>
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="c1">#   &quot;topk&quot; : [</span>
+<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a><span class="c1">#       (&quot;Stage4_Flowering&quot;,           0.9213),</span>
+<a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a><span class="c1">#       (&quot;Stage5_Unripe&quot;,              0.0314),</span>
+<a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a><span class="c1">#       (&quot;Stage3_Flowering_Initiation&quot;,0.0421),</span>
+<a id="__codelineno-13-22" name="__codelineno-13-22" href="#__codelineno-13-22"></a><span class="c1">#   ]</span>
+<a id="__codelineno-13-23" name="__codelineno-13-23" href="#__codelineno-13-23"></a><span class="c1"># }</span>
+</code></pre></div>
+<p>The function also accepts <strong>raw image bytes</strong> — suitable for direct integration with camera streams, HTTP image uploads, or MinIO object storage:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># From a camera stream or HTTP upload</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;plant.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">predict_growth_stage</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="c1"># With explicit paths (useful in containerised deployments)</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="n">result</span> <span class="o">=</span> <span class="n">predict_growth_stage</span><span class="p">(</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>    <span class="n">image_bytes</span><span class="p">,</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>    <span class="n">model_path</span><span class="o">=</span><span class="s2">&quot;src/agritwin_gh/models/growth_stage_20260302_170744.keras&quot;</span><span class="p">,</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>    <span class="n">label_map_path</span><span class="o">=</span><span class="s2">&quot;src/agritwin_gh/models/artifacts/growth_stage_20260302_170744/label_map.json&quot;</span><span class="p">,</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="p">)</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="c1"># With Test-Time Augmentation (higher-confidence predictions, 5× slower)</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="n">result</span> <span class="o">=</span> <span class="n">predict_growth_stage</span><span class="p">(</span><span class="n">image_bytes</span><span class="p">,</span> <span class="n">tta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tta_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="auto-resolution-of-artifact-paths">Auto-Resolution of Artifact Paths<a class="headerlink" href="#auto-resolution-of-artifact-paths" title="Permanent link">&para;</a></h3>
+<p>When <code>model_path</code> and <code>label_map_path</code> are not supplied, the inference module automatically:
+1. Searches its own directory for the latest <code>growth_stage_*.keras</code> file (alphabetically latest = most recent run).
+2. Derives the <code>label_map.json</code> path as <code>artifacts/&lt;run_id&gt;/label_map.json</code>.</p>
+<p>This means in most deployments, no configuration is required beyond importing the module.</p>
+<h3 id="model-caching">Model Caching<a class="headerlink" href="#model-caching" title="Permanent link">&para;</a></h3>
+<p>After the first call to <code>predict_growth_stage()</code>, both the Keras model and the label map are cached in memory. Subsequent calls on the same process reuse the cached model — no disk I/O or model loading overhead.</p>
+<p>This is critical for real-time applications where predictions may be requested every few seconds.</p>
+<h3 id="preprocessing-at-inference-time">Preprocessing at Inference Time<a class="headerlink" href="#preprocessing-at-inference-time" title="Permanent link">&para;</a></h3>
+<p>Before feeding an image to the model, it must be <strong>preprocessed identically</strong> to training. The inference module handles this automatically:</p>
+<ol>
+<li><strong>Read</strong> the image (from file path or raw bytes).</li>
+<li><strong>Decode</strong> to RGB (3 colour channels), discarding alpha channel if present.</li>
+<li><strong>Resize</strong> to 300×300 pixels using bilinear interpolation.</li>
+<li><strong>Cast</strong> to float32.</li>
+<li><strong>Normalise</strong> using EfficientNet's specific <code>preprocess_input</code> function — this maps pixel values from [0, 255] to the range the backbone expects (approximately [-1, 1]).</li>
+<li><strong>Add batch dimension</strong> to produce a [1, 300, 300, 3] tensor for <code>model()</code>.</li>
+</ol>
+<p>If preprocessing differs between training and inference, even by a small amount, prediction accuracy degrades significantly. This is a common source of production bugs — the inference module avoids it by using the exact same preprocessing code path.</p>
+<h3 id="runtime-dependencies">Runtime Dependencies<a class="headerlink" href="#runtime-dependencies" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>tensorflow &gt;= 2.13
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>keras      &gt;= 2.13
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>numpy      &gt;= 1.24
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>Pillow     (optional, for PIL-based custom loading)
+</code></pre></div>
+<hr />
+<h2 id="15-end-to-end-flow-diagram">15. End-to-End Flow Diagram<a class="headerlink" href="#15-end-to-end-flow-diagram" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>┌────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>│                      DATA PREPARATION                          │
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>│                                                                │
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>│  Plant photos in stage folders → Label = folder name →        │
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>│  Stratified 3-way split: Train 75% / Val 15% / Test 10%       │
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>│  Class weights computed for balanced learning                  │
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>└──────────────────────────────┬─────────────────────────────────┘
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>                               │
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>                               ▼
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>┌────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>│                     tf.data PIPELINE                           │
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>│                                                                │
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>│  Load image → Resize (224×224 warm-up | 300×300 fine-tune) →  │
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a>│  [Augment if training — growth-stage-safe mild transforms] →   │
+<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>│  EfficientNet preprocess_input → One-hot encode label →        │
+<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a>│  Batch (16 images) → Prefetch (background loading)            │
+<a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a>└──────────────────────────────┬─────────────────────────────────┘
+<a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a>                               │
+<a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a>                               ▼
+<a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a>┌────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a>│                        MODEL ARCHITECTURE                      │
+<a id="__codelineno-16-22" name="__codelineno-16-22" href="#__codelineno-16-22"></a>│                                                                │
+<a id="__codelineno-16-23" name="__codelineno-16-23" href="#__codelineno-16-23"></a>│  Input (300×300×3)                                             │
+<a id="__codelineno-16-24" name="__codelineno-16-24" href="#__codelineno-16-24"></a>│       ↓                                                        │
+<a id="__codelineno-16-25" name="__codelineno-16-25" href="#__codelineno-16-25"></a>│  EfficientNetB3 Backbone (pre-trained on ImageNet)             │
+<a id="__codelineno-16-26" name="__codelineno-16-26" href="#__codelineno-16-26"></a>│       ↓                                                        │
+<a id="__codelineno-16-27" name="__codelineno-16-27" href="#__codelineno-16-27"></a>│  GlobalAveragePooling2D                                        │
+<a id="__codelineno-16-28" name="__codelineno-16-28" href="#__codelineno-16-28"></a>│       ↓                                                        │
+<a id="__codelineno-16-29" name="__codelineno-16-29" href="#__codelineno-16-29"></a>│  Dropout(40%)                                                  │
+<a id="__codelineno-16-30" name="__codelineno-16-30" href="#__codelineno-16-30"></a>│       ↓                                                        │
+<a id="__codelineno-16-31" name="__codelineno-16-31" href="#__codelineno-16-31"></a>│  Dense(256) → BatchNorm → ReLU                                 │
+<a id="__codelineno-16-32" name="__codelineno-16-32" href="#__codelineno-16-32"></a>│       ↓                                                        │
+<a id="__codelineno-16-33" name="__codelineno-16-33" href="#__codelineno-16-33"></a>│  Dropout(30%)                                                  │
+<a id="__codelineno-16-34" name="__codelineno-16-34" href="#__codelineno-16-34"></a>│       ↓                                                        │
+<a id="__codelineno-16-35" name="__codelineno-16-35" href="#__codelineno-16-35"></a>│  Dense(6) → Softmax (float32)  →  [6 stage probabilities]     │
+<a id="__codelineno-16-36" name="__codelineno-16-36" href="#__codelineno-16-36"></a>└──────────────────────────────┬─────────────────────────────────┘
+<a id="__codelineno-16-37" name="__codelineno-16-37" href="#__codelineno-16-37"></a>                               │
+<a id="__codelineno-16-38" name="__codelineno-16-38" href="#__codelineno-16-38"></a>                               ▼
+<a id="__codelineno-16-39" name="__codelineno-16-39" href="#__codelineno-16-39"></a>┌────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-16-40" name="__codelineno-16-40" href="#__codelineno-16-40"></a>│                        TRAINING                                │
+<a id="__codelineno-16-41" name="__codelineno-16-41" href="#__codelineno-16-41"></a>│                                                                │
+<a id="__codelineno-16-42" name="__codelineno-16-42" href="#__codelineno-16-42"></a>│  Phase 1 Warm-Up   (8 epochs):  head only, lr = 0.001         │
+<a id="__codelineno-16-43" name="__codelineno-16-43" href="#__codelineno-16-43"></a>│                                  resolution = 224×224          │
+<a id="__codelineno-16-44" name="__codelineno-16-44" href="#__codelineno-16-44"></a>│  Phase 2 Fine-Tune (15 epochs): top 40 backbone layers,        │
+<a id="__codelineno-16-45" name="__codelineno-16-45" href="#__codelineno-16-45"></a>│                                  lr = 3×10⁻⁵, res = 300×300   │
+<a id="__codelineno-16-46" name="__codelineno-16-46" href="#__codelineno-16-46"></a>│                                                                │
+<a id="__codelineno-16-47" name="__codelineno-16-47" href="#__codelineno-16-47"></a>│  Callbacks: ModelCheckpoint, EarlyStopping, ReduceLROnPlateau  │
+<a id="__codelineno-16-48" name="__codelineno-16-48" href="#__codelineno-16-48"></a>└──────────────────────────────┬─────────────────────────────────┘
+<a id="__codelineno-16-49" name="__codelineno-16-49" href="#__codelineno-16-49"></a>                               │
+<a id="__codelineno-16-50" name="__codelineno-16-50" href="#__codelineno-16-50"></a>                               ▼
+<a id="__codelineno-16-51" name="__codelineno-16-51" href="#__codelineno-16-51"></a>┌────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-16-52" name="__codelineno-16-52" href="#__codelineno-16-52"></a>│                EVALUATION (Test-Time Augmentation)             │
+<a id="__codelineno-16-53" name="__codelineno-16-53" href="#__codelineno-16-53"></a>│                                                                │
+<a id="__codelineno-16-54" name="__codelineno-16-54" href="#__codelineno-16-54"></a>│  Load best checkpoint → Run 5-pass TTA on test set →          │
+<a id="__codelineno-16-55" name="__codelineno-16-55" href="#__codelineno-16-55"></a>│  Accuracy, F1, Conf. Matrix, ROC-AUC, Misclassified Grid       │
+<a id="__codelineno-16-56" name="__codelineno-16-56" href="#__codelineno-16-56"></a>│  Save all artifacts to artifacts/&lt;run_id&gt;/                     │
+<a id="__codelineno-16-57" name="__codelineno-16-57" href="#__codelineno-16-57"></a>└──────────────────────────────┬─────────────────────────────────┘
+<a id="__codelineno-16-58" name="__codelineno-16-58" href="#__codelineno-16-58"></a>                               │
+<a id="__codelineno-16-59" name="__codelineno-16-59" href="#__codelineno-16-59"></a>                               ▼
+<a id="__codelineno-16-60" name="__codelineno-16-60" href="#__codelineno-16-60"></a>┌────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-16-61" name="__codelineno-16-61" href="#__codelineno-16-61"></a>│               EXPORT &amp; INFERENCE MODULE                        │
+<a id="__codelineno-16-62" name="__codelineno-16-62" href="#__codelineno-16-62"></a>│                                                                │
+<a id="__codelineno-16-63" name="__codelineno-16-63" href="#__codelineno-16-63"></a>│  Write growth_stage_inference.py → auto-cached model →        │
+<a id="__codelineno-16-64" name="__codelineno-16-64" href="#__codelineno-16-64"></a>│  predict_growth_stage(path | bytes) → stage + confidence       │
+<a id="__codelineno-16-65" name="__codelineno-16-65" href="#__codelineno-16-65"></a>└──────────────────────────────┬─────────────────────────────────┘
+<a id="__codelineno-16-66" name="__codelineno-16-66" href="#__codelineno-16-66"></a>                               │
+<a id="__codelineno-16-67" name="__codelineno-16-67" href="#__codelineno-16-67"></a>                               ▼
+<a id="__codelineno-16-68" name="__codelineno-16-68" href="#__codelineno-16-68"></a>┌────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-16-69" name="__codelineno-16-69" href="#__codelineno-16-69"></a>│                  DIGITAL TWIN INTEGRATION                      │
+<a id="__codelineno-16-70" name="__codelineno-16-70" href="#__codelineno-16-70"></a>│                                                                │
+<a id="__codelineno-16-71" name="__codelineno-16-71" href="#__codelineno-16-71"></a>│  Growth stage feeds → Disease Risk Index calculation           │
+<a id="__codelineno-16-72" name="__codelineno-16-72" href="#__codelineno-16-72"></a>│                     → Stage-aware control policy               │
+<a id="__codelineno-16-73" name="__codelineno-16-73" href="#__codelineno-16-73"></a>│                     → What-if simulations                      │
+<a id="__codelineno-16-74" name="__codelineno-16-74" href="#__codelineno-16-74"></a>│                     → Harvest scheduling &amp; yield forecasting   │
+<a id="__codelineno-16-75" name="__codelineno-16-75" href="#__codelineno-16-75"></a>│  Integrates with: MinIO image store, PostgreSQL metadata DB    │
+<a id="__codelineno-16-76" name="__codelineno-16-76" href="#__codelineno-16-76"></a>└────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="16-common-questions-faq">16. Common Questions (FAQ)<a class="headerlink" href="#16-common-questions-faq" title="Permanent link">&para;</a></h2>
+<p><strong>Q: How is this different from the disease classifier?</strong><br />
+A: The disease classifier (<code>tomato_disease_classifier_train.ipynb</code>) identifies <em>what is wrong</em> with a leaf — it classifies leaf-level images into disease categories. The growth stage classifier identifies <em>where the plant is in its life cycle</em> — it classifies plant-level images into developmental stages. They serve complementary roles in the AgriTwin-GH pipeline. Both models feed separate branches of the digital twin logic.</p>
+<p><strong>Q: Can the model classify multiple stages at once (e.g., a plant with ripe and unripe fruits both visible)?</strong><br />
+A: No — the model outputs a single stage label per image. It will pick the most visually dominant stage. In commercial practice, a single plant typically has trusses at 1–2 adjacent stages simultaneously. The model is best suited to classify from images taken at consistent, plant-level framing. Future work could extend to multi-label classification.</p>
+<p><strong>Q: How accurate is the model?</strong><br />
+A: Accuracy depends on the final training run. With EfficientNetB3 and the two-phase fine-tuning strategy at 300×300 resolution, similar models typically achieve <strong>90–96% test accuracy</strong> on growth stage classification. The actual numbers for your run are stored in <code>artifacts/&lt;run_id&gt;/metrics.json</code> and <code>classification_report.txt</code>.</p>
+<p><strong>Q: Why does Stage 3 (Flowering Initiation) get confused with Stage 2 and Stage 4?</strong><br />
+A: Stage 3 is the most ambiguous — the transition from vegetative growth to flowering is gradual. Early bud clusters in Stage 3 can look very like dense vegetative foliage (Stage 2), and advanced bud development can suggest early flowering (Stage 4). More images of this transitional stage would improve its classification accuracy.</p>
+<p><strong>Q: Does it work in real-time with a greenhouse camera?</strong><br />
+A: Yes, provided:
+- Images are taken at a consistent framing (whole plant or truss level — not individual leaves).
+- Lighting is reasonable (not extreme backlighting or night-time conditions).
+- Camera resolution is at least 300×300 pixels (or can be downsampled).
+- The inference module is loaded once and kept in memory for subsequent calls (caching ensures speed).</p>
+<p>Single-pass inference on CPU takes approximately 200–500 ms per image. With TTA enabled (5 passes), expect 1–2.5 seconds per image on CPU. On a GPU, both are substantially faster.</p>
+<p><strong>Q: Why 300×300 pixels and not 224×224 like the disease model?</strong><br />
+A: 300×300 is the native resolution designed for EfficientNetB3. More importantly, growth stage discrimination requires resolving fine details — early bud clusters at Stage 3 versus open flowers at Stage 4 can be distinguished only with sufficient resolution. At 224×224, the model would still work but with lower accuracy on fine-grained distinctions.</p>
+<p><strong>Q: What happens if I pass an image of a disease-affected leaf instead of a whole plant?</strong><br />
+A: The model will still output a prediction — it never refuses. However, the result will be unreliable because the model was trained on whole-plant images, not leaf close-ups. For leaf-level disease identification, use the disease classifier instead.</p>
+<p><strong>Q: What does "stratified split" mean and why does it matter?</strong><br />
+A: Stratified means the proportion of each stage is maintained in every split. If Stage 6 (Ripe) makes up 15% of the dataset, it will make up approximately 15% of the training set, 15% of the validation set, and 15% of the test set. Without stratification, random splits could accidentally give all Stage 1 images to training and none to validation, preventing meaningful evaluation of that class.</p>
+<p><strong>Q: Why is vertical flip disabled for this model but enabled for the disease model?</strong><br />
+A: Tomato plants grow upward. An upside-down image of a plant would represent a biological situation that never occurs in a greenhouse. The disease model operates on leaf close-ups where orientation is irrelevant — an upside-down leaf with Early Blight is still Early Blight. But for the growth stage model, plant orientation provides genuine visual information — seedlings are small and upright at the bottom of the frame, ripe fruits hang from trusses above. Vertical flipping would confuse the model with impossible orientations.</p>
+<p><strong>Q: What is an epoch?</strong><br />
+A: One complete pass through all training images. If there are 3,000 training images and we train for 23 epochs total (8 warm-up + 15 fine-tuning), the model sees each image 23 times, each time with a different random augmentation applied.</p>
+<hr />
+<h2 id="17-glossary">17. Glossary<a class="headerlink" href="#17-glossary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Plain-English Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Accuracy</strong></td>
+<td>Fraction of predictions that were correct</td>
+</tr>
+<tr>
+<td><strong>Augmentation</strong></td>
+<td>Creating modified copies of training images (rotated, flipped, brightness-adjusted, etc.) to improve robustness</td>
+</tr>
+<tr>
+<td><strong>AUC (Area Under Curve)</strong></td>
+<td>A single number summarising a ROC curve; 1.0 = perfect, 0.5 = random guess</td>
+</tr>
+<tr>
+<td><strong>Backbone</strong></td>
+<td>The large pre-trained network (EfficientNetB3) used as a feature extractor</td>
+</tr>
+<tr>
+<td><strong>Batch</strong></td>
+<td>A small group of images processed together (16 in our case)</td>
+</tr>
+<tr>
+<td><strong>BatchNormalisation</strong></td>
+<td>A technique that stabilises training by normalising intermediate layer outputs</td>
+</tr>
+<tr>
+<td><strong>Callback</strong></td>
+<td>An automatic action taken during training (e.g., save best model, reduce learning rate)</td>
+</tr>
+<tr>
+<td><strong>Class</strong></td>
+<td>A category the model predicts (e.g., "Stage4_Flowering")</td>
+</tr>
+<tr>
+<td><strong>Class weights</strong></td>
+<td>Multipliers that make the model pay more attention to underrepresented stages</td>
+</tr>
+<tr>
+<td><strong>CNN</strong></td>
+<td>Convolutional Neural Network — a type of neural network designed for images</td>
+</tr>
+<tr>
+<td><strong>Confidence</strong></td>
+<td>The model's certainty about a prediction, expressed as a probability (0–1)</td>
+</tr>
+<tr>
+<td><strong>Confusion matrix</strong></td>
+<td>A table showing which stages the model confused with each other</td>
+</tr>
+<tr>
+<td><strong>Cotyledon</strong></td>
+<td>The first seed leaves that appear when a plant germinates</td>
+</tr>
+<tr>
+<td><strong>Cutout (Random Erasing)</strong></td>
+<td>Randomly blanking out a small square patch of the image during training</td>
+</tr>
+<tr>
+<td><strong>Deep learning</strong></td>
+<td>Machine learning using neural networks with many layers</td>
+</tr>
+<tr>
+<td><strong>Dropout</strong></td>
+<td>Randomly disabling neurons during training to prevent overfitting</td>
+</tr>
+<tr>
+<td><strong>Early stopping</strong></td>
+<td>Automatically stopping training when no improvement is seen for several epochs</td>
+</tr>
+<tr>
+<td><strong>EfficientNetB3</strong></td>
+<td>A mid-size, accurate CNN architecture designed by Google; uses compound scaling</td>
+</tr>
+<tr>
+<td><strong>Epoch</strong></td>
+<td>One complete pass through all training data</td>
+</tr>
+<tr>
+<td><strong>Ethylene</strong></td>
+<td>A plant hormone that triggers fruit ripening; responsible for the green→red transition</td>
+</tr>
+<tr>
+<td><strong>F1 Score</strong></td>
+<td>A balanced measure combining precision and recall</td>
+</tr>
+<tr>
+<td><strong>Feature</strong></td>
+<td>A pattern or characteristic detected by the model (e.g., yellow flower shape, red fruit colour)</td>
+</tr>
+<tr>
+<td><strong>Fine-tuning</strong></td>
+<td>Allowing pre-trained backbone layers to update slightly on the new task data</td>
+</tr>
+<tr>
+<td><strong>Focal Loss</strong></td>
+<td>An alternative loss function that focuses learning on hard, misclassified examples</td>
+</tr>
+<tr>
+<td><strong>GPU</strong></td>
+<td>Graphics Processing Unit — hardware that trains neural networks quickly via parallelism</td>
+</tr>
+<tr>
+<td><strong>Inference</strong></td>
+<td>Using a trained model to make a prediction on new data</td>
+</tr>
+<tr>
+<td><strong>Label</strong></td>
+<td>The correct answer/class for a training image (e.g., "Stage3_Flowering_Initiation")</td>
+</tr>
+<tr>
+<td><strong>Label smoothing</strong></td>
+<td>Softening training targets so the model avoids overconfident predictions</td>
+</tr>
+<tr>
+<td><strong>Learning rate</strong></td>
+<td>How large a step the model takes when adjusting weights during training</td>
+</tr>
+<tr>
+<td><strong>Loss</strong></td>
+<td>A number measuring how wrong the model's predictions are; minimised during training</td>
+</tr>
+<tr>
+<td><strong>Lycopene</strong></td>
+<td>The red pigment synthesised during tomato ripening (Stage 5→6 transition)</td>
+</tr>
+<tr>
+<td><strong>Mixed precision</strong></td>
+<td>Using 16-bit floats for speed while keeping 32-bit where precision matters</td>
+</tr>
+<tr>
+<td><strong>Neural network</strong></td>
+<td>A system of interconnected mathematical functions loosely inspired by biological neurons</td>
+</tr>
+<tr>
+<td><strong>One-hot encoding</strong></td>
+<td>Representing a class as a vector of zeros with a single 1 (e.g., Stage 3 of 6 = [0,0,1,0,0,0])</td>
+</tr>
+<tr>
+<td><strong>Overfitting</strong></td>
+<td>When a model memorises training data but fails on new data</td>
+</tr>
+<tr>
+<td><strong>Precision</strong></td>
+<td>Of all predicted positives, the fraction that are truly positive</td>
+</tr>
+<tr>
+<td><strong>Preprocessing</strong></td>
+<td>Preparing raw images for model input (resize, normalise, add batch dimension)</td>
+</tr>
+<tr>
+<td><strong>Progressive resizing</strong></td>
+<td>Training at smaller resolution first, then switching to full resolution</td>
+</tr>
+<tr>
+<td><strong>Recall</strong></td>
+<td>Of all actual positives, the fraction the model correctly identified</td>
+</tr>
+<tr>
+<td><strong>RGB</strong></td>
+<td>Red, Green, Blue — three numbers per pixel representing colour</td>
+</tr>
+<tr>
+<td><strong>ROC curve</strong></td>
+<td>A graph of True Positive Rate vs False Positive Rate at different thresholds</td>
+</tr>
+<tr>
+<td><strong>Softmax</strong></td>
+<td>A function converting raw output scores to probabilities summing to 1.0</td>
+</tr>
+<tr>
+<td><strong>Stratified split</strong></td>
+<td>Dividing data while maintaining the same class proportions in each subset</td>
+</tr>
+<tr>
+<td><strong>Test set</strong></td>
+<td>Images held out completely until after training; used for final performance measurement</td>
+</tr>
+<tr>
+<td><strong>Test-Time Augmentation (TTA)</strong></td>
+<td>Averaging predictions from multiple augmented views of the same image at inference</td>
+</tr>
+<tr>
+<td><strong>Transfer learning</strong></td>
+<td>Reusing a model trained on one task (ImageNet) as a starting point for another (growth stages)</td>
+</tr>
+<tr>
+<td><strong>Training</strong></td>
+<td>The process of adjusting model weights to minimise prediction error</td>
+</tr>
+<tr>
+<td><strong>Truss</strong></td>
+<td>A stem-like structure that holds a cluster of tomato flowers or fruits</td>
+</tr>
+<tr>
+<td><strong>Validation set</strong></td>
+<td>Images used during training to check generalisation; not used for weight updates</td>
+</tr>
+<tr>
+<td><strong>Warm-up</strong></td>
+<td>Phase 1 of training where only the custom head is trained, backbone frozen</td>
+</tr>
+<tr>
+<td><strong>Weight</strong></td>
+<td>A number inside a neural network that determines how important an input is</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Document maintained as part of the AgriTwin-GH project. For technical implementation details, see the training notebook at <code>notebooks/tomato_growth_stage_classifier_train.ipynb</code>.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/arjun-christopher" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
