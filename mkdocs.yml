@@ -1,6 +1,7 @@
 site_name: AgriTwin-GH Documentation
 site_description: AgriTwin Greenhouse Digital Twin - Documentation and Feature Demos
 site_author: AgriTwin Team
+site_url: https://arjun-christopher.github.io/AgriTwin-GH/
 repo_url: https://github.com/arjun-christopher/AgriTwin-GH
 repo_name: AgriTwin-GH
 
