@@ -1,0 +1,309 @@
+{
+  "run_id": "dp_20260305_111754",
+  "metrics": {
+    "6": {
+      "val": {
+        "late_blight": {
+          "MAE": 6.324,
+          "RMSE": 11.335,
+          "Precision_High": 0.975,
+          "Recall_High": 0.893,
+          "F1_High": 0.932
+        },
+        "leaf_mold": {
+          "MAE": 6.853,
+          "RMSE": 12.171,
+          "Precision_High": 0.932,
+          "Recall_High": 0.971,
+          "F1_High": 0.951
+        },
+        "powdery_mildew": {
+          "MAE": 2.794,
+          "RMSE": 13.649,
+          "Precision_High": 0.958,
+          "Recall_High": 1.0,
+          "F1_High": 0.978
+        },
+        "early_blight": {
+          "MAE": 5.147,
+          "RMSE": 12.823,
+          "Precision_High": 0.99,
+          "Recall_High": 0.982,
+          "F1_High": 0.986
+        },
+        "spider_mites": {
+          "MAE": 0.022,
+          "RMSE": 0.132,
+          "Precision_High": 0.0,
+          "Recall_High": 0.0,
+          "F1_High": 0.0
+        }
+      },
+      "test": {
+        "late_blight": {
+          "MAE": 1.578,
+          "RMSE": 5.947,
+          "Precision_High": 0.983,
+          "Recall_High": 0.873,
+          "F1_High": 0.925
+        },
+        "leaf_mold": {
+          "MAE": 1.686,
+          "RMSE": 6.324,
+          "Precision_High": 0.965,
+          "Recall_High": 0.926,
+          "F1_High": 0.945
+        },
+        "powdery_mildew": {
+          "MAE": 3.32,
+          "RMSE": 10.425,
+          "Precision_High": 0.968,
+          "Recall_High": 0.992,
+          "F1_High": 0.98
+        },
+        "early_blight": {
+          "MAE": 3.4,
+          "RMSE": 9.684,
+          "Precision_High": 0.954,
+          "Recall_High": 0.905,
+          "F1_High": 0.929
+        },
+        "spider_mites": {
+          "MAE": 1.397,
+          "RMSE": 8.587,
+          "Precision_High": 0.985,
+          "Recall_High": 0.978,
+          "F1_High": 0.982
+        }
+      }
+    },
+    "12": {
+      "val": {
+        "late_blight": {
+          "MAE": 9.509,
+          "RMSE": 15.348,
+          "Precision_High": 0.944,
+          "Recall_High": 0.864,
+          "F1_High": 0.902
+        },
+        "leaf_mold": {
+          "MAE": 10.307,
+          "RMSE": 16.734,
+          "Precision_High": 0.909,
+          "Recall_High": 0.939,
+          "F1_High": 0.924
+        },
+        "powdery_mildew": {
+          "MAE": 2.663,
+          "RMSE": 13.035,
+          "Precision_High": 0.958,
+          "Recall_High": 1.0,
+          "F1_High": 0.978
+        },
+        "early_blight": {
+          "MAE": 4.414,
+          "RMSE": 12.397,
+          "Precision_High": 0.989,
+          "Recall_High": 0.977,
+          "F1_High": 0.983
+        },
+        "spider_mites": {
+          "MAE": 0.356,
+          "RMSE": 1.623,
+          "Precision_High": 0.0,
+          "Recall_High": 0.0,
+          "F1_High": 0.0
+        }
+      },
+      "test": {
+        "late_blight": {
+          "MAE": 2.301,
+          "RMSE": 7.698,
+          "Precision_High": 0.946,
+          "Recall_High": 0.819,
+          "F1_High": 0.878
+        },
+        "leaf_mold": {
+          "MAE": 2.51,
+          "RMSE": 8.543,
+          "Precision_High": 0.926,
+          "Recall_High": 0.92,
+          "F1_High": 0.923
+        },
+        "powdery_mildew": {
+          "MAE": 5.232,
+          "RMSE": 13.333,
+          "Precision_High": 0.962,
+          "Recall_High": 0.983,
+          "F1_High": 0.972
+        },
+        "early_blight": {
+          "MAE": 3.77,
+          "RMSE": 10.266,
+          "Precision_High": 0.969,
+          "Recall_High": 0.908,
+          "F1_High": 0.938
+        },
+        "spider_mites": {
+          "MAE": 4.525,
+          "RMSE": 15.071,
+          "Precision_High": 0.979,
+          "Recall_High": 0.942,
+          "F1_High": 0.96
+        }
+      }
+    },
+    "24": {
+      "val": {
+        "late_blight": {
+          "MAE": 23.862,
+          "RMSE": 32.318,
+          "Precision_High": 0.906,
+          "Recall_High": 0.597,
+          "F1_High": 0.72
+        },
+        "leaf_mold": {
+          "MAE": 24.791,
+          "RMSE": 33.544,
+          "Precision_High": 0.862,
+          "Recall_High": 0.672,
+          "F1_High": 0.755
+        },
+        "powdery_mildew": {
+          "MAE": 3.417,
+          "RMSE": 14.134,
+          "Precision_High": 0.958,
+          "Recall_High": 0.997,
+          "F1_High": 0.977
+        },
+        "early_blight": {
+          "MAE": 13.668,
+          "RMSE": 23.268,
+          "Precision_High": 0.978,
+          "Recall_High": 0.871,
+          "F1_High": 0.921
+        },
+        "spider_mites": {
+          "MAE": 0.145,
+          "RMSE": 0.549,
+          "Precision_High": 0.0,
+          "Recall_High": 0.0,
+          "F1_High": 0.0
+        }
+      },
+      "test": {
+        "late_blight": {
+          "MAE": 5.568,
+          "RMSE": 15.374,
+          "Precision_High": 0.91,
+          "Recall_High": 0.47,
+          "F1_High": 0.62
+        },
+        "leaf_mold": {
+          "MAE": 5.806,
+          "RMSE": 15.567,
+          "Precision_High": 0.868,
+          "Recall_High": 0.565,
+          "F1_High": 0.685
+        },
+        "powdery_mildew": {
+          "MAE": 12.883,
+          "RMSE": 24.669,
+          "Precision_High": 0.94,
+          "Recall_High": 0.944,
+          "F1_High": 0.942
+        },
+        "early_blight": {
+          "MAE": 9.931,
+          "RMSE": 20.287,
+          "Precision_High": 0.895,
+          "Recall_High": 0.712,
+          "F1_High": 0.793
+        },
+        "spider_mites": {
+          "MAE": 16.332,
+          "RMSE": 30.923,
+          "Precision_High": 0.859,
+          "Recall_High": 0.637,
+          "F1_High": 0.731
+        }
+      }
+    },
+    "48": {
+      "val": {
+        "late_blight": {
+          "MAE": 41.207,
+          "RMSE": 49.706,
+          "Precision_High": 0.411,
+          "Recall_High": 0.289,
+          "F1_High": 0.339
+        },
+        "leaf_mold": {
+          "MAE": 40.813,
+          "RMSE": 49.483,
+          "Precision_High": 0.407,
+          "Recall_High": 0.287,
+          "F1_High": 0.336
+        },
+        "powdery_mildew": {
+          "MAE": 3.688,
+          "RMSE": 14.594,
+          "Precision_High": 0.958,
+          "Recall_High": 1.0,
+          "F1_High": 0.978
+        },
+        "early_blight": {
+          "MAE": 35.279,
+          "RMSE": 44.991,
+          "Precision_High": 0.929,
+          "Recall_High": 0.6,
+          "F1_High": 0.729
+        },
+        "spider_mites": {
+          "MAE": 0.192,
+          "RMSE": 0.902,
+          "Precision_High": 0.0,
+          "Recall_High": 0.0,
+          "F1_High": 0.0
+        }
+      },
+      "test": {
+        "late_blight": {
+          "MAE": 10.354,
+          "RMSE": 24.141,
+          "Precision_High": 0.315,
+          "Recall_High": 0.056,
+          "F1_High": 0.095
+        },
+        "leaf_mold": {
+          "MAE": 11.044,
+          "RMSE": 25.461,
+          "Precision_High": 0.5,
+          "Recall_High": 0.082,
+          "F1_High": 0.141
+        },
+        "powdery_mildew": {
+          "MAE": 20.167,
+          "RMSE": 31.466,
+          "Precision_High": 0.9,
+          "Recall_High": 0.856,
+          "F1_High": 0.877
+        },
+        "early_blight": {
+          "MAE": 21.991,
+          "RMSE": 33.359,
+          "Precision_High": 0.667,
+          "Recall_High": 0.348,
+          "F1_High": 0.458
+        },
+        "spider_mites": {
+          "MAE": 25.013,
+          "RMSE": 38.945,
+          "Precision_High": 0.661,
+          "Recall_High": 0.418,
+          "F1_High": 0.512
+        }
+      }
+    }
+  }
+}
