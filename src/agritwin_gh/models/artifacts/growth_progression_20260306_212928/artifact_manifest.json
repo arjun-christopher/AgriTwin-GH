@@ -1,0 +1,50 @@
+{
+  "run_id": "growth_progression_20260306_212928",
+  "generated_utc": "2026-03-06T17:14:30.230957+00:00",
+  "models": {
+    "lstm": "E:/AgriTwin-GH/src/agritwin_gh/models/growth_progression_lstm_growth_progression_20260306_212928.keras",
+    "rf": {
+      "classifier": "E:/AgriTwin-GH/src/agritwin_gh/models/growth_progression_rf_classifier_growth_progression_20260306_212928.pkl",
+      "regressor": "E:/AgriTwin-GH/src/agritwin_gh/models/growth_progression_rf_regressor_growth_progression_20260306_212928.pkl"
+    }
+  },
+  "preprocessing": {
+    "scaler": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/scaler_growth_progression_20260306_212928.pkl",
+    "label_encoder_stage": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/label_encoder_stage_growth_progression_20260306_212928.pkl",
+    "feature_schema": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/feature_schema.json",
+    "engineered_features_head": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/engineered_features_head.csv",
+    "engineered_features_tail": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/engineered_features_tail.csv",
+    "config_snapshot": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/config_snapshot.json",
+    "stage_mapping": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/stage_mapping.json",
+    "label_construction_summary": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/label_construction_summary.json",
+    "preprocessing_summary": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/preprocessing_summary.json"
+  },
+  "data_split": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/data_split_summary.json",
+  "lstm_training_history_csv": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/lstm_training_history.csv",
+  "lstm_best_checkpoint": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/lstm_best_checkpoint_growth_progression_20260306_212928.keras",
+  "evaluation": {
+    "evaluation_report_json": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/evaluation_report.json",
+    "evaluation_report_csv": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/evaluation_report_summary.csv",
+    "evaluation_summary_json": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/evaluation_summary.json",
+    "evaluation_summary_md": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/evaluation_summary.md",
+    "best_model_summary_json": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/best_model_summary.json",
+    "rf_metrics_json": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/rf_metrics.json",
+    "rf_metrics_csv": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/rf_metrics_summary.csv",
+    "lstm_metrics_json": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/lstm_metrics.json",
+    "lstm_metrics_csv": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/lstm_metrics_summary.csv",
+    "baseline_comparison_seed": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/baseline_comparison_seed.json",
+    "rf_validation_summary": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/rf_validation_summary.json"
+  },
+  "sample_reports": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/final_sample_reports.json",
+  "thresholds_config": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/thresholds_config.json",
+  "plots": {
+    "rf_confusion_matrix": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/rf_confusion_matrix.png",
+    "rf_regression_scatter": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/rf_regression_scatter.png",
+    "rf_feature_importance": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/rf_feature_importance.png",
+    "lstm_learning_curves": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/lstm_learning_curves.png",
+    "lstm_confusion_matrix": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/lstm_confusion_matrix.png",
+    "lstm_regression_scatter": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/lstm_regression_scatter.png",
+    "lstm_progression_timeline": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/lstm_progression_timeline.png",
+    "lstm_vs_rf_comparison": "E:/AgriTwin-GH/src/agritwin_gh/models/artifacts/growth_progression_20260306_212928/lstm_vs_rf_comparison.png"
+  }
+}
