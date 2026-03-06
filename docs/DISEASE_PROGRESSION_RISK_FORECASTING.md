@@ -259,8 +259,6 @@ See [Section 7](#7-risk-scoring-formula-explained) for the full formula.
 **Files saved:**
 - `thresholds_config.json` — the exact disease threshold values used
 - `data_split_summary.json` — sizes of train/val/test sets with date ranges
-- `dp_<run_id>_risk_preview.csv` — last 200 rows of the dataset with all risk columns (quick sanity check)
-- `dp_<run_id>_full_risk.csv` — the full enriched dataset with all risk scores
 
 ---
 
@@ -683,8 +681,8 @@ src/agritwin_gh/models/artifacts/dp_<run_id>/
     ├── engineered_features_head.csv     ← first 50 rows of scaled X (inspection)
     ├── engineered_features_tail.csv     ← last 50 rows of scaled X (inspection)
     │
-    ├── rf_metrics_<run_id>.json         ← RF evaluation metrics (all diseases × horizons)
-    ├── rf_metrics_<run_id>.csv          ← same metrics as CSV (Excel-friendly)
+    ├── rf_metrics.json         ← RF evaluation metrics (all diseases × horizons)
+    ├── rf_metrics_summary.csv          ← same metrics as CSV (Excel-friendly)
     ├── rf_feature_importance_H6.png     ← top-30 features for H=6h RF model
     ├── rf_feature_importance_H12.png    ← top-30 features for H=12h RF model
     ├── rf_feature_importance_H24.png    ← top-30 features for H=24h RF model
@@ -693,10 +691,9 @@ src/agritwin_gh/models/artifacts/dp_<run_id>/
     │
     ├── rnn_training_history.png         ← LSTM loss curve (train vs val per epoch)
     ├── rnn_trajectory_<disease>.png     ← LSTM predicted vs actual for each disease
-    ├── rnn_mae_vs_horizon.png           ← how error increases with forecast distance
-    ├── rnn_calibration_scatter.png      ← predicted vs actual scatter plot
-    ├── rnn_metrics_<run_id>.json        ← LSTM evaluation metrics
-    ├── rnn_metrics_<run_id>.csv         ← same metrics as CSV
+    ├── rnn_horizon_error.png           ← how error increases with forecast distance
+    ├── rnn_metrics.json        ← LSTM evaluation metrics
+    ├── rnn_metrics_summary.csv         ← same metrics as CSV
     ├── rnn_training_history.csv         ← epoch-by-epoch loss log
     │
     ├── evaluation_report.json           ← UNIFIED RF + LSTM metrics report
