@@ -2,7 +2,7 @@
 """
 test_disease_progression_model.py
 ===================================
-Standalone inference-validation script for the AgriTwin-GH
+Interactive inference-validation script for the AgriTwin-GH
 Disease Progression Risk Forecasting model.
 
 No real greenhouse dataset required — six realistic synthetic scenarios
@@ -11,36 +11,24 @@ and fed through the full inference pipeline.
 
 What this script does
 ─────────────────────
-1.  Auto-discovers the latest trained run (or --run-id to pin one).
-2.  Loads artefacts: feature_schema.json, scaler.pkl, RF .joblib files,
-    LSTM .keras file.
-3.  Synthesises hourly greenhouse data for six agronomically distinct
-    scenarios (70 h each — 24h LSTM warm-up + 46 prediction points).
-4.  Runs the identical feature-engineering pipeline as the training notebook
-    (Sections D–F) on the synthetic data.
-5.  Runs both models (RF and LSTM) for all four forecast horizons and
-    all five diseases.
-6.  Prints a formatted system-style alert report for each scenario.
+1.  Auto-discovers the latest trained run and loads all artefacts.
+2.  Presents an interactive terminal menu to choose:
+      • Which model to run  (Random Forest / LSTM / Both)
+      • Which scenario to simulate  (6 choices + Run All)
+      • Simulation speed  (Fast / Real-time stream / Slow-live stream)
+3.  Synthesises hourly greenhouse physics data for the chosen scenario.
+4.  Optionally streams hourly sensor readings to the terminal in real time.
+5.  Runs the full feature-engineering pipeline (Sections D–F) and
+    model inference for all four forecast horizons and five diseases.
+6.  Prints a formatted system-style disease-risk alert report.
 
 Usage
 ─────
-    # Auto-discover latest run
     python scripts/test_disease_progression_model.py
 
-    # Pin a specific run
-    python scripts/test_disease_progression_model.py --run-id dp_20260305_111754
-
-    # Run LSTM only (skips RF)
-    python scripts/test_disease_progression_model.py --model lstm
-
-    # Run RF only
-    python scripts/test_disease_progression_model.py --model rf
-
-    # Verbose (prints feature matrix head per scenario)
-    python scripts/test_disease_progression_model.py --verbose
+    # (No CLI arguments — all choices are made through the interactive menu)
 """
 
-import argparse
 import json
 import sys
 import time
@@ -856,38 +844,88 @@ def print_scenario_report(
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-# SECTION 6 — MAIN
+# SECTION 6 — INTERACTIVE MENU UTILITIES  +  MAIN
 # ═════════════════════════════════════════════════════════════════════════════
 
-def parse_args():
-    p = argparse.ArgumentParser(description="AgriTwin-GH Disease Progression Model Test")
-    p.add_argument("--run-id",  default=None,
-                   help="Training run ID (e.g. dp_20260305_111754). "
-                        "Auto-detects latest if omitted.")
-    p.add_argument("--model",   default="both",
-                   choices=["both", "rf", "lstm"],
-                   help="Which model to run (default: both)")
-    p.add_argument("--scenario", default=None, type=int,
-                   help="Run only this scenario index (1-based). Runs all if omitted.")
-    p.add_argument("--verbose",  action="store_true",
-                   help="Print feature matrix head for each scenario.")
-    return p.parse_args()
+_W = 72   # console width constant
+
+
+def _banner(run_id: str, has_rf: bool, has_lstm: bool) -> None:
+    """Print ASCII welcome banner after artefacts are loaded."""
+    models_str = "  +  ".join(
+        filter(None, [
+            "Random Forest" if has_rf   else None,
+            "LSTM"          if has_lstm else None,
+        ])
+    )
+    horizons_str = " / ".join(f"H{h}h" for h in HORIZON_H)
+    diseases_str = " · ".join(DISEASES)
+
+    print("\n" + "╔" + "═" * (_W - 2) + "╗")
+    print("║" + "  AgriTwin-GH  ·  Disease Progression Risk Forecasting".center(_W - 2) + "║")
+    print("║" + "  Interactive Simulation Mode".center(_W - 2) + "║")
+    print("╠" + "═" * (_W - 2) + "╣")
+    print(f"║  Run ID   : {run_id}".ljust(_W - 1) + "║")
+    print(f"║  Models   : {models_str}".ljust(_W - 1) + "║")
+    print(f"║  Horizons : {horizons_str}".ljust(_W - 1) + "║")
+    print(f"║  Diseases : {diseases_str}".ljust(_W - 1) + "║")
+    print("╚" + "═" * (_W - 2) + "╝")
+
+
+def _menu(prompt: str, options: list) -> int:
+    """
+    Print a numbered menu, validate user input, return 0-based index.
+    Keeps prompting until a valid integer in range is entered.
+    """
+    print(f"\n  ┌{'─' * (_W - 4)}┐")
+    print(f"  │  {prompt}".ljust(_W - 1) + "│")
+    print(f"  ├{'─' * (_W - 4)}┤")
+    for i, opt in enumerate(options, 1):
+        line = f"  │  [{i}] {opt}"
+        print(line.ljust(_W - 1) + "│")
+    print(f"  └{'─' * (_W - 4)}┘")
+    while True:
+        try:
+            raw = input(f"\n  → Enter choice (1–{len(options)}): ").strip()
+            idx = int(raw) - 1
+            if 0 <= idx < len(options):
+                return idx
+            print(f"  ✗  Please enter a number between 1 and {len(options)}.")
+        except (ValueError, EOFError):
+            print("  ✗  Invalid input — please enter a number.")
+
+
+def _stream_sensor_row(dt, row: dict, step: int, total: int, delay: float) -> None:
+    """Print one row of the synthetic sensor feed with a progress bar."""
+    bar_len = 20
+    filled  = int(bar_len * step / total)
+    bar     = "█" * filled + "░" * (bar_len - filled)
+    dn      = "☀  day " if row.get("day_night_flag", 0) else "🌙 night"
+    print(
+        f"  {dt.strftime('%Y-%m-%d %H:%M')}  [{bar}] {step:>3}/{total}  "
+        f"{dn}  "
+        f"T={row.get('temp', 0):>5.1f}°C  "
+        f"RH={row.get('humidity', 0):>4.0f}%  "
+        f"VPD={row.get('vpd', 0):.2f}kPa  "
+        f"AV={row.get('air_velocity', 0):.1f}m/s  "
+        f"SR={row.get('solar_radiation', 0):>4.0f}W/m²",
+        flush=True,
+    )
+    if delay > 0:
+        time.sleep(delay)
 
 
 def main():
-    args = parse_args()
-
-    print("\n" + "═" * 72)
-    print("  AgriTwin-GH — Disease Progression Model · Inference Test")
-    print("  Synthetic scenarios · No real dataset required")
-    print("═" * 72)
+    print("\n" + "═" * _W)
+    print("  AgriTwin-GH  ·  Disease Progression Risk Forecasting System")
+    print("  Initialising …")
+    print("═" * _W)
     print(f"  Repo root  : {REPO_ROOT}")
-    print(f"  Model mode : {args.model.upper()}")
 
-    # ── 1. Discover and load artefacts ────────────────────────────────────────
-    print("\n[1/3] Discovering training artefacts …")
-    paths     = find_latest_run(args.run_id)
-    artefacts = load_artefacts(paths, model_type=args.model)
+    # ── 1. Discover & load artefacts ──────────────────────────────────────────
+    print("\n[1/4] Discovering training artefacts …")
+    paths     = find_latest_run()
+    artefacts = load_artefacts(paths, model_type="both")
 
     feature_columns = artefacts["feature_columns"]
     scaler          = artefacts["scaler"]
@@ -898,59 +936,152 @@ def main():
     has_lstm = lstm_model is not None
 
     if not has_rf and not has_lstm:
-        sys.exit("[ERROR] No models available. Check models directory.")
+        sys.exit("[ERROR] No models available. Check the models directory.")
 
-    # ── 2. Select scenarios ───────────────────────────────────────────────────
-    selected = SCENARIOS
-    if args.scenario is not None:
-        idx = args.scenario - 1
-        if idx < 0 or idx >= len(SCENARIOS):
-            sys.exit(f"[ERROR] --scenario must be between 1 and {len(SCENARIOS)}.")
-        selected = [SCENARIOS[idx]]
+    _banner(paths["run_id"], has_rf, has_lstm)
 
-    print(f"\n[2/3] Generating synthetic data + running inference "
-          f"({len(selected)} scenario(s)) …")
+    # ── 2. Menu: model selection ──────────────────────────────────────────────
+    print("\n[2/4] Configure simulation …")
+
+    if has_rf and has_lstm:
+        model_options = [
+            "Both models  (Random Forest + LSTM)  ← recommended — compare predictions",
+            "Random Forest only  — fast, snapshot-based predictor",
+            "LSTM only           — sequence-aware, trend-sensitive predictor",
+        ]
+        model_keys = ["both", "rf", "lstm"]
+    elif has_rf:
+        model_options = ["Random Forest  (LSTM artefact not found)"]
+        model_keys    = ["rf"]
+    else:
+        model_options = ["LSTM  (Random Forest artefacts not found)"]
+        model_keys    = ["lstm"]
+
+    model_idx  = _menu("Which model would you like to run?", model_options)
+    model_type = model_keys[model_idx]
+
+    # Release whichever model is not needed
+    if model_type == "rf":
+        lstm_model = None
+    elif model_type == "lstm":
+        rf_models  = {}
+
+    # ── 3. Menu: scenario selection ───────────────────────────────────────────
+    desc_limit = _W - 12   # characters available after bullet indent
+
+    def _short_desc(d: str) -> str:
+        return d if len(d) <= desc_limit else d[:desc_limit - 1] + "…"
+
+    scenario_options = [
+        f"{s['name']:<35} — {_short_desc(s['description'])}"
+        for s in SCENARIOS
+    ] + ["Run ALL scenarios sequentially"]
+
+    scen_idx = _menu("Select a greenhouse scenario to simulate:", scenario_options)
+    selected = SCENARIOS if scen_idx == len(SCENARIOS) else [SCENARIOS[scen_idx]]
+
+    # ── 4. Menu: simulation speed ─────────────────────────────────────────────
+    speed_options = [
+        "Fast        — no delay, show final predictions only",
+        "Real-time   — stream hourly sensor feed at 0.05 s/row  (~4 s for 72 h)",
+        "Slow-live   — stream at 0.15 s/row, comfortable to watch (~11 s for 72 h)",
+    ]
+    speed_idx = _menu("Select simulation speed / display style:", speed_options)
+    row_delay = [0.0, 0.05, 0.15][speed_idx]
+
+    show_features = False
+    if speed_idx == 0:
+        fv_idx        = _menu("Show feature-matrix detail?",
+                              ["No  — predictions only",
+                               "Yes — print first 8 feature columns & matrix shape"])
+        show_features = (fv_idx == 1)
+
+    # ── 5. Run scenarios ──────────────────────────────────────────────────────
+    speed_label = ["fast", "real-time stream", "slow-live stream"][speed_idx]
+    print(f"\n[3/4] Starting simulation  "
+          f"·  model={model_type.upper()}  "
+          f"·  {len(selected)} scenario(s)  "
+          f"·  {speed_label}")
 
     t_start = time.time()
 
-    for scen in selected:
-        # ── Generate synthetic hourly data ────────────────────────────────────
+    for s_num, scen in enumerate(selected, 1):
+        # ── Scenario header ───────────────────────────────────────────────────
+        print(f"\n{'╔' + '═' * (_W - 2) + '╗'}")
+        print(f"║  Scenario {s_num}/{len(selected)} : {scen['name']}".ljust(_W - 1) + "║")
+        desc_line = f"║  {scen['description']}"
+        if len(desc_line) > _W - 1:
+            desc_line = desc_line[:_W - 2] + "…"
+        print(desc_line.ljust(_W - 1) + "║")
+        print(f"╚{'═' * (_W - 2)}╝")
+
+        # ── Generate synthetic sensor data ────────────────────────────────────
+        print(f"\n  Generating {scen['n_hours']}h of synthetic greenhouse sensor data …")
         raw_df = generate_scenario(**{
             k: v for k, v in scen.items()
             if k not in ("name", "description")
         })
 
+        # ── Stream sensor rows (or fast summary) ──────────────────────────────
+        if row_delay > 0:
+            print(f"\n  {'─' * (_W - 4)}")
+            print(f"  LIVE SENSOR FEED  —  {scen['n_hours']} hours  "
+                  f"({row_delay:.2f} s/row)")
+            print(f"  {'─' * (_W - 4)}")
+            n = len(raw_df)
+            for i, (dt, row) in enumerate(raw_df.iterrows(), 1):
+                _stream_sensor_row(dt, row.to_dict(), i, n, row_delay)
+            print(f"  {'─' * (_W - 4)}")
+            print("  ✓ Sensor stream complete — running inference …")
+        else:
+            last     = raw_df.iloc[-1]
+            last_dt  = raw_df.index[-1]
+            dn_label = "Day" if last.get("day_night_flag", 0) else "Night"
+            print(f"\n  Last reading  ({last_dt.strftime('%Y-%m-%d %H:%M')}  ·  {dn_label}):")
+            print(f"    T={last.get('temp', 0):.1f}°C  "
+                  f"RH={last.get('humidity', 0):.0f}%  "
+                  f"VPD={last.get('vpd', 0):.3f} kPa  "
+                  f"AV={last.get('air_velocity', 0):.2f} m/s  "
+                  f"SR={last.get('solar_radiation', 0):.0f} W/m²")
+
         # ── Feature engineering ───────────────────────────────────────────────
         X_scaled, df_fe = prepare_features(raw_df, feature_columns, scaler)
 
-        if args.verbose:
+        if show_features:
             print(f"\n  Feature matrix shape : {X_scaled.shape}")
-            fe_cols_demo = feature_columns[:8]
-            print(f"  First 8 features     : {fe_cols_demo}")
+            print(f"  First 8 features     : {feature_columns[:8]}")
 
         # ── RF inference ──────────────────────────────────────────────────────
         rf_disease_risks = None
-        if has_rf and args.model in ("both", "rf"):
+        if rf_models and model_type in ("both", "rf"):
+            if row_delay > 0:
+                print(f"\n  [RF]   Running Random Forest across {len(rf_models)} horizons …",
+                      end=" ", flush=True)
             rf_preds = rf_predict(rf_models, X_scaled)
-            # Use the LAST row's prediction (most recent hour in scenario)
             rf_disease_risks = {
                 d: {H: float(rf_preds[H][-1, d_idx])
                     for H in HORIZON_H if H in rf_preds}
                 for d_idx, d in enumerate(DISEASES)
             }
+            if row_delay > 0:
+                print("done ✓")
 
         # ── LSTM inference ────────────────────────────────────────────────────
         lstm_disease_risks = None
-        if has_lstm and args.model in ("both", "lstm"):
+        if lstm_model is not None and model_type in ("both", "lstm"):
+            if row_delay > 0:
+                print(f"  [LSTM] Sliding {WINDOW_N}-step window over sensor sequence …",
+                      end=" ", flush=True)
             lstm_preds = lstm_predict(lstm_model, X_scaled)
-            # Prediction at the last valid window (most recent 24-h block)
             lstm_disease_risks = {
                 d: {H: float(lstm_preds[H][-1, d_idx])
                     for H in HORIZON_H if H in lstm_preds}
                 for d_idx, d in enumerate(DISEASES)
             }
+            if row_delay > 0:
+                print("done ✓")
 
-        # ── Print formatted report ────────────────────────────────────────────
+        # ── Formatted report ──────────────────────────────────────────────────
         last_raw = raw_df.iloc[-1].to_dict()
         print_scenario_report(
             scenario_meta      = scen,
@@ -959,10 +1090,19 @@ def main():
             last_row           = last_raw,
         )
 
+        # Pause between scenarios when running all
+        if len(selected) > 1 and s_num < len(selected):
+            print(f"\n  ↩  Press Enter to continue to scenario {s_num + 1} …", end="")
+            try:
+                input()
+            except EOFError:
+                print()
+
     elapsed = time.time() - t_start
-    print(f"\n[3/3] All scenarios complete in {elapsed:.1f}s")
-    print("      Tip: run with --verbose for feature-matrix detail,")
-    print("           or --scenario N to test a single scenario.\n")
+    print(f"\n[4/4] Simulation complete  "
+          f"·  {len(selected)} scenario(s)  "
+          f"·  elapsed {elapsed:.1f} s")
+    print("═" * _W + "\n")
 
 
 if __name__ == "__main__":
