@@ -37,6 +37,7 @@
 13. [How to Run the Notebook](#13-how-to-run-the-notebook)
 14. [Frequently Asked Questions](#14-frequently-asked-questions)
 15. [Glossary](#15-glossary)
+16. [References & Further Reading](#16-references--further-reading)
 
 ---
 
@@ -441,6 +442,8 @@ Reports are aggregated using the **maximum risk across the next 24 hours** — s
 ---
 
 ## 6. Disease Threshold Reference
+
+> **Sources:** Threshold values were derived from the FAO Good Agricultural Practices guide ([PDF](General%20Research%20Papers/Good%20Agricultural%20Practices.pdf)), the UC IPM Tomato Disease Management guidelines ([ipm.ucanr.edu](https://ipm.ucanr.edu)), and the FAO corporate website ([fao.org](https://www.fao.org)). See [Section 16](#16-references--further-reading) for full citations.
 
 ### Late Blight
 
@@ -907,6 +910,49 @@ A: Yes. Add an entry to `DISEASE_THRESHOLDS` (cell D1) following the same struct
 | **Scaler** | Object that normalises input features during training and inference |
 | **VPD** | Vapour Pressure Deficit — the difference between the amount of moisture in the air and how much it can hold; high VPD = dry air, low VPD = humid air |
 | **Window N** | The LSTM lookback period: how many past hours it sees as input (default: 24h) |
+
+---
+
+## 16. References & Further Reading
+
+The disease threshold parameters used in this project (temperature ranges, humidity limits, VPD bounds, required exposure hours, and all modifier values) were established by consulting the sources listed below. No threshold value was invented — each is grounded in peer-reviewed agronomic guidance or established extension recommendations.
+
+### Primary Reference Document
+
+| # | Document | Authors / Publisher | Access |
+|---|----------|--------------------|---------|
+| 1 | **Good Agricultural Practices for Greenhouse Tomato Production** | Food and Agriculture Organization of the United Nations (FAO) | [Open PDF](General%20Research%20Papers/Good%20Agricultural%20Practices.pdf) |
+
+This document informed the **disease-favourable condition definitions** for all five pathogens, specifically:
+- Humidity and temperature bands that create infection-risk windows
+- The role of air circulation in fungal spore dispersal and settlement
+- Recommended monitoring frequencies that shaped the hourly granularity of this model
+- The conceptual basis for distinguishing *wet-disease* (Late Blight, Leaf Mold) from *dry-disease* (Powdery Mildew, Spider Mites) thresholds
+
+---
+
+### Online Reference Resources
+
+| # | Resource | URL | What It Contributed |
+|---|----------|-----|-----------------------|
+| 2 | **UC IPM — Integrated Pest Management for Tomatoes** | [ipm.ucanr.edu](https://ipm.ucanr.edu) | Per-disease threshold values (RH%, VPD kPa, temperature °C) for Late Blight, Leaf Mold, Early Blight, Powdery Mildew, and Spider Mites; infection-period duration guidance used to set `required_hours_24h` per disease |
+| 3 | **FAO — Food and Agriculture Organization of the United Nations** | [fao.org](https://www.fao.org) | Broader agronomic context for greenhouse climate management; cross-validation of disease risk scoring methodology and risk label definitions (Low / Medium / High) |
+
+---
+
+### Threshold-to-Source Mapping
+
+The table below traces each disease's key threshold values to the source documents:
+
+| Disease | Key Thresholds | Primary Source |
+|---------|---------------|----------------|
+| **Late Blight** | RH ≥ 90%, VPD ≤ 0.40 kPa, required 6 h / 24 h, night boost | UC IPM + FAO GAP PDF [1,2] |
+| **Leaf Mold** | RH ≥ 90%, VPD ≤ 0.50 kPa, required 5 h / 24 h, airflow < 1.5 m/s | UC IPM + FAO GAP PDF [1,2] |
+| **Powdery Mildew** | RH 70–90%, VPD 0.50–1.20 kPa, required 6 h / 24 h | UC IPM [2] |
+| **Early Blight** | Temp 24–30 °C, RH ≥ 85%, required 4 h / 24 h, solar > 200 W/m² | UC IPM + FAO GAP PDF [1,2] |
+| **Spider Mites** | Temp ≥ 28 °C, RH ≤ 55%, VPD ≥ 1.50 kPa, even 1 h triggers risk | UC IPM [2] |
+
+> The risk scoring formula (base score + night/airflow/radiation modifiers, clamped to [0, 100]) was designed specifically for this project to quantify cumulative exposure into a single actionable index, drawing on the exposure-duration principles described in the above sources.
 
 ---
 
