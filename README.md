@@ -23,8 +23,6 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 |-----------|-------------|--------|
 | **Synthetic Data Generator** | Configurable greenhouse sensor data generation | ✅ Complete |
 | **Indoor Dataset Generator** | Passive greenhouse physics model from outdoor weather | ✅ Complete |
-| **Disease Risk Index** | ML-based fungal risk prediction from environmental data | ✅ Complete |
-| **Disease Progression Forecasting** | LSTM + Random Forest multi-horizon risk forecasting (6/12/24/48 h) | ✅ Complete |
 | **Disease Classifier** | EfficientNetB0 — 6-class tomato leaf disease classification | ✅ Complete |
 | **Growth Stage Classifier** | EfficientNetB3 — 6-stage tomato plant growth classification | ✅ Complete |
 | **Digital Twin Simulator** | Physics-based greenhouse model for scenario simulation | ✅ Complete |
@@ -76,7 +74,6 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 
 - **Disease Classifier** — EfficientNetB0, 6 classes: Early Blight, Late Blight, Leaf Mold, Powdery Mildew, Septoria Leaf Spot, Spider Mites + Healthy → [Disease Classification](docs/TOMATO_DISEASE_CLASSIFICATION.md)
 - **Growth Stage Classifier** — EfficientNetB3, 6 stages: Seedling → Early Vegetative → Flowering Initiation → Flowering → Unripe → Ripe, with TTA support → [Growth Stage Classification](docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md)
-- **Disease Progression Forecaster** — LSTM (seq2seq) + Random Forest ensemble, 5 diseases × 4 horizons (6/12/24/48 h), environment-driven risk index pipeline → [Disease Progression Forecasting](docs/DISEASE_PROGRESSION_RISK_FORECASTING.md)
 
 ## 🛠️ Technology Stack
 
@@ -116,7 +113,6 @@ jupyter notebook feature_demos/
 | [Indoor Greenhouse Dataset](docs/INDOOR_GREENHOUSE_DATASET.md) | Synthetic dataset generation methodology |
 | [Disease Classification](docs/TOMATO_DISEASE_CLASSIFICATION.md) | EfficientNetB0 leaf disease model |
 | [Growth Stage Classification](docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md) | EfficientNetB3 growth stage model |
-| [Disease Progression Forecasting](docs/DISEASE_PROGRESSION_RISK_FORECASTING.md) | LSTM + RF multi-horizon disease risk forecasting |
 | [Deployment Guide](docs/DOCS_DEPLOYMENT.md) | MkDocs documentation site setup |
 
 **[📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)**
