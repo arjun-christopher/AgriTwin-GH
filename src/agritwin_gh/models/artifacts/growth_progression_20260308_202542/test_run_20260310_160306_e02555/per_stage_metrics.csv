@@ -1,0 +1,7 @@
+stage,n,acc_24h,f1_weighted_24h,ord_dist_24h,progress_mae_24h,h2n_mae
+seedling,6,1.0,1.0,0.0,62.01,78.0
+early_vegetative,11,1.0,1.0,0.0,54.51,145.27
+flowering_initiation,6,0.6667,0.6667,0.3333,41.41,45.1
+flowering,7,1.0,1.0,0.0,59.63,93.71
+unripe,16,1.0,1.0,0.0,50.82,197.28
+ripe,4,1.0,1.0,0.0,41.61,80.38

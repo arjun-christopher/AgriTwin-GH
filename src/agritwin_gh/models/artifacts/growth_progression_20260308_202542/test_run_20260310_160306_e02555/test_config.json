@@ -1,0 +1,20 @@
+{
+  "test_id": "20260310_160306_e02555",
+  "run_id": "growth_progression_20260308_202542",
+  "mode": 4,
+  "mode_name": "Full evaluation            (all held-out windows, complete metrics + plots)",
+  "scenario_id": 8,
+  "scenario_name": "Mixed scenarios (all windows)",
+  "cycles": [
+    7,
+    12,
+    16
+  ],
+  "enc_len": 48,
+  "pred_len": 48,
+  "horizon": "both",
+  "n_windows_req": 50,
+  "artifact_dir": "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_progression_20260308_202542",
+  "output_dir": "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_progression_20260308_202542\\test_run_20260310_160306_e02555",
+  "started_at": "2026-03-10T16:04:25.446233"
+}

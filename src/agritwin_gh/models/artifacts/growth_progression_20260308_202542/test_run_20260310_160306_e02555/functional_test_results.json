@@ -1,0 +1,22 @@
+{
+  "F01_model_type": true,
+  "F02_scaler_loaded": true,
+  "F03_scaler_feature_count": 19,
+  "F03_scaler_matches_config": true,
+  "F04_training_dataset_loaded": true,
+  "F05_windows_available": true,
+  "F06_inference_executes": true,
+  "F07_output_keys_present": true,
+  "F08_no_nan": true,
+  "F09_no_inf": true,
+  "F10_stage_24h_valid": true,
+  "F11_stage_48h_valid": true,
+  "F12_progress_24h_valid": true,
+  "F13_progress_48h_valid": true,
+  "F14_hours_to_next_nonneg": true,
+  "F15_class_probs_sum_to_1": true,
+  "checks_passed": 15,
+  "total_checks": 15,
+  "failures": [],
+  "all_passed": true
+}

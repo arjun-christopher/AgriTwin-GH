@@ -1,0 +1,7 @@
+cycle_id,timestamp,stage_now,actual_trans_24h,actual_trans_48h,pred_trans_24h,pred_trans_48h,true_h2n,pred_h2n,h2n_error_h,correct_24h,stage_skip
+12,2026-12-22 07:00:00,early_vegetative,False,True,False,False,41.0,336.0,295.0,True,0
+12,2027-01-04 13:00:00,flowering_initiation,True,False,True,True,11.0,38.6,27.6,True,1
+12,2027-02-26 13:00:00,unripe,True,False,True,True,11.0,193.4,182.4,True,0
+16,2028-03-13 09:00:00,seedling,False,True,False,False,39.0,168.0,129.0,True,0
+16,2028-04-19 21:00:00,flowering_initiation,True,False,True,True,3.0,2.0,-1.0,True,1
+16,2028-06-02 15:00:00,unripe,False,True,False,False,33.0,480.0,447.0,True,0
