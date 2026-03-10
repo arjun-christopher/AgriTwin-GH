@@ -1,0 +1,45 @@
+{
+  "run_id": "growth_progression_20260308_202542",
+  "split_strategy": "cycle-stratified 70/15/15 by season type",
+  "train": {
+    "cycles": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      8,
+      9,
+      11,
+      13,
+      14
+    ],
+    "rows": 26736,
+    "seasons": [
+      "southwest_monsoon",
+      "northeast_monsoon",
+      "dry_cool",
+      "summer",
+      "dry_winter"
+    ]
+  },
+  "val": {
+    "cycles": [
+      4,
+      10,
+      15
+    ],
+    "rows": 8016
+  },
+  "test": {
+    "cycles": [
+      7,
+      12,
+      16
+    ],
+    "rows": 7992
+  },
+  "encoder_length": 72,
+  "prediction_horizon": 48,
+  "leakage_check": "Splits applied at cycle boundaries only."
+}

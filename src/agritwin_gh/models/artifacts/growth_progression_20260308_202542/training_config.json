@@ -1,0 +1,28 @@
+{
+  "run_id": "growth_progression_20260308_202542",
+  "learning_rate": 0.001,
+  "batch_size": 64,
+  "max_epochs": 100,
+  "dropout": 0.15,
+  "attention_head_size": 4,
+  "hidden_size": 64,
+  "hidden_continuous_size": 32,
+  "lstm_layers": 2,
+  "encoder_length": 72,
+  "prediction_length": 48,
+  "gradient_clip_val": 0.5,
+  "early_stop_patience": 10,
+  "reduce_on_plateau_patience": 5,
+  "quantiles": [
+    0.02,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    0.9,
+    0.98
+  ],
+  "seed": 42,
+  "accelerator": "cpu",
+  "num_workers": 0
+}

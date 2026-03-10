@@ -1,0 +1,7 @@
+,Germination,Seedling,Vegetative,Flowering,Fruiting,Harvest Ready
+Germination,324,0,0,0,0,0
+Seedling,82,542,0,0,0,0
+Vegetative,0,27,232,29,0,0
+Flowering,0,0,1,331,87,61
+Fruiting,0,0,0,0,624,144
+Harvest Ready,0,0,0,0,0,227

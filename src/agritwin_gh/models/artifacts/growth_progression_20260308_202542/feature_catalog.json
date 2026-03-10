@@ -1,0 +1,72 @@
+{
+  "description": "TFT feature groups for tomato growth progression forecasting",
+  "project": "AgriTwin-GH",
+  "run_id": "growth_progression_20260308_202542",
+  "entity_id": "cycle_id",
+  "time_index": "timestamp",
+  "group_ids": [
+    "cycle_id"
+  ],
+  "max_encoder_length": 168,
+  "max_prediction_length": 48,
+  "static_categoricals": [
+    "cycle_label",
+    "season_window",
+    "cycle_origin_type"
+  ],
+  "static_reals": [
+    "prototype_cycle_id"
+  ],
+  "time_varying_known_categoricals": [
+    "season_label"
+  ],
+  "time_varying_known_reals": [
+    "hour",
+    "day_of_year",
+    "week_of_year",
+    "month",
+    "year",
+    "day_night_flag",
+    "light_period_flag",
+    "stage_duration_hours",
+    "stage_duration_days",
+    "estimated_hours_to_next_stage",
+    "estimated_days_to_next_stage"
+  ],
+  "time_varying_unknown_reals": [
+    "indoor_temp",
+    "indoor_humidity",
+    "indoor_air_velocity",
+    "indoor_CO2",
+    "solarradiation",
+    "vpd",
+    "dew_point",
+    "leaf_wetness_proxy",
+    "temperature_rolling_mean_24h",
+    "humidity_rolling_mean_24h",
+    "vpd_proxy",
+    "cumulative_gdd_like_index",
+    "stage_index",
+    "stage_progress_pct",
+    "total_cycle_progress_pct"
+  ],
+  "targets": {
+    "primary": [
+      "target_stage_index_24h",
+      "target_stage_index_48h",
+      "target_stage_progress_24h",
+      "target_stage_progress_48h",
+      "target_hours_to_next_stage"
+    ],
+    "auxiliary": [
+      "target_stage_24h",
+      "target_stage_48h"
+    ]
+  },
+  "notes": {
+    "max_encoder_length": "168 h (7 days) captures multi-stage context + rolling means",
+    "max_prediction_length": "48 h matches the longest forecast horizon",
+    "known_at_forecast_time": "Calendar + scheduled agronomic features available at inference",
+    "unknown_observed": "Real-time sensor readings; not available at future steps"
+  }
+}

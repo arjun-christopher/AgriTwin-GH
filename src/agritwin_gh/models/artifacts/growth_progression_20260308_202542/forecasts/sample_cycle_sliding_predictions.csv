@@ -1,0 +1,218 @@
+window_start,enc_end_time_idx,current_stage,pred_stage_24h,pred_stage_48h,pred_index_24h,pred_index_48h,pred_cont_24h,pred_cont_48h,progress_24h,progress_48h,hours_to_next,gt_stage_24h,gt_stage_48h,gt_index_24h,gt_index_48h
+0,71,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+12,83,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+24,95,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+36,107,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+48,119,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+60,131,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+72,143,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+84,155,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+96,167,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+108,179,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+120,191,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+132,203,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+144,215,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+156,227,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+168,239,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,seedling,-1,-1
+180,251,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,early_vegetative,-1,0
+192,263,seedling,Seedling,Seedling,0,0,0.0,0.0,0.0,0.0,24.0,seedling,early_vegetative,-1,0
+204,275,seedling,Early Vegetative,Early Vegetative,1,1,0.6021,0.6004,60.21,60.04,9.4,early_vegetative,early_vegetative,0,0
+216,287,seedling,Early Vegetative,Early Vegetative,1,1,0.9116,0.9079,91.16,90.79,1.7,early_vegetative,early_vegetative,0,0
+228,299,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.1218,1.1167,12.18,11.67,20.8,early_vegetative,early_vegetative,0,0
+240,311,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.1986,1.1967,19.86,19.67,19.2,early_vegetative,early_vegetative,0,0
+252,323,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.2079,1.2078,20.79,20.78,19.0,early_vegetative,early_vegetative,0,0
+264,335,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+276,347,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+288,359,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+300,371,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+312,383,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+324,395,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+336,407,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+348,419,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+360,431,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+372,443,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+384,455,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+396,467,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+408,479,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+420,491,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+432,503,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+444,515,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+456,527,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+468,539,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+480,551,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+492,563,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+504,575,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+516,587,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+528,599,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+540,611,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+552,623,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+564,635,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+576,647,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+588,659,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+600,671,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+612,683,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+624,695,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+636,707,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+648,719,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+660,731,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+672,743,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+684,755,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+696,767,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,early_vegetative,0,0
+708,779,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,flowering_initiation,0,0
+720,791,early_vegetative,Early Vegetative,Early Vegetative,1,1,1.0,1.0,0.0,0.0,24.0,early_vegetative,flowering_initiation,0,0
+732,803,early_vegetative,Flowering Init.,Flowering Init.,2,2,1.9775,1.9759,97.75,97.59,0.4,flowering_initiation,flowering_initiation,0,0
+744,815,early_vegetative,Flowering Init.,Flowering Init.,2,2,2.3865,2.3828,38.65,38.28,14.3,flowering_initiation,flowering_initiation,0,0
+756,827,flowering_initiation,Flowering,Flowering,3,3,2.6254,2.6204,62.54,62.04,8.8,flowering_initiation,flowering_initiation,0,0
+768,839,flowering_initiation,Flowering,Flowering,3,3,2.6737,2.6718,67.37,67.18,7.8,flowering_initiation,flowering_initiation,0,0
+780,851,flowering_initiation,Flowering,Flowering,3,3,2.5832,2.5831,58.32,58.31,10.0,flowering_initiation,flowering_initiation,0,0
+792,863,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+804,875,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+816,887,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+828,899,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+840,911,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+852,923,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+864,935,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+876,947,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+888,959,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+900,971,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+912,983,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+924,995,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+936,1007,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+948,1019,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+960,1031,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+972,1043,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+984,1055,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering_initiation,0,0
+996,1067,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering,0,0
+1008,1079,flowering_initiation,Flowering Init.,Flowering Init.,2,2,2.0,2.0,0.0,0.0,24.0,flowering_initiation,flowering,0,0
+1020,1091,flowering_initiation,Flowering,Flowering,3,3,3.3528,3.3511,35.28,35.11,15.4,flowering,flowering,0,0
+1032,1103,flowering_initiation,Unripe,Unripe,4,4,3.8611,3.8574,86.11,85.74,3.0,flowering,flowering,0,0
+1044,1115,flowering,Unripe,Unripe,4,4,4.1289,4.1239,12.89,12.39,20.7,flowering,flowering,0,0
+1056,1127,flowering,Unripe,Unripe,4,4,4.148,4.1461,14.8,14.61,20.4,flowering,flowering,0,0
+1068,1139,flowering,Unripe,Unripe,4,4,3.9585,3.9584,95.85,95.84,1.0,flowering,flowering,0,0
+1080,1151,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1092,1163,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1104,1175,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1116,1187,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1128,1199,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1140,1211,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1152,1223,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1164,1235,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1176,1247,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1188,1259,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1200,1271,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1212,1283,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1224,1295,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1236,1307,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1248,1319,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1260,1331,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1272,1343,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1284,1355,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1296,1367,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1308,1379,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1320,1391,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1332,1403,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1344,1415,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1356,1427,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1368,1439,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1380,1451,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1392,1463,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1404,1475,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1416,1487,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,flowering,0,0
+1428,1499,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,unripe,0,0
+1440,1511,flowering,Flowering,Flowering,3,3,3.0,3.0,0.0,0.0,24.0,flowering,unripe,0,0
+1452,1523,flowering,Ripe,Ripe,5,5,4.7281,4.7264,72.81,72.64,6.4,unripe,unripe,0,0
+1464,1535,flowering,Ripe,Ripe,5,5,5.3359,5.3321,33.59,33.21,15.6,unripe,unripe,0,0
+1476,1547,unripe,Ripe,Ripe,5,5,5.6324,5.6274,63.24,62.74,8.6,unripe,unripe,0,0
+1488,1559,unripe,Ripe,Ripe,5,5,5.6228,5.6209,62.28,62.09,9.0,unripe,unripe,0,0
+1500,1571,unripe,Ripe,Ripe,5,5,5.3338,5.3337,33.38,33.37,16.0,unripe,unripe,0,0
+1512,1583,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1524,1595,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1536,1607,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1548,1619,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1560,1631,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1572,1643,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1584,1655,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1596,1667,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1608,1679,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1620,1691,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1632,1703,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1644,1715,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1656,1727,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1668,1739,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1680,1751,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1692,1763,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1704,1775,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1716,1787,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1728,1799,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1740,1811,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1752,1823,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1764,1835,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1776,1847,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1788,1859,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1800,1871,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1812,1883,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1824,1895,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1836,1907,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1848,1919,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1860,1931,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1872,1943,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1884,1955,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1896,1967,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1908,1979,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1920,1991,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1932,2003,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1944,2015,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1956,2027,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1968,2039,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1980,2051,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+1992,2063,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2004,2075,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2016,2087,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2028,2099,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2040,2111,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2052,2123,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2064,2135,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2076,2147,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2088,2159,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2100,2171,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2112,2183,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2124,2195,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2136,2207,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2148,2219,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2160,2231,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2172,2243,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2184,2255,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2196,2267,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2208,2279,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2220,2291,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2232,2303,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2244,2315,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2256,2327,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2268,2339,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2280,2351,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2292,2363,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2304,2375,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,unripe,0,0
+2316,2387,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,ripe,0,0
+2328,2399,unripe,Unripe,Unripe,4,4,4.0,4.0,0.0,0.0,24.0,unripe,ripe,0,0
+2340,2411,unripe,Ripe,Ripe,5,5,6.1034,6.1017,10.34,10.17,21.4,ripe,ripe,0,0
+2352,2423,unripe,Ripe,Ripe,5,5,6.8106,6.8069,81.06,80.69,4.2,ripe,ripe,0,0
+2364,2435,ripe,Ripe,Ripe,5,5,7.136,7.1309,13.6,13.09,20.5,ripe,ripe,0,0
+2376,2447,ripe,Ripe,Ripe,5,5,7.0974,7.0954,9.74,9.54,21.6,ripe,ripe,0,0
+2388,2459,ripe,Ripe,Ripe,5,5,6.7091,6.709,70.91,70.9,7.0,ripe,ripe,0,0
+2400,2471,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2412,2483,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2424,2495,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2436,2507,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2448,2519,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2460,2531,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2472,2543,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2484,2555,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2496,2567,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2508,2579,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2520,2591,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2532,2603,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2544,2615,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2556,2627,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2568,2639,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2580,2651,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0
+2592,2663,ripe,Ripe,Ripe,5,5,5.0,5.0,0.0,0.0,24.0,ripe,ripe,0,0

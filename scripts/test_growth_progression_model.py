@@ -1,1029 +1,1369 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
-test_growth_progression_model.py
+AgriTwin-GH :: TFT Growth Progression Model — Integration Test Suite
+=====================================================================
+Evaluates the trained Temporal Fusion Transformer against held-out test
+cycles (7, 12, 16) using real-time-style greenhouse scenario windows.
 
-Real-time growth-progression model tester for AgriTwin-GH.
+Parts
+-----
+  A — Artifact loading and validation
+  B — Test data preparation (chronological real-data windows)
+  C — Functional tests (inference correctness & output structure)
+  D — Scenario-based real-time tests (8 greenhouse scenario categories)
+  E — Biological consistency checks
+  F — Accuracy and regression metrics
+  G — Forecast behavior and transition analysis
+  H — Save all outputs, metrics, and plots
 
-Simulates a live greenhouse sensor stream at hourly resolution, maintains a
-72-hour rolling feature buffer, and runs inference with the best saved
-growth-progression model (LSTM or RF).
-
-The feature engineering pipeline (rolling stats, lags, stage history,
-cumulative exposure, interaction terms, day/night segmented features)
-exactly mirrors Sections G1-G7 of growth_progression.ipynb.
-
-Usage:
-  # Fast simulation (default: 0.5 s per tick)
-  python scripts/test_growth_model_realtime.py
-
-  # Starting at the 'flowering' stage, 0.1 s per tick
-  python scripts/test_growth_model_realtime.py --stage flowering --tick-secs 0.1
-
-  # Force LSTM, run 200 ticks, save log
-  python scripts/test_growth_model_realtime.py --model lstm --max-ticks 200 --log-json logs/realtime_test.json
-
-  # Use a specific saved run
-  python scripts/test_growth_model_realtime.py --run-id growth_progression_20260306_212928
-
-Arguments:
-  --tick-secs  Wall-clock seconds between ticks (default: 0.5)
-  --stage      Starting growth stage            (default: seedling)
-  --max-ticks  Stop after N ticks; 0 = unlimited (default: 500)
-  --model      auto | rf | lstm                 (default: auto)
-  --log-json   Path to save per-tick JSON log   (default: none)
-  --run-id     Specific artifact run ID to load (default: latest)
+Usage
+-----
+    python tests/integration/test_growth_progression_model.py
+    python tests/integration/test_growth_progression_model.py --max-windows 200
+    python tests/integration/test_growth_progression_model.py \\
+        --run-id growth_progression_20260308_141446 --max-windows 300
 """
-
 from __future__ import annotations
 
 import argparse
 import json
-import logging
 import math
-import os
-import random
+import pickle
 import sys
 import time
-from datetime import datetime, timedelta
+import uuid
+import warnings
+from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Optional
 
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import torch
 
-# ---------------------------------------------------------------------------
-# Logging
-# ---------------------------------------------------------------------------
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s  %(levelname)-8s  %(message)s",
-    datefmt="%H:%M:%S",
-)
-LOG = logging.getLogger("gp_realtime")
+warnings.filterwarnings("ignore", message="Found.*unknown classes",           category=UserWarning)
+warnings.filterwarnings("ignore", message="The behavior of array concatenation", category=FutureWarning)
+warnings.filterwarnings("ignore", message="X does not have valid feature names", category=UserWarning)
+warnings.filterwarnings("ignore", message="y_pred contains classes not in y_true", category=UserWarning)
+warnings.filterwarnings("ignore", message="Attribute.*is an instance of.*nn.Module", category=UserWarning)
 
-# Suppress TensorFlow noise unless debugging
-os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
+try:
+    from sklearn.metrics import (
+        accuracy_score, balanced_accuracy_score,
+        precision_score, recall_score, f1_score,
+        confusion_matrix,
+        mean_absolute_error, mean_squared_error, r2_score,
+        explained_variance_score, median_absolute_error,
+    )
+except ImportError:
+    sys.exit("[ERROR] scikit-learn is required: pip install scikit-learn")
 
-# ---------------------------------------------------------------------------
-# Repo structure
-# ---------------------------------------------------------------------------
-ROOT          = Path(__file__).resolve().parents[1]
-MODELS_DIR    = ROOT / "src" / "agritwin_gh" / "models"
-ARTIFACTS_BASE = MODELS_DIR / "artifacts"
+try:
+    from pytorch_forecasting import TemporalFusionTransformer, TimeSeriesDataSet
+except ImportError:
+    sys.exit("[ERROR] pytorch_forecasting is required: pip install pytorch-forecasting")
 
-# ---------------------------------------------------------------------------
-# Stage constants
-# ---------------------------------------------------------------------------
-STAGE_ORDER = [
-    "seedling",
-    "early_veg",
-    "flowering_initiation",
-    "flowering",
-    "unripe",
-    "ripe",
-]
+# ============================================================================
+# CONSTANTS
+# ============================================================================
 
+ROOT          = Path(__file__).resolve().parent.parent.parent
+ARTIFACT_BASE = ROOT / "src" / "agritwin_gh" / "models" / "artifacts"
+MODEL_DIR     = ROOT / "src" / "agritwin_gh" / "models"
+
+STAGE_ORDER  = ["seedling", "early_vegetative", "flowering_initiation",
+                "flowering", "unripe", "ripe"]
+STAGE_LABELS = ["Seedling", "Early Vegetative", "Flowering Init.",
+                "Flowering", "Unripe", "Ripe"]
 STAGE_TO_INT = {s: i for i, s in enumerate(STAGE_ORDER)}
+N_STAGES     = 6
 
-# ---------------------------------------------------------------------------
-# Biological thresholds — mirror notebook G4
-# ---------------------------------------------------------------------------
-TEMP_FAV_MIN = 18.0   # °C
-TEMP_FAV_MAX = 26.0   # °C
-VPD_OPT_MIN  =  0.4   # kPa
-VPD_OPT_MAX  =  1.2   # kPa
-VPD_STRESS   =  1.5   # kPa
-
-# Sensors used for rolling and lag features (7 continuous, excluding binary cols)
-_CONTINUOUS_SENSORS = [
-    "temperature", "humidity", "air_velocity",
-    "co2", "solar_radiation", "vpd", "dew_point",
-]
-_ROLLING_WINDOWS = [6, 12, 24, 72]
-_ROLLING_STATS   = ["mean", "max", "min", "std"]
-_LAG_STEPS       = [1, 2, 3, 6, 12, 24]
-
-# ---------------------------------------------------------------------------
-# Per-stage simulation parameters — realistic Dindigul, Tamil Nadu conditions
-# ---------------------------------------------------------------------------
-_STAGE_SIM = {
-    "seedling": {
-        "temp_day": (22.0, 26.0), "temp_night": (18.0, 22.0),
-        "humidity": (68.0, 80.0), "co2": (400, 520),
-        "solar_peak": (250, 500), "air_vel": (0.10, 0.35),
-    },
-    "early_veg": {
-        "temp_day": (21.0, 26.0), "temp_night": (17.0, 21.0),
-        "humidity": (62.0, 76.0), "co2": (420, 600),
-        "solar_peak": (300, 550), "air_vel": (0.10, 0.40),
-    },
-    "flowering_initiation": {
-        "temp_day": (19.0, 25.0), "temp_night": (15.0, 20.0),
-        "humidity": (58.0, 72.0), "co2": (450, 650),
-        "solar_peak": (350, 650), "air_vel": (0.15, 0.45),
-    },
-    "flowering": {
-        "temp_day": (18.0, 24.0), "temp_night": (14.0, 19.0),
-        "humidity": (54.0, 68.0), "co2": (480, 700),
-        "solar_peak": (350, 700), "air_vel": (0.15, 0.50),
-    },
-    "unripe": {
-        "temp_day": (20.0, 27.0), "temp_night": (16.0, 22.0),
-        "humidity": (52.0, 66.0), "co2": (430, 650),
-        "solar_peak": (300, 650), "air_vel": (0.10, 0.45),
-    },
-    "ripe": {
-        "temp_day": (22.0, 30.0), "temp_night": (18.0, 24.0),
-        "humidity": (48.0, 62.0), "co2": (380, 520),
-        "solar_peak": (350, 600), "air_vel": (0.10, 0.40),
-    },
+# Stage approximate durations used for hours-to-next-stage extrapolation
+STAGE_DURATION_H: dict[str, int] = {
+    "seedling"             : 168,
+    "early_vegetative"     : 336,
+    "flowering_initiation" : 120,
+    "flowering"            : 240,
+    "unripe"               : 480,
+    "ripe"                 : 240,
 }
 
-# =============================================================================
-# Physics helpers
-# =============================================================================
+TEST_CYCLES = [7, 12, 16]
 
-def _vpd(T: float, RH: float) -> float:
-    """Vapour-pressure deficit in kPa (Magnus formula)."""
-    es = 0.6108 * math.exp(17.27 * T / (T + 237.3))
-    return max(0.0, round(es * (1.0 - RH / 100.0), 4))
+ENC_LEN    = 72
+PRED_LEN   = 48
+H24        = 23
+H48        = 47
+QUANTILES  = [0.02, 0.1, 0.25, 0.5, 0.75, 0.9, 0.98]
+MEDIAN_IDX = QUANTILES.index(0.5)
 
+# ============================================================================
+# PART A — ARTIFACT LOADING
+# ============================================================================
 
-def _dewpoint(T: float, RH: float) -> float:
-    """Dew-point temperature in °C (Magnus formula)."""
-    alpha = math.log(max(RH / 100.0, 1e-9)) + 17.625 * T / (243.04 + T)
-    return round(243.04 * alpha / (17.625 - alpha), 3)
-
-
-# =============================================================================
-# Sensor simulation
-# =============================================================================
-
-def simulate_reading(ts: datetime, stage: str, rng: random.Random) -> dict[str, float]:
-    """
-    Generate one synthetic hourly sensor reading for *ts* and *stage*.
-
-    Derived quantities (VPD, dew_point) are computed from fundamental
-    measurements so they are physically consistent.
-    """
-    p = _STAGE_SIM.get(stage, _STAGE_SIM["seedling"])
-    hour = ts.hour
-    is_day = 6 <= hour < 18
-    day_night_flag = 1 if is_day else 0
-
-    # Temperature — sinusoidal day/night profile with small Gaussian noise
-    if is_day:
-        lo, hi = p["temp_day"]
-        phase = math.sin(math.pi * (hour - 6) / 12.0)
-    else:
-        lo, hi = p["temp_night"]
-        phase = 0.4
-    temp = lo + (hi - lo) * phase + rng.gauss(0.0, 0.3)
-    temp = round(max(p["temp_night"][0] - 1.0, min(p["temp_day"][1] + 2.0, temp)), 2)
-
-    # Humidity — inversely correlated with temperature during the day
-    hum_lo, hum_hi = p["humidity"]
-    humidity = hum_hi - (hum_hi - hum_lo) * phase + rng.gauss(0.0, 1.0)
-    humidity = round(max(30.0, min(99.0, humidity)), 1)
-
-    # CO2 — stable with slight nighttime elevation
-    co2_lo, co2_hi = p["co2"]
-    co2 = round(rng.uniform(co2_lo, co2_hi) + (30.0 if not is_day else 0.0), 1)
-
-    # Solar radiation — sinusoidal daytime curve
-    if is_day:
-        sol_lo, sol_hi = p["solar_peak"]
-        solar = max(0.0, (sol_lo + (sol_hi - sol_lo) * phase) * rng.uniform(0.70, 1.05))
-    else:
-        solar = 0.0
-    solar = round(solar, 2)
-
-    # Air velocity — uniform random draw
-    av_lo, av_hi = p["air_vel"]
-    air_vel = round(rng.uniform(av_lo, av_hi), 3)
-
-    # Derived
-    vpd       = _vpd(temp, humidity)
-    dew_point = _dewpoint(temp, humidity)
-
-    return {
-        "temperature":    temp,
-        "humidity":       humidity,
-        "air_velocity":   air_vel,
-        "co2":            co2,
-        "solar_radiation": solar,
-        "day_night_flag": day_night_flag,
-        "vpd":            vpd,
-        "dew_point":      dew_point,
-    }
+def _require(path: Path, label: str) -> Path:
+    if not path.exists():
+        sys.exit(f"\n[ERROR] Missing required file: {label}\n  Expected at: {path}")
+    return path
 
 
-# =============================================================================
-# Feature engineering (replicates growth_progression.ipynb G1-G7)
-# =============================================================================
+def locate_artifact_dir(run_id: Optional[str]) -> Path:
+    candidates = [
+        d for d in ARTIFACT_BASE.iterdir()
+        if d.is_dir() and d.name.startswith("growth_progression_")
+    ]
+    if not candidates:
+        sys.exit(f"[ERROR] No growth_progression artifact directories in {ARTIFACT_BASE}")
+    if run_id:
+        matched = [d for d in candidates if run_id in d.name]
+        if not matched:
+            sys.exit(f"[ERROR] No artifact directory matching run_id '{run_id}'")
+        return matched[0]
+    return sorted(candidates, key=lambda p: p.stat().st_mtime)[-1]
 
-def engineer_features(buf: pd.DataFrame) -> pd.DataFrame:
-    """
-    Apply the full feature engineering pipeline from notebook Sections G1-G7
-    to a buffer DataFrame.
 
-    Parameters
-    ----------
-    buf : pd.DataFrame
-        DatetimeIndex named 'datetime'.  Must contain columns:
-        temperature, humidity, air_velocity, co2, solar_radiation,
-        day_night_flag, vpd, dew_point, leaf_wetness_proxy,
-        growth_stage (str), stage_int (int).
+def load_artifacts(art_dir: Path) -> dict:
+    """Load all model artifacts. Exits with a clear error message on any failure."""
+    print(f"\n[A] Loading artifacts from: {art_dir.name}")
 
-    Returns
-    -------
-    pd.DataFrame
-        Same rows as *buf* with all engineered feature columns appended.
-        The last row corresponds to the current tick.
+    feature_roles = json.loads(_require(art_dir / "feature_roles.json",      "feature_roles").read_text())
+    seq_meta      = json.loads(_require(art_dir / "sequence_metadata.json", "sequence_metadata").read_text())
+    tgt_def       = json.loads(_require(art_dir / "target_definition.json", "target_definition").read_text())
+    trn_cfg       = json.loads(_require(art_dir / "training_config.json",   "training_config").read_text())
+    split_sum     = json.loads(_require(art_dir / "split_summary.json",     "split_summary").read_text())
 
-    Notes
-    -----
-    Cumulative exposure features (G4) accumulate from the buffer start,
-    not from the historical dataset start.  This is an acceptable
-    approximation for real-time inference; in production, persist the
-    running totals between calls.
-    """
-    df = buf.copy()
-    # All engineered columns are accumulated in a dict to avoid DataFrame
-    # fragmentation (pandas PerformanceWarning when inserting columns one at a time).
-    new_cols: dict[str, Any] = {}
+    run_id     = trn_cfg["run_id"]
+    enc_len    = int(trn_cfg.get("encoder_length",    ENC_LEN))
+    pred_len   = int(trn_cfg.get("prediction_length", PRED_LEN))
+    quantiles  = trn_cfg.get("quantiles", QUANTILES)
+    median_idx = quantiles.index(0.5) if 0.5 in quantiles else MEDIAN_IDX
+    h24        = min(23, pred_len - 1)
+    h48        = min(47, pred_len - 1)
 
-    # ── G1: Rolling statistics ────────────────────────────────────────────────
-    # 7 continuous sensors × 4 windows × 4 stats = 112 features
-    for col in _CONTINUOUS_SENSORS:
-        for w in _ROLLING_WINDOWS:
-            roll_w = df[col].rolling(w, min_periods=1)
-            for stat in _ROLLING_STATS:
-                new_cols[f"{col}_rolling_{stat}_{w}h"] = getattr(roll_w, stat)()
+    with open(_require(art_dir / "robust_scaler.pkl",        "scaler"), "rb") as fh:
+        scaler = pickle.load(fh)
+    with open(_require(art_dir / "tft_training_dataset.pkl", "training_dataset"), "rb") as fh:
+        _saved = pickle.load(fh)
+    training_dataset = _saved["training"]
 
-    # ── G2: Lag features ──────────────────────────────────────────────────────
-    # 7 sensors × 6 lags = 42 features
-    for col in _CONTINUOUS_SENSORS:
-        for lag in _LAG_STEPS:
-            new_cols[f"{col}_lag_{lag}h"] = df[col].shift(lag)
-
-    # ── G3: Stage-history features ────────────────────────────────────────────
-    stage_change_flag = (df["stage_int"] != df["stage_int"].shift(1)).astype(int)
-    if len(stage_change_flag) > 0:
-        stage_change_flag.iloc[0] = 1  # first row always marks a stage start
-    stage_run_id = stage_change_flag.cumsum()
-
-    run_start_map = (
-        df.assign(stage_run_id=stage_run_id)
-        .reset_index()
-        .groupby("stage_run_id")["datetime"]
-        .first()
+    scaled_features: list[str] = (
+        seq_meta.get("scaled_features") or
+        feature_roles.get("time_varying_known_reals", []) +
+        feature_roles.get("time_varying_unknown_reals", [])
     )
-    stage_run_start = stage_run_id.map(run_start_map)
-    stage_age_hours = (
-        df.index.to_series() - pd.Series(stage_run_start.values, index=df.index)
-    ).dt.total_seconds() / 3600.0
 
-    new_cols["current_stage_encoded"] = df["stage_int"].values
-    new_cols["stage_change_flag"]     = stage_change_flag.values
-    new_cols["stage_run_id"]          = stage_run_id.values
-    new_cols["stage_age_hours"]       = stage_age_hours.values
+    ckpt_dir  = art_dir / "checkpoints"
+    ckpt_arts = sorted(ckpt_dir.glob("*.ckpt")) if ckpt_dir.exists() else []
+    ckpt_root = MODEL_DIR / f"growth_progression_{run_id}.ckpt"
 
-    # ── Merge G1-G3 into df now (G4 needs stage_run_id in df) ─────────────────
-    df = pd.concat([df, pd.DataFrame(new_cols, index=df.index)], axis=1)
-    new_cols = {}
+    if ckpt_root.exists():
+        print(f"  Loading checkpoint : {ckpt_root.name}")
+        tft_model = TemporalFusionTransformer.load_from_checkpoint(str(ckpt_root))
+    elif ckpt_arts:
+        print(f"  Loading checkpoint : {ckpt_arts[-1].name}")
+        tft_model = TemporalFusionTransformer.load_from_checkpoint(str(ckpt_arts[-1]))
+    else:
+        sys.exit("[ERROR] No model checkpoint found in artifact dir or model dir.")
 
-    # ── G4: Cumulative exposure features ──────────────────────────────────────
-    fav_temp  = ((df["temperature"] >= TEMP_FAV_MIN) &
-                 (df["temperature"] <= TEMP_FAV_MAX)).astype(float)
-    vpd_opt   = ((df["vpd"] >= VPD_OPT_MIN) &
-                 (df["vpd"] <= VPD_OPT_MAX)).astype(float)
-    vpd_str   = (df["vpd"] > VPD_STRESS).astype(float)
-    night_msk = (df["day_night_flag"] == 0).astype(float)
+    tft_model.eval()
+    print(f"  Run ID            : {run_id}")
+    print(f"  Encoder / pred    : {enc_len} h / {pred_len} h")
+    print(f"  Scaler            : {type(scaler).__name__}  ({len(scaler.feature_names_in_)} features)")
+    print(f"  Model             : {type(tft_model).__name__}")
+    print(f"  Test cycles       : {split_sum.get('test', {}).get('cycles', TEST_CYCLES)}")
 
-    # Global accumulation (from buffer start)
-    new_cols["cumulative_solar_exposure"]          = df["solar_radiation"].cumsum()
-    new_cols["cumulative_favorable_temp_hours"]    = fav_temp.cumsum()
-    new_cols["cumulative_vpd_optimal_hours"]       = vpd_opt.cumsum()
-    new_cols["cumulative_vpd_stress_hours"]        = vpd_str.cumsum()
-    new_cols["cumulative_night_humidity_exposure"] = (df["humidity"] * night_msk).cumsum()
+    return dict(
+        feature_roles=feature_roles, seq_meta=seq_meta, tgt_def=tgt_def,
+        trn_cfg=trn_cfg, split_sum=split_sum,
+        scaled_features=scaled_features, scaler=scaler,
+        training_dataset=training_dataset, tft_model=tft_model,
+        art_dir=art_dir, run_id=run_id,
+        enc_len=enc_len, pred_len=pred_len,
+        quantiles=quantiles, median_idx=median_idx,
+        h24=h24, h48=h48,
+    )
 
-    # Within-stage accumulation (resets at each stage transition via groupby)
-    for out_col, src in [
-        ("stage_solar_exposure",       df["solar_radiation"]),
-        ("stage_favorable_temp_hours", fav_temp),
-        ("stage_vpd_stress_hours",     vpd_str),
-        ("stage_vpd_optimal_hours",    vpd_opt),
-    ]:
-        tmp_s = pd.Series(src.values, index=df.index, name="_tmp")
-        new_cols[out_col] = df.groupby("stage_run_id")["stage_run_id"].transform(
-            lambda _: None  # placeholder
-        )  # replaced below
-        # Correct within-stage cumsum via concat-based groupby
-        new_cols[out_col] = (
-            pd.concat([df["stage_run_id"].rename("srid"), tmp_s], axis=1)
-            .groupby("srid")["_tmp"]
-            .cumsum()
-            .values
-        )
 
-    # ── G5: Interaction terms ─────────────────────────────────────────────────
-    new_cols["dewpoint_spread"]         = df["temperature"].values - df["dew_point"].values
-    new_cols["temperature_x_humidity"]  = df["temperature"].values * df["humidity"].values
-    new_cols["temperature_x_vpd"]       = df["temperature"].values * df["vpd"].values
-    new_cols["humidity_x_vpd"]          = df["humidity"].values    * df["vpd"].values
-    new_cols["radiation_x_temperature"] = df["solar_radiation"].values * df["temperature"].values
-    new_cols["radiation_x_vpd"]         = df["solar_radiation"].values * df["vpd"].values
+# ============================================================================
+# PART B — DATASET LOADING AND WINDOW EXTRACTION
+# ============================================================================
 
-    # ── G6: Day/night segmented rolling features ──────────────────────────────
-    _DN_W  = 24
-    day_s  = lambda col: df[col].where(df["day_night_flag"] == 1)
-    nght_s = lambda col: df[col].where(df["day_night_flag"] == 0)
+def load_dataset(art_dir: Path) -> pd.DataFrame:
+    """Load sequence-ready dataset. Prefers parquet; falls back to CSV."""
+    seq_csv  = art_dir / "sequence_ready_dataset.csv"
+    exp_parq = art_dir / "expanded_hourly_growth_dataset.parquet"
 
-    day_temp_mean  = day_s("temperature").rolling(_DN_W, min_periods=1).mean()
-    nght_temp_mean = nght_s("temperature").rolling(_DN_W, min_periods=1).mean()
-    day_hum_mean   = day_s("humidity").rolling(_DN_W, min_periods=1).mean()
-    nght_hum_mean  = nght_s("humidity").rolling(_DN_W, min_periods=1).mean()
+    if seq_csv.exists():
+        print(f"\n[B] Dataset : {seq_csv.name}  (CSV)")
+        df = pd.read_csv(seq_csv, parse_dates=["timestamp"], low_memory=False)
+    elif exp_parq.exists():
+        print(f"\n[B] Dataset : {exp_parq.name}  (parquet)")
+        df = pd.read_parquet(exp_parq)
+    else:
+        sys.exit(f"[ERROR] No dataset found in {art_dir}")
 
-    new_cols["day_temperature_mean_24h"]      = day_temp_mean
-    new_cols["night_temperature_mean_24h"]    = nght_temp_mean
-    new_cols["day_humidity_mean_24h"]         = day_hum_mean
-    new_cols["night_humidity_mean_24h"]       = nght_hum_mean
-    new_cols["day_vpd_mean_24h"]              = day_s("vpd").rolling(_DN_W, min_periods=1).mean()
-    new_cols["night_vpd_mean_24h"]            = nght_s("vpd").rolling(_DN_W, min_periods=1).mean()
-    new_cols["day_solar_mean_24h"]            = day_s("solar_radiation").rolling(_DN_W, min_periods=1).mean()
-    new_cols["day_co2_mean_24h"]              = day_s("co2").rolling(_DN_W, min_periods=1).mean()
-    new_cols["night_co2_mean_24h"]            = nght_s("co2").rolling(_DN_W, min_periods=1).mean()
-    new_cols["night_humidity_std_24h"]        = nght_s("humidity").rolling(_DN_W, min_periods=2).std()
-    new_cols["diurnal_temperature_range_24h"] = day_temp_mean - nght_temp_mean
-    new_cols["diurnal_humidity_range_24h"]    = day_hum_mean  - nght_hum_mean
+    if "timestamp" in df.columns and not pd.api.types.is_datetime64_any_dtype(df["timestamp"]):
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
 
-    # ── Final merge ───────────────────────────────────────────────────────────
-    df = pd.concat([df, pd.DataFrame(new_cols, index=df.index)], axis=1)
+    req_target = "target_stage_index_24h"
+    if req_target not in df.columns:
+        sys.exit(f"[ERROR] Column '{req_target}' not found in dataset. Need sequence_ready_dataset.csv.")
+
+    print(f"  Rows      : {len(df):,}   cols={len(df.columns)}")
+    print(f"  Cycles    : {sorted(df['cycle_id'].unique().tolist())}")
     return df
 
 
-# =============================================================================
-# Artifact loading
-# =============================================================================
-
-def load_artifacts(run_dir: Path, load_lstm: bool = True) -> dict[str, Any]:
+def extract_windows(
+    df: pd.DataFrame,
+    enc_len: int,
+    cycles: list[int],
+    max_per_cycle: int = 50,
+) -> list[dict]:
     """
-    Load all model artifacts from *run_dir* and return them in a flat dict.
-
-    Parameters
-    ----------
-    run_dir :
-        Path to the artifacts sub-directory for this run.
-    load_lstm :
-        Set to False to skip loading the Keras LSTM model when only RF
-        inference is needed (avoids the slow TensorFlow initialisation).
-
-    Loaded:
-      feature_schema.json    → feature_cols, window_n, class encoding
-      thresholds_config.json → alert_lead_h, repeat_interval_h, confidence_threshold
-      best_model_summary.json → best_model_type, run_id, artifact_paths
-      lstm_metrics.json      → y_time_mean_h, y_time_std_h (regression normalisation)
-      scaler_*.pkl           → fitted StandardScaler
-      label_encoder_stage_*.pkl → fitted LabelEncoder
-      growth_progression_lstm_*.keras  (only when load_lstm=True)
-      growth_progression_rf_classifier_*.pkl  (if available)
-      growth_progression_rf_regressor_*.pkl   (if available)
+    Extract evenly-spaced encoder windows from specified cycles.
+    Each window: enc_len encoder rows + pre-computed target cols from last row.
+    Windows that lack valid 48h ground-truth targets are skipped.
     """
-    # ── Feature schema ────────────────────────────────────────────────────────
-    schema = json.loads((run_dir / "feature_schema.json").read_text())
-    feature_cols = schema["feature_cols"]
-    window_n     = schema["window_N"]
-    int_to_stage = {
-        int(k): v
-        for k, v in schema["label_encoder_classes"]["int_to_stage"].items()
-    }
-    stage_to_int = schema["label_encoder_classes"]["stage_to_int"]
+    windows = []
+    for cycle_id in cycles:
+        cyc = (df[df["cycle_id"] == cycle_id]
+               .sort_values("time_idx")
+               .reset_index(drop=True))
 
-    # ── Alert thresholds ──────────────────────────────────────────────────────
-    thresh = json.loads((run_dir / "thresholds_config.json").read_text())
-    alert_lead_h         = thresh["regressor_alert_thresholds"]["alert_lead_h"]
-    repeat_interval_h    = thresh["regressor_alert_thresholds"]["repeat_interval_h"]
-    confidence_threshold = thresh["classifier_confidence_threshold"]
+        # All rows in sequence_ready_dataset have non-NaN targets, but guard anyway
+        cyc = cyc.dropna(subset=["target_stage_index_24h", "target_stage_index_48h"])
 
-    # ── Best model summary ────────────────────────────────────────────────────
-    best_summary     = json.loads((run_dir / "best_model_summary.json").read_text())
-    best_model_type  = best_summary["best_model"]
-    run_id           = best_summary["run_id"]
+        if len(cyc) < enc_len + 1:
+            print(f"  [WARN] Cycle {cycle_id} too short ({len(cyc)} rows). Skipping.")
+            continue
 
-    # ── LSTM regression normalisation constants ───────────────────────────────
-    lstm_metrics  = json.loads((run_dir / "lstm_metrics.json").read_text())
-    y_time_mean_h = lstm_metrics["normalization"]["y_time_mean_h"]
-    y_time_std_h  = lstm_metrics["normalization"]["y_time_std_h"]
+        max_start = len(cyc) - enc_len
+        step      = max(1, max_start // max_per_cycle)
+        starts    = list(range(0, max_start, step))[:max_per_cycle]
 
-    # ── Preprocessing objects ─────────────────────────────────────────────────
-    import joblib
+        for start in starts:
+            enc_rows = cyc.iloc[start: start + enc_len].reset_index(drop=True)
+            gt_row   = cyc.iloc[start + enc_len - 1]
 
-    scaler_path    = next(run_dir.glob("scaler_*.pkl"), None)
-    label_enc_path = next(run_dir.glob("label_encoder_stage_*.pkl"), None)
+            windows.append({
+                "cycle_id" : int(cycle_id),
+                "start_idx": int(start),
+                "enc_rows" : enc_rows,
+                "gt"       : {
+                    "stage_now"          : int(gt_row["stage_index"]),
+                    "stage_now_name"     : str(gt_row.get("stage_name", "")),
+                    "stage_24h"          : int(round(float(gt_row["target_stage_index_24h"]))),
+                    "stage_48h"          : int(round(float(gt_row["target_stage_index_48h"]))),
+                    "progress_24h"       : float(gt_row["target_stage_progress_24h"]),
+                    "progress_48h"       : float(gt_row["target_stage_progress_48h"]),
+                    "hours_to_next"      : float(gt_row["target_hours_to_next_stage"]),
+                    "stage_progress_now" : float(gt_row["stage_progress_pct"]),
+                    "indoor_temp"        : float(gt_row["indoor_temp"]),
+                    "indoor_humidity"    : float(gt_row["indoor_humidity"]),
+                    "solarradiation"     : float(gt_row["solarradiation"]),
+                    "vpd"                : float(gt_row["vpd"]),
+                    "cycle_origin_type"  : str(gt_row.get("cycle_origin_type", "generated")),
+                    "season_label"       : str(gt_row.get("season_label", "summer")),
+                    "timestamp"          : str(gt_row.get("timestamp", "")),
+                },
+            })
 
-    if scaler_path is None:
-        raise FileNotFoundError(f"No scaler_*.pkl found in {run_dir}")
-    if label_enc_path is None:
-        raise FileNotFoundError(f"No label_encoder_stage_*.pkl found in {run_dir}")
-
-    scaler    = joblib.load(scaler_path)
-    label_enc = joblib.load(label_enc_path)
-
-    # ── Models ────────────────────────────────────────────────────────────────
-    rf_clf_path = MODELS_DIR / f"growth_progression_rf_classifier_{run_id}.pkl"
-    rf_reg_path = MODELS_DIR / f"growth_progression_rf_regressor_{run_id}.pkl"
-    lstm_path   = MODELS_DIR / f"growth_progression_lstm_{run_id}.keras"
-
-    clf_rf = joblib.load(rf_clf_path) if rf_clf_path.exists() else None
-    reg_rf = joblib.load(rf_reg_path) if rf_reg_path.exists() else None
-
-    lstm_model = None
-    if load_lstm and lstm_path.exists():
-        LOG.info("Loading LSTM model (this may take a moment) ...")
-        import keras
-        lstm_model = keras.models.load_model(str(lstm_path))
-        LOG.info("LSTM model loaded.")
-    elif not load_lstm:
-        LOG.info("Skipping LSTM model load (RF inference only).")
-
-    LOG.info(
-        "Artifacts loaded: run=%s | n_features=%d | window_N=%d | best_model=%s",
-        run_id, len(feature_cols), window_n, best_model_type,
-    )
-
-    return dict(
-        feature_cols=feature_cols,
-        window_n=window_n,
-        int_to_stage=int_to_stage,
-        stage_to_int=stage_to_int,
-        alert_lead_h=alert_lead_h,
-        repeat_interval_h=repeat_interval_h,
-        confidence_threshold=confidence_threshold,
-        best_model_type=best_model_type,
-        run_id=run_id,
-        y_time_mean_h=y_time_mean_h,
-        y_time_std_h=y_time_std_h,
-        scaler=scaler,
-        label_enc=label_enc,
-        clf_rf=clf_rf,
-        reg_rf=reg_rf,
-        lstm_model=lstm_model,
-    )
+    print(f"  Windows   : {len(windows)} total from cycles {cycles}")
+    return windows
 
 
-# =============================================================================
-# Inference
-# =============================================================================
+# ============================================================================
+# INFERENCE ENGINE
+# ============================================================================
 
-def run_inference(
-    buf_feat: pd.DataFrame,
-    arts: dict,
-    model_type: str,
-) -> dict[str, Any]:
+def _build_window_df(enc_rows: pd.DataFrame) -> pd.DataFrame:
     """
-    Run growth-stage and time-to-transition inference on the current buffer.
-
-    Parameters
-    ----------
-    buf_feat :
-        Full engineered feature buffer (all computed rows).
-        Last row = current observation.
-    arts :
-        Loaded artifacts dict from load_artifacts().
-    model_type :
-        "rf"  — tabular Random Forest inference on last row.
-        "lstm" — sequence LSTM inference on last window_n rows.
-
-    Returns
-    -------
-    dict
-        stage_pred   : predicted next stage name (str)
-        stage_conf   : classifier confidence for that class (float 0-1)
-        time_pred_h  : predicted hours until stage transition (float)
-        clf_probs    : full class probability vector (list[float])
-        raw_reg_out  : raw regressor output before denormalisation (float)
+    Format a real-data 72-row window for TFT inference.
+    Re-indexes time_idx from 0; uses dummy cycle_id '999'.
     """
-    feature_cols  = arts["feature_cols"]
-    scaler        = arts["scaler"]
-    int_to_stage  = arts["int_to_stage"]
-    window_n      = arts["window_n"]
-    y_time_mean_h = arts["y_time_mean_h"]
-    y_time_std_h  = arts["y_time_std_h"]
+    df = enc_rows.copy()
+    df["time_idx"]       = np.arange(len(df), dtype=int)
+    df["cycle_id"]       = "999"
+    df["cycle_origin_type"] = df["cycle_origin_type"].fillna("original").astype(str)
+    df["season_label"]   = df["season_label"].fillna("summer").astype(str)
+    df["target_stage_index_24h"] = 0.0   # dummy — not used during inference
+    return df
 
-    # Align columns to the exact FEATURE_COLS order used during training.
-    # Any column that doesn't exist in the buffer is filled with 0.0.
-    feat_df = buf_feat.reindex(columns=feature_cols, fill_value=0.0)
 
-    # NaN handling:
-    #   ffill  — propagate the most recent valid value (lag / rolling warmup)
-    #   bfill  — fill remaining leading NaN (first rows before rolling kicks in)
-    #   fillna — last resort zero-fill
-    feat_df = feat_df.ffill().bfill().fillna(0.0)
+def _append_decoder_rows(enc_df: pd.DataFrame, pred_len: int) -> pd.DataFrame:
+    """Append pred_len decoder rows by propagating and updating the last encoder row."""
+    last    = enc_df.iloc[-1].to_dict()
+    last_ti = int(last["time_idx"])
+    last_hr = int(last.get("hour", 12))
+    last_doy = int(last.get("day_of_year", 180))
 
-    # ── LSTM inference ────────────────────────────────────────────────────────
-    if model_type == "lstm":
-        lstm_model = arts["lstm_model"]
+    dec_rows = []
+    for k in range(1, pred_len + 1):
+        r = dict(last)
+        fh = (last_hr + k) % 24
+        ed = (last_hr + k) // 24
+        r["time_idx"]          = last_ti + k
+        r["hour"]              = float(fh)
+        r["day_of_year"]       = float(min(last_doy + ed, 366))
+        r["day_night_flag"]    = float(int(6 <= fh < 20))
+        r["light_period_flag"] = float(int(8 <= fh < 18))
+        r["target_stage_index_24h"] = 0.0
+        dec_rows.append(r)
 
-        # Extract the last window_n rows
-        tail = feat_df.tail(window_n)
+    full = pd.concat([enc_df, pd.DataFrame(dec_rows)], ignore_index=True)
+    full["time_idx"] = full["time_idx"].astype(int)
+    return full
 
-        # Pad with the oldest available row if buffer hasn't filled yet
-        if len(tail) < window_n:
-            pad_n   = window_n - len(tail)
-            pad_row = tail.iloc[[0]].values if len(tail) > 0 else np.zeros((1, len(feature_cols)))
-            pad     = np.repeat(pad_row, pad_n, axis=0)
-            window_arr = np.vstack([pad, tail.values]).astype(np.float32)
+
+def _scale_df(df: pd.DataFrame, scaler, scaled_features: list[str]) -> pd.DataFrame:
+    cols = [c for c in scaled_features if c in df.columns]
+    df   = df.copy()
+    df[cols] = scaler.transform(df[cols])
+    return df
+
+
+def run_inference(enc_rows: pd.DataFrame, arts: dict) -> Optional[dict]:
+    """
+    Run a single TFT forward pass on a real-data 72-row window.
+    Returns a prediction dict or None on failure.
+    """
+    try:
+        win_df  = _build_window_df(enc_rows)
+        full_df = _append_decoder_rows(win_df, arts["pred_len"])
+        full_df = _scale_df(full_df, arts["scaler"], arts["scaled_features"])
+
+        infer_ds = TimeSeriesDataSet.from_dataset(
+            arts["training_dataset"], full_df, predict=True, stop_randomization=True
+        )
+        infer_dl = infer_ds.to_dataloader(train=False, batch_size=1, num_workers=0)
+
+        arts["tft_model"].eval()
+        with torch.no_grad():
+            x, _y   = next(iter(infer_dl))
+            out     = arts["tft_model"](x)
+            pred_dn = arts["tft_model"].transform_output(out.prediction, x["target_scale"])
+
+        preds = pred_dn[0].cpu().numpy()   # (pred_len, n_quantiles)
+        q50   = preds[:, arts["median_idx"]]
+
+        p24 = float(q50[arts["h24"]])
+        p48 = float(q50[arts["h48"]])
+        q24 = preds[arts["h24"]]
+        q48 = preds[arts["h48"]]
+
+        si24 = int(np.clip(round(p24), 0, 5))
+        si48 = int(np.clip(round(p48), 0, 5))
+
+        prog24 = float(np.clip((p24 - math.floor(p24)) * 100.0, 0.0, 100.0))
+        prog48 = float(np.clip((p48 - math.floor(p48)) * 100.0, 0.0, 100.0))
+
+        # Hours-to-next: scan q50 decoder steps for a stage transition; extrapolate otherwise
+        cur_si   = int(enc_rows.iloc[-1].get("stage_index", 0))
+        cur_base = int(math.floor(q50[0]))
+        transition_step = None
+        for step, val in enumerate(q50):
+            if int(math.floor(val)) > cur_base:
+                transition_step = step
+                break
+        if transition_step is not None:
+            hours_nxt = float(transition_step + 1)
         else:
-            window_arr = tail.values.astype(np.float32)  # (window_n, n_feat)
+            frac_now  = float(q50[0] - cur_base)
+            stage_key = STAGE_ORDER[cur_si] if 0 <= cur_si < N_STAGES else "early_vegetative"
+            hours_nxt = round((1.0 - frac_now) * STAGE_DURATION_H.get(stage_key, 240), 1)
 
-        # Scale: reshape to 2-D, transform, reshape back
-        n_feat     = window_arr.shape[1]
-        scaled_2d  = scaler.transform(window_arr)          # (window_n, n_feat)
-        X_input    = scaled_2d[np.newaxis, :, :]           # (1, window_n, n_feat)
+        def _probs(q_arr: np.ndarray) -> list[float]:
+            mid   = arts["median_idx"]
+            mu    = q_arr[mid]
+            sigma = max((q_arr[-1] - q_arr[0]) / 4.0, 0.3)
+            raw   = np.exp(-0.5 * ((np.arange(float(N_STAGES)) - mu) / sigma) ** 2)
+            return (raw / raw.sum()).tolist()
 
-        pred_out = lstm_model.predict(X_input, verbose=0)
+        has_nan = bool(np.any(np.isnan(preds)))
+        has_inf = bool(np.any(np.isinf(preds)))
 
-        # Dual-output model: [clf_probs (1,6), reg_norm (1,1)]
-        if isinstance(pred_out, (list, tuple)) and len(pred_out) == 2:
-            clf_probs  = np.asarray(pred_out[0]).ravel()   # (6,)
-            reg_norm   = float(np.asarray(pred_out[1]).ravel()[0])
+        return {
+            "stage_index_24h" : si24,
+            "stage_index_48h" : si48,
+            "stage_cont_24h"  : round(p24, 4),
+            "stage_cont_48h"  : round(p48, 4),
+            "progress_24h"    : round(prog24, 2),
+            "progress_48h"    : round(prog48, 2),
+            "hours_to_next"   : round(hours_nxt, 1),
+            "class_probs_24h" : _probs(q24),
+            "class_probs_48h" : _probs(q48),
+            "iqr_24h"         : [round(float(q24[2]), 3), round(float(q24[4]), 3)],
+            "iqr_48h"         : [round(float(q48[2]), 3), round(float(q48[4]), 3)],
+            "has_nan"         : has_nan,
+            "has_inf"         : has_inf,
+        }
+
+    except Exception as exc:
+        return None
+
+
+def run_all_inference(
+    windows: list[dict], arts: dict, tag: str = "test", verbose: bool = True
+) -> list[dict]:
+    """Batch-run inference on all windows. Attaches 'pred' key (or None on failure)."""
+    results  = []
+    n_ok     = 0
+    n_err    = 0
+    t_start  = time.time()
+    for i, win in enumerate(windows):
+        pred = run_inference(win["enc_rows"], arts)
+        rec  = {k: v for k, v in win.items() if k != "enc_rows"}
+        rec["enc_rows"] = win["enc_rows"]   # keep for S4 radiation check
+        rec["pred"]     = pred
+        results.append(rec)
+        if pred is None:
+            n_err += 1
         else:
-            # Single-output fallback — treat as classification only
-            clf_probs = np.asarray(pred_out).ravel()
-            reg_norm  = 0.0
+            n_ok += 1
+        if verbose and (i + 1) % 20 == 0:
+            elapsed = time.time() - t_start
+            rate    = (i + 1) / elapsed
+            print(f"  [{tag}] {i+1}/{len(windows)}  ok={n_ok}  err={n_err}"
+                  f"  ({rate:.1f} win/s)", end="\r", flush=True)
 
-        raw_reg_out = reg_norm
-        pred_class  = int(np.argmax(clf_probs))
-        stage_pred  = int_to_stage.get(pred_class, f"class_{pred_class}")
-        stage_conf  = float(clf_probs[pred_class])
-        time_pred_h = max(0.0, reg_norm * y_time_std_h + y_time_mean_h)
-
-    # ── RF inference ──────────────────────────────────────────────────────────
-    else:
-        clf_rf = arts["clf_rf"]
-        reg_rf = arts["reg_rf"]
-
-        X_row    = feat_df.iloc[[-1]].values.astype(np.float64)  # (1, n_feat)
-        X_scaled = scaler.transform(X_row)
-
-        # Classifier
-        if clf_rf is not None:
-            clf_probs_arr = clf_rf.predict_proba(X_scaled)[0]  # (n_classes,)
-            pred_class    = int(np.argmax(clf_probs_arr))
-            stage_pred    = int_to_stage.get(pred_class, f"class_{pred_class}")
-            stage_conf    = float(clf_probs_arr[pred_class])
-            clf_probs     = clf_probs_arr.tolist()
-        else:
-            stage_pred = "unknown"
-            stage_conf = 0.0
-            clf_probs  = []
-
-        # Regressor (RF predicts raw hours — no denormalisation needed)
-        if reg_rf is not None:
-            raw_reg_out = float(reg_rf.predict(X_scaled)[0])
-            time_pred_h = max(0.0, raw_reg_out)
-        else:
-            raw_reg_out = float("nan")
-            time_pred_h = float("nan")
-
-    return dict(
-        stage_pred=stage_pred,
-        stage_conf=stage_conf,
-        time_pred_h=time_pred_h,
-        clf_probs=clf_probs if isinstance(clf_probs, list) else clf_probs.tolist(),
-        raw_reg_out=raw_reg_out,
-    )
+    elapsed = time.time() - t_start
+    print(f"  [{tag}] Done: {n_ok} ok, {n_err} failed — {elapsed:.1f}s            ")
+    return results
 
 
-# =============================================================================
-# Display helpers
-# =============================================================================
+# ============================================================================
+# PART C — FUNCTIONAL TESTS
+# ============================================================================
 
-_PROB_BAR_WIDTH = 20
+def functional_tests(arts: dict, windows: list[dict]) -> dict:
+    """Ten structural/functional correctness checks."""
+    print("\n[C] Functional tests ...")
+    res      = {}
+    failures = []
 
+    # C1 — Model type
+    res["C1_model_type_correct"] = isinstance(arts["tft_model"], TemporalFusionTransformer)
+    if not res["C1_model_type_correct"]:
+        failures.append("C1: model is not TemporalFusionTransformer")
 
-def _prob_bar(prob: float) -> str:
-    """Render a compact ASCII probability bar for *prob* in [0, 1]."""
-    filled = round(prob * _PROB_BAR_WIDTH)
-    return "[" + "#" * filled + "." * (_PROB_BAR_WIDTH - filled) + "]"
+    # C2 — Scaler feature count consistency
+    n_scaler  = len(arts["scaler"].feature_names_in_)
+    n_listed  = len(arts["scaled_features"])
+    res["C2_scaler_feature_count"] = n_scaler
+    res["C2_scaler_matches_config"] = (n_scaler == n_listed)
+    if n_scaler != n_listed:
+        failures.append(f"C2: scaler has {n_scaler} features but config lists {n_listed}")
 
+    # C3 — Sample window available
+    sample = windows[0] if windows else None
+    res["C3_sample_window_available"] = sample is not None
+    if not sample:
+        failures.append("C3: No sample windows available")
+        _summarise_c(res, failures)
+        return res
 
-def print_tick(
-    tick: int,
-    ts: datetime,
-    current_stage: str,
-    reading: dict,
-    result: dict,
-    arts: dict,
-    alert: bool,
-    model_type: str,
-    warmup: bool,
-) -> None:
-    """Print a formatted per-tick diagnostic to stdout."""
-    int_to_stage = arts["int_to_stage"]
-    n_cls        = len(int_to_stage)
+    # Checks C4–C10 require a real inference call on the sample window
+    pred = run_inference(sample["enc_rows"], arts)
+    res["C4_inference_executes"]   = pred is not None
+    if pred is None:
+        failures.append("C4: Inference crashed on sample window")
+        _summarise_c(res, failures)
+        return res
 
-    sep = "=" * 74 if alert else "-" * 74
-    print(sep)
+    required_keys = ["stage_index_24h", "stage_index_48h", "progress_24h",
+                     "progress_48h", "hours_to_next", "class_probs_24h"]
+    missing       = [k for k in required_keys if k not in pred]
+    res["C5_output_keys_present"] = len(missing) == 0
+    if missing:
+        failures.append(f"C5: Missing output keys: {missing}")
 
-    if alert:
-        print("  *** STAGE TRANSITION ALERT — transition predicted within "
-              f"{arts['alert_lead_h']}h ***")
+    res["C6_no_nan_in_output"] = not pred.get("has_nan", True)
+    res["C6_no_inf_in_output"] = not pred.get("has_inf", True)
+    if pred.get("has_nan"):
+        failures.append("C6: NaN values found in raw predictions")
+    if pred.get("has_inf"):
+        failures.append("C6: Inf values found in raw predictions")
 
-    period = "DAY " if reading["day_night_flag"] else "NGHT"
-    warmup_tag = "  [WARMUP]" if warmup else ""
-    print(
-        f"  Tick #{tick:04d}{warmup_tag}  |  "
-        f"Sim time: {ts.strftime('%Y-%m-%d %H:%M')}  [{period}]"
-    )
-    print(
-        f"  Model: {model_type.upper():<4}  |  "
-        f"Current stage : {current_stage}"
-    )
-    print()
+    si24_ok = 0 <= pred["stage_index_24h"] <= 5
+    si48_ok = 0 <= pred["stage_index_48h"] <= 5
+    res["C7_stage_indices_valid"] = si24_ok and si48_ok
+    if not (si24_ok and si48_ok):
+        failures.append(f"C7: Stage indices out of range: {pred['stage_index_24h']}, {pred['stage_index_48h']}")
 
-    # Sensor readings
-    print(
-        f"  Sensors  "
-        f"T={reading['temperature']:5.1f}C  "
-        f"RH={reading['humidity']:5.1f}%  "
-        f"VPD={reading['vpd']:5.3f} kPa  "
-        f"CO2={reading['co2']:5.0f} ppm  "
-        f"Rad={reading['solar_radiation']:5.0f} W/m2  "
-        f"Vel={reading['air_velocity']:4.2f} m/s"
-    )
-    print(
-        f"           "
-        f"Dew={reading['dew_point']:5.1f}C"
-    )
-    print()
+    p24_ok = 0.0 <= pred["progress_24h"] <= 100.0
+    p48_ok = 0.0 <= pred["progress_48h"] <= 100.0
+    res["C8_progress_in_valid_range"] = p24_ok and p48_ok
+    if not (p24_ok and p48_ok):
+        failures.append(f"C8: Progress out of [0,100]: {pred['progress_24h']}, {pred['progress_48h']}")
 
-    # Prediction summary
-    time_str = (
-        f"{result['time_pred_h']:.1f} h"
-        if not math.isnan(result["time_pred_h"])
-        else "n/a"
-    )
-    alert_tag = "  <-- ALERT" if alert else ""
-    print(
-        f"  Prediction   next stage : {result['stage_pred']:<25} "
-        f"(conf={result['stage_conf']:.1%})"
-    )
-    print(
-        f"               time-to-transition : {time_str}{alert_tag}"
-    )
-    print()
+    res["C9_hours_to_next_nonneg"] = pred["hours_to_next"] >= 0.0
+    if pred["hours_to_next"] < 0:
+        failures.append(f"C9: Negative hours_to_next: {pred['hours_to_next']}")
 
-    # Class probability breakdown
-    if result["clf_probs"]:
-        print("  Stage probabilities:")
-        for cls_idx, prob in enumerate(result["clf_probs"]):
-            stage_name = int_to_stage.get(cls_idx, str(cls_idx))
-            marker = " <-- predicted" if cls_idx == STAGE_TO_INT.get(result["stage_pred"], -1) else ""
-            print(
-                f"    {stage_name:<25} {_prob_bar(prob)} {prob:5.1%}{marker}"
-            )
+    s24 = sum(pred.get("class_probs_24h", [0]))
+    s48 = sum(pred.get("class_probs_48h", [0]))
+    res["C10_class_probs_sum_to_1"] = abs(s24 - 1.0) < 0.01 and abs(s48 - 1.0) < 0.01
+    if not res["C10_class_probs_sum_to_1"]:
+        failures.append(f"C10: Class probs don't sum to 1: +24h={s24:.3f}, +48h={s48:.3f}")
+
+    _summarise_c(res, failures)
+    return res
 
 
-# =============================================================================
-# Interactive configuration menu
-# =============================================================================
+def _summarise_c(res: dict, failures: list[str]) -> None:
+    n_bool   = sum(1 for v in res.values() if isinstance(v, bool))
+    n_passed = sum(1 for v in res.values() if v is True)
+    res["checks_passed"] = n_passed
+    res["total_checks"]  = n_bool
+    res["failures"]      = failures
+    res["all_passed"]    = len(failures) == 0
+    status = "PASS" if res["all_passed"] else f"PARTIAL ({len(failures)} failed)"
+    print(f"  Result : {status}  ({n_passed}/{n_bool} checks)")
+    for f in failures:
+        print(f"  FAIL   : {f}")
 
-def _interactive_setup() -> argparse.Namespace:
-    """
-    Display a step-by-step configuration menu and return a Namespace
-    that matches exactly what argparse would produce in main().
 
-    Called automatically when the script is run without any CLI arguments.
-    """
+# ============================================================================
+# PART D — SCENARIO DEFINITIONS AND ASSIGNMENT
+# ============================================================================
 
-    def _pick(prompt: str, options: list[str], default: int = 0) -> int:
-        """Print numbered options and return the 0-based index chosen by the user."""
-        print(f"\n  {prompt}")
-        for i, opt in enumerate(options):
-            tag = "  <-- default" if i == default else ""
-            print(f"    [{i + 1}] {opt}{tag}")
-        while True:
+SCENARIOS: dict[str, dict] = {
+    "S1_stable_early_growth": {
+        "desc"   : "Stable early growth — seedling/early_veg, <60% stage progress",
+        "filter" : lambda gt, enc: gt["stage_now"] in (0, 1) and gt["stage_progress_now"] < 60,
+    },
+    "S2_approaching_transition": {
+        "desc"   : "Approaching stage transition — >85% stage progress remaining",
+        "filter" : lambda gt, enc: gt["stage_progress_now"] > 85,
+    },
+    "S3_mid_stage_development": {
+        "desc"   : "Mid-stage steady development — 30–70% stage progress",
+        "filter" : lambda gt, enc: 30 < gt["stage_progress_now"] < 70,
+    },
+    "S4_diurnal_variation": {
+        "desc"   : "Clear day/night cycle — radiation range > 100 W/m² in window",
+        "filter" : lambda gt, enc: float(enc["solarradiation"].max() - enc["solarradiation"].min()) > 100,
+    },
+    "S5_high_humidity": {
+        "desc"   : "High humidity / lower ventilation — humidity > 82%",
+        "filter" : lambda gt, enc: gt["indoor_humidity"] > 82,
+    },
+    "S6_high_growth_conditions": {
+        "desc"   : "High-growth conditions — T > 24°C and radiation > 150 W/m²",
+        "filter" : lambda gt, enc: gt["indoor_temp"] > 24 and gt["solarradiation"] > 150,
+    },
+    "S7_late_fruit_development": {
+        "desc"   : "Late fruit development — unripe/ripe stage, >75% progress",
+        "filter" : lambda gt, enc: gt["stage_now"] in (4, 5) and gt["stage_progress_now"] > 75,
+    },
+    "S8_original_cycles": {
+        "desc"   : "Original (non-synthetic) crop cycle data",
+        "filter" : lambda gt, enc: gt["cycle_origin_type"] == "original",
+    },
+    "S8_generated_cycles": {
+        "desc"   : "Augmentation-generated cycle data",
+        "filter" : lambda gt, enc: gt["cycle_origin_type"] == "generated",
+    },
+}
+
+
+def assign_scenarios(results: list[dict]) -> dict[str, list[dict]]:
+    """Assign each valid result into matching scenario buckets."""
+    buckets = {k: [] for k in SCENARIOS}
+    for rec in results:
+        if rec["pred"] is None:
+            continue
+        gt  = rec["gt"]
+        enc = rec["enc_rows"]
+        for sc_key, sc_def in SCENARIOS.items():
             try:
-                raw = input(f"  Choice [1-{len(options)}, Enter={default + 1}]: ").strip()
-            except EOFError:
-                return default
-            if raw == "":
-                return default
-            if raw.isdigit() and 1 <= int(raw) <= len(options):
-                return int(raw) - 1
-            print(f"  Invalid -- enter a number between 1 and {len(options)}.")
+                if sc_def["filter"](gt, enc):
+                    buckets[sc_key].append(rec)
+            except Exception:
+                pass
+    return buckets
 
-    print()
-    print("=" * 64)
-    print("  AgriTwin-GH  |  Growth Progression Model Tester")
-    print("  Interactive Setup  --  press Enter to accept the default")
-    print("=" * 64)
 
-    # -- 1. Starting growth stage ------------------------------------------
-    stage_labels = [
-        "seedling               - germination & root establishment",
-        "early_veg              - leaf/stem expansion",
-        "flowering_initiation   - bud formation begins",
-        "flowering              - anthesis & pollination",
-        "unripe                 - fruit development",
-        "ripe                   - harvest-ready",
-    ]
-    stage_idx = _pick("Starting growth stage:", stage_labels, default=0)
-    stage = STAGE_ORDER[stage_idx]
+def _quick_metrics(bucket: list[dict]) -> dict:
+    if not bucket:
+        return {"n": 0}
+    y_si24_t  = [r["gt"]["stage_24h"]    for r in bucket]
+    y_si24_p  = [r["pred"]["stage_index_24h"] for r in bucket]
+    y_pr24_t  = [r["gt"]["progress_24h"] for r in bucket]
+    y_pr24_p  = [r["pred"]["progress_24h"] for r in bucket]
+    y_h2n_t   = [r["gt"]["hours_to_next"] for r in bucket]
+    y_h2n_p   = [r["pred"]["hours_to_next"] for r in bucket]
+    return {
+        "n"              : len(bucket),
+        "stage_acc_24h"  : round(accuracy_score(y_si24_t, y_si24_p), 4),
+        "ord_dist_24h"   : round(float(np.mean(np.abs(np.array(y_si24_t) - np.array(y_si24_p)))), 4),
+        "progress_mae_24h": round(mean_absolute_error(y_pr24_t, y_pr24_p), 2),
+        "h2n_mae"        : round(mean_absolute_error(y_h2n_t, y_h2n_p), 2),
+    }
 
-    # -- 2. Inference model ------------------------------------------------
-    model_labels = [
-        "auto   - use best model recorded in artifacts",
-        "rf     - Random Forest  (fast, no TF warmup)",
-        "lstm   - LSTM neural network  (requires TF initialisation)",
-    ]
-    model_vals = ["auto", "rf", "lstm"]
-    model_idx  = _pick("Inference model:", model_labels, default=0)
-    model      = model_vals[model_idx]
 
-    # -- 3. Simulation speed -----------------------------------------------
-    speed_labels = [
-        "instant  (0.00 s/tick) - run as fast as possible",
-        "fast     (0.10 s/tick)",
-        "normal   (0.50 s/tick)",
-        "slow     (2.00 s/tick) - closer to real-time feel",
-    ]
-    speed_vals = [0.0, 0.1, 0.5, 2.0]
-    speed_idx  = _pick("Simulation speed (wall-clock seconds per simulated hour):",
-                       speed_labels, default=2)
-    tick_secs  = speed_vals[speed_idx]
+def compute_scenario_metrics(buckets: dict[str, list[dict]]) -> pd.DataFrame:
+    rows = []
+    for sc_key, bucket in buckets.items():
+        m = _quick_metrics(bucket)
+        rows.append({
+            "scenario"       : sc_key,
+            "description"    : SCENARIOS.get(sc_key, {}).get("desc", ""),
+            **m,
+        })
+    return pd.DataFrame(rows)
 
-    # ── 4. Number of ticks ────────────────────────────────────────────────────
-    ticks_labels = [
-        "50      - quick sanity check",
-        "200     - short run",
-        "500     - standard run",
-        "unlimited - run until Ctrl+C",
-    ]
-    ticks_vals = [50, 200, 500, 0]
-    ticks_idx  = _pick("Number of ticks to simulate:", ticks_labels, default=2)
-    max_ticks  = ticks_vals[ticks_idx]
 
-    # -- 5. JSON log -------------------------------------------------------
-    log_labels = [
-        "No   - do not save a log file",
-        "Yes  - save to logs/realtime_test_<timestamp>.json",
-    ]
-    log_idx = _pick("Save a per-tick JSON log?", log_labels, default=0)
-    if log_idx == 1:
-        ts_tag   = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_json = f"logs/realtime_test_{ts_tag}.json"
-    else:
-        log_json = ""
+# ============================================================================
+# PART E — BIOLOGICAL CONSISTENCY TESTS
+# ============================================================================
 
-    # -- Summary ----------------------------------------------------------
-    print()
-    print("=" * 64)
-    print("  Configuration summary")
-    print(f"    Starting stage : {stage}")
-    print(f"    Model          : {model}")
-    print(f"    Speed          : {tick_secs:.2f} s / tick")
-    print(f"    Max ticks      : {max_ticks if max_ticks > 0 else 'unlimited'}")
-    print(f"    JSON log       : {log_json if log_json else 'disabled'}")
-    print("=" * 64)
-    print()
+def biological_consistency_tests(results: list[dict]) -> dict:
+    """Check biological plausibility of all predictions."""
+    print("\n[E] Biological consistency checks ...")
+    valid = [r for r in results if r["pred"] is not None]
+    n     = len(valid)
+    if n == 0:
+        return {"error": "No valid predictions to check"}
 
-    return argparse.Namespace(
-        stage=stage,
-        model=model,
-        tick_secs=tick_secs,
-        max_ticks=max_ticks,
-        log_json=log_json,
-        run_id="",
+    back_24:    list[dict] = []
+    back_48:    list[dict] = []
+    skip_24:    list[dict] = []
+    skip_48:    list[dict] = []
+    prog_back:  list[dict] = []
+    h2n_incon:  list[dict] = []
+    h2n_neg:    list[dict] = []
+    h2n_ext:    list[dict] = []
+
+    for rec in valid:
+        pred   = rec["pred"]
+        gt     = rec["gt"]
+        si_now = int(gt["stage_now"])
+        si24   = int(pred["stage_index_24h"])
+        si48   = int(pred["stage_index_48h"])
+        h2n    = float(pred["hours_to_next"])
+        pr24   = float(pred["progress_24h"])
+        pr48   = float(pred["progress_48h"])
+        base   = {"cycle": rec["cycle_id"], "stage_now": si_now}
+
+        # E1 — No backward stage jump
+        if si24 < si_now:
+            back_24.append({**base, "si24": si24})
+        if si48 < si_now:
+            back_48.append({**base, "si48": si48})
+
+        # E2 — No impossibly large jump in a short horizon
+        if si24 > si_now + 1:
+            skip_24.append({**base, "si24": si24, "skip": si24 - si_now})
+        if si48 > si_now + 2:
+            skip_48.append({**base, "si48": si48, "skip": si48 - si_now})
+
+        # E3 — Progress shouldn't go backwards within the same stage
+        if si24 == si48 and pr48 < pr24 - 5.0:
+            prog_back.append({**base, "pr24": pr24, "pr48": pr48})
+
+        # E4 — Transition consistency: if +24h=same and +48h=next, h2n should be ≤ 48h
+        if si24 == si_now and si48 == si_now + 1 and h2n > 48:
+            h2n_incon.append({**base, "si48": si48, "h2n": h2n})
+
+        # E5 — h2n sanity bounds
+        if h2n < 0:
+            h2n_neg.append({**base, "h2n": h2n})
+        if h2n > 2000:
+            h2n_ext.append({**base, "h2n": h2n})
+
+    total = (len(back_24) + len(back_48) + len(skip_24) + len(skip_48) +
+             len(prog_back) + len(h2n_incon) + len(h2n_neg) + len(h2n_ext))
+    pass_rate = round(100 * (1 - total / max(n, 1)), 2)
+
+    summary = {
+        "n_evaluated"             : n,
+        "E1_backward_jumps_24h"   : len(back_24),
+        "E1_backward_jumps_48h"   : len(back_48),
+        "E2_multi_stage_skip_24h" : len(skip_24),
+        "E2_multi_stage_skip_48h" : len(skip_48),
+        "E3_progress_backward"    : len(prog_back),
+        "E4_h2n_inconsistent"     : len(h2n_incon),
+        "E5_h2n_negative"         : len(h2n_neg),
+        "E5_h2n_extreme"          : len(h2n_ext),
+        "total_violations"        : total,
+        "biological_pass_rate_pct": pass_rate,
+        "violation_examples"      : {
+            "backward_jumps_24h"   : back_24[:5],
+            "multi_stage_skip_24h" : skip_24[:5],
+            "progress_backward"    : prog_back[:5],
+            "h2n_inconsistent"     : h2n_incon[:5],
+        },
+    }
+    print(f"  Pass rate : {pass_rate}%  ({total} violations in {n} samples)")
+    for tag, lst in [("E1 backward 24h", back_24), ("E2 skip 24h", skip_24),
+                     ("E3 prog backward", prog_back), ("E4 h2n inconsist.", h2n_incon),
+                     ("E5 h2n extreme", h2n_ext)]:
+        if lst:
+            print(f"    {tag}: {len(lst)}")
+    return summary
+
+
+# ============================================================================
+# PART F — ACCURACY AND REGRESSION METRICS
+# ============================================================================
+
+def _ordinal_distance(y_true: list[int], y_pred: list[int]) -> float:
+    return float(np.mean(np.abs(np.array(y_true) - np.array(y_pred))))
+
+
+def _transition_acc(y_true: list[int], y_pred: list[int], si_now: list[int]) -> float:
+    """Whether transition (predicted stage > current) was correctly detected."""
+    gt   = [int(t > n) for t, n in zip(y_true, si_now)]
+    pred = [int(p > n) for p, n in zip(y_pred, si_now)]
+    return float(accuracy_score(gt, pred)) if gt else 0.0
+
+
+def compute_stage_metrics(
+    y_true_si: list[int], y_pred_si: list[int],
+    si_now: list[int], horizon: str
+) -> dict:
+    labels   = list(range(N_STAGES))
+    present  = sorted(set(y_true_si) | set(y_pred_si))
+    cm       = confusion_matrix(y_true_si, y_pred_si, labels=labels)
+    return {
+        "horizon"               : horizon,
+        "n_samples"             : len(y_true_si),
+        "accuracy"              : round(accuracy_score(y_true_si, y_pred_si), 4),
+        "balanced_accuracy"     : round(balanced_accuracy_score(y_true_si, y_pred_si), 4),
+        "precision_macro"       : round(precision_score(y_true_si, y_pred_si, average="macro",    zero_division=0, labels=present), 4),
+        "recall_macro"          : round(recall_score(   y_true_si, y_pred_si, average="macro",    zero_division=0, labels=present), 4),
+        "f1_macro"              : round(f1_score(       y_true_si, y_pred_si, average="macro",    zero_division=0, labels=present), 4),
+        "f1_weighted"           : round(f1_score(       y_true_si, y_pred_si, average="weighted", zero_division=0), 4),
+        "ordinal_distance"      : round(_ordinal_distance(y_true_si, y_pred_si), 4),
+        "transition_detect_acc" : round(_transition_acc(y_true_si, y_pred_si, si_now), 4),
+        "confusion_matrix"      : cm.tolist(),
+    }
+
+
+def compute_regression_metrics(
+    y_true: list[float], y_pred: list[float], name: str
+) -> dict:
+    t = np.array(y_true, dtype=float)
+    p = np.array(y_pred, dtype=float)
+    abs_err = np.abs(t - p)
+    try:
+        r2 = float(r2_score(t, p))
+        ev = float(explained_variance_score(t, p))
+    except Exception:
+        r2, ev = float("nan"), float("nan")
+    safe_mape = float(np.nanmean(np.where(t != 0, np.abs((t - p) / t), np.nan))) * 100
+    return {
+        "metric"            : name,
+        "n_samples"         : len(y_true),
+        "mae"               : round(float(np.mean(abs_err)), 4),
+        "rmse"              : round(float(np.sqrt(np.mean((t - p) ** 2))), 4),
+        "r2"                : round(r2, 4) if not math.isnan(r2) else None,
+        "explained_var"     : round(ev, 4) if not math.isnan(ev) else None,
+        "median_abs_error"  : round(float(np.median(abs_err)), 4),
+        "mape_pct"          : round(safe_mape, 2) if not math.isnan(safe_mape) else None,
+        "mean_bias"         : round(float(np.mean(p - t)), 4),
+    }
+
+
+def compute_h2n_metrics(y_true: list[float], y_pred: list[float]) -> dict:
+    t       = np.array(y_true, dtype=float)
+    p       = np.array(y_pred, dtype=float)
+    abs_err = np.abs(t - p)
+    return {
+        "n_samples"        : len(y_true),
+        "mae"              : round(float(np.mean(abs_err)), 2),
+        "rmse"             : round(float(np.sqrt(np.mean((t - p) ** 2))), 2),
+        "median_abs_error" : round(float(np.median(abs_err)), 2),
+        "pct_within_6h"    : round(float(np.mean(abs_err <= 6))  * 100, 1),
+        "pct_within_12h"   : round(float(np.mean(abs_err <= 12)) * 100, 1),
+        "pct_within_24h"   : round(float(np.mean(abs_err <= 24)) * 100, 1),
+        "mean_bias_h"      : round(float(np.mean(p - t)), 2),
+    }
+
+
+def compute_all_metrics(results: list[dict]) -> dict:
+    """Compute the full metric suite over all valid inference results."""
+    valid = [r for r in results if r["pred"] is not None]
+    n     = len(valid)
+    print(f"\n[F] Computing metrics over {n} valid windows ...")
+    if n == 0:
+        return {"error": "No valid inference results"}
+
+    si_now   = [r["gt"]["stage_now"]     for r in valid]
+    si24_t   = [r["gt"]["stage_24h"]     for r in valid]
+    si48_t   = [r["gt"]["stage_48h"]     for r in valid]
+    prog24_t = [r["gt"]["progress_24h"]  for r in valid]
+    prog48_t = [r["gt"]["progress_48h"]  for r in valid]
+    h2n_t    = [r["gt"]["hours_to_next"] for r in valid]
+
+    si24_p   = [r["pred"]["stage_index_24h"] for r in valid]
+    si48_p   = [r["pred"]["stage_index_48h"] for r in valid]
+    prog24_p = [r["pred"]["progress_24h"]    for r in valid]
+    prog48_p = [r["pred"]["progress_48h"]    for r in valid]
+    h2n_p    = [r["pred"]["hours_to_next"]   for r in valid]
+
+    return {
+        "n_valid"      : n,
+        "stage_24h"    : compute_stage_metrics(si24_t,   si24_p,   si_now, "24h"),
+        "stage_48h"    : compute_stage_metrics(si48_t,   si48_p,   si_now, "48h"),
+        "progress_24h" : compute_regression_metrics(prog24_t, prog24_p, "stage_progress_24h"),
+        "progress_48h" : compute_regression_metrics(prog48_t, prog48_p, "stage_progress_48h"),
+        "hours_to_next": compute_h2n_metrics(h2n_t, h2n_p),
+    }
+
+
+def compute_per_stage_metrics(results: list[dict]) -> pd.DataFrame:
+    valid = [r for r in results if r["pred"] is not None]
+    rows  = []
+    for si, stage in enumerate(STAGE_ORDER):
+        sub = [r for r in valid if r["gt"]["stage_now"] == si]
+        if not sub:
+            rows.append({"stage": stage, "n": 0}); continue
+        si24_t  = [r["gt"]["stage_24h"]    for r in sub]
+        si24_p  = [r["pred"]["stage_index_24h"] for r in sub]
+        pr24_t  = [r["gt"]["progress_24h"] for r in sub]
+        pr24_p  = [r["pred"]["progress_24h"] for r in sub]
+        h2n_t   = [r["gt"]["hours_to_next"] for r in sub]
+        h2n_p   = [r["pred"]["hours_to_next"] for r in sub]
+        rows.append({
+            "stage"         : stage,
+            "n"             : len(sub),
+            "acc_24h"       : round(accuracy_score(si24_t, si24_p), 4),
+            "f1_weighted_24h": round(f1_score(si24_t, si24_p, average="weighted", zero_division=0), 4),
+            "ord_dist_24h"  : round(_ordinal_distance(si24_t, si24_p), 4),
+            "progress_mae_24h": round(mean_absolute_error(pr24_t, pr24_p), 2),
+            "h2n_mae"       : round(mean_absolute_error(h2n_t, h2n_p), 2),
+        })
+    return pd.DataFrame(rows)
+
+
+def compute_per_cycle_metrics(results: list[dict]) -> pd.DataFrame:
+    valid  = [r for r in results if r["pred"] is not None]
+    cycles = sorted(set(r["cycle_id"] for r in valid))
+    rows   = []
+    for cyc in cycles:
+        sub = [r for r in valid if r["cycle_id"] == cyc]
+        si24_t  = [r["gt"]["stage_24h"]    for r in sub]
+        si24_p  = [r["pred"]["stage_index_24h"] for r in sub]
+        pr24_t  = [r["gt"]["progress_24h"] for r in sub]
+        pr24_p  = [r["pred"]["progress_24h"] for r in sub]
+        h2n_t   = [r["gt"]["hours_to_next"] for r in sub]
+        h2n_p   = [r["pred"]["hours_to_next"] for r in sub]
+        origins = set(r["gt"]["cycle_origin_type"] for r in sub)
+        rows.append({
+            "cycle_id"      : cyc,
+            "origin_type"   : "/".join(sorted(origins)),
+            "n"             : len(sub),
+            "acc_24h"       : round(accuracy_score(si24_t, si24_p), 4),
+            "f1_weighted_24h": round(f1_score(si24_t, si24_p, average="weighted", zero_division=0), 4),
+            "ord_dist_24h"  : round(_ordinal_distance(si24_t, si24_p), 4),
+            "progress_mae_24h": round(mean_absolute_error(pr24_t, pr24_p), 2),
+            "h2n_mae"       : round(mean_absolute_error(h2n_t, h2n_p), 2),
+        })
+    return pd.DataFrame(rows)
+
+
+# ============================================================================
+# PART G — FORECAST BEHAVIOR AND TRANSITION ANALYSIS
+# ============================================================================
+
+def transition_analysis(results: list[dict]) -> pd.DataFrame:
+    """Detailed analysis of windows where a real stage transition is expected within 48h."""
+    valid = [r for r in results if r["pred"] is not None]
+    rows  = []
+    for rec in valid:
+        gt    = rec["gt"]
+        pred  = rec["pred"]
+        si_n  = int(gt["stage_now"])
+        si24t = int(gt["stage_24h"])
+        si48t = int(gt["stage_48h"])
+        si24p = int(pred["stage_index_24h"])
+        si48p = int(pred["stage_index_48h"])
+
+        trans_24h = si24t > si_n
+        trans_48h = si48t > si_n and not trans_24h
+        if not (trans_24h or trans_48h):
+            continue
+
+        rows.append({
+            "cycle_id"           : rec["cycle_id"],
+            "timestamp"          : gt["timestamp"],
+            "stage_now"          : STAGE_ORDER[si_n] if 0 <= si_n < N_STAGES else "?",
+            "actual_trans_24h"   : trans_24h,
+            "actual_trans_48h"   : trans_48h,
+            "pred_trans_24h"     : si24p > si_n,
+            "pred_trans_48h"     : si48p > si_n,
+            "true_hours_to_next" : round(float(gt["hours_to_next"]), 1),
+            "pred_hours_to_next" : round(float(pred["hours_to_next"]), 1),
+            "h2n_error_h"        : round(float(pred["hours_to_next"]) - float(gt["hours_to_next"]), 1),
+            "correct_24h"        : (si24p > si_n) == trans_24h,
+        })
+
+    if rows:
+        df       = pd.DataFrame(rows)
+        df_trans = df[df["actual_trans_24h"]]
+        if len(df_trans) > 0:
+            detect_rate = df_trans["correct_24h"].mean()
+            early_bias  = float(df_trans["h2n_error_h"].mean())
+            print(f"  Transitions within 24h : {len(df_trans)}  "
+                  f"detect_rate={detect_rate:.2%}  "
+                  f"avg_timing_bias={early_bias:+.1f}h")
+        return df
+
+    return pd.DataFrame(columns=["cycle_id", "timestamp", "stage_now",
+                                  "actual_trans_24h", "actual_trans_48h",
+                                  "pred_trans_24h", "pred_trans_48h",
+                                  "true_hours_to_next", "pred_hours_to_next",
+                                  "h2n_error_h", "correct_24h"])
+
+
+def build_prediction_samples(results: list[dict], n: int = 200) -> pd.DataFrame:
+    """Flat CSV of actual vs predicted values for a sample of results."""
+    valid = [r for r in results if r["pred"] is not None]
+    step  = max(1, len(valid) // n)
+    rows  = []
+    for rec in valid[::step]:
+        gt   = rec["gt"]
+        pred = rec["pred"]
+        rows.append({
+            "cycle_id"           : rec["cycle_id"],
+            "timestamp"          : gt["timestamp"],
+            "stage_now"          : gt["stage_now_name"],
+            "stage_progress_now_pct" : round(gt["stage_progress_now"], 1),
+            "actual_stage_24h"   : STAGE_ORDER[gt["stage_24h"]] if 0 <= gt["stage_24h"] < N_STAGES else "?",
+            "pred_stage_24h"     : STAGE_ORDER[pred["stage_index_24h"]] if 0 <= pred["stage_index_24h"] < N_STAGES else "?",
+            "actual_stage_48h"   : STAGE_ORDER[gt["stage_48h"]] if 0 <= gt["stage_48h"] < N_STAGES else "?",
+            "pred_stage_48h"     : STAGE_ORDER[pred["stage_index_48h"]] if 0 <= pred["stage_index_48h"] < N_STAGES else "?",
+            "actual_progress_24h": round(gt["progress_24h"], 1),
+            "pred_progress_24h"  : round(pred["progress_24h"], 1),
+            "actual_progress_48h": round(gt["progress_48h"], 1),
+            "pred_progress_48h"  : round(pred["progress_48h"], 1),
+            "actual_h2n"         : round(gt["hours_to_next"], 1),
+            "pred_h2n"           : round(pred["hours_to_next"], 1),
+            "stage_acc_24h"      : int(gt["stage_24h"] == pred["stage_index_24h"]),
+            "stage_acc_48h"      : int(gt["stage_48h"] == pred["stage_index_48h"]),
+            "indoor_temp"        : round(gt["indoor_temp"], 1),
+            "indoor_humidity"    : round(gt["indoor_humidity"], 1),
+            "solarradiation"     : round(gt["solarradiation"], 1),
+        })
+    return pd.DataFrame(rows)
+
+
+# ============================================================================
+# PART H — SAVE OUTPUTS AND PLOTS
+# ============================================================================
+
+def _plot_confusion_matrix(cm_data: list[list], title: str, path: Path) -> None:
+    cm  = np.array(cm_data, dtype=int)
+    fig, ax = plt.subplots(figsize=(7, 6))
+    im = ax.imshow(cm, cmap="Blues", aspect="auto")
+    plt.colorbar(im, ax=ax)
+    ax.set_xticks(range(N_STAGES)); ax.set_xticklabels(STAGE_LABELS, rotation=35, ha="right", fontsize=8)
+    ax.set_yticks(range(N_STAGES)); ax.set_yticklabels(STAGE_LABELS, fontsize=8)
+    max_val = cm.max() if cm.max() > 0 else 1
+    for i in range(N_STAGES):
+        for j in range(N_STAGES):
+            color = "white" if cm[i, j] > max_val * 0.5 else "black"
+            ax.text(j, i, str(int(cm[i, j])), ha="center", va="center",
+                    fontsize=8, color=color, fontweight="bold")
+    ax.set_xlabel("Predicted stage",  fontsize=9)
+    ax.set_ylabel("Actual stage",     fontsize=9)
+    ax.set_title(title,               fontsize=10)
+    plt.tight_layout()
+    plt.savefig(path, dpi=130, bbox_inches="tight")
+    plt.close()
+
+
+def _plot_error_dist(errors: list[float], title: str, xlabel: str, path: Path) -> None:
+    fig, ax = plt.subplots(figsize=(7, 4))
+    ax.hist(errors, bins=40, color="#2196F3", edgecolor="white", linewidth=0.4)
+    ax.axvline(0, color="red", linewidth=1.2, linestyle="--", label="Zero error")
+    ax.axvline(float(np.mean(errors)), color="orange", linewidth=1.2,
+               linestyle=":", label=f"Mean {np.mean(errors):.1f}")
+    ax.set_title(title, fontsize=10)
+    ax.set_xlabel(xlabel, fontsize=9)
+    ax.set_ylabel("Count", fontsize=9)
+    ax.legend(fontsize=8)
+    plt.tight_layout()
+    plt.savefig(path, dpi=130, bbox_inches="tight")
+    plt.close()
+
+
+def _plot_actual_vs_pred(y_true: list, y_pred: list, title: str,
+                          xlabel: str, path: Path) -> None:
+    fig, ax = plt.subplots(figsize=(6, 5))
+    ax.scatter(y_true, y_pred, alpha=0.3, s=12, color="#2196F3")
+    lim = [min(min(y_true), min(y_pred)) * 0.95, max(max(y_true), max(y_pred)) * 1.05]
+    ax.plot(lim, lim, "r--", linewidth=1, label="Perfect")
+    ax.set_xlim(lim); ax.set_ylim(lim)
+    ax.set_title(title, fontsize=10)
+    ax.set_xlabel(f"Actual {xlabel}", fontsize=9)
+    ax.set_ylabel(f"Predicted {xlabel}", fontsize=9)
+    ax.legend(fontsize=8)
+    plt.tight_layout()
+    plt.savefig(path, dpi=130, bbox_inches="tight")
+    plt.close()
+
+
+def _plot_scenario_comparison(sc_metrics: pd.DataFrame, path: Path) -> None:
+    df = sc_metrics[sc_metrics["n"] > 0].copy()
+    if df.empty:
+        return
+    fig, axes = plt.subplots(1, 3, figsize=(13, 5))
+    cols   = ["stage_acc_24h", "progress_mae_24h", "h2n_mae"]
+    titles = ["Stage Accuracy +24h", "Progress MAE +24h (%)", "Hours-to-Next MAE"]
+    colors = ["#4CAF50", "#FF9800", "#2196F3"]
+    labels = [s.replace("S8_", "").replace("_", "\n") for s in df["scenario"]]
+    for ax, col, title, color in zip(axes, cols, titles, colors):
+        if col not in df.columns:
+            ax.set_visible(False); continue
+        ax.barh(labels, df[col], color=color, edgecolor="white")
+        ax.set_title(title, fontsize=9)
+        ax.set_xlabel("Score", fontsize=8)
+        ax.tick_params(axis="y", labelsize=7)
+    plt.suptitle("Scenario Comparison — TFT Growth Progression", fontsize=10)
+    plt.tight_layout()
+    plt.savefig(path, dpi=130, bbox_inches="tight")
+    plt.close()
+
+
+def _plot_stage_trajectory(results: list[dict], out_dir: Path, n_examples: int = 4) -> None:
+    """Plot actual vs predicted stage index trajectories for sample windows."""
+    valid = [r for r in results if r["pred"] is not None]
+    sample = valid[::max(1, len(valid) // n_examples)][:n_examples]
+    if not sample:
+        return
+
+    fig, axes = plt.subplots(1, len(sample), figsize=(4 * len(sample), 4), sharey=True)
+    if len(sample) == 1:
+        axes = [axes]
+
+    for ax, rec in zip(axes, sample):
+        gt   = rec["gt"]
+        pred = rec["pred"]
+        # Encoder stage progression from enc_rows
+        enc_si = rec["enc_rows"]["stage_index"].values.tolist()
+        ax.plot(range(len(enc_si)), enc_si, color="gray", linewidth=1, alpha=0.6, label="Observed")
+        ax.scatter([len(enc_si) + 23], [gt["stage_24h"]],      marker="o", s=50, color="green",  label="Actual +24h")
+        ax.scatter([len(enc_si) + 47], [gt["stage_48h"]],      marker="o", s=50, color="darkgreen")
+        ax.scatter([len(enc_si) + 23], [pred["stage_index_24h"]], marker="x", s=60, color="red",     label="Pred +24h")
+        ax.scatter([len(enc_si) + 47], [pred["stage_index_48h"]], marker="x", s=60, color="darkred")
+        ax.set_yticks(range(N_STAGES)); ax.set_yticklabels(STAGE_LABELS, fontsize=6)
+        ax.set_title(f"Cycle {rec['cycle_id']}", fontsize=8)
+        ax.set_xlabel("Hour idx", fontsize=7)
+        ax.legend(fontsize=6)
+
+    plt.suptitle("Stage Trajectory: Observed + Forecast", fontsize=9)
+    plt.tight_layout()
+    plt.savefig(out_dir / "stage_prediction_examples.png", dpi=130, bbox_inches="tight")
+    plt.close()
+
+
+def save_all_outputs(
+    out_dir: Path,
+    test_cfg: dict,
+    functional: dict,
+    bio: dict,
+    metrics: dict,
+    per_stage: pd.DataFrame,
+    per_cycle: pd.DataFrame,
+    sc_metrics: pd.DataFrame,
+    trans_df: pd.DataFrame,
+    samples_df: pd.DataFrame,
+    results: list[dict],
+) -> None:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    print(f"\n[H] Saving outputs to: {out_dir}")
+
+    # JSON outputs
+    def _jdump(obj, name: str) -> None:
+        (out_dir / name).write_text(json.dumps(obj, indent=2, default=str))
+
+    _jdump(test_cfg,   "test_config.json")
+    _jdump(functional, "functional_test_results.json")
+    _jdump(bio,        "logical_consistency_results.json")
+
+    if "error" not in metrics:
+        _jdump(metrics.get("stage_24h", {}),    "stage_metrics_24h.json")
+        _jdump(metrics.get("stage_48h", {}),    "stage_metrics_48h.json")
+        _jdump({
+            "progress_24h" : metrics.get("progress_24h", {}),
+            "progress_48h" : metrics.get("progress_48h", {}),
+        },                                       "regression_metrics.json")
+        _jdump(metrics.get("hours_to_next", {}), "hours_to_next_metrics.json")
+
+        summary = {
+            "test_id"          : test_cfg["test_id"],
+            "run_id"           : test_cfg["run_id"],
+            "n_windows"        : metrics["n_valid"],
+            "functional_passed": functional.get("all_passed", False),
+            "bio_pass_rate_pct": bio.get("biological_pass_rate_pct", 0),
+            "stage_acc_24h"    : metrics["stage_24h"].get("accuracy"),
+            "stage_acc_48h"    : metrics["stage_48h"].get("accuracy"),
+            "f1_macro_24h"     : metrics["stage_24h"].get("f1_macro"),
+            "f1_macro_48h"     : metrics["stage_48h"].get("f1_macro"),
+            "ordinal_dist_24h" : metrics["stage_24h"].get("ordinal_distance"),
+            "progress_mae_24h" : metrics["progress_24h"].get("mae"),
+            "progress_mae_48h" : metrics["progress_48h"].get("mae"),
+            "h2n_mae"          : metrics["hours_to_next"].get("mae"),
+            "h2n_pct_within_12h": metrics["hours_to_next"].get("pct_within_12h"),
+            "violations_total" : bio.get("total_violations", 0),
+        }
+        _jdump(summary, "test_summary.json")
+
+        # Confusion matrices
+        cm24 = np.array(metrics["stage_24h"]["confusion_matrix"])
+        cm48 = np.array(metrics["stage_48h"]["confusion_matrix"])
+        pd.DataFrame(cm24, index=STAGE_LABELS, columns=STAGE_LABELS).to_csv(
+            out_dir / "confusion_matrix_24h.csv")
+        pd.DataFrame(cm48, index=STAGE_LABELS, columns=STAGE_LABELS).to_csv(
+            out_dir / "confusion_matrix_48h.csv")
+
+        # Plots — confusion matrices
+        _plot_confusion_matrix(cm24.tolist(), "Stage Prediction Confusion — +24h",
+                               out_dir / "confusion_matrix_24h.png")
+        _plot_confusion_matrix(cm48.tolist(), "Stage Prediction Confusion — +48h",
+                               out_dir / "confusion_matrix_48h.png")
+
+        # Plots — error distributions
+        valid      = [r for r in results if r["pred"] is not None]
+        prog_errs  = [r["pred"]["progress_24h"] - r["gt"]["progress_24h"]  for r in valid]
+        h2n_errs   = [r["pred"]["hours_to_next"] - r["gt"]["hours_to_next"] for r in valid]
+        prog24_t   = [r["gt"]["progress_24h"]  for r in valid]
+        prog24_p   = [r["pred"]["progress_24h"] for r in valid]
+        h2n_t      = [r["gt"]["hours_to_next"]  for r in valid]
+        h2n_p      = [r["pred"]["hours_to_next"] for r in valid]
+
+        if prog_errs:
+            _plot_error_dist(prog_errs, "Stage Progress Error Distribution (+24h)",
+                             "Predicted – Actual (%)", out_dir / "error_distribution_progress.png")
+        if h2n_errs:
+            _plot_error_dist(h2n_errs, "Hours-to-Next-Stage Error Distribution",
+                             "Predicted – Actual (h)", out_dir / "error_distribution_time_to_next_stage.png")
+        if prog24_t:
+            _plot_actual_vs_pred(prog24_t, prog24_p, "Stage Progress Actual vs Predicted (+24h)",
+                                 "progress (%)", out_dir / "progress_prediction_examples.png")
+        if h2n_t:
+            _plot_actual_vs_pred(h2n_t, h2n_p, "Hours-to-Next Actual vs Predicted",
+                                 "hours", out_dir / "time_to_next_stage_examples.png")
+
+    # Stage trajectory examples
+    _plot_stage_trajectory(results, out_dir)
+
+    # Scenario comparison plot
+    if not sc_metrics.empty:
+        _plot_scenario_comparison(sc_metrics, out_dir / "scenario_comparison.png")
+
+    # CSVs
+    if not per_stage.empty:
+        per_stage.to_csv(out_dir / "per_stage_metrics.csv", index=False)
+    if not per_cycle.empty:
+        per_cycle.to_csv(out_dir / "per_cycle_metrics.csv", index=False)
+    if not sc_metrics.empty:
+        sc_metrics.to_csv(out_dir / "per_scenario_metrics.csv", index=False)
+    if not trans_df.empty:
+        trans_df.to_csv(out_dir / "transition_analysis.csv", index=False)
+    if not samples_df.empty:
+        samples_df.to_csv(out_dir / "actual_vs_predicted.csv", index=False)
+        samples_df.head(50).to_csv(out_dir / "prediction_samples.csv", index=False)
+
+    # Violation examples CSV
+    viol = bio.get("violation_examples", {})
+    viol_rows = []
+    for vtype, items in viol.items():
+        for item in items:
+            viol_rows.append({"type": vtype, **item})
+    if viol_rows:
+        pd.DataFrame(viol_rows).to_csv(out_dir / "violation_examples.csv", index=False)
+
+    # Original vs generated comparison
+    valid = [r for r in results if r["pred"] is not None]
+    orig_r = [r for r in valid if r["gt"]["cycle_origin_type"] == "original"]
+    gen_r  = [r for r in valid if r["gt"]["cycle_origin_type"] == "generated"]
+    if orig_r or gen_r:
+        ov_rows = []
+        for label, subset in [("original", orig_r), ("generated", gen_r)]:
+            if not subset:
+                continue
+            si24_t = [r["gt"]["stage_24h"]        for r in subset]
+            si24_p = [r["pred"]["stage_index_24h"] for r in subset]
+            si_now = [r["gt"]["stage_now"]          for r in subset]
+            ov_rows.append({
+                "origin_type"  : label,
+                "n"            : len(subset),
+                "acc_24h"      : round(accuracy_score(si24_t, si24_p), 4),
+                "f1_24h"       : round(f1_score(si24_t, si24_p, average="weighted", zero_division=0), 4),
+                "ord_dist_24h" : round(_ordinal_distance(si24_t, si24_p), 4),
+            })
+        pd.DataFrame(ov_rows).to_csv(out_dir / "original_vs_generated_metrics.csv", index=False)
+
+    saved = sorted(f.name for f in out_dir.iterdir())
+    print(f"  Saved {len(saved)} files: {', '.join(saved[:8])}" +
+          (f" ... (+{len(saved)-8} more)" if len(saved) > 8 else ""))
+
+
+# ============================================================================
+# FINAL SUMMARY PRINT — PART J
+# ============================================================================
+
+def print_summary(
+    art_dir: Path, out_dir: Path, test_cfg: dict,
+    functional: dict, bio: dict, metrics: dict,
+    n_windows: int, n_scenarios: int,
+) -> None:
+    bar = "=" * 66
+    print(f"\n{bar}")
+    print(f"  AgriTwin-GH :: TFT Growth Progression — Test Results")
+    print(bar)
+    print(f"  Model tested  : {test_cfg['run_id']}")
+    print(f"  Test cycles   : {test_cfg['test_cycles']}")
+    print(f"  Total windows : {n_windows}")
+    print(f"  Scenarios     : {n_scenarios}")
+    print(f"  Functional    : {'PASS' if functional.get('all_passed') else 'PARTIAL'}"
+          f"  ({functional.get('checks_passed', '?')}/{functional.get('total_checks', '?')} checks)")
+    print(f"  Bio sanity    : {bio.get('biological_pass_rate_pct', '?')}% pass rate"
+          f"  ({bio.get('total_violations', '?')} violations)")
+    if "error" not in metrics:
+        m24  = metrics["stage_24h"]
+        m48  = metrics["stage_48h"]
+        mpr  = metrics["progress_24h"]
+        mh2n = metrics["hours_to_next"]
+        print(f"\n  Stage +24h    : acc={m24.get('accuracy'):.4f}"
+              f"  F1w={m24.get('f1_weighted'):.4f}"
+              f"  ord_dist={m24.get('ordinal_distance'):.4f}"
+              f"  trans_detect={m24.get('transition_detect_acc'):.4f}")
+        print(f"  Stage +48h    : acc={m48.get('accuracy'):.4f}"
+              f"  F1w={m48.get('f1_weighted'):.4f}"
+              f"  ord_dist={m48.get('ordinal_distance'):.4f}")
+        print(f"  Progress +24h : MAE={mpr.get('mae'):.2f}%"
+              f"  RMSE={mpr.get('rmse'):.2f}%"
+              f"  R2={mpr.get('r2')}")
+        print(f"  Hours-to-next : MAE={mh2n.get('mae'):.1f}h"
+              f"  within12h={mh2n.get('pct_within_12h')}%"
+              f"  within24h={mh2n.get('pct_within_24h')}%"
+              f"  bias={mh2n.get('mean_bias_h'):+.1f}h")
+        overall_ok = (functional.get("all_passed", False) and
+                      bio.get("total_violations", 999) < n_windows * 0.05)
+        verdict = "DEPLOY-READY" if overall_ok else "NEEDS REVIEW"
+        print(f"\n  Verdict       : {verdict}")
+    print(f"  Artifacts     : {out_dir}")
+    print(bar)
+
+
+# ============================================================================
+# ARGUMENT PARSING AND MAIN
+# ============================================================================
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(
+        description="AgriTwin-GH TFT Growth Progression — Integration Test Suite"
     )
+    p.add_argument("--run-id",      default=None,
+                   help="Specific run_id to test (default: latest artifact)")
+    p.add_argument("--max-windows", type=int, default=60,
+                   help="Max windows per test cycle (default: 60, i.e. ~180 total)")
+    p.add_argument("--test-cycles", type=int, nargs="+", default=TEST_CYCLES,
+                   help="Cycle IDs to use for accuracy evaluation (default: 7 12 16)")
+    p.add_argument("--test-id",     default=None,
+                   help="Test run ID (default: auto-generated UUID8)")
+    p.add_argument("--no-plots",    action="store_true",
+                   help="Skip plot generation (faster in CI environments)")
+    return p.parse_args()
 
-
-# =============================================================================
-# Main simulation loop
-# =============================================================================
 
 def main() -> None:
-    # Ensure UTF-8 output on Windows where the console default may be cp1252
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    args    = parse_args()
+    test_id = args.test_id or datetime.now().strftime("%Y%m%d_%H%M%S") + "_" + uuid.uuid4().hex[:6]
 
-    parser = argparse.ArgumentParser(
-        description="Real-time growth-progression model tester.",
+    print("=" * 66)
+    print("  AgriTwin-GH :: TFT Growth Progression — Integration Tests")
+    print(f"  Test ID  : {test_id}")
+    print(f"  Started  : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("=" * 66)
+
+    # ── A: Load artifacts ────────────────────────────────────────────────────
+    art_dir = locate_artifact_dir(args.run_id)
+    arts    = load_artifacts(art_dir)
+    run_id  = arts["run_id"]
+    enc_len = arts["enc_len"]
+
+    # Output dir for this test run
+    out_dir = art_dir / f"test_run_{test_id}"
+
+    # ── B: Load dataset and extract test windows ─────────────────────────────
+    df      = load_dataset(art_dir)
+    windows = extract_windows(df, enc_len, cycles=args.test_cycles,
+                              max_per_cycle=args.max_windows)
+
+    if not windows:
+        sys.exit("[ERROR] No valid test windows extracted. Check test_cycles and dataset.")
+
+    test_cfg = {
+        "test_id"      : test_id,
+        "run_id"       : run_id,
+        "test_cycles"  : args.test_cycles,
+        "max_per_cycle": args.max_windows,
+        "n_windows"    : len(windows),
+        "enc_len"      : enc_len,
+        "pred_len"     : arts["pred_len"],
+        "artifact_dir" : str(art_dir),
+        "output_dir"   : str(out_dir),
+        "started_at"   : datetime.now().isoformat(),
+    }
+
+    # ── C: Functional tests (on sample window before full inference) ──────────
+    functional = functional_tests(arts, windows)
+
+    # ── Full inference on all test windows ───────────────────────────────────
+    print(f"\n  Running inference on {len(windows)} windows ...")
+    results = run_all_inference(windows, arts, tag="accuracy")
+
+    n_valid = sum(1 for r in results if r["pred"] is not None)
+    print(f"  Valid results: {n_valid}/{len(results)}")
+
+    if n_valid == 0:
+        sys.exit("[ERROR] All inference calls failed. Cannot compute metrics.")
+
+    # ── D: Scenario assignment and metrics ───────────────────────────────────
+    print("\n[D] Assigning scenario buckets ...")
+    buckets    = assign_scenarios(results)
+    sc_metrics = compute_scenario_metrics(buckets)
+    n_scenarios = sum(1 for _, b in buckets.items() if len(b) > 0)
+    for sc_key, bucket in buckets.items():
+        if bucket:
+            m = _quick_metrics(bucket)
+            print(f"  {sc_key:<35} n={m['n']:>4}  "
+                  f"acc={m.get('stage_acc_24h', 'N/A')}  "
+                  f"prog_mae={m.get('progress_mae_24h', 'N/A')}%")
+
+    # ── E: Biological consistency ─────────────────────────────────────────────
+    bio = biological_consistency_tests(results)
+
+    # ── F: Full metrics ───────────────────────────────────────────────────────
+    metrics    = compute_all_metrics(results)
+    per_stage  = compute_per_stage_metrics(results)
+    per_cycle  = compute_per_cycle_metrics(results)
+
+    # ── G: Transition and behavior analysis ──────────────────────────────────
+    print("\n[G] Transition analysis ...")
+    trans_df   = transition_analysis(results)
+    samples_df = build_prediction_samples(results, n=300)
+    print(f"  Transition-near windows : {len(trans_df)}")
+
+    # ── H: Save all outputs ───────────────────────────────────────────────────
+    save_all_outputs(
+        out_dir, test_cfg, functional, bio, metrics,
+        per_stage, per_cycle, sc_metrics, trans_df, samples_df, results,
     )
-    parser.add_argument(
-        "--tick-secs", type=float, default=0.5,
-        help="Wall-clock seconds between ticks (default: 0.5).",
-    )
-    parser.add_argument(
-        "--stage", type=str, default="seedling", choices=STAGE_ORDER,
-        help="Starting growth stage (default: seedling).",
-    )
-    parser.add_argument(
-        "--max-ticks", type=int, default=500,
-        help="Stop after N ticks; 0 = unlimited (default: 500).",
-    )
-    parser.add_argument(
-        "--model", type=str, default="auto", choices=["auto", "rf", "lstm"],
-        help="Model to use for inference (default: auto = use best_model from artifacts).",
-    )
-    parser.add_argument(
-        "--log-json", type=str, default="",
-        help="Path to save per-tick JSON log (default: none).",
-    )
-    parser.add_argument(
-        "--run-id", type=str, default="",
-        help="Specific artifact run ID to load (default: latest).",
-    )
 
-    # When no CLI arguments are given, launch the interactive setup menu
-    # instead of falling back silently to all defaults.
-    if len(sys.argv) == 1:
-        args = _interactive_setup()
-    else:
-        args = parser.parse_args()
-
-    # ── Locate artifact directory ─────────────────────────────────────────────
-    if args.run_id:
-        run_dir = ARTIFACTS_BASE / args.run_id
-        if not run_dir.exists():
-            LOG.error("Artifact directory not found: %s", run_dir)
-            sys.exit(1)
-    else:
-        candidates = sorted(ARTIFACTS_BASE.glob("growth_progression_*"), reverse=True)
-        if not candidates:
-            LOG.error(
-                "No growth_progression_* artifact directories found under %s",
-                ARTIFACTS_BASE,
-            )
-            sys.exit(1)
-        run_dir = candidates[0]
-        LOG.info("Latest run: %s", run_dir.name)
-
-    # ── Load artifacts ────────────────────────────────────────────────────────
-    # Load best_model_summary first to decide whether LSTM needs to be loaded.
-    _best_meta = json.loads(
-        (run_dir / "best_model_summary.json").read_text()
-    )
-    _auto_model = _best_meta["best_model"]
-    _need_lstm  = (args.model == "lstm") or (args.model == "auto" and _auto_model == "lstm")
-
-    arts = load_artifacts(run_dir, load_lstm=_need_lstm)
-
-    # ── Resolve model type ────────────────────────────────────────────────────
-    model_type = args.model if args.model != "auto" else arts["best_model_type"]
-
-    if model_type == "lstm" and arts["lstm_model"] is None:
-        LOG.warning("LSTM model file not found; falling back to RF.")
-        model_type = "rf"
-
-    if model_type == "rf" and arts["clf_rf"] is None:
-        LOG.error("RF classifier not found. Cannot run inference.")
-        sys.exit(1)
-
-    LOG.info("Active inference model: %s", model_type.upper())
-
-    # ── Initial state ─────────────────────────────────────────────────────────
-    rng                 = random.Random(42)
-    current_stage       = args.stage
-    current_stage_int   = STAGE_TO_INT[current_stage]
-
-    # Simulation clock: start on 2025-03-01 at 06:00 so the first ticks are daytime
-    sim_ts = datetime(2025, 3, 1, 6, 0, 0)
-
-    # Rolling buffer of raw rows.  We keep _BUFFER_CAPACITY rows so that
-    # rolling (max window=72) and lag (max lag=24) features are accurate.
-    _BUFFER_CAPACITY = 300
-    buffer_rows: list[tuple[datetime, dict]] = []
-
-    # Alert suppression: track last alert time in simulated hours (ticks)
-    last_alert_tick: float = -float("inf")
-
-    # Warmup: first window_n ticks collect data before inference is meaningful
-    window_n = arts["window_n"]
-
-    tick_logs: list[dict] = []
-    tick = 0
-
-    print()
-    print("=" * 74)
-    print("  AgriTwin-GH - Growth Progression Real-Time Model Test")
-    print(f"  Run       : {arts['run_id']}")
-    print(f"  Model     : {model_type.upper()}")
-    print(f"  Stage     : {current_stage}  (starting)")
-    print(f"  Tick rate : {args.tick_secs:.2f} s / simulated hour")
-    print(f"  Max ticks : {args.max_ticks if args.max_ticks > 0 else 'unlimited'}")
-    print(f"  Alert lead: {arts['alert_lead_h']} h | "
-          f"Conf threshold: {arts['confidence_threshold']:.0%}")
-    print(f"  Warmup    : {window_n} ticks before LSTM window is fully populated")
-    print("=" * 74)
-    print()
-    LOG.info("Press Ctrl+C to stop.\n")
-
-    try:
-        while True:
-            tick += 1
-            if args.max_ticks > 0 and tick > args.max_ticks:
-                LOG.info("max-ticks=%d reached. Stopping.", args.max_ticks)
-                break
-
-            # ── Generate synthetic sensor reading ──────────────────────────────
-            reading = simulate_reading(sim_ts, current_stage, rng)
-
-            # ── Append to buffer ───────────────────────────────────────────────
-            buffer_rows.append((sim_ts, {**reading,
-                                         "leaf_wetness_proxy": 0,  # placeholder
-                                         "growth_stage": current_stage,
-                                         "stage_int": current_stage_int}))
-            if len(buffer_rows) > _BUFFER_CAPACITY:
-                buffer_rows = buffer_rows[-_BUFFER_CAPACITY:]
-
-            # ── Build buffer DataFrame ─────────────────────────────────────────
-            idx = pd.DatetimeIndex(
-                [r[0] for r in buffer_rows], name="datetime"
-            )
-            buf = pd.DataFrame([r[1] for r in buffer_rows], index=idx)
-
-            # leaf_wetness_proxy: humidity > 85 for 3 consecutive hours
-            high_hum = (buf["humidity"] > 85).astype(int)
-            buf["leaf_wetness_proxy"] = (
-                high_hum.rolling(window=3, min_periods=1).sum() >= 3
-            ).astype(int)
-
-            # ── Feature engineering ────────────────────────────────────────────
-            try:
-                buf_feat = engineer_features(buf)
-            except Exception as exc:
-                LOG.warning("Feature engineering error at tick %d: %s", tick, exc)
-                sim_ts += timedelta(hours=1)
-                time.sleep(args.tick_secs)
-                continue
-
-            # ── Inference ──────────────────────────────────────────────────────
-            warmup = (tick < window_n)
-
-            try:
-                result = run_inference(buf_feat, arts, model_type)
-            except Exception as exc:
-                LOG.warning("Inference error at tick %d: %s", tick, exc)
-                sim_ts += timedelta(hours=1)
-                time.sleep(args.tick_secs)
-                continue
-
-            # ── Alert logic ────────────────────────────────────────────────────
-            time_since_last = tick - last_alert_tick
-            alert = (
-                not warmup
-                and not math.isnan(result["time_pred_h"])
-                and result["time_pred_h"] <= arts["alert_lead_h"]
-                and result["stage_conf"]  >= arts["confidence_threshold"]
-                and time_since_last       >= arts["repeat_interval_h"]
-            )
-            if alert:
-                last_alert_tick = tick
-
-            # ── Print diagnostic ───────────────────────────────────────────────
-            print_tick(
-                tick, sim_ts, current_stage, reading,
-                result, arts, alert, model_type, warmup,
-            )
-
-            # ── JSON log ───────────────────────────────────────────────────────
-            if args.log_json:
-                tick_logs.append({
-                    "tick":          tick,
-                    "sim_ts":        sim_ts.isoformat(),
-                    "current_stage": current_stage,
-                    "sensors":       reading,
-                    "prediction":    {
-                        "stage_pred":  result["stage_pred"],
-                        "stage_conf":  round(result["stage_conf"], 4),
-                        "time_pred_h": round(result["time_pred_h"], 2),
-                        "clf_probs":   [round(p, 4) for p in result["clf_probs"]],
-                    },
-                    "alert_fired":   alert,
-                })
-
-            # ── Advance simulation clock ───────────────────────────────────────
-            sim_ts += timedelta(hours=1)
-
-            # ── Sleep ─────────────────────────────────────────────────────────
-            if args.tick_secs > 0:
-                time.sleep(args.tick_secs)
-
-    except KeyboardInterrupt:
-        print("\n\n[Stopped by user]")
-
-    # ── Save JSON log ──────────────────────────────────────────────────────────
-    if args.log_json and tick_logs:
-        log_path = Path(args.log_json)
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(log_path, "w", encoding="utf-8") as fh:
-            json.dump(tick_logs, fh, indent=2)
-        LOG.info("Tick log saved: %s  (%d ticks)", log_path, len(tick_logs))
-
-    LOG.info("Simulation ended after %d ticks.", min(tick, args.max_ticks) if args.max_ticks > 0 else tick)
+    # ── J: Final summary ──────────────────────────────────────────────────────
+    print_summary(art_dir, out_dir, test_cfg, functional, bio, metrics,
+                  n_valid, n_scenarios)
 
 
 if __name__ == "__main__":
