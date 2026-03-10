@@ -1,4 +1,0 @@
-cycle_id,t_actual,t_first_correct,from_stage_index,to_stage_index,from_stage_name,to_stage_name,pred_at_transition,pred_24h_before,timing_error_h,abs_timing_error_h,within_6h,within_12h,within_24h,correct_at_transition
-7,288,,-1,0,Ripe,Seedling,,,,,,,,
-12,336,,-1,0,Ripe,Seedling,,,,,,,,
-16,336,,-1,0,Ripe,Seedling,,,,,,,,

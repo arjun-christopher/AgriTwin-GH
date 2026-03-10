@@ -41,6 +41,7 @@ torch>=1.0.0               # PyTorch for deep learning
 keras>=2.0.0              # High-level neural networks API
 pytorch-lightning>=1.0.0  # High-level interface for PyTorch
 pytorch-forecasting>=0.10.0    # Time series forecasting with PyTorch
+xgboost>=1.0.0            # Gradient boosting library
 
 # Visualization
 matplotlib>=3.0.0        # Plotting library

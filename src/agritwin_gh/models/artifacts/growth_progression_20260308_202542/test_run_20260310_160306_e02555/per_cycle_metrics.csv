@@ -1,4 +1,0 @@
-cycle_id,origin_type,n,acc_24h,f1_weighted_24h,ord_dist_24h,progress_mae_24h,h2n_mae
-7,generated,17,1.0,1.0,0.0,48.05,127.21
-12,generated,17,0.9412,0.938,0.0588,55.19,135.29
-16,generated,16,0.9375,0.9341,0.0625,53.87,125.5

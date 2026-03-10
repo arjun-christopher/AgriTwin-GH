@@ -1,2 +1,0 @@
-cycle_id,enc_end_time_idx,horizon,decoder_step,decoder_time_idx,pred_stage_cont,pred_stage_index,pred_stage_name,pred_q25,pred_q75,pred_progress_pct,gt_stage_index,gt_progress_pct,gt_hours_to_next
-12,2519,h24,23,2543,5.0,5,Ripe,5.0,5.0,0.0,5.0,26.893999099731445,217.0

@@ -1,0 +1,33 @@
+────────────────────────────────────────────────────────────
+  TOMATO GROWTH PROGRESSION — RUN SUMMARY
+  Run ID : 20260310_192038
+────────────────────────────────────────────────────────────
+
+Dataset
+  Path   : E:\AgriTwin-GH\data\processed\Growth Progression\tomato_growth_progression_synthetic_hourly.csv
+
+Train / Val / Test split (cycles)
+  Train  : 2  (5,282 seqs)
+  Val    : 1  (2,689 seqs)
+  Test   : 1  (2,785 seqs)
+
+Baseline (RF / XGBoost)
+  RF current-stage acc : 1.0000
+  XGB hours    MAE     : 1.5575
+  XGB hours    RMSE    : 7.7259
+
+LSTM Test Metrics
+  Current stage acc    : 0.9289
+  Next stage acc       : 0.9489
+  Hours  MAE           : nan
+  Hours  RMSE          : nan
+  Hours  MAPE          : nan%
+  Transition 24h F1    : 0.3937
+  Transition 48h F1    : 0.4308
+
+Improvement vs Baseline
+  MAE   Δ (positive = better) : nan
+  RMSE  Δ (positive = better) : nan
+
+Artifacts directory : E:\AgriTwin-GH\src\agritwin_gh\models\artifacts\growth_stage_progression_20260310_192038
+────────────────────────────────────────────────────────────

@@ -1,3 +1,0 @@
-metric,n_samples,mae,rmse,r2,explained_var,median_abs_error,mape_pct,mean_bias
-stage_progress_24h,50,52.3409,58.8166,-3.3681,-0.5056,50.39,156.51,-47.6133
-stage_progress_48h,50,51.0532,57.866,-3.2415,-0.4527,51.085,114.34,-46.9217

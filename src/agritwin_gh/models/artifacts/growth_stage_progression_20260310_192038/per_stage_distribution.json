@@ -1,0 +1,26 @@
+{
+  "train": {
+    "seedling": 650,
+    "early_vegetative": 1200,
+    "flowering_initiation": 480,
+    "flowering": 720,
+    "unripe": 1512,
+    "ripe": 720
+  },
+  "val": {
+    "seedling": 265,
+    "early_vegetative": 624,
+    "flowering_initiation": 264,
+    "flowering": 408,
+    "unripe": 768,
+    "ripe": 360
+  },
+  "test": {
+    "seedling": 385,
+    "early_vegetative": 624,
+    "flowering_initiation": 288,
+    "flowering": 456,
+    "unripe": 792,
+    "ripe": 240
+  }
+}

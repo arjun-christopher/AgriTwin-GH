@@ -1,0 +1,13 @@
+── CURRENT STAGE ──
+                      precision    recall  f1-score   support
+
+            seedling       1.00      0.91      0.96       385
+    early_vegetative       0.99      0.97      0.98       624
+flowering_initiation       0.85      0.65      0.73       288
+           flowering       0.76      0.94      0.84       456
+              unripe       0.99      0.98      0.99       792
+                ripe       0.93      1.00      0.96       240
+
+            accuracy                           0.93      2785
+           macro avg       0.92      0.91      0.91      2785
+        weighted avg       0.93      0.93      0.93      2785

@@ -1,0 +1,26 @@
+{
+  "class_weights": {
+    "0": 1.3543589743589743,
+    "1": 0.7336111111111111,
+    "2": 1.8340277777777778,
+    "3": 1.2226851851851852,
+    "4": 0.5822310405643739,
+    "5": 1.2226851851851852
+  },
+  "stage_distribution_train": {
+    "seedling": 650,
+    "early_vegetative": 1200,
+    "flowering_initiation": 480,
+    "flowering": 720,
+    "unripe": 1512,
+    "ripe": 720
+  },
+  "stage_names": [
+    "seedling",
+    "early_vegetative",
+    "flowering_initiation",
+    "flowering",
+    "unripe",
+    "ripe"
+  ]
+}

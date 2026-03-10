@@ -1,0 +1,68 @@
+{
+  "run_id": "20260310_192038",
+  "model_path": "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\growth_stage_progression_20260310_192038.keras",
+  "artifacts_dir": "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038",
+  "dataset_path": "E:\\AgriTwin-GH\\data\\processed\\Growth Progression\\tomato_growth_progression_synthetic_hourly.csv",
+  "split": {
+    "train_cycles": 2,
+    "val_cycles": 1,
+    "test_cycles": 1,
+    "train_seqs": 5282,
+    "val_seqs": 2689,
+    "test_seqs": 2785
+  },
+  "baselines": {
+    "rf_current_stage_accuracy": 1.0,
+    "xgb_hours_mae": 1.5575257539749146,
+    "xgb_hours_rmse": 7.725865593965856
+  },
+  "lstm_metrics": {
+    "current_stage_accuracy": 0.9289,
+    "next_stage_accuracy": 0.9489,
+    "hours_mae": NaN,
+    "hours_rmse": NaN,
+    "hours_mape_pct": NaN,
+    "transition_24h_f1": 0.3937,
+    "transition_48h_f1": 0.4308
+  },
+  "improvement_vs_baseline": {
+    "hours_mae_delta": NaN,
+    "hours_rmse_delta": NaN
+  },
+  "artifacts": [
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\baseline_metrics.json",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\baseline_rf_classification_report.txt",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\best_model_20260310_192038.keras",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\class_weights.json",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\confusion_matrix_current_stage.png",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\confusion_matrix_next_stage.png",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\confusion_matrix_trans_24h.png",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\confusion_matrix_trans_48h.png",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\cycle_duration_distribution.png",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\cycle_summary.csv",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\dataset_summary.json",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\feature_list.json",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\feature_scaler.pkl",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\hours_actual_vs_predicted.png",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\inference_config.json",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\inference_demo.json",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\lstm_current_stage_classification_report.txt",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\lstm_metrics.json",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\lstm_next_stage_classification_report.txt",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\model_config.json",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\per_stage_distribution.json",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\prediction_samples.csv",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\rf_feature_importances.csv",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\rf_feature_importances.png",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\run_20260310_192038.log",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\scaler_details.json",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\split_summary.json",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\stage_distribution.png",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\stage_progression_timelines.png",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\test_predictions_full.csv",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\training_history.csv",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\training_history.json",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\training_history_curves.png",
+    "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\transition_probability_histograms.png"
+  ]
+}

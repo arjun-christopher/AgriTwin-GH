@@ -1,7 +1,0 @@
-stage_index,stage_name,n_samples,precision,recall,f1,mae
-0,Germination,15528,1.0,1.0,1.0,0.0
-1,Seedling,29952,1.0,0.8678,0.9292,0.1443
-2,Vegetative,13824,1.0,0.7855,0.8799,0.2099
-3,Flowering,23040,1.0,0.6798,0.8094,0.483
-4,Fruiting,36864,1.0,0.8132,0.8969,0.3257
-5,Harvest Ready,10920,1.0,1.0,1.0,0.0
