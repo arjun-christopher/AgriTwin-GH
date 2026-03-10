@@ -27,6 +27,7 @@ uv.lock
 # Jupyter Notebook
 .ipynb_checkpoints
 *.ipynb_checkpoints/
+src/agritwin_gh/models/artifacts/disease_progression_*/*.npz
 
 # IDE
 .vscode/

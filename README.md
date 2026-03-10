@@ -12,6 +12,7 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 
 - **Predictive Disease Management** — Risk indexing from environmental sensor data to prevent fungal outbreaks before they occur
 - **Growth-Aware Control** — Adaptive MPC policies that respond to detected crop development stages
+- **Stage Transition Forecasting** — Multi-task LSTM predicts the next growth stage and hours to transition directly from sensor time-series, enabling proactive greenhouse interventions
 - **Digital Twin Simulation** — Physics-based virtual replica enabling what-if scenario analysis
 - **Image Intelligence** — EfficientNet classifiers for tomato leaf disease detection and growth stage classification
 - **Data Infrastructure** — PostgreSQL + TimescaleDB for time-series, MinIO for image object storage
@@ -25,6 +26,8 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 | **Indoor Dataset Generator** | Passive greenhouse physics model from outdoor weather | ✅ Complete |
 | **Disease Classifier** | EfficientNetB0 — 6-class tomato leaf disease classification | ✅ Complete |
 | **Growth Stage Classifier** | EfficientNetB3 — 6-stage tomato plant growth classification | ✅ Complete |
+| **Growth Progression Model** | Multi-task LSTM predicting current stage, next stage, and hours to transition from sensor time-series | ✅ Complete |
+| **Disease Progression Model** | Multi-stream GRU with cross-disease attention predicting infection %, active status, and net change at 24h and 48h horizons for 5 diseases simultaneously | ✅ Complete |
 | **Digital Twin Simulator** | Physics-based greenhouse model for scenario simulation | ✅ Complete |
 | **MPC-Like Control Policy** | Model predictive control for actuator management | ✅ Complete |
 | **What-If Analysis** | Comparative scenario evaluation and decision support | ✅ Complete |
@@ -74,6 +77,8 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 
 - **Disease Classifier** — EfficientNetB0, 6 classes: Early Blight, Late Blight, Leaf Mold, Powdery Mildew, Septoria Leaf Spot, Spider Mites + Healthy → [Disease Classification](docs/TOMATO_DISEASE_CLASSIFICATION.md)
 - **Growth Stage Classifier** — EfficientNetB3, 6 stages: Seedling → Early Vegetative → Flowering Initiation → Flowering → Unripe → Ripe, with TTA support → [Growth Stage Classification](docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md)
+- **Growth Progression Model** — Multi-task LSTM trained on hourly sensor time-series; simultaneously predicts the current growth stage, next stage, hours until stage transition, and 24h/48h transition probability in a single forward pass → [Growth Progression Model](docs/TOMATO_GROWTH_PROGRESSION_MODEL.md)
+- **Disease Progression Model** — Multi-stream GRU with cross-disease co-infection attention; predicts infection %, active status, and net change at 24h and 48h horizons for all 5 diseases simultaneously across healthy, single-disease, and multi-disease crop scenarios → [Disease Progression Model](docs/TOMATO_DISEASE_PROGRESSION_MODEL.md)
 
 ## 🛠️ Technology Stack
 
@@ -113,6 +118,8 @@ jupyter notebook feature_demos/
 | [Indoor Greenhouse Dataset](docs/INDOOR_GREENHOUSE_DATASET.md) | Synthetic dataset generation methodology |
 | [Disease Classification](docs/TOMATO_DISEASE_CLASSIFICATION.md) | EfficientNetB0 leaf disease model |
 | [Growth Stage Classification](docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md) | EfficientNetB3 growth stage model |
+| [Growth Progression Model](docs/TOMATO_GROWTH_PROGRESSION_MODEL.md) | Multi-task LSTM for stage transition forecasting from sensor time-series |
+| [Disease Progression Model](docs/TOMATO_DISEASE_PROGRESSION_MODEL.md) | Multi-stream GRU with cross-disease attention for 24h/48h disease progression forecasting |
 | [Deployment Guide](docs/DOCS_DEPLOYMENT.md) | MkDocs documentation site setup |
 
 **[📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)**
