@@ -28,6 +28,7 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 | **Growth Stage Classifier** | EfficientNetB3 — 6-stage tomato plant growth classification | ✅ Complete |
 | **Growth Progression Model** | Multi-task LSTM predicting current stage, next stage, and hours to transition from sensor time-series | ✅ Complete |
 | **Disease Progression Model** | Multi-stream GRU with cross-disease attention predicting infection %, active status, and net change at 24h and 48h horizons for 5 diseases simultaneously | ✅ Complete |
+| **Greenhouse Weather Forecast Model** | Chronos + XGBoost + LSTM ensemble forecasting 24h/48h indoor climate conditions for digital twin and control | ✅ Complete |
 | **Digital Twin Simulator** | Physics-based greenhouse model for scenario simulation | ✅ Complete |
 | **MPC-Like Control Policy** | Model predictive control for actuator management | ✅ Complete |
 | **What-If Analysis** | Comparative scenario evaluation and decision support | ✅ Complete |
@@ -79,6 +80,7 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 - **Growth Stage Classifier** — EfficientNetB3, 6 stages: Seedling → Early Vegetative → Flowering Initiation → Flowering → Unripe → Ripe, with TTA support → [Growth Stage Classification](docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md)
 - **Growth Progression Model** — Multi-task LSTM trained on hourly sensor time-series; simultaneously predicts the current growth stage, next stage, hours until stage transition, and 24h/48h transition probability in a single forward pass → [Growth Progression Model](docs/TOMATO_GROWTH_PROGRESSION_MODEL.md)
 - **Disease Progression Model** — Multi-stream GRU with cross-disease co-infection attention; predicts infection %, active status, and net change at 24h and 48h horizons for all 5 diseases simultaneously across healthy, single-disease, and multi-disease crop scenarios → [Disease Progression Model](docs/TOMATO_DISEASE_PROGRESSION_MODEL.md)
+- **Greenhouse Weather Forecast Model** — Chronos time-series foundation model + XGBoost + LSTM ensemble for 24h/48h indoor climate forecasting, feeding the digital twin and control policies → [Weather Forecast Model](docs/WEATHER_FORECAST_MODEL.md)
 
 ## 🛠️ Technology Stack
 
@@ -120,6 +122,7 @@ jupyter notebook feature_demos/
 | [Growth Stage Classification](docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md) | EfficientNetB3 growth stage model |
 | [Growth Progression Model](docs/TOMATO_GROWTH_PROGRESSION_MODEL.md) | Multi-task LSTM for stage transition forecasting from sensor time-series |
 | [Disease Progression Model](docs/TOMATO_DISEASE_PROGRESSION_MODEL.md) | Multi-stream GRU with cross-disease attention for 24h/48h disease progression forecasting |
+| [Weather Forecast Model](docs/WEATHER_FORECAST_MODEL.md) | Chronos + XGBoost + LSTM ensemble for 24h/48h greenhouse climate forecasting |
 | [Deployment Guide](docs/DOCS_DEPLOYMENT.md) | MkDocs documentation site setup |
 
 **[📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)**
