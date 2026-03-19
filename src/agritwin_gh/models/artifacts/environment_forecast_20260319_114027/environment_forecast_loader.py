@@ -1,6 +1,6 @@
 
 """
-Inference loader for environment_forecast_20260313_210748
+Inference loader for environment_forecast_20260319_114027
 Usage:
     from environment_forecast_loader import EnvironmentForecastModel
     model = EnvironmentForecastModel("<artifacts_dir>", main_model_path="<path>.pt")
