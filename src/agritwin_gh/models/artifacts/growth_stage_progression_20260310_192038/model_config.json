@@ -4,14 +4,14 @@
   "seq_len": 24,
   "n_features": 358,
   "n_stages": 6,
-  "lstm_units_1": 128,
-  "lstm_units_2": 64,
+  "lstm_units_1": 256,
+  "lstm_units_2": 128,
   "dropout_rate": 0.3,
   "dense_units": 64,
   "loss_weights": {
     "current_stage": 2.0,
-    "next_stage": 2.0,
-    "hours_to_next": 1.0,
+    "next_stage": 1.5,
+    "hours_to_next": 2.5,
     "trans_24h": 1.0,
     "trans_48h": 1.0
   },

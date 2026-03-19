@@ -3,9 +3,9 @@
   "true_next_stage": "early_vegetative",
   "current_stage": "seedling",
   "next_stage": "early_vegetative",
-  "hours_to_transition": 172.0500030517578,
-  "transition_prob_24h": 0.5029,
-  "transition_prob_48h": 0.5338,
-  "will_transition_24h": true,
-  "will_transition_48h": true
+  "hours_to_transition": 290.57000732421875,
+  "transition_prob_24h": 0.0,
+  "transition_prob_48h": 0.0001,
+  "will_transition_24h": false,
+  "will_transition_48h": false
 }

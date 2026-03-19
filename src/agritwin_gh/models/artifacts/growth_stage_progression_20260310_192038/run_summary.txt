@@ -4,7 +4,7 @@
 ────────────────────────────────────────────────────────────
 
 Dataset
-  Path   : E:\AgriTwin-GH\data\processed\Growth Progression\tomato_growth_progression_synthetic_hourly.csv
+  Path   : e:\AgriTwin-GH\data\processed\Growth Progression\tomato_growth_progression_synthetic_hourly.csv
 
 Train / Val / Test split (cycles)
   Train  : 2  (5,282 seqs)
@@ -17,17 +17,17 @@ Baseline (RF / XGBoost)
   XGB hours    RMSE    : 7.7259
 
 LSTM Test Metrics
-  Current stage acc    : 0.9289
-  Next stage acc       : 0.9489
+  Current stage acc    : 0.9659
+  Next stage acc       : 0.9709
   Hours  MAE           : nan
   Hours  RMSE          : nan
   Hours  MAPE          : nan%
-  Transition 24h F1    : 0.3937
-  Transition 48h F1    : 0.4308
+  Transition 24h F1    : 0.0000
+  Transition 48h F1    : 0.0000
 
 Improvement vs Baseline
   MAE   Δ (positive = better) : nan
   RMSE  Δ (positive = better) : nan
 
-Artifacts directory : E:\AgriTwin-GH\src\agritwin_gh\models\artifacts\growth_stage_progression_20260310_192038
+Artifacts directory : e:\AgriTwin-GH\src\agritwin_gh\models\artifacts\growth_stage_progression_20260310_192038
 ────────────────────────────────────────────────────────────

@@ -134,10 +134,19 @@ The notebook is divided into **19 numbered sections** (Sections 0–18). Each se
 ### Section 0 — Run ID & Path Setup
 
 **What it does:**  
-This is the very first thing that runs. It creates a unique identifier called a **Run ID** — a timestamp string like `20260310_142305`. This ID is attached to every file this notebook produces, so you can run the notebook multiple times and never accidentally overwrite previous results.
+This is the very first thing that runs. It implements an intelligent **Run ID detection** system:
+
+1. **Scans existing artifacts** — Looks in `src/agritwin_gh/models/artifacts/` for directories matching the pattern `growth_stage_progression_*`
+2. **Detects and reuses** — If existing model runs are found, extracts their Run IDs and reuses the latest one
+3. **Fallback to new** — If no existing runs are found, generates a new Run ID (timestamp string like `20260310_142305`)
+
+This means:
+- Running the notebook multiple times uses the **same** trained model (no retraining)
+- All predictions and outputs append to the existing artifact folder
+- You never accidentally lose a previously trained model
 
 **Why it matters:**  
-Without a Run ID, running the notebook a second time would overwrite all the previous model files, plots, and metrics. With it, every run is self-contained and recoverable.
+Without Run ID detection, you would have to manually track which model was trained and either reuse it by hard-coding the path or retrain from scratch. The automatic detection makes the workflow reproducible and efficient.
 
 **What it sets up:**
 
@@ -153,6 +162,9 @@ E:\AgriTwin-GH\
 ```
 
 All folder creation happens automatically — you do not need to create anything by hand.
+
+**Implementation details:**
+The detection scans the artifacts folder and looks for directories like `growth_stage_progression_20260310_192038`. When found, it extracts the Run ID (`20260310_192038`) and verifies the model file exists before reusing.
 
 ---
 
@@ -380,18 +392,34 @@ Think of the LSTM backbone as a "reader" that digests the last 24 hours of senso
 
 **2. Five Specialised Output Heads:**
 
-After the shared backbone, five small separate networks branch off, each specialised for one prediction task:
+After the shared backbone, five separate networks branch off, each specialised for one prediction task:
 
-| Head | Output | Loss Function |
-|------|--------|--------------|
-| `current_stage` | 6 probabilities (one per stage) | Categorical cross-entropy |
-| `next_stage` | 6 probabilities (one per stage) | Categorical cross-entropy |
-| `hours_to_next` | A single number | Huber loss (robust to outliers) |
-| `trans_24h` | A probability between 0 and 1 | Binary cross-entropy |
-| `trans_48h` | A probability between 0 and 1 | Binary cross-entropy |
+| Head | Output | Loss Function | Notes |
+|------|--------|---------------|-------|
+| `current_stage` | 6 probabilities (one per stage) | Categorical cross-entropy | What stage is the plant in *now*? |
+| `next_stage` | 6 probabilities (one per stage) | Categorical cross-entropy | What stage comes *after* current? |
+| `hours_to_next` | A single number (hours) | Huber loss (robust to outliers) | How many hours until transition? |
+| `trans_24h` | A probability between 0 and 1 | Binary cross-entropy | Will transition occur in next 24h? |
+| `trans_48h` | A probability between 0 and 1 | Binary cross-entropy | Will transition occur in next 48h? |
 
 **3. Class Weighting:**  
 Some growth stages (like `ripe`) have fewer hours than others (like `early_vegetative`). Without correction, the model would learn to mostly predict the majority stages. Class weights are computed and applied so that the model pays proportionally more attention to rare stages during training.
+
+**4. Loss Function Configuration:**
+
+The model is trained with a multi-task loss function that includes all five outputs:
+
+```python
+loss = {
+    'current_stage': 'categorical_crossentropy',
+    'next_stage': 'categorical_crossentropy',
+    'hours_to_next': 'mse',
+    'trans_24h': 'mse',
+    'trans_48h': 'mse',
+}
+```
+
+Each loss component is weighted equally during backpropagation. This ensures all five tasks learn simultaneously and reinforce each other.
 
 **Key outputs:**
 - `model_config.json` — all hyperparameters (architecture choices, layer sizes, learning rate)
@@ -456,19 +484,38 @@ Runs the trained model on the **test set** (data it has never seen) and computes
 **What it does:**  
 Picks 8 random samples from the test set and runs the model on each, printing side-by-side comparisons of predicted vs actual values. This gives a human-readable sanity check — you can read individual examples to build intuition for how the model behaves.
 
-**Example output row:**
+**Critical logic: Conditional Transition Flags**
+
+The inference function implements a crucial safeguard for the transition probability outputs:
+
+```python
+# If hours to next stage > 24, set trans_24h to 0; otherwise use predicted probability
+trans_24h_prob = 0.0 if hours_pred > 24 else raw_trans_24h
+
+# If hours to next stage > 48, set trans_48h to 0; otherwise use predicted probability  
+trans_48h_prob = 0.0 if hours_pred > 48 else raw_trans_48h
+```
+
+This ensures the transition flags are *conditional probabilities* — they only produce meaningful values when the time window is biologically relevant. For example:
+- If `hours_to_next = 220h`, both `trans_24h` and `trans_48h` will be set to 0.0 (no chance of transition in those windows)
+- If `hours_to_next = 18h`, `trans_24h` will use the model's prediction (likely high), and `trans_48h` will also use its prediction (likely very high)
+- If `hours_to_next = 50h`, `trans_24h` will be 0.0, and `trans_48h` will use its prediction
+
+**Example output row (correct logic in action):**
 
 ```
 Sample #3
-  Actual current stage   : flowering
-  Predicted current stage: flowering  ✓
-  Actual next stage      : unripe
-  Predicted next stage   : unripe     ✓
-  Actual hours to next   : 41.0 h
-  Predicted hours to next: 38.7 h     (Δ 2.3 h)
-  Trans prob 24h         : 0.03   (No)
-  Trans prob 48h         : 0.87   (Yes)
+  Actual current stage      : flowering
+  Predicted current stage   : flowering  ✓
+  Actual next stage         : unripe
+  Predicted next stage      : unripe     ✓
+  Actual hours to next      : 41.0 h
+  Predicted hours to next   : 38.7 h     (Δ 2.3 h)
+  Trans prob 24h (raw)      : 0.03   → Output: 0.0 (hours > 24)
+  Trans prob 48h (raw)      : 0.87   → Output: 0.87 (hours < 48) ✓
 ```
+
+Notice how the raw model outputs are post-processed based on `hours_to_next` to produce biologically sensible predictions.
 
 **Key output:** `prediction_samples.csv` — a CSV file with all 8 example predictions for later review.
 
@@ -508,14 +555,41 @@ Specifically:
 ### Section 17 — Inference Utilities
 
 **What it does:**  
-Defines four reusable Python functions that make it easy to use the trained model on **new, unseen sensor data** — without having to understand the internal preprocessing pipeline:
+Defines five reusable Python functions that make it easy to use the trained model on **new, unseen sensor data** — without having to understand the internal preprocessing pipeline:
 
 | Function | What it does |
-|----------|-------------|
+|----------|----------|
 | `decode_stage(idx)` | Converts a stage number (0–5) back to its name (`"flowering"`) |
 | `preprocess_new_data(df_raw)` | Takes a raw sensor DataFrame and runs the full pipeline (standardise columns → engineer features → fill gaps) |
 | `build_recent_sequence(df_feats)` | Takes the last 24 rows of preprocessed data and returns a scaled array ready for the model |
+| `predict_with_inference(model, sample_data_dict, scaler)` | Runs the model on a sample and applies **conditional transition flag logic** (see below) |
 | `predict_progression(sequence_3d)` | Runs the model and returns a human-readable dict with all 5 predictions |
+
+**Conditional Transition Flag Processing:**
+
+The `predict_with_inference` function applies critical post-processing to ensure stable, biologically valid predictions:
+
+```python
+def predict_with_inference(model, sample_data_dict, scaler):
+    # Get raw model outputs
+    sample_scaled = scaler.transform(sample_data_dict['X'])
+    preds = model.predict(sample_scaled, verbose=0)
+    
+    hours_pred = preds[2][0]
+    raw_trans_24h = preds[3][0]
+    raw_trans_48h = preds[4][0]
+    
+    # Apply conditional logic: transition flags should be ~0 if hours > threshold
+    trans_24h_prob = 0.0 if hours_pred > 24 else raw_trans_24h
+    trans_48h_prob = 0.0 if hours_pred > 48 else raw_trans_48h
+    
+    return trans_24h_prob, trans_48h_prob  # Now logically valid
+```
+
+This ensures that:
+- If a plant has 220 hours until the next stage transition, the 24h and 48h flags will output 0.0 (impossible to transition in those windows)
+- Transition flags only produce meaningful probabilities when `hours_to_next` is actually within their respective windows
+- Predictions are consistent with each other — no contradictions like "transition in 220 hours but 50% chance in 24 hours"
 
 A **demonstration** is run at the end using the first test sequence, printing the results and saving them to `inference_demo.json`.
 

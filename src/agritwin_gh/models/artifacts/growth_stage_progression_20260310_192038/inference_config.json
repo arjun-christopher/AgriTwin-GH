@@ -1,7 +1,7 @@
 {
   "run_id": "20260310_192038",
-  "model_path": "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\growth_stage_progression_20260310_192038.keras",
-  "scaler_path": "E:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\feature_scaler.pkl",
+  "model_path": "e:\\AgriTwin-GH\\src\\agritwin_gh\\models\\growth_stage_progression_20260310_192038.keras",
+  "scaler_path": "e:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\growth_stage_progression_20260310_192038\\feature_scaler.pkl",
   "seq_len": 24,
   "n_features": 358,
   "n_stages": 6,
