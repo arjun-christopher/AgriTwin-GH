@@ -252,11 +252,11 @@
     "control_action_flag"
   ],
   "target_cols": [
-    "active_within_24h",
-    "net_change_24h",
     "active_within_48h",
+    "active_within_24h",
     "infection_pct_48h",
+    "net_change_48h",
     "infection_pct_24h",
-    "net_change_48h"
+    "net_change_24h"
   ]
 }
