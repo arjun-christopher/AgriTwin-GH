@@ -1,0 +1,213 @@
+{
+  "project": "AgriTwin-GH",
+  "location": "Dindigul, Tamil Nadu, India",
+  "crop": "Tomato (Solanum lycopersicum)",
+  "greenhouse_system": "Greenhouse (passive + managed)",
+  "notebook_name": "tomato_growth_progression_synthetic_dataset.ipynb",
+  "created_on": "2026-03-08T11:22:36",
+  "source_files": {
+    "2024": "E:\\AgriTwin-GH\\data\\processed\\Greenhouse Indoor Conditions\\dindigul_greenhouse_indoor_2024.csv",
+    "2025": "E:\\AgriTwin-GH\\data\\processed\\Greenhouse Indoor Conditions\\dindigul_greenhouse_indoor_2025.csv"
+  },
+  "data_years": [
+    2024,
+    2025
+  ],
+  "environmental_columns_used": [
+    "indoor_temp",
+    "indoor_humidity",
+    "indoor_air_velocity",
+    "indoor_CO2",
+    "solarradiation",
+    "day_night_flag",
+    "vpd",
+    "dew_point",
+    "leaf_wetness_proxy"
+  ],
+  "stages_ordered": [
+    "seedling",
+    "early_vegetative",
+    "flowering_initiation",
+    "flowering",
+    "unripe",
+    "ripe"
+  ],
+  "stage_index_map": {
+    "seedling": 0,
+    "early_vegetative": 1,
+    "flowering_initiation": 2,
+    "flowering": 3,
+    "unripe": 4,
+    "ripe": 5
+  },
+  "stage_duration_ranges_days": {
+    "seedling": [
+      12,
+      18
+    ],
+    "early_vegetative": [
+      20,
+      28
+    ],
+    "flowering_initiation": [
+      8,
+      13
+    ],
+    "flowering": [
+      14,
+      20
+    ],
+    "unripe": [
+      28,
+      38
+    ],
+    "ripe": [
+      10,
+      15
+    ]
+  },
+  "gdd_tbase_celsius": 10.0,
+  "gdd_topt_celsius": 30.0,
+  "temp_rolling_hours": 24,
+  "humidity_rolling_hours": 24,
+  "cycles": [
+    {
+      "cycle_id": 1,
+      "label": "kharif_2024",
+      "season_window": "Kharif (Jun\u2013Jul 2024)",
+      "cycle_start": "2024-07-01",
+      "cycle_end": "2024-10-22",
+      "total_days": 113,
+      "stage_durations_days": {
+        "seedling": 12,
+        "early_vegetative": 26,
+        "flowering_initiation": 11,
+        "flowering": 17,
+        "unripe": 32,
+        "ripe": 15
+      }
+    },
+    {
+      "cycle_id": 2,
+      "label": "rabi_2024",
+      "season_window": "Rabi (Oct\u2013Nov 2024)",
+      "cycle_start": "2024-11-10",
+      "cycle_end": "2025-02-27",
+      "total_days": 109,
+      "stage_durations_days": {
+        "seedling": 12,
+        "early_vegetative": 26,
+        "flowering_initiation": 9,
+        "flowering": 14,
+        "unripe": 33,
+        "ripe": 15
+      }
+    },
+    {
+      "cycle_id": 3,
+      "label": "summer_2025",
+      "season_window": "Summer (Feb\u2013Mar 2025)",
+      "cycle_start": "2025-03-05",
+      "cycle_end": "2025-06-30",
+      "total_days": 117,
+      "stage_durations_days": {
+        "seedling": 17,
+        "early_vegetative": 26,
+        "flowering_initiation": 12,
+        "flowering": 19,
+        "unripe": 33,
+        "ripe": 10
+      }
+    },
+    {
+      "cycle_id": 4,
+      "label": "kharif_2025",
+      "season_window": "Kharif (Jun\u2013Jul 2025)",
+      "cycle_start": "2025-07-01",
+      "cycle_end": "2025-10-22",
+      "total_days": 113,
+      "stage_durations_days": {
+        "seedling": 17,
+        "early_vegetative": 24,
+        "flowering_initiation": 11,
+        "flowering": 16,
+        "unripe": 30,
+        "ripe": 15
+      }
+    }
+  ],
+  "total_hourly_rows": 10848,
+  "date_coverage": {
+    "earliest_timestamp": "2024-07-01 00:00:00",
+    "latest_timestamp": "2025-10-21 23:00:00"
+  },
+  "output_files": {
+    "hourly_dataset": "E:\\AgriTwin-GH\\data\\processed\\Grwoth Progression\\tomato_growth_progression_synthetic_hourly.csv",
+    "cycle_summary": "E:\\AgriTwin-GH\\data\\processed\\Grwoth Progression\\tomato_growth_progression_cycle_summary.csv",
+    "stage_summary": "E:\\AgriTwin-GH\\data\\processed\\Grwoth Progression\\tomato_growth_progression_stage_summary.csv",
+    "metadata_json": "E:\\AgriTwin-GH\\data\\processed\\Grwoth Progression\\tomato_growth_progression_metadata.json"
+  },
+  "column_groups": {
+    "identity": [
+      "timestamp",
+      "cycle_id",
+      "cycle_label",
+      "season_window",
+      "real_or_synthetic_flag"
+    ],
+    "time": [
+      "year",
+      "month",
+      "day_of_year",
+      "week_of_year",
+      "hour",
+      "season_label"
+    ],
+    "progression": [
+      "days_from_cycle_start",
+      "stage_name",
+      "stage_index",
+      "hours_in_current_stage",
+      "days_in_current_stage",
+      "stage_duration_hours",
+      "stage_duration_days",
+      "stage_progress_pct",
+      "total_cycle_progress_pct",
+      "estimated_days_to_next_stage",
+      "estimated_hours_to_next_stage",
+      "is_stage_transition"
+    ],
+    "environment": [
+      "indoor_temp",
+      "indoor_humidity",
+      "indoor_air_velocity",
+      "indoor_CO2",
+      "solarradiation",
+      "day_night_flag",
+      "vpd",
+      "dew_point",
+      "leaf_wetness_proxy"
+    ],
+    "engineered": [
+      "temperature_rolling_mean_24h",
+      "humidity_rolling_mean_24h",
+      "vpd_proxy",
+      "light_period_flag",
+      "cumulative_gdd_like_index"
+    ]
+  },
+  "label_rules": {
+    "stage_order_is_fixed": true,
+    "backward_jumps_allowed": false,
+    "all_six_stages_per_cycle": true,
+    "cycle_ends_at_ripe": true,
+    "real_or_synthetic_flag": "synthetic"
+  },
+  "agronomic_notes": [
+    "Cultivation windows selected for Dindigul, Tamil Nadu based on Kharif (Jun-Jul), Rabi (Oct-Nov), and Summer (Feb-Mar) tomato planting seasons.",
+    "Stage durations drawn randomly from agronomically defensible ranges; different per cycle to avoid artificial uniformity.",
+    "Environmental backbone is the actual hourly greenhouse time-series from 2024 and 2025 \u2014 no synthetic random noise.",
+    "Cumulative GDD-like index uses Tbase=10\u00b0C, Topt=30\u00b0C, hourly contribution = max(0, min(T,Topt)-Tbase)/24.",
+    "Suitable for sequential ML models (LSTM, TCN, GRU) and progression regression/classification tasks."
+  ]
+}

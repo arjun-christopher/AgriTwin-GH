@@ -1,0 +1,5 @@
+cycle_id,cycle_label,season_window,cycle_start,cycle_end,total_days,days_seedling,days_early_vegetative,days_flowering_initiation,days_flowering,days_unripe,days_ripe,total_hourly_rows
+1,kharif_2024,Kharif (Jun–Jul 2024),2024-07-01,2024-10-22,113,12,26,11,17,32,15,2712
+2,rabi_2024,Rabi (Oct–Nov 2024),2024-11-10,2025-02-27,109,12,26,9,14,33,15,2616
+3,summer_2025,Summer (Feb–Mar 2025),2025-03-05,2025-06-30,117,17,26,12,19,33,10,2808
+4,kharif_2025,Kharif (Jun–Jul 2025),2025-07-01,2025-10-22,113,17,24,11,16,30,15,2712
