@@ -44,6 +44,11 @@ pytorch-forecasting>=0.10.0    # Time series forecasting with PyTorch
 xgboost>=1.0.0            # Gradient boosting library
 shap>=0.40.0             # SHAP for model interpretability
 tf-keras>=2.0.0             # Keras for TensorFlow
+chronos-forecasting>=0.1.0     # Time series forecasting with TensorFlow
+lightgbm>=3.0.0          # LightGBM for gradient boosting
+neuralforecast>=0.1.0       # Neural forecasting models
+optuna>=3.0.0           # Hyperparameter optimization framework
+statsmodels>=0.13.0      # Statistical modeling and time series analysis
 
 # Visualization
 matplotlib>=3.0.0        # Plotting library
