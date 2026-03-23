@@ -1,0 +1,25 @@
+{
+  "train_cycles": [
+    "2",
+    "4"
+  ],
+  "val_cycles": [
+    "1"
+  ],
+  "test_cycles": [
+    "3"
+  ],
+  "train_rows": 5280,
+  "val_rows": 2688,
+  "test_rows": 2784,
+  "n_features_encoded": 156,
+  "target_cols": [
+    "y_has_early_blight",
+    "y_has_late_blight",
+    "y_has_leaf_mold",
+    "y_has_powdery_mildew",
+    "y_has_spider_mites",
+    "y_trend_24h_int"
+  ],
+  "trend_eps": 1.0
+}

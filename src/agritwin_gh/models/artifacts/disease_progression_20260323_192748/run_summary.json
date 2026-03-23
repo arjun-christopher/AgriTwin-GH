@@ -1,0 +1,41 @@
+{
+  "run_id": "20260323_192748",
+  "dataset_path": "e:\\AgriTwin-GH\\data\\processed\\Disease Progression\\tomato_disease_progression_synthetic_hourly.csv",
+  "artifacts_dir": "e:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\disease_progression_20260323_192748",
+  "models": {
+    "combined_multitask_model": "e:\\AgriTwin-GH\\src\\agritwin_gh\\models\\disease_progression_20260323_192748.pkl"
+  },
+  "required_outputs": [
+    "current_health + disease list",
+    "after_24h trend (reduces/stable/worse)"
+  ],
+  "healthy_metrics": {
+    "accuracy": 0.9996408045977011,
+    "precision": 1.0,
+    "recall": 0.9985590778097982,
+    "f1": 0.9992790194664743
+  },
+  "disease_thresholds": {
+    "early_blight": 0.45,
+    "late_blight": 0.5,
+    "leaf_mold": 0.55,
+    "powdery_mildew": 0.45,
+    "spider_mites": 0.45
+  },
+  "trend_accuracy": 0.6404454022988506,
+  "trend_macro_f1": 0.6469909404452883,
+  "trend_balanced_accuracy": 0.6532221587606487,
+  "trend_class_recalls": {
+    "reduces": 0.8005018820577164,
+    "stable": 0.6557894736842105,
+    "worse": 0.5033751205400193
+  },
+  "trend_params": {
+    "m0": 0.9,
+    "m1": 0.6,
+    "m2": 1.6,
+    "t0": 0.0,
+    "t1": 0.2,
+    "t2": 0.2
+  }
+}
