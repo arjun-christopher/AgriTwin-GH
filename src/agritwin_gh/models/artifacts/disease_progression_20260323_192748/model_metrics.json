@@ -1,66 +1,67 @@
 {
   "run_id": "20260323_192748",
   "healthy_metrics": {
-    "accuracy": 1.0,
+    "accuracy": 0.9996408045977011,
     "precision": 1.0,
-    "recall": 1.0,
-    "f1": 1.0
+    "recall": 0.9985590778097982,
+    "f1": 0.9992790194664743
   },
   "disease_thresholds": {
-    "early_blight": 0.45,
-    "late_blight": 0.5,
-    "leaf_mold": 0.55,
-    "powdery_mildew": 0.45,
-    "spider_mites": 0.5
+    "early_blight": 0.3,
+    "late_blight": 0.35,
+    "leaf_mold": 0.45,
+    "powdery_mildew": 0.4,
+    "spider_mites": 0.4
   },
-  "trend_accuracy": 0.6339798850574713,
-  "trend_macro_f1": 0.6350019838793587,
-  "trend_balanced_accuracy": 0.6497358105805126,
+  "trend_accuracy": 0.6084770114942529,
+  "trend_macro_f1": 0.4963291681313437,
+  "trend_balanced_accuracy": 0.5667365161438664,
   "trend_class_recalls": {
-    "reduces": 0.7879548306148055,
-    "stable": 0.7726315789473684,
-    "worse": 0.38862102217936356
+    "reduces": 0.0075282308657465494,
+    "stable": 0.7736842105263158,
+    "worse": 0.9189971070395371
   },
-  "trend_worse_recall": 0.38862102217936356,
-  "trend_worse_f1": 0.47692307692307695,
+  "trend_worse_recall": 0.9189971070395371,
+  "trend_worse_f1": 0.6387399463806971,
   "trend_tuning": {
-    "m0": 1.1,
-    "m1": 0.8,
-    "m2": 1.2,
-    "t0": 0.0,
-    "t1": 0.15,
-    "t2": 0.15
+    "blend_alpha_xgb": 0.0,
+    "m0": 1.0,
+    "m1": 1.1,
+    "m2": 2.0,
+    "t0": 0.1,
+    "t1": 0.0,
+    "t2": -0.05
   },
   "trend_report": {
     "reduces": {
-      "precision": 0.473604826546003,
-      "recall": 0.7879548306148055,
-      "f1-score": 0.5916156382477626,
+      "precision": 0.21428571428571427,
+      "recall": 0.0075282308657465494,
+      "f1-score": 0.014545454545454545,
       "support": 797.0
     },
     "stable": {
-      "precision": 0.9118012422360249,
-      "recall": 0.7726315789473684,
-      "f1-score": 0.8364672364672364,
+      "precision": 0.9085290482076638,
+      "recall": 0.7736842105263158,
+      "f1-score": 0.8357021034678794,
       "support": 950.0
     },
     "worse": {
-      "precision": 0.6171516079632465,
-      "recall": 0.38862102217936356,
-      "f1-score": 0.47692307692307695,
+      "precision": 0.48947098099640474,
+      "recall": 0.9189971070395371,
+      "f1-score": 0.6387399463806971,
       "support": 1037.0
     },
-    "accuracy": 0.6339798850574713,
+    "accuracy": 0.6084770114942529,
     "macro avg": {
-      "precision": 0.6675192255817581,
-      "recall": 0.6497358105805126,
-      "f1-score": 0.6350019838793587,
+      "precision": 0.5374285811632609,
+      "recall": 0.5667365161438664,
+      "f1-score": 0.4963291681313437,
       "support": 2784.0
     },
     "weighted avg": {
-      "precision": 0.6766021710988773,
-      "recall": 0.6339798850574713,
-      "f1-score": 0.6324463969456078,
+      "precision": 0.5536888352644636,
+      "recall": 0.6084770114942529,
+      "f1-score": 0.5272568426594813,
       "support": 2784.0
     }
   }
