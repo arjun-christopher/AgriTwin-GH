@@ -94,5 +94,6 @@ nav:
     - Data Directory: DATA.md
   - ML Models:
     - Disease Classification: TOMATO_DISEASE_CLASSIFICATION.md
+    - Disease Progression Notebook (Detailed): TOMATO_DISEASE_PROGRESSION_NOTEBOOK_DETAILED_GUIDE.md
     - Growth Stage Classification: TOMATO_GROWTH_STAGE_CLASSIFICATION.md
   - Deployment Guide: DOCS_DEPLOYMENT.md
