@@ -1,0 +1,31 @@
+{
+  "lstm": {
+    "presence_micro_f1": 0.8006236601052427,
+    "presence_macro_f1": 0.801007892753347,
+    "presence_roc_auc_mean": 0.948736664212096,
+    "presence_pr_auc_mean": 0.887095802550766,
+    "presence_brier_mean": 0.09066795370873235,
+    "future_mae_mean": 3.2972345961296012,
+    "future_rmse_mean": 7.143070985867946,
+    "future_r2_mean": 0.618745054358295,
+    "future_evs_mean": 0.6516379074452361,
+    "future_median_ae_mean": 0.17391186083175744,
+    "future_blend_alpha": 0.0,
+    "trend_macro_f1_mean": 0.41934840048816036
+  },
+  "gru": {
+    "presence_micro_f1": 0.17116145271485078,
+    "presence_macro_f1": 0.1372165268716993,
+    "presence_roc_auc_mean": 0.8120728896241168,
+    "presence_pr_auc_mean": 0.6083456685968407,
+    "presence_brier_mean": 0.17360972906240985,
+    "future_mae_mean": 10.150837802886963,
+    "future_rmse_mean": 14.567186616656324,
+    "future_r2_mean": -1.61905118227005,
+    "future_evs_mean": -0.6782985091209411,
+    "future_median_ae_mean": 5.5374143600463865,
+    "future_blend_alpha": 1.0,
+    "trend_macro_f1_mean": 0.23890859546187007
+  },
+  "selected_best": "lstm"
+}

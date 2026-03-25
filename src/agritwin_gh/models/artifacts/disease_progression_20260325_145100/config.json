@@ -1,0 +1,19 @@
+{
+  "csv_path": "e:\\AgriTwin-GH\\data\\processed\\Disease Progression\\tomato_disease_progression_synthetic_hourly.csv",
+  "history_window": 24,
+  "forecast_horizon": 24,
+  "severity_delta": 3.0,
+  "severity_floor": 0.5,
+  "presence_threshold": 0.5,
+  "batch_size": 128,
+  "epochs": 50,
+  "learning_rate": 0.001,
+  "run_id": "20260325_145100",
+  "project_root": "e:\\AgriTwin-GH",
+  "artifacts_dir": "e:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\disease_progression_20260325_145100",
+  "best_model_name": "lstm",
+  "best_model_ckpt_path": "e:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\disease_progression_20260325_145100\\best_lstm_20260325_145100.keras",
+  "lstm_ckpt_path": "e:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\disease_progression_20260325_145100\\best_lstm_20260325_145100.keras",
+  "gru_ckpt_path": "e:\\AgriTwin-GH\\src\\agritwin_gh\\models\\artifacts\\disease_progression_20260325_145100\\best_gru_20260325_145100.keras",
+  "model_path": "e:\\AgriTwin-GH\\src\\agritwin_gh\\models\\disease_progression_20260325_145100.keras"
+}
