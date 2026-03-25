@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "accelerate>=0.20.0",
+    "catboost>=1.2.10",
     "chronos-forecasting>=0.1.0",
     "diffusers>=0.10.0",
     "fastparquet>=0.10.0",
