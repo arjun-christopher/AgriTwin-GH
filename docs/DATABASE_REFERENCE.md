@@ -11,6 +11,11 @@
 - [Timeseries Tables](#timeseries-tables)
   - [weather_data](#weather_data)
   - [greenhouse_data](#greenhouse_data)
+  - [disease_progression](#disease_progression)
+  - [growth_progression_hourly](#growth_progression_hourly)
+  - [growth_progression_stage_summary](#growth_progression_stage_summary)
+  - [growth_progression_cycle_summary](#growth_progression_cycle_summary)
+  - [growth_progression_metadata](#growth_progression_metadata)
 - [Image Metadata Tables](#image-metadata-tables)
   - [image_metadata](#image_metadata)
   - [image_annotations](#image_annotations)
@@ -46,14 +51,19 @@ AgriTwin-GH uses a single **PostgreSQL 15 database** (`agritwin_db`) with **Time
 │                  + TimescaleDB Extension                 │
 ├─────────────────────────────────────────────────────────┤
 │                                                          │
-│  ┌────────────────────┐   ┌──────────────────────────┐ │
-│  │  TIMESERIES DATA   │   │  IMAGE METADATA          │ │
-│  │                    │   │                          │ │
-│  │  • weather_data    │   │  • image_metadata        │ │
-│  │  • greenhouse_data │   │  • image_annotations     │ │
-│  │                    │   │  • image_access_log      │ │
-│  │  (Hypertables)     │   │                          │ │
-│  └────────────────────┘   └──────────────────────────┘ │
+│  ┌────────────────────────────────┐   ┌──────────────────────────┐ │
+│  │  TIMESERIES DATA               │   │  IMAGE METADATA          │ │
+│  │                                │   │                          │ │
+│  │  • weather_data                │   │  • image_metadata        │ │
+│  │  • greenhouse_data             │   │  • image_annotations     │ │
+│  │  • disease_progression         │   │  • image_access_log      │ │
+│  │  • growth_progression_hourly   │   │                          │ │
+│  │  • growth_progression_stage_*  │   │                          │ │
+│  │  • growth_progression_cycle_*  │   │                          │ │
+│  │  • growth_progression_metadata │   │                          │ │
+│  │                                │   │                          │ │
+│  │  (Hypertables for hourly data) │   │                          │ │
+│  └────────────────────────────────┘   └──────────────────────────┘ │
 │                                                          │
 └─────────────────────────────────────────────────────────┘
                             ↓
@@ -213,6 +223,306 @@ SELECT
 FROM greenhouse_data
 WHERE datetime >= CURRENT_DATE
 GROUP BY day_night_flag;
+```
+
+---
+
+### disease_progression
+
+Hourly synthetic disease risk and outbreak records for **5 disease types** across **4 crop cycles** (Jul 2024 – Oct 2025). Each row represents one disease × one hour.
+
+**Schema**:
+```sql
+CREATE TABLE disease_progression (
+    id                           SERIAL PRIMARY KEY,
+    timestamp                    TIMESTAMP NOT NULL,        -- Hourly bucket
+
+    -- Cycle / stage identity
+    cycle_id                     INTEGER NOT NULL,          -- 1–4
+    cycle_label                  VARCHAR(50),               -- kharif_2024, rabi_2024, …
+    season_label                 VARCHAR(50),
+    stage_name                   VARCHAR(50),               -- seedling … ripe
+    stage_index                  INTEGER,                   -- 0–5
+
+    -- Time features
+    days_from_cycle_start        FLOAT,
+    day_of_year                  INTEGER,
+    week_of_year                 INTEGER,
+    hour                         INTEGER,
+    hours_in_current_stage       FLOAT,
+    stage_progress_pct           FLOAT,
+    total_cycle_progress_pct     FLOAT,
+    is_stage_transition          BOOLEAN,
+
+    -- Snapshot indoor environment
+    indoor_temp                  FLOAT,
+    indoor_humidity              FLOAT,
+    indoor_air_velocity          FLOAT,
+    indoor_co2                   FLOAT,
+    solarradiation               FLOAT,
+    day_night_flag               FLOAT,
+    vpd                          FLOAT,
+    dew_point                    FLOAT,
+    leaf_wetness_proxy           FLOAT,
+
+    -- Rolling / derived features
+    temperature_rolling_mean_24h FLOAT,
+    humidity_rolling_mean_24h    FLOAT,
+    vpd_proxy                    FLOAT,
+    cumulative_gdd_like_index    FLOAT,
+
+    -- Disease-specific columns
+    disease_name                 VARCHAR(50) NOT NULL,      -- early_blight | late_blight | …
+    disease_present_flag         INTEGER,                   -- 1 = active outbreak
+    disease_cycle_id             INTEGER,
+    disease_cycle_stage          VARCHAR(30),               -- none | latent | active | decline
+    outbreak_trigger_flag        INTEGER,
+    control_action_flag          INTEGER,
+    control_action_type          VARCHAR(50),               -- none | fungicide | pruning | …
+    stage_susceptibility_score   FLOAT,
+    disease_risk_score           FLOAT,
+    hours_since_disease_onset    FLOAT,
+    current_infection_pct        FLOAT,
+    infection_growth_rate_hourly FLOAT
+);
+
+-- TimescaleDB hypertable (monthly chunks)
+SELECT create_hypertable('disease_progression', 'timestamp',
+    chunk_time_interval => INTERVAL '1 month');
+```
+
+**Key Features**:
+- **5 diseases tracked**: `early_blight`, `late_blight`, `leaf_mold`, `powdery_mildew`, `spider_mites`
+- **4 crop cycles** × **~8,760 hours each** = ~175,000+ rows total
+- Hypertable on `timestamp` (monthly chunks)
+- Compound index on `(cycle_id, disease_name)` for per-disease queries
+- `hours_since_disease_onset` is `NULL` when no outbreak is active
+
+**Common Queries**:
+```sql
+-- Active outbreak periods by disease
+SELECT disease_name,
+       MIN(timestamp) AS outbreak_start,
+       MAX(timestamp) AS outbreak_end,
+       MAX(current_infection_pct) AS peak_infection_pct
+FROM disease_progression
+WHERE disease_present_flag = 1
+GROUP BY disease_name, disease_cycle_id
+ORDER BY outbreak_start;
+
+-- Risk score time-series for a specific cycle and disease
+SELECT timestamp, disease_risk_score, control_action_type
+FROM disease_progression
+WHERE cycle_id = 1 AND disease_name = 'late_blight'
+ORDER BY timestamp;
+
+-- Hours with high risk but no control action
+SELECT COUNT(*) AS uncontrolled_high_risk_hours
+FROM disease_progression
+WHERE disease_risk_score > 0.7
+  AND control_action_flag = 0;
+```
+
+---
+
+### growth_progression_hourly
+
+Hourly time-series of tomato growth stage progression across **4 crop cycles**, with full environmental context and GDD accumulation. 10,848 rows total.
+
+**Schema**:
+```sql
+CREATE TABLE growth_progression_hourly (
+    id                             SERIAL PRIMARY KEY,
+    timestamp                      TIMESTAMP NOT NULL,
+
+    -- Cycle / identity
+    cycle_id                       INTEGER NOT NULL,
+    cycle_label                    VARCHAR(50),
+    season_window                  VARCHAR(100),
+    real_or_synthetic_flag         VARCHAR(20),
+
+    -- Time features
+    year INTEGER, month INTEGER, day_of_year INTEGER,
+    week_of_year INTEGER, hour INTEGER,
+    season_label                   VARCHAR(50),
+    days_from_cycle_start          FLOAT,
+
+    -- Stage / progression
+    stage_name                     VARCHAR(50),
+    stage_index                    INTEGER,
+    hours_in_current_stage         FLOAT,
+    days_in_current_stage          FLOAT,
+    stage_duration_hours           INTEGER,
+    stage_duration_days            INTEGER,
+    stage_progress_pct             FLOAT,
+    total_cycle_progress_pct       FLOAT,
+    estimated_days_to_next_stage   FLOAT,
+    estimated_hours_to_next_stage  FLOAT,
+    is_stage_transition            BOOLEAN,
+
+    -- Environment
+    indoor_temp FLOAT, indoor_humidity FLOAT,
+    indoor_air_velocity FLOAT, indoor_co2 FLOAT,
+    solarradiation FLOAT, day_night_flag FLOAT,
+    vpd FLOAT, dew_point FLOAT, leaf_wetness_proxy FLOAT,
+
+    -- Engineered features
+    temperature_rolling_mean_24h   FLOAT,
+    humidity_rolling_mean_24h      FLOAT,
+    vpd_proxy                      FLOAT,
+    light_period_flag              INTEGER,
+    cumulative_gdd_like_index      FLOAT
+);
+
+SELECT create_hypertable('growth_progression_hourly', 'timestamp',
+    chunk_time_interval => INTERVAL '1 month');
+```
+
+**Key Features**:
+- **6 growth stages**: seedling → early_vegetative → flowering_initiation → flowering → unripe → ripe
+- GDD-like index (`Tbase = 10 °C`, `Topt = 30 °C`) accumulated hourly
+- Backbone is **real** 2024/2025 indoor conditions — no synthetic noise
+- Suitable for LSTM / TCN / GRU sequence models
+
+**Common Queries**:
+```sql
+-- Duration spent in each stage per cycle
+SELECT cycle_id, stage_name, MAX(days_in_current_stage) AS stage_days
+FROM growth_progression_hourly
+GROUP BY cycle_id, stage_name
+ORDER BY cycle_id, MIN(stage_index);
+
+-- GDD at stage transitions
+SELECT timestamp, stage_name, cumulative_gdd_like_index
+FROM growth_progression_hourly
+WHERE is_stage_transition = TRUE
+ORDER BY timestamp;
+
+-- Hourly temp and GDD for cycle 1
+SELECT timestamp, indoor_temp, cumulative_gdd_like_index
+FROM growth_progression_hourly
+WHERE cycle_id = 1
+ORDER BY timestamp;
+```
+
+---
+
+### growth_progression_stage_summary
+
+Per-stage aggregated statistics (mean / std of environmental variables) for each cycle. 24 rows (4 cycles × 6 stages).
+
+**Schema**:
+```sql
+CREATE TABLE growth_progression_stage_summary (
+    id                   SERIAL PRIMARY KEY,
+    cycle_id             INTEGER NOT NULL,
+    stage_index          INTEGER NOT NULL,
+    stage_name           VARCHAR(50) NOT NULL,
+    hourly_rows          INTEGER,
+    start_timestamp      TIMESTAMP,
+    end_timestamp        TIMESTAMP,
+    actual_days          FLOAT,
+    max_stage_prog       FLOAT,
+    mean_gdd             FLOAT,
+    mean_indoor_temp     FLOAT,
+    mean_indoor_humidity FLOAT,
+    mean_vpd             FLOAT,
+    mean_solarradiation  FLOAT,
+    std_indoor_temp      FLOAT,
+    std_indoor_humidity  FLOAT,
+    std_vpd              FLOAT,
+    std_solarradiation   FLOAT
+);
+```
+
+**Common Queries**:
+```sql
+-- Compare mean temperature across stages for all cycles
+SELECT stage_name, ROUND(AVG(mean_indoor_temp)::numeric, 2) AS avg_temp
+FROM growth_progression_stage_summary
+GROUP BY stage_name
+ORDER BY MIN(stage_index);
+
+-- Cycles where ripe stage had high VPD
+SELECT cycle_id, mean_vpd, actual_days
+FROM growth_progression_stage_summary
+WHERE stage_name = 'ripe' AND mean_vpd > 1.5;
+```
+
+---
+
+### growth_progression_cycle_summary
+
+One row per crop cycle with start/end dates and stage durations. 4 rows.
+
+**Schema**:
+```sql
+CREATE TABLE growth_progression_cycle_summary (
+    id                        SERIAL PRIMARY KEY,
+    cycle_id                  INTEGER NOT NULL UNIQUE,
+    cycle_label               VARCHAR(50),
+    season_window             VARCHAR(100),
+    cycle_start               DATE,
+    cycle_end                 DATE,
+    total_days                INTEGER,
+    days_seedling             INTEGER,
+    days_early_vegetative     INTEGER,
+    days_flowering_initiation INTEGER,
+    days_flowering            INTEGER,
+    days_unripe               INTEGER,
+    days_ripe                 INTEGER,
+    total_hourly_rows         INTEGER
+);
+```
+
+**Common Queries**:
+```sql
+-- Overview of all cycles
+SELECT cycle_label, cycle_start, cycle_end, total_days, days_ripe
+FROM growth_progression_cycle_summary
+ORDER BY cycle_start;
+
+-- Which cycle had the longest flowering stage?
+SELECT cycle_label, days_flowering
+FROM growth_progression_cycle_summary
+ORDER BY days_flowering DESC
+LIMIT 1;
+```
+
+---
+
+### growth_progression_metadata
+
+Single-row table holding the full dataset metadata JSON (project config, agronomic notes, column groups, etc.).
+
+**Schema**:
+```sql
+CREATE TABLE growth_progression_metadata (
+    id                 SERIAL PRIMARY KEY,
+    project            VARCHAR(100),
+    crop               VARCHAR(100),
+    location           VARCHAR(100),
+    greenhouse_system  VARCHAR(100),
+    notebook_name      VARCHAR(200),
+    created_on         TIMESTAMP,
+    total_hourly_rows  INTEGER,
+    earliest_timestamp TIMESTAMP,
+    latest_timestamp   TIMESTAMP,
+    metadata_json      JSONB,     -- Full raw metadata blob
+    loaded_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Common Queries**:
+```sql
+-- Retrieve agronomic notes
+SELECT jsonb_array_elements_text(metadata_json->'agronomic_notes') AS note
+FROM growth_progression_metadata;
+
+-- Stage duration ranges from metadata
+SELECT key AS stage, value AS duration_range_days
+FROM growth_progression_metadata,
+     jsonb_each(metadata_json->'stage_duration_ranges_days');
 ```
 
 ---
@@ -523,6 +833,19 @@ CREATE INDEX idx_weather_datetime ON weather_data(datetime);
 
 -- greenhouse_data
 CREATE INDEX idx_greenhouse_datetime ON greenhouse_data(datetime);
+
+-- disease_progression
+CREATE INDEX idx_disease_prog_timestamp    ON disease_progression (timestamp DESC);
+CREATE INDEX idx_disease_prog_cycle_disease ON disease_progression (cycle_id, disease_name);
+CREATE INDEX idx_disease_prog_present      ON disease_progression (disease_present_flag)
+    WHERE disease_present_flag = 1;
+
+-- growth_progression_hourly
+CREATE INDEX idx_growth_hourly_timestamp   ON growth_progression_hourly (timestamp DESC);
+CREATE INDEX idx_growth_hourly_cycle_stage ON growth_progression_hourly (cycle_id, stage_index);
+
+-- growth_progression_stage_summary
+CREATE INDEX idx_stage_summary_cycle_stage ON growth_progression_stage_summary (cycle_id, stage_index);
 ```
 
 **TimescaleDB Advantages**:
@@ -859,8 +1182,13 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 
 | Table | Records | Size | Notes |
 |-------|---------|------|-------|
-| weather_data | ~17,000 | ~2 MB | Hourly data for 2024-2025 |
-| greenhouse_data | ~200,000 | ~25 MB | 5-minute intervals |
+| weather_data | ~17,520 | ~2 MB | Hourly outdoor data, 2024–2025 |
+| greenhouse_data | ~17,520 | ~2 MB | Hourly indoor conditions, 2024–2025 merged |
+| disease_progression | ~175,000+ | ~60 MB | 5 diseases × 4 cycles, hourly |
+| growth_progression_hourly | 10,848 | ~5 MB | 4 crop cycles, hourly (Jul 2024–Oct 2025) |
+| growth_progression_stage_summary | 24 | <1 MB | 4 cycles × 6 stages |
+| growth_progression_cycle_summary | 4 | <1 MB | One row per crop cycle |
+| growth_progression_metadata | 1 | <1 MB | Dataset config JSON |
 | image_metadata | 69,607 | ~15 MB | 3 categories of tomato images |
 | image_annotations | varies | <1 MB | ML training labels |
 | image_access_log | varies | <5 MB | Usage tracking |
@@ -872,13 +1200,16 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 ## Additional Resources
 
 - **Query Examples**: `examples/query_timeseries_examples.py`, `examples/query_images_examples.py`
-- **Schema Files**: `database/schema/image_metadata.sql`
+- **Schema Files**: `database/schema/image_metadata.sql`, `database/schema/timeseries_data.sql` (complete timeseries schema — all 7 tables)
 - **Models**: `src/agritwin_gh/models/timeseries.py`
+- **Loader Script**: `scripts/load_timeseries_to_postgres.py`
+- **Verification**: `scripts/verify_setup.py`
 - **TimescaleDB Docs**: https://docs.timescale.com/
 - **PostgreSQL JSONB**: https://www.postgresql.org/docs/current/datatype-json.html
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2026-02-25  
-**Database Version**: PostgreSQL 15 + TimescaleDB
+**Document Version**: 2.0  
+**Last Updated**: 2026-03-30  
+**Database Version**: PostgreSQL 15 + TimescaleDB  
+**New in v2.0**: `disease_progression`, `growth_progression_hourly`, `growth_progression_stage_summary`, `growth_progression_cycle_summary`, `growth_progression_metadata`

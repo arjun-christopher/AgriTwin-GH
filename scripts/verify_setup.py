@@ -318,6 +318,101 @@ def check_logs_directory() -> bool:
         return False
 
 
+def check_timeseries_data_files() -> bool:
+    """Check that all expected processed time-series data files are present."""
+    print_header("7. TIMESERIES DATA FILES")
+
+    base = Path("data")
+
+    expected_files = {
+        # Greenhouse indoor conditions
+        "Greenhouse Indoor 2024": base / "processed" / "Greenhouse Indoor Conditions" / "dindigul_greenhouse_indoor_2024.csv",
+        "Greenhouse Indoor 2025": base / "processed" / "Greenhouse Indoor Conditions" / "dindigul_greenhouse_indoor_2025.csv",
+        # Disease progression
+        "Disease Progression (hourly)": base / "processed" / "Disease Progression" / "tomato_disease_progression_synthetic_hourly.csv",
+        # Growth progression
+        "Growth Progression (hourly)": base / "processed" / "Growth Progression" / "tomato_growth_progression_synthetic_hourly.csv",
+        "Growth Progression (stage summary)": base / "processed" / "Growth Progression" / "tomato_growth_progression_stage_summary.csv",
+        "Growth Progression (cycle summary)": base / "processed" / "Growth Progression" / "tomato_growth_progression_cycle_summary.csv",
+        "Growth Progression (metadata JSON)": base / "processed" / "Growth Progression" / "tomato_growth_progression_metadata.json",
+    }
+
+    all_ok = True
+    for label, path in expected_files.items():
+        exists = path.exists()
+        if exists:
+            size_kb = path.stat().st_size / 1024
+            print_check(f"  {label}", True, f"{path.name}  ({size_kb:,.1f} KB)")
+        else:
+            print_check(f"  {label}", False, f"NOT FOUND — expected at: {path}")
+            all_ok = False
+
+    if not all_ok:
+        print(f"\n{YELLOW}⚠ Some data files are missing. Run the relevant generation notebooks first.{RESET}")
+
+    return all_ok
+
+
+def check_timeseries_db_tables() -> bool:
+    """Check that all timeseries tables exist in PostgreSQL."""
+    print_header("8. TIMESERIES DATABASE TABLES")
+
+    required_tables = [
+        "weather_data",
+        "greenhouse_data",
+        "disease_progression",
+        "growth_progression_hourly",
+        "growth_progression_stage_summary",
+        "growth_progression_cycle_summary",
+        "growth_progression_metadata",
+    ]
+
+    try:
+        import psycopg2
+
+        conn = psycopg2.connect(
+            host=os.getenv("DB_HOST"),
+            port=os.getenv("DB_PORT"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+        )
+        cursor = conn.cursor()
+
+        all_ok = True
+        for table in required_tables:
+            cursor.execute(
+                "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = %s)",
+                (table,),
+            )
+            exists = cursor.fetchone()[0]
+            if exists:
+                cursor.execute(f"SELECT COUNT(*) FROM {table}")  # noqa: S608
+                count = cursor.fetchone()[0]
+                print_check(f"  {table}", True, f"{count:,} rows")
+            else:
+                print_check(f"  {table}", False, "table does not exist")
+                all_ok = False
+
+        cursor.close()
+        conn.close()
+
+        if not all_ok:
+            print(f"\n{YELLOW}⚠ Missing tables. Run:{RESET}")
+            print(f"  {BLUE}python scripts/load_timeseries_to_postgres.py --create-tables-only{RESET}")
+            print(f"  {BLUE}python scripts/load_timeseries_to_postgres.py --all{RESET}")
+
+        return all_ok
+
+    except ImportError:
+        print_check("psycopg2", False, "not installed — run: pip install psycopg2-binary")
+        return False
+    except Exception as e:
+        print_check("Connection", False, str(e))
+        print(f"\n{YELLOW}Make sure PostgreSQL is running and DB_* env vars are set.{RESET}")
+        return False
+
+
 def main():
     """Run all verification checks"""
     print(f"\n{BLUE}{'='*80}")
@@ -331,7 +426,9 @@ def main():
         "PostgreSQL Connection": check_postgresql_connection(),
         "Image Directories": check_image_directories()[0],
         "Python Packages": check_python_packages(),
-        "Logs Directory": check_logs_directory()
+        "Logs Directory": check_logs_directory(),
+        "Timeseries Data Files": check_timeseries_data_files(),
+        "Timeseries DB Tables": check_timeseries_db_tables(),
     }
     
     # Summary
@@ -347,12 +444,13 @@ def main():
     
     if passed == total:
         print(f"{GREEN}✓ All checks passed! ({passed}/{total}){RESET}")
-        print(f"\n{GREEN}You're ready to upload images!{RESET}")
+        print(f"\n{GREEN}You're ready to upload images and load timeseries data!{RESET}")
         print(f"\nRun: {BLUE}python scripts/upload_images_to_minio.py{RESET}")
+        print(f"Run: {BLUE}python scripts/load_timeseries_to_postgres.py --all{RESET}")
     else:
         print(f"{RED}✗ {total - passed} check(s) failed ({passed}/{total} passed){RESET}")
-        print(f"\n{YELLOW}Fix the issues above before uploading images{RESET}")
-        print(f"\nSee: {BLUE}QUICKSTART_IMAGE_STORAGE.md{RESET} for setup instructions")
+        print(f"\n{YELLOW}Fix the issues above before proceeding{RESET}")
+        print(f"\nSee: {BLUE}docs/DATABASE_REFERENCE.md{RESET} for setup instructions")
     
     print(f"{BLUE}{'='*80}{RESET}\n")
     
