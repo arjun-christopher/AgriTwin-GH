@@ -1,0 +1,142 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# MPC Control Layer — Dedicated Configuration
+# Loaded by src/agritwin_gh/mpc/config.py
+# ─────────────────────────────────────────────────────────────────────────────
+
+timing:
+  dt_minutes: 5
+  prediction_horizon_hours: 12
+  control_horizon_hours: 6
+
+solver:
+  method: SLSQP          # scipy method; extension point for CasADi/IPOPT
+  max_iter: 200
+  ftol: 1.0e-6
+
+# Default cost weights (overridden per-stage by growth_weights table below)
+cost_weights:
+  w_temp: 1.0
+  w_humidity: 1.0
+  w_soil_moisture: 0.8
+  w_co2: 0.5
+  w_vpd: 0.6
+  w_light: 0.4
+  w_disease: 2.0
+  w_energy: 0.3
+  w_water: 0.3
+  w_switch: 0.1
+
+# Stage-adaptive weight multipliers (applied on top of cost_weights)
+stage_weight_multipliers:
+  seedling:
+    w_temp: 1.2
+    w_humidity: 1.4
+    w_disease: 1.0
+    w_light: 1.0
+    w_co2: 0.6
+    w_soil_moisture: 1.3
+  early_vegetative:
+    w_temp: 1.2
+    w_humidity: 1.2
+    w_disease: 1.0
+    w_light: 1.3
+    w_co2: 1.0
+    w_soil_moisture: 1.2
+  flowering_initiation:
+    w_temp: 1.4
+    w_humidity: 1.2
+    w_disease: 1.3
+    w_light: 1.3
+    w_co2: 1.3
+    w_soil_moisture: 1.0
+  flowering:
+    w_temp: 1.4
+    w_humidity: 1.4
+    w_disease: 1.6
+    w_light: 1.3
+    w_co2: 1.5
+    w_soil_moisture: 1.0
+  unripe:
+    w_temp: 1.2
+    w_humidity: 1.2
+    w_disease: 1.6
+    w_light: 1.0
+    w_co2: 1.3
+    w_soil_moisture: 1.3
+  ripe:
+    w_temp: 1.0
+    w_humidity: 1.0
+    w_disease: 1.2
+    w_light: 0.7
+    w_co2: 0.7
+    w_soil_moisture: 1.0
+
+# Stage setpoint overrides (merge into defaults in setpoints.py).
+# Only include values you want to override; omit fields to keep defaults.
+# setpoint_overrides:
+#   seedling:
+#     temp: 24.0
+
+# Actuator hard bounds
+actuator_bounds:
+  fan_speed: [0.0, 1.0]
+  vent_opening: [0.0, 1.0]
+  irrigation_qty: [0.0, 50.0]
+  heater_output: [0.0, 1.0]
+  led_intensity: [0.0, 1.0]
+  co2_valve_pct: [0.0, 1.0]
+  fogger_duty: [0.0, 1.0]
+
+# Per-step rate-of-change limits [min_delta, max_delta]
+actuator_rate_limits:
+  fan_speed: [-0.20, 0.20]
+  vent_opening: [-0.15, 0.15]
+  irrigation_qty: [-10.0, 10.0]
+  heater_output: [-0.25, 0.25]
+  led_intensity: [-0.20, 0.20]
+  co2_valve_pct: [-0.20, 0.20]
+  fogger_duty: [-0.20, 0.20]
+
+# Minimum steps between actuator activations
+actuator_cooldowns:
+  heater_output: 3
+  co2_valve_pct: 2
+  irrigation_qty: 6
+
+# Environmental hard bounds
+env_bounds:
+  indoor_temp: [10.0, 40.0]
+  indoor_humidity: [30.0, 95.0]
+  co2: [300.0, 2000.0]
+  soil_moisture: [20.0, 90.0]
+  light_intensity: [0.0, 1200.0]
+
+# Daily resource budgets
+resources:
+  daily_water_budget_litres: 500.0
+  daily_energy_budget_kwh: 100.0
+
+# Energy cost coefficients per actuator (kWh per unit per step)
+energy_costs:
+  fan_speed: 0.05
+  heater_output: 0.30
+  led_intensity: 0.15
+  co2_valve_pct: 0.02
+  fogger_duty: 0.04
+
+# Model artifact run IDs (auto-discovered if null)
+model_artifacts:
+  environment_forecast_run_id: null
+  disease_progression_run_id: null
+  growth_progression_run_id: null
+  disease_classifier_run_id: null
+  growth_classifier_run_id: null
+
+# Image streaming
+image_stream:
+  interval_minutes: 5
+  enabled: true
+
+# Initial soil moisture (not in DB, must be set)
+initial_conditions:
+  soil_moisture_pct: 60.0
