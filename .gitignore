@@ -21,7 +21,6 @@ build/
 
 # UV package manager
 .uv-cache/
-uv.lock
 .python-version.bak
 
 # Jupyter Notebook
