@@ -1,0 +1,224 @@
+{
+  "baseline": {
+    "controller_id": "baseline",
+    "controller_type": "rule_based",
+    "n_steps": 144,
+    "tracking": {
+      "indoor_temp": {
+        "variable": "indoor_temp",
+        "rmse": 3.3955458978556665,
+        "mae": 3.0677777777777777,
+        "max_abs_error": 4.690000000000001,
+        "mean_signed_error": -2.305416666666667,
+        "within_tolerance_pct": 17.36
+      },
+      "indoor_humidity": {
+        "variable": "indoor_humidity",
+        "rmse": 7.3995815384685395,
+        "mae": 7.09875,
+        "max_abs_error": 12.32,
+        "mean_signed_error": -7.028333333333332,
+        "within_tolerance_pct": 2.08
+      },
+      "soil_moisture": {
+        "variable": "soil_moisture",
+        "rmse": 5.041290619584544,
+        "mae": 4.807361111111111,
+        "max_abs_error": 6.799999999999997,
+        "mean_signed_error": -4.807361111111111,
+        "within_tolerance_pct": 0.69
+      },
+      "co2": {
+        "variable": "co2",
+        "rmse": 50.51507956926218,
+        "mae": 37.50486111111112,
+        "max_abs_error": 300.0,
+        "mean_signed_error": -24.345138888888886,
+        "within_tolerance_pct": 0.0
+      },
+      "vpd": {
+        "variable": "vpd",
+        "rmse": 0.21226807474407344,
+        "mae": 0.17410277777777777,
+        "max_abs_error": 0.4639,
+        "mean_signed_error": 0.02869166666666667,
+        "within_tolerance_pct": 0.0
+      }
+    },
+    "disease_burden": {
+      "mean_risk": 0.12989722222222222,
+      "max_risk": 0.2645,
+      "cumulative_rh_exposure": 0.0,
+      "disease_favorable_steps": 0,
+      "disease_favorable_duration_hours": 0.0
+    },
+    "resources": {
+      "total_water_litres": 116.95,
+      "total_energy_kwh": 62.2041,
+      "water_per_hour": 9.75,
+      "energy_per_hour": 5.1837,
+      "water_efficiency": 0.0086,
+      "energy_efficiency": 0.0161
+    },
+    "control_quality": {
+      "switching_frequency": {
+        "fan_speed": 0.1119,
+        "vent_opening": 0.1259,
+        "irrigation_qty": 0.1399,
+        "heater_output": 0.035,
+        "led_intensity": 0.3077,
+        "co2_valve_pct": 0.2587,
+        "fogger_duty": 0.007
+      },
+      "total_switches": {
+        "fan_speed": 16,
+        "vent_opening": 18,
+        "irrigation_qty": 20,
+        "heater_output": 5,
+        "led_intensity": 44,
+        "co2_valve_pct": 37,
+        "fogger_duty": 1
+      },
+      "smoothness_l2": {
+        "fan_speed": 0.0624,
+        "vent_opening": 0.0495,
+        "irrigation_qty": 0.374,
+        "heater_output": 0.0445,
+        "led_intensity": 0.109,
+        "co2_valve_pct": 0.1008,
+        "fogger_duty": 0.0184
+      },
+      "mean_smoothness_l2": 0.1084
+    },
+    "safety": {
+      "violation_count": {
+        "indoor_temp": 0,
+        "indoor_humidity": 0,
+        "vpd": 0,
+        "co2": 0,
+        "soil_moisture": 0
+      },
+      "violation_duration_hours": {
+        "indoor_temp": 0.0,
+        "indoor_humidity": 0.0,
+        "vpd": 0.0,
+        "co2": 0.0,
+        "soil_moisture": 0.0
+      },
+      "total_violations": 0,
+      "violation_rate_pct": 0.0
+    },
+    "yield_quality_score": 68.6
+  },
+  "mpc": {
+    "controller_id": "mpc",
+    "controller_type": "mpc_disease_aware",
+    "n_steps": 144,
+    "tracking": {
+      "indoor_temp": {
+        "variable": "indoor_temp",
+        "rmse": 3.3623660650731586,
+        "mae": 3.03375,
+        "max_abs_error": 4.670000000000002,
+        "mean_signed_error": -2.274583333333333,
+        "within_tolerance_pct": 19.44
+      },
+      "indoor_humidity": {
+        "variable": "indoor_humidity",
+        "rmse": 7.40576042685692,
+        "mae": 7.098194444444444,
+        "max_abs_error": 12.32,
+        "mean_signed_error": -7.010277777777778,
+        "within_tolerance_pct": 3.47
+      },
+      "soil_moisture": {
+        "variable": "soil_moisture",
+        "rmse": 4.5522746145928705,
+        "mae": 4.38375,
+        "max_abs_error": 5.259999999999998,
+        "mean_signed_error": -4.38375,
+        "within_tolerance_pct": 0.69
+      },
+      "co2": {
+        "variable": "co2",
+        "rmse": 47.77135139274259,
+        "mae": 32.46458333333334,
+        "max_abs_error": 300.0,
+        "mean_signed_error": -31.943750000000005,
+        "within_tolerance_pct": 0.0
+      },
+      "vpd": {
+        "variable": "vpd",
+        "rmse": 0.21113507278122534,
+        "mae": 0.17269930555555557,
+        "max_abs_error": 0.4639,
+        "mean_signed_error": 0.02993541666666666,
+        "within_tolerance_pct": 0.0
+      }
+    },
+    "disease_burden": {
+      "mean_risk": 0.13033472222222223,
+      "max_risk": 0.2645,
+      "cumulative_rh_exposure": 0.0,
+      "disease_favorable_steps": 0,
+      "disease_favorable_duration_hours": 0.0
+    },
+    "resources": {
+      "total_water_litres": 119.64,
+      "total_energy_kwh": 61.6852,
+      "water_per_hour": 9.97,
+      "energy_per_hour": 5.1404,
+      "water_efficiency": 0.0084,
+      "energy_efficiency": 0.0162
+    },
+    "control_quality": {
+      "switching_frequency": {
+        "fan_speed": 0.1049,
+        "vent_opening": 0.1049,
+        "irrigation_qty": 0.5804,
+        "heater_output": 0.0629,
+        "led_intensity": 0.3147,
+        "co2_valve_pct": 0.3147,
+        "fogger_duty": 0.014
+      },
+      "total_switches": {
+        "fan_speed": 15,
+        "vent_opening": 15,
+        "irrigation_qty": 83,
+        "heater_output": 9,
+        "led_intensity": 45,
+        "co2_valve_pct": 45,
+        "fogger_duty": 2
+      },
+      "smoothness_l2": {
+        "fan_speed": 0.06,
+        "vent_opening": 0.0442,
+        "irrigation_qty": 0.7517,
+        "heater_output": 0.0483,
+        "led_intensity": 0.1111,
+        "co2_valve_pct": 0.1117,
+        "fogger_duty": 0.0191
+      },
+      "mean_smoothness_l2": 0.1637
+    },
+    "safety": {
+      "violation_count": {
+        "indoor_temp": 0,
+        "indoor_humidity": 0,
+        "vpd": 0,
+        "co2": 0,
+        "soil_moisture": 0
+      },
+      "violation_duration_hours": {
+        "indoor_temp": 0.0,
+        "indoor_humidity": 0.0,
+        "vpd": 0.0,
+        "co2": 0.0,
+        "soil_moisture": 0.0
+      },
+      "total_violations": 0,
+      "violation_rate_pct": 0.0
+    },
+    "yield_quality_score": 68.79
+  }
+}

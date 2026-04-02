@@ -21,19 +21,32 @@ from typing import Any
 from .baseline_controller import RuleBasedController
 from .config import MPCConfig
 from .evaluation_metrics import ControllerMetricsBundle
-from .experiment_runner import (
-    ComparisonReport,
-    ExperimentConfig,
-    ExperimentRunner,
-    generate_default_growth_stages,
-    generate_default_weather,
-    make_baseline_adapter,
-    make_default_initial_state,
-    make_mpc_adapter,
-)
 from .mpc_solver import MPCSolver
 from .state import GreenhouseState, WeatherState
-from .yield_proxy import YieldProxyResult, YieldProxyWeights
+
+# experiment_runner and yield_proxy were removed from the real-time production
+# build.  Guard the import so the rest of the package loads cleanly.
+try:
+    from .experiment_runner import (
+        ComparisonReport,
+        ExperimentConfig,
+        ExperimentRunner,
+        generate_default_growth_stages,
+        generate_default_weather,
+        make_baseline_adapter,
+        make_default_initial_state,
+        make_mpc_adapter,
+    )
+    from .yield_proxy import YieldProxyResult, YieldProxyWeights
+    _EVALUATION_AVAILABLE = True
+except ImportError:
+    _EVALUATION_AVAILABLE = False
+    # Provide stub types so the rest of this module's type annotations compile.
+    ComparisonReport = None  # type: ignore[assignment,misc]
+    ExperimentConfig = None  # type: ignore[assignment,misc]
+    ExperimentRunner = None  # type: ignore[assignment,misc]
+    YieldProxyResult = None  # type: ignore[assignment,misc]
+    YieldProxyWeights = None  # type: ignore[assignment,misc]
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +99,12 @@ def run_evaluation(
     -------
     ComparisonReport
     """
+    if not _EVALUATION_AVAILABLE:
+        raise ImportError(
+            "run_evaluation() requires experiment_runner and yield_proxy modules "
+            "which have been removed from the real-time production build. "
+            "Use MPCRunner.run_simulation() for production evaluation instead."
+        )
     _init = initial_state or make_default_initial_state()
     _weather = weather_sequence or generate_default_weather(n_steps, dt_minutes)
     _stages = growth_stage_sequence or generate_default_growth_stages(n_steps, growth_stage)
@@ -145,6 +164,11 @@ def save_evaluation_artifacts(
 
     Returns the output directory path.
     """
+    if not _EVALUATION_AVAILABLE:
+        raise ImportError(
+            "save_evaluation_artifacts() requires experiment_runner and yield_proxy "
+            "modules which have been removed from the real-time production build."
+        )
     run_id = run_id or f"eval_{_dt.datetime.now():%Y%m%d_%H%M%S}"
 
     if workspace_root is None:

@@ -1,0 +1,23 @@
+{
+  "experiment_name": "scenario_3_transition_48h",
+  "n_steps": 288,
+  "dt_minutes": 5,
+  "random_seed": 123,
+  "initial_state": {
+    "indoor_temp": 24.0,
+    "indoor_humidity": 65.0,
+    "soil_moisture": 60.0,
+    "co2": 600.0,
+    "light_intensity": 300.0,
+    "disease_risk_score": 0.1,
+    "growth_stage_index": 3,
+    "vpd": 0.8,
+    "leaf_wetness_proxy": 0.2,
+    "timestamp": null
+  },
+  "growth_stages_used": [
+    "flowering",
+    "unripe"
+  ],
+  "weather_steps": 288
+}

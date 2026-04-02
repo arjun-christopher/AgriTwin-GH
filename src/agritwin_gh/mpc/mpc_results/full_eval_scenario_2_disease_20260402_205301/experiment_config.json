@@ -1,6 +1,8 @@
 {
+  "experiment_name": "scenario_2_high_disease_fruiting",
   "n_steps": 288,
   "dt_minutes": 5,
+  "random_seed": 7,
   "initial_state": {
     "indoor_temp": 29.0,
     "indoor_humidity": 82.0,
@@ -13,10 +15,8 @@
     "leaf_wetness_proxy": 0.65,
     "timestamp": null
   },
-  "random_seed": 7,
-  "experiment_name": "scenario_2_high_disease_fruiting",
-  "description": "",
-  "start_time": "2025-06-01T00:00:00",
-  "n_weather_steps": 288,
-  "n_growth_stages": 288
+  "growth_stages_used": [
+    "unripe"
+  ],
+  "weather_steps": 288
 }

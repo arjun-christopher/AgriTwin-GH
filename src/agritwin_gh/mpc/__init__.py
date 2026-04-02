@@ -111,9 +111,6 @@ from .mpc_solver import MPCSolution, MPCSolver
 # ── Explanation ───────────────────────────────────────────────────────────────
 from .explanation import ControllerExplanation, ExplanationBuilder, ExplanationEntry
 
-# ── Hybrid replay ─────────────────────────────────────────────────────────────
-from .hybrid_replay import ReplayConfig, ReplayEngine, ReplayStep, ReplaySummary
-
 # ── Evaluation metrics ────────────────────────────────────────────────────────
 from .evaluation_metrics import (
     ControllerMetricsBundle,
@@ -125,17 +122,57 @@ from .evaluation_metrics import (
     compute_all_metrics,
 )
 
+# ── Digital Twin state & interface ─────────────────────────────────────────────
+from .dt_state import DTDiagnostics, DTSnapshot, DTStepInput, DTStepOutput
+from .dt_engine import DigitalTwinEngine
+from .dt_interface import DigitalTwinPlant
+
+# ── DT runtime loop ──────────────────────────────────────────────────────────
+from .dt_runtime_prep import (
+    build_fused_state,
+    build_mpc_solver,
+    prepare_growth_stages,
+    prepare_initial_state,
+    prepare_weather_sequence,
+)
+from .dt_loop import (
+    DTLoop,
+    DTLoopStepResult,
+    IMAGE_CADENCE_STEPS,
+    MPC_CADENCE_STEPS,
+    should_force_mpc_update,
+)
+from .dt_logger import DTLoopLogger, DTLoopRunSummary
+
+# ── DT input / output / image abstractions ────────────────────────────────────
+from .dt_input_provider import (
+    DTInputProvider,
+    ImageObservation,
+    SyntheticInputProvider,
+)
+from .dt_image_observer import (
+    ImageObserver,
+    SyntheticImageObserver,
+)
+from .dt_output_writer import (
+    DTOutputWriter,
+    JsonFileOutputWriter,
+    fanout_step_to_writer,
+)
+
+# ── DT artifact manager ──────────────────────────────────────────────────────
+from .dt_artifact_manager import DTArtifactManager
+
 # ── Yield proxy ───────────────────────────────────────────────────────────────
 from .yield_proxy import (
-    YieldProxyResult,
     YieldProxyWeights,
+    YieldProxyResult,
     compute_yield_proxy,
 )
 
 # ── Experiment runner ─────────────────────────────────────────────────────────
 from .experiment_runner import (
     ComparisonReport,
-    ControllerTrajectory,
     ExperimentConfig,
     ExperimentRunner,
     generate_default_growth_stages,
@@ -245,11 +282,6 @@ __all__ = [
     "ExplanationEntry",
     "ControllerExplanation",
     "ExplanationBuilder",
-    # hybrid replay
-    "ReplayConfig",
-    "ReplayEngine",
-    "ReplayStep",
-    "ReplaySummary",
     # evaluation metrics
     "TrackingMetrics",
     "DiseaseBurdenMetrics",
@@ -258,15 +290,14 @@ __all__ = [
     "SafetyMetrics",
     "ControllerMetricsBundle",
     "compute_all_metrics",
+    # utilities
+    "discover_latest_artifact",
     # yield proxy
     "YieldProxyWeights",
     "YieldProxyResult",
     "compute_yield_proxy",
-    # utilities
-    "discover_latest_artifact",
     # experiment runner
     "ExperimentConfig",
-    "ControllerTrajectory",
     "ExperimentRunner",
     "ComparisonReport",
     "make_baseline_adapter",
@@ -278,4 +309,35 @@ __all__ = [
     "run_evaluation",
     "save_evaluation_artifacts",
     "load_evaluation_report",
+    # digital twin state & interface
+    "DTSnapshot",
+    "DTStepInput",
+    "DTStepOutput",
+    "DTDiagnostics",
+    "DigitalTwinEngine",
+    "DigitalTwinPlant",
+    # dt runtime loop
+    "prepare_initial_state",
+    "prepare_weather_sequence",
+    "prepare_growth_stages",
+    "build_mpc_solver",
+    "build_fused_state",
+    "DTLoop",
+    "DTLoopStepResult",
+    "MPC_CADENCE_STEPS",
+    "IMAGE_CADENCE_STEPS",
+    "should_force_mpc_update",
+    "DTLoopLogger",
+    "DTLoopRunSummary",
+    # dt input / output / image abstractions
+    "DTInputProvider",
+    "ImageObservation",
+    "SyntheticInputProvider",
+    "ImageObserver",
+    "SyntheticImageObserver",
+    "DTOutputWriter",
+    "JsonFileOutputWriter",
+    "fanout_step_to_writer",
+    # dt artifact manager
+    "DTArtifactManager",
 ]

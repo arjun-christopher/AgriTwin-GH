@@ -1,0 +1,45 @@
+{
+  "run_id": "full_eval_scenario_2_disease_20260402_205301",
+  "generated_at": "2026-04-02T20:51:08.539080",
+  "summary_table": {
+    "baseline": {
+      "n_steps": 288,
+      "temp_rmse": 3.559,
+      "hum_rmse": 6.976,
+      "sm_rmse": 5.325,
+      "mean_disease_risk": 0.1657,
+      "max_disease_risk": 0.9301,
+      "water_litres": 243.11,
+      "energy_kwh": 111.0448,
+      "safety_violations": 0,
+      "yield_score": 66.71
+    },
+    "mpc_disease": {
+      "n_steps": 288,
+      "temp_rmse": 3.538,
+      "hum_rmse": 6.975,
+      "sm_rmse": 4.716,
+      "mean_disease_risk": 0.1677,
+      "max_disease_risk": 0.9301,
+      "water_litres": 244.32,
+      "energy_kwh": 109.9061,
+      "safety_violations": 0,
+      "yield_score": 66.87
+    }
+  },
+  "improvements": {
+    "baseline vs mpc_disease": {
+      "indoor_temp_rmse": 0.59,
+      "indoor_humidity_rmse": 0.02,
+      "soil_moisture_rmse": 11.44,
+      "co2_rmse": 17.95,
+      "vpd_rmse": -0.02,
+      "mean_disease_risk": -1.19,
+      "rh_exposure": -38.58,
+      "water_litres": -0.5,
+      "energy_kwh": 1.03,
+      "safety_violations": 0.0,
+      "yield_score": 0.24
+    }
+  }
+}

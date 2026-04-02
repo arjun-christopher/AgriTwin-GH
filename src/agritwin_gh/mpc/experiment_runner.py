@@ -1,67 +1,63 @@
 """
-Experiment runner for controller comparison in AgriTwin-GH.
+Offline experiment runner for comparative MPC evaluation.
 
-Drives one or more controller strategies through a shared synthetic or
-replayed weather / disturbance scenario using ``GreenhouseTransitionModel``,
-then evaluates them via the metrics in ``evaluation_metrics`` and yields
-``ComparisonReport`` artefacts.
+Provides:
+  • ``ExperimentConfig``          — declarative experiment specification.
+  • ``ExperimentRunner``          — orchestrates multi-controller runs.
+  • ``ComparisonReport``          — consolidated results with pairwise
+    improvements and yield-proxy scoring.
+  • Adapter factories             — ``make_baseline_adapter()``,
+    ``make_mpc_adapter()``.
+  • Scenario helpers              — ``generate_default_weather()``,
+    ``generate_default_growth_stages()``, ``make_default_initial_state()``.
 
-Design goals
-============
-* **Reproducible** — same ``ExperimentConfig`` → same results (seeded noise).
-* **Controller-agnostic** — any callable that maps
-  ``(GreenhouseState, str, float, WeatherState) → ActuatorState`` works.
-* **Artifacts** — everything JSON-serialisable, timestamped, with run IDs.
-
-Usage
------
->>> cfg = ExperimentConfig(n_steps=100, initial_state=..., weather_sequence=..., growth_stage_sequence=...)
->>> runner = ExperimentRunner(cfg)
->>> runner.register_controller("baseline", baseline_adapter)
->>> runner.register_controller("mpc_aware", mpc_adapter)
->>> report = runner.run()
+The runner is intentionally decoupled from the real-time ``MPCRunner`` so
+it can be used in offline evaluation, ablation studies, and CI checks
+without touching the database.
 """
 
 from __future__ import annotations
 
 import datetime as _dt
 import logging
+import math
+import random
 from dataclasses import asdict, dataclass, field
-from typing import Any, Callable, Protocol, Sequence
+from typing import Any, Callable, Sequence
 
 import numpy as np
 
+from .baseline_controller import RuleBasedController
+from .config import MPCConfig
 from .constants import (
-    GROWTH_STAGES,
+    CONTROL_VARIABLES,
     compute_disease_risk_score,
     stage_label_to_index,
 )
-from .greenhouse_model import GreenhouseModelParams, GreenhouseTransitionModel
 from .evaluation_metrics import (
     ControllerMetricsBundle,
     compute_all_metrics,
 )
-from .state import ActuatorState, GreenhouseState, WeatherState
+from .greenhouse_model import GreenhouseTransitionModel
+from .mpc_solver import MPCSolver, MPCSolution
+from .setpoints import get_setpoint
+from .state import (
+    ActuatorState,
+    FusedState,
+    GreenhouseState,
+    WeatherState,
+)
 from .yield_proxy import YieldProxyResult, YieldProxyWeights, compute_yield_proxy
 
 logger = logging.getLogger(__name__)
 
+# ── Type alias for a controller adapter ───────────────────────────────────────
+# Callable(state, weather, growth_stage, disease_risk, step_index) → ActuatorState
 
-# ── Controller protocol ───────────────────────────────────────────────────────
-
-
-class ControllerCallable(Protocol):
-    """Minimal callable interface any controller adapter must satisfy."""
-
-    def __call__(
-        self,
-        state: GreenhouseState,
-        growth_stage: str,
-        disease_risk: float,
-        weather: WeatherState,
-        prev_actuators: ActuatorState | None,
-        step_index: int,
-    ) -> ActuatorState: ...
+_ControllerAdapter = Callable[
+    [GreenhouseState, WeatherState, str, float, int],
+    ActuatorState,
+]
 
 
 # ── Experiment configuration ──────────────────────────────────────────────────
@@ -69,259 +65,50 @@ class ControllerCallable(Protocol):
 
 @dataclass
 class ExperimentConfig:
-    """Full specification of a reproducible evaluation experiment.
+    """Declarative specification for one comparative experiment run.
 
-    All sequences must have length >= ``n_steps``.
+    Parameters
+    ----------
+    n_steps : int
+        Total simulation steps.
+    dt_minutes : int
+        Step duration in minutes.
+    initial_state : GreenhouseState
+        Starting indoor-climate state.
+    weather_sequence : list[WeatherState]
+        External disturbance sequence (length must equal ``n_steps``).
+    growth_stage_sequence : list[str]
+        Canonical growth-stage label per step.
+    random_seed : int
+        Seed for reproducibility.
+    yield_proxy_weights : YieldProxyWeights, optional
+        Weights for the yield-proxy scorer.
+    experiment_name : str
+        Human-readable identifier stored in the report.
     """
 
-    n_steps: int = 288                                # default: 1 day at 5-min dt
+    # Required
+    n_steps: int = 288
     dt_minutes: int = 5
-
-    # Initial greenhouse state
     initial_state: GreenhouseState = field(default_factory=GreenhouseState)
-
-    # External disturbances (same for all controllers)
     weather_sequence: list[WeatherState] = field(default_factory=list)
-
-    # Growth-stage label per step (constant or stage-transitioning)
     growth_stage_sequence: list[str] = field(default_factory=list)
 
-    # Transition model configuration
-    model_params: GreenhouseModelParams | None = None
-
-    # Random seed for stochastic noise (reproducibility)
+    # Optional
     random_seed: int = 42
-
-    # Yield proxy weights
     yield_proxy_weights: YieldProxyWeights | None = None
-
-    # Metadata
     experiment_name: str = ""
-    description: str = ""
-    start_time: _dt.datetime = field(
-        default_factory=lambda: _dt.datetime(2025, 6, 1, 0, 0),
-    )
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "experiment_name": self.experiment_name,
             "n_steps": self.n_steps,
             "dt_minutes": self.dt_minutes,
-            "initial_state": self.initial_state.to_dict(),
             "random_seed": self.random_seed,
-            "experiment_name": self.experiment_name,
-            "description": self.description,
-            "start_time": self.start_time.isoformat(),
-            "n_weather_steps": len(self.weather_sequence),
-            "n_growth_stages": len(self.growth_stage_sequence),
+            "initial_state": asdict(self.initial_state),
+            "growth_stages_used": sorted(set(self.growth_stage_sequence)),
+            "weather_steps": len(self.weather_sequence),
         }
-
-
-# ── Controller trajectory container ──────────────────────────────────────────
-
-
-@dataclass
-class ControllerTrajectory:
-    """Raw simulation trajectory for one controller run."""
-
-    controller_id: str = ""
-    controller_type: str = ""
-    states: list[GreenhouseState] = field(default_factory=list)
-    actuators: list[ActuatorState] = field(default_factory=list)
-    growth_stages: list[str] = field(default_factory=list)
-    timestamps: list[_dt.datetime] = field(default_factory=list)
-    disease_risks: list[float] = field(default_factory=list)
-
-    # Computed after simulation
-    metrics: ControllerMetricsBundle | None = None
-    yield_proxy: YieldProxyResult | None = None
-
-
-# ── Experiment runner ─────────────────────────────────────────────────────────
-
-
-class ExperimentRunner:
-    """Orchestrates controller comparison experiments.
-
-    Usage::
-
-        runner = ExperimentRunner(config)
-        runner.register_controller("baseline", adapter_fn)
-        runner.register_controller("mpc", mpc_adapter_fn)
-        report = runner.run()
-    """
-
-    def __init__(self, config: ExperimentConfig) -> None:
-        self._cfg = config
-        self._controllers: dict[str, tuple[str, ControllerCallable]] = {}
-        self._trajectories: dict[str, ControllerTrajectory] = {}
-        self._validate_config()
-
-    def _validate_config(self) -> None:
-        n = self._cfg.n_steps
-        if len(self._cfg.weather_sequence) < n:
-            raise ValueError(
-                f"weather_sequence length {len(self._cfg.weather_sequence)} "
-                f"< n_steps {n}"
-            )
-        if len(self._cfg.growth_stage_sequence) < n:
-            raise ValueError(
-                f"growth_stage_sequence length {len(self._cfg.growth_stage_sequence)} "
-                f"< n_steps {n}"
-            )
-
-    def register_controller(
-        self,
-        controller_id: str,
-        controller_fn: ControllerCallable,  # type: ignore[override]
-        controller_type: str = "custom",
-    ) -> None:
-        """Register a controller for evaluation.
-
-        Parameters
-        ----------
-        controller_id : str
-            Unique identifier (e.g. ``"baseline"``, ``"mpc_v2"``).
-        controller_fn : callable
-            Must conform to ``ControllerCallable`` protocol.
-        controller_type : str
-            Descriptive label (``"baseline"``, ``"mpc"``, ``"mpc_disease_aware"``).
-        """
-        self._controllers[controller_id] = (controller_type, controller_fn)
-
-    def run(self) -> ComparisonReport:
-        """Execute all registered controllers and produce a comparison report."""
-        if not self._controllers:
-            raise RuntimeError("No controllers registered")
-
-        self._trajectories.clear()
-
-        for cid, (ctype, cfn) in self._controllers.items():
-            logger.info("Running controller '%s' (%s) for %d steps", cid, ctype, self._cfg.n_steps)
-            traj = self._simulate_controller(cid, ctype, cfn)
-            self._trajectories[cid] = traj
-
-        return self._build_report()
-
-    # ── Simulation ────────────────────────────────────────────────────
-
-    def _simulate_controller(
-        self,
-        controller_id: str,
-        controller_type: str,
-        controller_fn: ControllerCallable,
-    ) -> ControllerTrajectory:
-        """Simulate one controller over the full experiment window."""
-        cfg = self._cfg
-        model = GreenhouseTransitionModel(
-            params=cfg.model_params,
-            dt_minutes=cfg.dt_minutes,
-        )
-
-        # Seed the model's noise for reproducibility
-        np.random.seed(cfg.random_seed)
-
-        state = GreenhouseState(**asdict(cfg.initial_state))
-        prev_act: ActuatorState | None = None
-
-        traj = ControllerTrajectory(
-            controller_id=controller_id,
-            controller_type=controller_type,
-        )
-
-        for step in range(cfg.n_steps):
-            weather = cfg.weather_sequence[step]
-            stage = cfg.growth_stage_sequence[step]
-
-            # Update disease risk from current climate
-            disease_risk = compute_disease_risk_score(
-                temp=state.indoor_temp,
-                humidity=state.indoor_humidity,
-                leaf_wetness=state.leaf_wetness_proxy,
-                growth_stage=stage,
-            )
-            state.disease_risk_score = disease_risk
-
-            timestamp = cfg.start_time + _dt.timedelta(minutes=step * cfg.dt_minutes)
-            state.timestamp = timestamp
-
-            # Record pre-action state
-            traj.states.append(GreenhouseState(**asdict(state)))
-            traj.growth_stages.append(stage)
-            traj.timestamps.append(timestamp)
-            traj.disease_risks.append(disease_risk)
-
-            # Controller decides
-            actuators = controller_fn(
-                state=state,
-                growth_stage=stage,
-                disease_risk=disease_risk,
-                weather=weather,
-                prev_actuators=prev_act,
-                step_index=step,
-            )
-
-            traj.actuators.append(actuators)
-            prev_act = actuators
-
-            # Transition model advances the plant
-            next_state = model.step(state, actuators, weather)
-            state = next_state
-
-        # ── Post-simulation metric computation ─────────────────────
-        metrics = compute_all_metrics(
-            states=traj.states,
-            actuators=traj.actuators,
-            growth_stages=traj.growth_stages,
-            controller_id=controller_id,
-            controller_type=controller_type,
-            dt_minutes=cfg.dt_minutes,
-        )
-
-        yield_result = compute_yield_proxy(
-            states=traj.states,
-            actuators=traj.actuators,
-            growth_stages=traj.growth_stages,
-            weights=cfg.yield_proxy_weights,
-        )
-
-        metrics.yield_quality_score = yield_result.overall_score
-        traj.metrics = metrics
-        traj.yield_proxy = yield_result
-
-        return traj
-
-    # ── Report assembly ───────────────────────────────────────────────
-
-    def _build_report(self) -> ComparisonReport:
-        """Assemble a ComparisonReport from all controller trajectories."""
-        bundles: dict[str, ControllerMetricsBundle] = {}
-        yield_results: dict[str, YieldProxyResult] = {}
-
-        for cid, traj in self._trajectories.items():
-            if traj.metrics:
-                bundles[cid] = traj.metrics
-            if traj.yield_proxy:
-                yield_results[cid] = traj.yield_proxy
-
-        # Compute pair-wise improvements
-        improvements: dict[str, dict[str, float]] = {}
-        controller_ids = list(bundles.keys())
-        if len(controller_ids) >= 2:
-            ref_id = controller_ids[0]
-            for cid in controller_ids[1:]:
-                improvements[f"{cid}_vs_{ref_id}"] = _compute_improvements(
-                    reference=bundles[ref_id],
-                    candidate=bundles[cid],
-                )
-
-        return ComparisonReport(
-            experiment_config=self._cfg,
-            controller_metrics=bundles,
-            yield_results=yield_results,
-            improvements=improvements,
-            trajectories=dict(self._trajectories),
-            generated_at=_dt.datetime.now(),
-        )
 
 
 # ── Comparison report ─────────────────────────────────────────────────────────
@@ -329,136 +116,318 @@ class ExperimentRunner:
 
 @dataclass
 class ComparisonReport:
-    """Aggregated comparison of all controllers in an experiment."""
+    """Consolidated multi-controller experiment results.
 
-    experiment_config: ExperimentConfig = field(default_factory=ExperimentConfig)
+    Attributes
+    ----------
+    controller_metrics : dict[str, ControllerMetricsBundle]
+        Full metric bundle per registered controller ID.
+    yield_results : dict[str, YieldProxyResult]
+        Yield-proxy score breakdown per controller.
+    improvements : dict[str, dict[str, float]]
+        Pairwise percentage improvements, keyed by
+        ``"<ref_id> vs <cmp_id>"``.
+    experiment_config : ExperimentConfig
+        The configuration that produced this report.
+    generated_at : datetime
+        Report generation timestamp.
+    """
+
     controller_metrics: dict[str, ControllerMetricsBundle] = field(default_factory=dict)
     yield_results: dict[str, YieldProxyResult] = field(default_factory=dict)
     improvements: dict[str, dict[str, float]] = field(default_factory=dict)
-    trajectories: dict[str, ControllerTrajectory] = field(default_factory=dict)
+    experiment_config: ExperimentConfig = field(default_factory=ExperimentConfig)
     generated_at: _dt.datetime = field(default_factory=_dt.datetime.now)
 
+    # ── convenience accessors ─────────────────────────────────────────
+
     def summary_table(self) -> dict[str, dict[str, Any]]:
-        """Return a controller-keyed dict suitable for tabular display."""
+        """Return a nested dict suitable for tabular display.
+
+        Outer key = controller_id.
+        Inner keys = selected scalar metrics.
+        """
         table: dict[str, dict[str, Any]] = {}
         for cid, m in self.controller_metrics.items():
-            row: dict[str, Any] = {
-                "type": m.controller_type,
+            yr = self.yield_results.get(cid)
+            table[cid] = {
                 "n_steps": m.n_steps,
-                "temp_rmse": round(m.tracking.get("indoor_temp", _empty_tracking()).rmse, 3),
-                "humidity_rmse": round(m.tracking.get("indoor_humidity", _empty_tracking()).rmse, 3),
-                "soil_moisture_rmse": round(m.tracking.get("soil_moisture", _empty_tracking()).rmse, 3),
-                "disease_risk_mean": round(m.disease_burden.mean_risk, 4),
-                "disease_risk_max": round(m.disease_burden.max_risk, 4),
-                "total_water_l": m.resources.total_water_litres,
-                "total_energy_kwh": m.resources.total_energy_kwh,
-                "mean_smoothness": m.control_quality.mean_smoothness_l2,
+                "temp_rmse": round(m.tracking.get("indoor_temp", _stub_tm()).rmse, 3),
+                "hum_rmse": round(m.tracking.get("indoor_humidity", _stub_tm()).rmse, 3),
+                "sm_rmse": round(m.tracking.get("soil_moisture", _stub_tm()).rmse, 3),
+                "mean_disease_risk": round(m.disease_burden.mean_risk, 4),
+                "max_disease_risk": round(m.disease_burden.max_risk, 4),
+                "water_litres": round(m.resources.total_water_litres, 2),
+                "energy_kwh": round(m.resources.total_energy_kwh, 4),
                 "safety_violations": m.safety.total_violations,
-                "yield_score": m.yield_quality_score,
+                "yield_score": round(yr.overall_score, 2) if yr else 0.0,
             }
-            table[cid] = row
         return table
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_json_dict(self) -> dict[str, Any]:
+        """Full JSON-serialisable representation."""
         return {
+            "generated_at": self.generated_at.isoformat(),
             "experiment_config": self.experiment_config.to_dict(),
+            "summary_table": self.summary_table(),
+            "improvements": self.improvements,
             "controller_metrics": {
                 cid: m.to_dict() for cid, m in self.controller_metrics.items()
             },
             "yield_results": {
                 cid: yr.to_dict() for cid, yr in self.yield_results.items()
             },
-            "improvements": dict(self.improvements),
-            "generated_at": self.generated_at.isoformat(),
-            "summary_table": self.summary_table(),
         }
 
+    def to_dict(self) -> dict[str, Any]:
+        """Alias for ``to_json_dict()`` — kept for script compatibility."""
+        return self.to_json_dict()
 
-def _empty_tracking():
+
+def _stub_tm():
+    """Return a zeroed TrackingMetrics instance (avoids circular import)."""
     from .evaluation_metrics import TrackingMetrics
     return TrackingMetrics()
 
 
-# ── Improvement computation ───────────────────────────────────────────────────
+# ── Experiment runner ─────────────────────────────────────────────────────────
+
+
+class ExperimentRunner:
+    """Run multiple controllers over the same scenario and compare results.
+
+    Usage
+    -----
+    ::
+
+        cfg = ExperimentConfig(n_steps=288, ...)
+        runner = ExperimentRunner(cfg)
+        runner.register_controller("baseline", make_baseline_adapter())
+        runner.register_controller("mpc", make_mpc_adapter())
+        report = runner.run()
+    """
+
+    def __init__(self, config: ExperimentConfig) -> None:
+        self._cfg = config
+        self._controllers: list[tuple[str, _ControllerAdapter, str]] = []
+        self._model = GreenhouseTransitionModel()
+
+    def register_controller(
+        self,
+        controller_id: str,
+        adapter: _ControllerAdapter,
+        controller_type: str = "unknown",
+    ) -> None:
+        """Register a controller adapter for evaluation.
+
+        Parameters
+        ----------
+        controller_id : str
+            Unique identifier (e.g. "baseline", "mpc").
+        adapter : callable
+            Function ``(state, weather, growth_stage, disease_risk, step) → ActuatorState``.
+        controller_type : str
+            Descriptive type label stored in the metrics bundle.
+        """
+        self._controllers.append((controller_id, adapter, controller_type))
+
+    def run(self) -> ComparisonReport:
+        """Execute all registered controllers and produce a ``ComparisonReport``.
+
+        Each controller is run independently over the same scenario
+        (same initial state, weather, growth-stage sequence).  Results
+        are compared pairwise (first registered controller is the reference).
+
+        Returns
+        -------
+        ComparisonReport
+        """
+        cfg = self._cfg
+        n = cfg.n_steps
+        weather = _pad_weather(cfg.weather_sequence, n)
+        stages = _pad_stages(cfg.growth_stage_sequence, n)
+
+        # Validate inputs
+        if n <= 0:
+            raise ValueError("ExperimentConfig.n_steps must be > 0")
+
+        rng = random.Random(cfg.random_seed)
+        np.random.seed(cfg.random_seed)
+
+        all_metrics: dict[str, ControllerMetricsBundle] = {}
+        all_trajectories: dict[str, tuple[list[GreenhouseState], list[ActuatorState]]] = {}
+
+        for cid, adapter, ctype in self._controllers:
+            logger.info("Running controller: %s (%s), steps=%d", cid, ctype, n)
+            states, actuators = self._simulate(adapter, weather, stages, rng, n, cfg)
+            bundle = compute_all_metrics(
+                states, actuators, stages,
+                controller_id=cid,
+                controller_type=ctype,
+                dt_minutes=cfg.dt_minutes,
+            )
+            all_metrics[cid] = bundle
+            all_trajectories[cid] = (states, actuators)
+            logger.info("  %s: temp_rmse=%.3f  disease=%.4f",
+                        cid,
+                        bundle.tracking.get("indoor_temp", _stub_tm()).rmse,
+                        bundle.disease_burden.mean_risk)
+
+        # Yield proxy scores
+        yield_results: dict[str, YieldProxyResult] = {}
+        for cid, (states, actuators) in all_trajectories.items():
+            yr = compute_yield_proxy(states, actuators, stages, cfg.yield_proxy_weights)
+            yr.controller_id = cid  # backfill
+            all_metrics[cid].yield_quality_score = yr.overall_score
+            yield_results[cid] = yr
+
+        # Pairwise improvements (first controller is baseline reference)
+        improvements = _compute_improvements(all_metrics, yield_results)
+
+        return ComparisonReport(
+            controller_metrics=all_metrics,
+            yield_results=yield_results,
+            improvements=improvements,
+            experiment_config=cfg,
+            generated_at=_dt.datetime.now(),
+        )
+
+    # ── Internal simulation ───────────────────────────────────────────
+
+    def _simulate(
+        self,
+        adapter: _ControllerAdapter,
+        weather: list[WeatherState],
+        stages: list[str],
+        rng: random.Random,
+        n: int,
+        cfg: ExperimentConfig,
+    ) -> tuple[list[GreenhouseState], list[ActuatorState]]:
+        """Roll out a single controller over ``n`` steps."""
+        state = _copy_state(cfg.initial_state)
+        states: list[GreenhouseState] = []
+        actuators: list[ActuatorState] = []
+
+        for step in range(n):
+            w = weather[step]
+            stage = stages[step]
+
+            # Estimate disease risk from current state
+            sp = get_setpoint(stage)
+            disease_risk = compute_disease_risk_score(
+                state.indoor_temp, state.indoor_humidity, state.leaf_wetness_proxy, stage
+            )
+            state.disease_risk_score = disease_risk
+            state.growth_stage_index = stage_label_to_index(stage)
+
+            # Call adapter
+            try:
+                action = adapter(state, w, stage, disease_risk, step)
+            except Exception as exc:
+                logger.warning("Adapter error at step %d: %s — using zero action", step, exc)
+                action = ActuatorState()
+
+            # Clamp action to [0, 1]
+            action = _clamp_action(action)
+
+            states.append(_copy_state(state))
+            actuators.append(action)
+
+            # Advance physics
+            state = self._model.step(state, action, w)
+
+        return states, actuators
+
+
+# ── Pairwise improvement computation ─────────────────────────────────────────
 
 
 def _compute_improvements(
-    reference: ControllerMetricsBundle,
-    candidate: ControllerMetricsBundle,
-) -> dict[str, float]:
-    """Compute percentage improvement of *candidate* over *reference*.
+    all_metrics: dict[str, ControllerMetricsBundle],
+    yield_results: dict[str, YieldProxyResult],
+) -> dict[str, dict[str, float]]:
+    """Compute pairwise percentage improvements relative to the first controller."""
+    cids = list(all_metrics.keys())
+    if len(cids) < 2:
+        return {}
 
-    Positive = candidate is better, negative = worse.
-    Convention:
-      - For RMSE / risk / consumption: improvement = (ref - cand) / ref * 100
-      - For yield score: improvement = (cand - ref) / max(ref, 1) * 100
+    ref_id = cids[0]
+    ref_m = all_metrics[ref_id]
+    ref_yr = yield_results.get(ref_id)
+    improvements: dict[str, dict[str, float]] = {}
+
+    for cid in cids[1:]:
+        m = all_metrics[cid]
+        yr = yield_results.get(cid)
+        pair_key = f"{ref_id} vs {cid}"
+
+        def pct_improve(ref_val: float, new_val: float, lower_is_better: bool = True) -> float:
+            """% improvement: positive means new_val is better than ref_val."""
+            if abs(ref_val) < 1e-12:
+                return 0.0
+            if lower_is_better:
+                return round(100.0 * (ref_val - new_val) / abs(ref_val), 2)
+            else:
+                return round(100.0 * (new_val - ref_val) / abs(ref_val), 2)
+
+        imps: dict[str, float] = {}
+
+        # Tracking improvements (lower RMSE is better)
+        for var in ["indoor_temp", "indoor_humidity", "soil_moisture", "co2", "vpd"]:
+            ref_rmse = ref_m.tracking.get(var, _stub_tm()).rmse
+            new_rmse = m.tracking.get(var, _stub_tm()).rmse
+            imps[f"{var}_rmse"] = pct_improve(ref_rmse, new_rmse, lower_is_better=True)
+
+        # Disease burden (lower is better)
+        imps["mean_disease_risk"] = pct_improve(
+            ref_m.disease_burden.mean_risk, m.disease_burden.mean_risk, lower_is_better=True
+        )
+        imps["rh_exposure"] = pct_improve(
+            ref_m.disease_burden.cumulative_rh_exposure,
+            m.disease_burden.cumulative_rh_exposure,
+            lower_is_better=True,
+        )
+
+        # Resources (lower is better)
+        imps["water_litres"] = pct_improve(
+            ref_m.resources.total_water_litres, m.resources.total_water_litres, lower_is_better=True
+        )
+        imps["energy_kwh"] = pct_improve(
+            ref_m.resources.total_energy_kwh, m.resources.total_energy_kwh, lower_is_better=True
+        )
+
+        # Safety (fewer violations is better)
+        imps["safety_violations"] = pct_improve(
+            float(ref_m.safety.total_violations), float(m.safety.total_violations), lower_is_better=True
+        )
+
+        # Yield score (higher is better)
+        if ref_yr and yr:
+            imps["yield_score"] = pct_improve(
+                ref_yr.overall_score, yr.overall_score, lower_is_better=False
+            )
+
+        improvements[pair_key] = imps
+
+    return improvements
+
+
+# ── Controller adapter factories ──────────────────────────────────────────────
+
+
+def make_baseline_adapter() -> _ControllerAdapter:
+    """Return a controller adapter wrapping ``RuleBasedController``.
+
+    The adapter signature is:
+    ``(state, weather, growth_stage, disease_risk, step_index) → ActuatorState``
     """
-    imp: dict[str, float] = {}
-
-    # Tracking RMSE improvements (lower is better)
-    for var in ("indoor_temp", "indoor_humidity", "soil_moisture", "co2", "vpd"):
-        ref_v = reference.tracking.get(var, _empty_tracking()).rmse
-        cand_v = candidate.tracking.get(var, _empty_tracking()).rmse
-        if ref_v > 1e-9:
-            imp[f"{var}_rmse_improvement_pct"] = round((ref_v - cand_v) / ref_v * 100, 2)
-
-    # Disease risk (lower is better)
-    ref_dr = reference.disease_burden.mean_risk
-    cand_dr = candidate.disease_burden.mean_risk
-    if ref_dr > 1e-9:
-        imp["disease_risk_mean_improvement_pct"] = round((ref_dr - cand_dr) / ref_dr * 100, 2)
-
-    # Resource consumption (lower is better)
-    ref_w = reference.resources.total_water_litres
-    cand_w = candidate.resources.total_water_litres
-    if ref_w > 1e-9:
-        imp["water_savings_pct"] = round((ref_w - cand_w) / ref_w * 100, 2)
-
-    ref_e = reference.resources.total_energy_kwh
-    cand_e = candidate.resources.total_energy_kwh
-    if ref_e > 1e-9:
-        imp["energy_savings_pct"] = round((ref_e - cand_e) / ref_e * 100, 2)
-
-    # Control smoothness (lower L2 is better)
-    ref_sm = reference.control_quality.mean_smoothness_l2
-    cand_sm = candidate.control_quality.mean_smoothness_l2
-    if ref_sm > 1e-9:
-        imp["smoothness_improvement_pct"] = round((ref_sm - cand_sm) / ref_sm * 100, 2)
-
-    # Safety (fewer violations is better)
-    ref_v = reference.safety.total_violations
-    cand_v = candidate.safety.total_violations
-    if ref_v > 0:
-        imp["safety_improvement_pct"] = round((ref_v - cand_v) / ref_v * 100, 2)
-
-    # Yield score (higher is better)
-    ref_y = reference.yield_quality_score
-    cand_y = candidate.yield_quality_score
-    imp["yield_score_improvement_pct"] = round((cand_y - ref_y) / max(ref_y, 1.0) * 100, 2)
-
-    return imp
-
-
-# ── Convenience: controller adapters ──────────────────────────────────────────
-
-
-def make_baseline_adapter(
-    controller: Any | None = None,
-) -> ControllerCallable:
-    """Wrap a ``RuleBasedController`` into the ``ControllerCallable`` protocol.
-
-    If *controller* is ``None`` a default ``RuleBasedController`` is created.
-    """
-    if controller is None:
-        from .baseline_controller import RuleBasedController
-        controller = RuleBasedController()
+    controller = RuleBasedController()
 
     def _adapter(
         state: GreenhouseState,
+        weather: WeatherState,
         growth_stage: str,
         disease_risk: float,
-        weather: WeatherState,
-        prev_actuators: ActuatorState | None,
         step_index: int,
     ) -> ActuatorState:
         payload = controller.compute_action(
@@ -469,183 +438,192 @@ def make_baseline_adapter(
         )
         return payload.actuators
 
-    return _adapter  # type: ignore[return-value]
+    return _adapter
 
 
-def make_mpc_adapter(
-    solver: Any | None = None,
-    config: Any | None = None,
-    weather_lookahead: int = 12,
-    weather_sequence: list[WeatherState] | None = None,
-) -> ControllerCallable:
-    """Wrap an ``MPCSolver`` into the ``ControllerCallable`` protocol.
+def make_mpc_adapter(config: MPCConfig | None = None) -> _ControllerAdapter:
+    """Return a controller adapter wrapping ``MPCSolver``.
 
-    The adapter constructs a minimal ``FusedState`` from the arguments and
-    passes the weather sequence as a look-ahead window.
+    The adapter signature is:
+    ``(state, weather, growth_stage, disease_risk, step_index) → ActuatorState``
 
-    Parameters
-    ----------
-    solver : MPCSolver or None
-        If ``None`` a default solver is created using *config*.
-    config : MPCConfig or None
-        Used only when *solver* is ``None``.
-    weather_lookahead : int
-        Number of weather steps passed to the solver per call.
-    weather_sequence : list[WeatherState] or None
-        Full weather forecast.  When provided, the adapter slices a
-        lookahead window starting at the current *step_index* so the
-        solver sees upcoming weather transitions.
+    The MPC solver optimises over a short horizon at each step
+    (receding-horizon, single-shooting formulation).
     """
-    if solver is None:
-        from .config import MPCConfig
-        from .mpc_solver import MPCSolver
-        _cfg = config or MPCConfig()
-        solver = MPCSolver(_cfg)
+    from .cost_function import DiseaseContext
 
-    # ── Safety filter: predict-then-check with baseline fallback ──────
-    from .greenhouse_model import GreenhouseTransitionModel
-    from .baseline_controller import RuleBasedController
-    from .constraints import get_default_constraints
-
-    _safety_model = GreenhouseTransitionModel()
-    _baseline = RuleBasedController(constraints=get_default_constraints())
-
-    # Tighter bounds with ~5 % margin inside the evaluation safety bounds
-    _filter_bounds: dict[str, tuple[float, float]] = {
-        "indoor_temp": (11.4, 36.6),
-        "indoor_humidity": (28.5, 91.2),
-        "vpd": (0.385, 1.9),
-        "co2": (287.5, 2375.0),
-        "soil_moisture": (19.0, 91.2),
-    }
-
-    # Convert weather_sequence to dicts once for fast slicing
-    _weather_dicts: list[dict[str, Any]] | None = None
-    if weather_sequence:
-        _weather_dicts = [w.to_dict() for w in weather_sequence]
+    _cfg = config or MPCConfig()
+    solver = MPCSolver(_cfg)
+    _prev_action: list[ActuatorState] = [ActuatorState()]
 
     def _adapter(
         state: GreenhouseState,
+        weather: WeatherState,
         growth_stage: str,
         disease_risk: float,
-        weather: WeatherState,
-        prev_actuators: ActuatorState | None,
         step_index: int,
     ) -> ActuatorState:
-        from .state import FusedState
-
-        # Build a minimal FusedState for the solver
         fused = FusedState(
             greenhouse_state=state,
             growth_stage=growth_stage,
-            growth_stage_index=state.growth_stage_index,
+            growth_stage_index=stage_label_to_index(growth_stage),
             disease_risk_score=disease_risk,
-            disease_classification="healthy leaves" if disease_risk < 0.3 else "early blight",
-            disease_confidence=0.8,
+            disease_classification="healthy leaves",
+            disease_confidence=0.9,
+            weather_forecast=[weather.to_dict()] * max(1, _cfg.control_horizon_steps),
         )
-
-        # Build weather forecast: lookahead window when full sequence available
-        if _weather_dicts is not None:
-            wf = _weather_dicts[step_index: step_index + weather_lookahead]
-            if not wf:
-                wf = [weather.to_dict()]
-        else:
-            wf = [weather.to_dict()]
-
-        solution = solver.solve(
-            fused=fused,
-            weather_forecast=wf,
-            previous_control=prev_actuators,
-        )
-        action = solution.first_action
-
-        # ── Safety filter: simulate one step, check bounds ────────────
-        _w_d = weather.to_dict()
-        predicted = _safety_model.step(state, action, _w_d)
-        safe = True
-        for var, (lo, hi) in _filter_bounds.items():
-            val = getattr(predicted, var, 0.0)
-            if val < lo or val > hi:
-                safe = False
-                break
-
-        if not safe:
-            bl_result = _baseline.compute_action(
-                state, growth_stage, disease_risk=disease_risk,
+        try:
+            solution: MPCSolution = solver.solve(
+                fused,
+                previous_control=_prev_action[0],
             )
-            action = bl_result.actuators
+            action = solution.first_action
+        except Exception as exc:
+            logger.warning("MPC solve failed at step %d: %s — falling back", step_index, exc)
+            from .baseline_controller import RuleBasedController
+            fb = RuleBasedController()
+            payload = fb.compute_action(
+                state=state,
+                growth_stage=growth_stage,
+                disease_risk=disease_risk,
+                weather=weather,
+            )
+            action = payload.actuators
 
-        # ── Dead-band filter: snap small changes to previous action ───
-        # Reduces unnecessary switching → improves yield proxy stability
-        # score without harming tracking for meaningful adjustments.
-        # CO2 valve excluded — frequent small adjustments needed for tracking.
-        if prev_actuators is not None:
-            _db = {
-                'fan_speed': 0.08, 'vent_opening': 0.08,
-                'irrigation_qty': 2.0, 'heater_output': 0.08,
-                'led_intensity': 0.08,
-                'fogger_duty': 0.08,
-            }
-            for attr, threshold in _db.items():
-                cur = getattr(action, attr, 0.0)
-                prev = getattr(prev_actuators, attr, 0.0)
-                if abs(cur - prev) < threshold:
-                    setattr(action, attr, prev)
-
+        _prev_action[0] = action
         return action
 
-    return _adapter  # type: ignore[return-value]
+    return _adapter
 
 
-# ── Convenience: synthetic scenario generators ────────────────────────────────
+# ── Scenario generation helpers ───────────────────────────────────────────────
 
 
 def generate_default_weather(
     n_steps: int,
     dt_minutes: int = 5,
-    base_temp: float = 20.0,
-    diurnal_amp: float = 8.0,
+    base_temp: float = 22.0,
+    base_humidity: float = 60.0,
 ) -> list[WeatherState]:
     """Generate a synthetic diurnal weather sequence.
 
-    Produces a temperature sinusoid (24h period) with mild humidity
-    variation, suitable for quick experiments.
+    Temperature and humidity follow sinusoidal day/night cycles;
+    solar radiation follows a standard sunrise-14h-sunset pattern.
+
+    Parameters
+    ----------
+    n_steps : int
+        Number of timesteps to generate.
+    dt_minutes : int
+        Step duration in minutes.
+    base_temp : float
+        Mean outdoor temperature (°C).
+    base_humidity : float
+        Mean outdoor relative humidity (%RH).
+
+    Returns
+    -------
+    list[WeatherState]
     """
-    weather: list[WeatherState] = []
+    seq: list[WeatherState] = []
     for i in range(n_steps):
-        hour_frac = (i * dt_minutes / 60.0) % 24.0
-        phase = 2.0 * np.pi * (hour_frac - 6.0) / 24.0  # peak at 15:00
-        temp = base_temp + diurnal_amp * np.sin(phase)
-        hum = 60.0 + 15.0 * np.cos(phase)  # anti-correlated with temp
-        solar = max(0.0, 800.0 * np.sin(np.pi * hour_frac / 14.0)) if 6 <= hour_frac <= 20 else 0.0
-        weather.append(WeatherState(
+        hour = (i * dt_minutes / 60.0) % 24.0
+        phase = 2.0 * math.pi * (hour - 6.0) / 24.0
+        temp = base_temp + 4.0 * math.sin(phase)
+        hum = base_humidity - 10.0 * math.sin(phase)
+        hum = max(30.0, min(95.0, hum))
+        if 6.0 <= hour <= 20.0:
+            solar = max(0.0, 500.0 * math.sin(math.pi * (hour - 6.0) / 14.0))
+        else:
+            solar = 0.0
+        windspeed = 1.5 + 0.5 * abs(math.cos(phase))
+        seq.append(WeatherState(
             temp_external=round(temp, 1),
-            humidity_external=round(max(30.0, min(95.0, hum)), 1),
+            humidity_external=round(hum, 1),
             solar_radiation=round(solar, 1),
-            windspeed=round(2.0 + 1.5 * abs(np.sin(phase)), 1),
-            conditions="clear" if solar > 200 else "cloudy",
+            windspeed=round(windspeed, 1),
+            conditions="clear" if solar > 100 else "overcast",
         ))
-    return weather
+    return seq
 
 
 def generate_default_growth_stages(
     n_steps: int,
     stage: str = "flowering",
 ) -> list[str]:
-    """Generate a constant growth stage sequence."""
+    """Return a constant growth-stage sequence.
+
+    Parameters
+    ----------
+    n_steps : int
+        Length of the sequence.
+    stage : str
+        Growth stage label to repeat.
+
+    Returns
+    -------
+    list[str]
+    """
     return [stage] * n_steps
 
 
 def make_default_initial_state() -> GreenhouseState:
-    """Return a reasonable initial greenhouse state for experiments."""
+    """Return a sensible default initial indoor-climate state.
+
+    Represents a healthy flowering-stage greenhouse at mid-morning.
+    """
     return GreenhouseState(
-        indoor_temp=23.0,
-        indoor_humidity=68.0,
-        soil_moisture=65.0,
-        co2=650.0,
+        indoor_temp=24.0,
+        indoor_humidity=65.0,
+        soil_moisture=60.0,
+        co2=600.0,
         light_intensity=300.0,
-        disease_risk_score=0.15,
+        disease_risk_score=0.1,
         growth_stage_index=stage_label_to_index("flowering"),
         vpd=0.8,
-        leaf_wetness_proxy=0.3,
+        leaf_wetness_proxy=0.2,
     )
+
+
+# ── Internal helpers ──────────────────────────────────────────────────────────
+
+
+def _pad_weather(seq: list[WeatherState], n: int) -> list[WeatherState]:
+    """Ensure weather sequence has exactly ``n`` entries."""
+    if not seq:
+        return generate_default_weather(n)
+    if len(seq) >= n:
+        return seq[:n]
+    # Tile
+    out = list(seq)
+    while len(out) < n:
+        out.extend(seq)
+    return out[:n]
+
+
+def _pad_stages(seq: list[str], n: int) -> list[str]:
+    """Ensure growth-stage sequence has exactly ``n`` entries."""
+    if not seq:
+        return ["flowering"] * n
+    if len(seq) >= n:
+        return seq[:n]
+    out = list(seq)
+    while len(out) < n:
+        out.append(seq[-1])
+    return out[:n]
+
+
+def _copy_state(state: GreenhouseState) -> GreenhouseState:
+    """Shallow-copy a GreenhouseState (avoids mutation across controllers)."""
+    from dataclasses import replace
+    return replace(state)
+
+
+def _clamp_action(action: ActuatorState) -> ActuatorState:
+    """Clamp all actuator values to [0, 1]."""
+    from dataclasses import replace
+    kwargs = {
+        name: max(0.0, min(1.0, getattr(action, name)))
+        for name in CONTROL_VARIABLES
+    }
+    return replace(action, **kwargs)

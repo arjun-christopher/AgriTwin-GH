@@ -28,6 +28,10 @@ import textwrap
 import time
 from pathlib import Path
 
+# Ensure UTF-8 output on Windows consoles (handles ₹, °, →, — etc.)
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 import numpy as np
 
 # ── Ensure project root is importable ─────────────────────────────────────────
@@ -358,7 +362,7 @@ def _generate_transition_stages(n_steps: int) -> list[str]:
 
 
 def scenario_3_multiday_transition() -> ComparisonReport:
-    banner("SCENARIO 3: 24 h with Stage Transition (Flowering → Unripe)")
+    banner("SCENARIO 3: 24 h with Stage Transition (Flowering -> Unripe)")
 
     n_steps = 288   # 24 h at 5-min intervals (practical runtime)
     weather = generate_default_weather(n_steps, dt_minutes=5)

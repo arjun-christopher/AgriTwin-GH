@@ -1,10 +1,10 @@
 {
   "baseline": {
-    "overall_score": 66.67,
-    "climate_tracking_score": 63.42,
+    "overall_score": 66.71,
+    "climate_tracking_score": 63.04,
     "disease_burden_score": 35.04,
     "stress_exposure_score": 90.44,
-    "resource_stability_score": 96.36,
+    "resource_stability_score": 97.66,
     "weights_used": {
       "climate_tracking": 0.4,
       "disease_burden": 0.25,
@@ -14,16 +14,16 @@
     "per_step_summary": {
       "min": 34.92,
       "max": 74.24,
-      "mean": 66.67,
-      "std": 7.84
+      "mean": 66.71,
+      "std": 7.88
     }
   },
   "mpc_disease": {
-    "overall_score": 66.99,
-    "climate_tracking_score": 64.25,
-    "disease_burden_score": 35.25,
-    "stress_exposure_score": 90.66,
-    "resource_stability_score": 95.66,
+    "overall_score": 66.87,
+    "climate_tracking_score": 64.19,
+    "disease_burden_score": 34.8,
+    "stress_exposure_score": 90.46,
+    "resource_stability_score": 96.03,
     "weights_used": {
       "climate_tracking": 0.4,
       "disease_burden": 0.25,
@@ -32,9 +32,9 @@
     },
     "per_step_summary": {
       "min": 34.92,
-      "max": 74.59,
-      "mean": 66.99,
-      "std": 7.62
+      "max": 74.33,
+      "mean": 66.87,
+      "std": 7.65
     }
   }
 }

@@ -1,0 +1,45 @@
+{
+  "run_id": "full_eval_scenario_1_flowering_20260402_205301",
+  "generated_at": "2026-04-02T20:47:26.205849",
+  "summary_table": {
+    "baseline": {
+      "n_steps": 144,
+      "temp_rmse": 3.396,
+      "hum_rmse": 7.4,
+      "sm_rmse": 5.041,
+      "mean_disease_risk": 0.1299,
+      "max_disease_risk": 0.2645,
+      "water_litres": 116.95,
+      "energy_kwh": 62.2041,
+      "safety_violations": 0,
+      "yield_score": 68.6
+    },
+    "mpc": {
+      "n_steps": 144,
+      "temp_rmse": 3.362,
+      "hum_rmse": 7.406,
+      "sm_rmse": 4.552,
+      "mean_disease_risk": 0.1303,
+      "max_disease_risk": 0.2645,
+      "water_litres": 119.64,
+      "energy_kwh": 61.6852,
+      "safety_violations": 0,
+      "yield_score": 68.79
+    }
+  },
+  "improvements": {
+    "baseline vs mpc": {
+      "indoor_temp_rmse": 0.98,
+      "indoor_humidity_rmse": -0.08,
+      "soil_moisture_rmse": 9.7,
+      "co2_rmse": 5.43,
+      "vpd_rmse": 0.53,
+      "mean_disease_risk": -0.34,
+      "rh_exposure": 0.0,
+      "water_litres": -2.3,
+      "energy_kwh": 0.83,
+      "safety_violations": 0.0,
+      "yield_score": 0.28
+    }
+  }
+}

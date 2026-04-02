@@ -22,10 +22,10 @@
       },
       "soil_moisture": {
         "variable": "soil_moisture",
-        "rmse": 5.0249174260766605,
-        "mae": 4.831041666666667,
-        "max_abs_error": 7.030000000000001,
-        "mean_signed_error": -3.9381944444444437,
+        "rmse": 5.325083267476252,
+        "mae": 5.115208333333333,
+        "max_abs_error": 7.299999999999997,
+        "mean_signed_error": -4.222361111111112,
         "within_tolerance_pct": 0.0
       },
       "co2": {
@@ -53,10 +53,10 @@
       "disease_favorable_duration_hours": 0.17
     },
     "resources": {
-      "total_water_litres": 243.57,
-      "total_energy_kwh": 111.0494,
-      "water_per_hour": 10.15,
-      "energy_per_hour": 4.6271,
+      "total_water_litres": 243.11,
+      "total_energy_kwh": 111.0448,
+      "water_per_hour": 10.13,
+      "energy_per_hour": 4.6269,
       "water_efficiency": 0.0041,
       "energy_efficiency": 0.009
     },
@@ -64,7 +64,7 @@
       "switching_frequency": {
         "fan_speed": 0.0662,
         "vent_opening": 0.0662,
-        "irrigation_qty": 0.2195,
+        "irrigation_qty": 0.122,
         "heater_output": 0.0279,
         "led_intensity": 0.1254,
         "co2_valve_pct": 0.3101,
@@ -73,7 +73,7 @@
       "total_switches": {
         "fan_speed": 19,
         "vent_opening": 19,
-        "irrigation_qty": 63,
+        "irrigation_qty": 35,
         "heater_output": 8,
         "led_intensity": 36,
         "co2_valve_pct": 89,
@@ -82,13 +82,13 @@
       "smoothness_l2": {
         "fan_speed": 0.0473,
         "vent_opening": 0.0356,
-        "irrigation_qty": 1.2911,
+        "irrigation_qty": 0.3492,
         "heater_output": 0.0313,
         "led_intensity": 0.0693,
         "co2_valve_pct": 0.1039,
         "fogger_duty": 0.0729
       },
-      "mean_smoothness_l2": 0.2359
+      "mean_smoothness_l2": 0.1014
     },
     "safety": {
       "violation_count": {
@@ -108,7 +108,7 @@
       "total_violations": 0,
       "violation_rate_pct": 0.0
     },
-    "yield_quality_score": 66.67
+    "yield_quality_score": 66.71
   },
   "mpc_disease": {
     "controller_id": "mpc_disease",
@@ -117,89 +117,89 @@
     "tracking": {
       "indoor_temp": {
         "variable": "indoor_temp",
-        "rmse": 3.5035099463886845,
-        "mae": 3.3659722222222226,
+        "rmse": 3.537964290300913,
+        "mae": 3.4049652777777784,
         "max_abs_error": 7.0,
-        "mean_signed_error": -1.6390277777777778,
+        "mean_signed_error": -1.6214930555555556,
         "within_tolerance_pct": 9.72
       },
       "indoor_humidity": {
         "variable": "indoor_humidity",
-        "rmse": 7.204655010439046,
-        "mae": 6.9028125,
+        "rmse": 6.974696205052789,
+        "mae": 6.670243055555556,
         "max_abs_error": 17.0,
-        "mean_signed_error": -6.643229166666667,
-        "within_tolerance_pct": 6.94
+        "mean_signed_error": -6.410659722222222,
+        "within_tolerance_pct": 7.29
       },
       "soil_moisture": {
         "variable": "soil_moisture",
-        "rmse": 4.399238215305009,
-        "mae": 4.253784722222223,
+        "rmse": 4.715776270491777,
+        "mae": 4.565555555555556,
         "max_abs_error": 7.0,
-        "mean_signed_error": -3.406979166666667,
+        "mean_signed_error": -3.71875,
         "within_tolerance_pct": 0.0
       },
       "co2": {
         "variable": "co2",
-        "rmse": 42.39159745423876,
-        "mae": 33.57395833333333,
+        "rmse": 41.93582398538669,
+        "mae": 33.207638888888894,
         "max_abs_error": 250.0,
-        "mean_signed_error": -33.36215277777777,
-        "within_tolerance_pct": 0.0
+        "mean_signed_error": -33.048611111111114,
+        "within_tolerance_pct": 0.69
       },
       "vpd": {
         "variable": "vpd",
-        "rmse": 0.333368340817964,
-        "mae": 0.22006076388888884,
-        "max_abs_error": 0.7353000000000001,
-        "mean_signed_error": 0.21739895833333328,
+        "rmse": 0.3344247387720857,
+        "mae": 0.21649791666666662,
+        "max_abs_error": 0.7347999999999999,
+        "mean_signed_error": 0.21390972222222215,
         "within_tolerance_pct": 0.0
       }
     },
     "disease_burden": {
-      "mean_risk": 0.16653819444444448,
+      "mean_risk": 0.16766736111111114,
       "max_risk": 0.9301,
       "cumulative_rh_exposure": 1.76,
       "disease_favorable_steps": 3,
       "disease_favorable_duration_hours": 0.25
     },
     "resources": {
-      "total_water_litres": 244.51,
-      "total_energy_kwh": 108.4665,
-      "water_per_hour": 10.19,
-      "energy_per_hour": 4.5194,
+      "total_water_litres": 244.32,
+      "total_energy_kwh": 109.9061,
+      "water_per_hour": 10.18,
+      "energy_per_hour": 4.5794,
       "water_efficiency": 0.0041,
-      "energy_efficiency": 0.0092
+      "energy_efficiency": 0.0091
     },
     "control_quality": {
       "switching_frequency": {
-        "fan_speed": 0.0767,
-        "vent_opening": 0.0697,
-        "irrigation_qty": 0.2997,
-        "heater_output": 0.0383,
-        "led_intensity": 0.1289,
+        "fan_speed": 0.0697,
+        "vent_opening": 0.0627,
+        "irrigation_qty": 0.5923,
+        "heater_output": 0.0209,
+        "led_intensity": 0.1394,
         "co2_valve_pct": 0.3693,
-        "fogger_duty": 0.1394
+        "fogger_duty": 0.1463
       },
       "total_switches": {
-        "fan_speed": 22,
-        "vent_opening": 20,
-        "irrigation_qty": 86,
-        "heater_output": 11,
-        "led_intensity": 37,
+        "fan_speed": 20,
+        "vent_opening": 18,
+        "irrigation_qty": 170,
+        "heater_output": 6,
+        "led_intensity": 40,
         "co2_valve_pct": 106,
-        "fogger_duty": 40
+        "fogger_duty": 42
       },
       "smoothness_l2": {
-        "fan_speed": 0.0488,
+        "fan_speed": 0.0482,
         "vent_opening": 0.0362,
-        "irrigation_qty": 1.396,
-        "heater_output": 0.0324,
-        "led_intensity": 0.0693,
-        "co2_valve_pct": 0.1202,
-        "fogger_duty": 0.0717
+        "irrigation_qty": 0.7661,
+        "heater_output": 0.03,
+        "led_intensity": 0.0715,
+        "co2_valve_pct": 0.1206,
+        "fogger_duty": 0.0739
       },
-      "mean_smoothness_l2": 0.2535
+      "mean_smoothness_l2": 0.1638
     },
     "safety": {
       "violation_count": {
@@ -219,6 +219,6 @@
       "total_violations": 0,
       "violation_rate_pct": 0.0
     },
-    "yield_quality_score": 66.99
+    "yield_quality_score": 66.87
   }
 }

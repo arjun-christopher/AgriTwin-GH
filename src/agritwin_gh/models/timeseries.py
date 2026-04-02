@@ -4,7 +4,7 @@ Supports both regular PostgreSQL and TimescaleDB
 """
 
 from datetime import datetime
-from sqlalchemy import Column, Integer, Float, String, DateTime, Boolean, Date, Index, Text
+from sqlalchemy import Column, Integer, Float, String, DateTime, Boolean, Date, Index, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -266,6 +266,98 @@ class GrowthProgressionMetadata(Base):
 
     def __repr__(self):
         return f"<GrowthProgressionMetadata(project={self.project}, crop={self.crop})>"
+
+
+class RealtimeGreenhouseStream(Base):
+    """Real-time sensor stream table for the closed-loop DT + MPC controller.
+
+    Each row represents one 5-minute DT simulation step written during a
+    ``run_realtime_loop.py`` run.  Column names mirror ``greenhouse_data``
+    so that ``MPCInputPreparation.get_latest_greenhouse_row()`` (and its
+    subclass override) can use a unified return schema.
+
+    Source legend
+    -------------
+    ``"bootstrap"``  — initial state seeded from historical ``greenhouse_data``
+    ``"dt_sim"``     — state produced by the Digital-Twin ARX physics step
+    """
+    __tablename__ = "realtime_greenhouse_stream"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Run identity
+    run_id = Column(String(64), nullable=False, index=True,
+                    comment="Unique ID of the realtime loop run (rt_YYYYMMDD_HHMMSS)")
+    step_index = Column(Integer, nullable=False, comment="Step counter within this run")
+    source = Column(String(20), nullable=False, default="dt_sim",
+                    comment="bootstrap | dt_sim")
+
+    # Timestamp
+    datetime = Column(DateTime, nullable=False, index=True,
+                      comment="Logical simulation timestamp (UTC)")
+    created_at = Column(DateTime, nullable=False, server_default=func.now(),
+                        comment="Wall-clock time the row was inserted")
+
+    # ── Greenhouse climate (mirrors greenhouse_data columns) ──────────
+    indoor_temp = Column(Float, comment="Indoor temperature °C")
+    indoor_humidity = Column(Float, comment="Indoor relative humidity %")
+    indoor_air_velocity = Column(Float, comment="Indoor air velocity m/s")
+    indoor_co2 = Column(Float, comment="CO₂ concentration ppm")
+    solarradiation = Column(Float, comment="Solar / LED radiation W/m²")
+    day_night_flag = Column(Integer, comment="1=day, 0=night")
+    vpd = Column(Float, comment="Vapour Pressure Deficit kPa")
+    dew_point = Column(Float, comment="Dew-point temperature °C")
+    leaf_wetness_proxy = Column(Float, comment="Leaf wetness proxy 0–1")
+
+    # ── Derived state ─────────────────────────────────────────────────
+    soil_moisture = Column(Float, comment="Soil moisture % (0–100)")
+    disease_risk_score = Column(Float, comment="Composite disease risk 0–1")
+    growth_stage = Column(String(50), comment="Canonical growth-stage label")
+    growth_stage_index = Column(Integer, comment="Growth stage index 0–5")
+    disease_classification = Column(String(100), comment="Top disease class from classifier")
+
+    # ── Applied actuators ─────────────────────────────────────────────
+    fan_speed = Column(Float, comment="Fan speed duty 0–1")
+    vent_opening = Column(Float, comment="Vent opening fraction 0–1")
+    heater_output = Column(Float, comment="Heater duty 0–1")
+    led_intensity = Column(Float, comment="LED intensity duty 0–1")
+    fogger_duty = Column(Float, comment="Fogger duty cycle 0–1")
+    co2_valve_pct = Column(Float, comment="CO₂ valve opening 0–1")
+    irrigation_qty = Column(Float, comment="Irrigation quantity L/step")
+
+    # ── MPC decision metadata ─────────────────────────────────────────
+    mpc_ran = Column(Boolean, default=False, comment="True if MPC solved this step")
+    mpc_converged = Column(Boolean, default=False, comment="True if solver converged")
+    mpc_fallback_used = Column(Boolean, default=False,
+                                comment="True if baseline fallback was used")
+    step_cost = Column(Float, comment="MPC step cost (objective value)")
+    solve_time_ms = Column(Float, comment="Solver wall time ms")
+
+    # ── Progression context ───────────────────────────────────────────
+    hours_in_current_stage = Column(Float, comment="Elapsed hours in current stage")
+    stage_progress_pct = Column(Float, comment="Stage progress 0–100")
+    hours_to_stage_transition = Column(Float, comment="LSTM-estimated hours to next stage")
+
+    # ── Resource accounting ───────────────────────────────────────────
+    step_energy_kwh = Column(Float, comment="Energy consumed this step kWh")
+    cumulative_energy_kwh = Column(Float, comment="Cumulative energy kWh since run start")
+    cumulative_water_litres = Column(Float, comment="Cumulative water L since run start")
+
+    # ── Alert ─────────────────────────────────────────────────────────
+    alert_level = Column(String(10), default="GREEN",
+                         comment="GREEN | YELLOW | RED alert level")
+
+    __table_args__ = (
+        Index("idx_rt_stream_run_step", "run_id", "step_index"),
+        Index("idx_rt_stream_datetime", "datetime"),
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<RealtimeGreenhouseStream(run_id={self.run_id!r}, "
+            f"step={self.step_index}, ts={self.datetime}, "
+            f"stage={self.growth_stage}, risk={self.disease_risk_score})>"
+        )
 
 
 # TimescaleDB-specific functions (optional, requires timescaledb extension)

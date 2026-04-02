@@ -123,6 +123,8 @@
 
 &emsp;6.23\. [`__init__.py`](#623-__init__py)
 
+&emsp;6.24\. [`yield_proxy.py`](#624-yield_proxypy)
+
 7\. [Key Data Structures](#7-key-data-structures)
 
 &emsp;7.1\. [`FusedState`](#71-fusedstate)
@@ -489,6 +491,7 @@ src/agritwin_gh/mpc/
 ├── digital_twin_output.py       # Formats step + trajectory payloads
 ├── evaluation.py                # MPC vs Baseline comparisons + plotting
 ├── evaluation_metrics.py        # Metric computation (tracking error, energy, etc.)
+├── yield_proxy.py               # YieldProxyWeights, YieldProxyResult, compute_yield_proxy
 │
 │── Configuration ───────────────────────────────────────────────
 ├── config.py                    # MPCConfig dataclass + YAML loader
@@ -1860,34 +1863,90 @@ def load_mpc_config(path: str | Path | None = None) -> MPCConfig:
 
 ### 6.19 `experiment_runner.py`
 
-**Purpose**: Runs a full paired experiment: MPC simulation + Baseline simulation over the same time window, saves all artefacts, and returns comparison metrics.
+**Purpose**: Offline comparative evaluation framework — runs multiple controllers
+over an identical synthetic scenario and produces a structured `ComparisonReport`.
+No database session is required; all inputs are generated programmatically.
 
-**Key function:**
+↗ `experiment_runner.py · L1`
+
+---
+
+**Dataclass `ExperimentConfig`** *(L67)* — declarative experiment specification:
 
 ```python
-def run_experiment(
-    session: Session,
-    start_time: datetime,
-    end_time: datetime,
-    config: MPCConfig | None = None,
-    output_dir: Path | None = None,
-) -> ComparisonMetrics:
-    """
-    1. Run MPCRunner.run_simulation() → mpc_trajectory
-    2. Run BaselineRunner.run_simulation() → baseline_trajectory
-    3. BaselineVsMPCEvaluator.compute_all() → metrics
-    4. Save trajectory Parquet files, metrics JSON, config snapshot
-    5. BaselineVsMPCEvaluator.plot_comparison() → PNG figures
-    6. Return ComparisonMetrics
-    """
+@dataclass
+class ExperimentConfig:
+    n_steps: int = 288              # total simulation steps
+    dt_minutes: int = 5             # step duration
+    initial_state: GreenhouseState  # starting indoor climate
+    weather_sequence: list[WeatherState]     # external disturbance (len = n_steps)
+    growth_stage_sequence: list[str]         # canonical stage label per step
+    random_seed: int = 42
+    yield_proxy_weights: YieldProxyWeights | None = None
+    experiment_name: str = ""
 ```
 
-Uses canonical disease labels (`"healthy leaves"`, `"early blight"`) and canonical stage indexing (`stage_label_to_index("flowering")`) — no hardcoded integers.
+---
 
-**Output files saved to:** `src/agritwin_gh/mpc/mpc_results/<run_id>/`
+**Class `ExperimentRunner`** *(L196)*:
 
-**Inputs**: DB session, time range, optional config.  
-**Outputs**: `ComparisonMetrics` + files on disk.
+```python
+runner = ExperimentRunner(config)
+runner.register_controller("baseline", make_baseline_adapter(), "baseline")
+runner.register_controller("mpc",      make_mpc_adapter(),      "mpc")
+report = runner.run()   # → ComparisonReport
+```
+
+- `register_controller(id, adapter, type)` — adapter signature:
+  `(GreenhouseState, WeatherState, str, float, int) → ActuatorState`
+- `run()` — simulates every registered controller over the same scenario
+  and returns a `ComparisonReport`.
+
+---
+
+**Dataclass `ComparisonReport`** *(L118)*:
+
+```python
+@dataclass
+class ComparisonReport:
+    controller_metrics: dict[str, ControllerMetricsBundle]
+    yield_results:      dict[str, YieldProxyResult]
+    improvements:       dict[str, dict[str, float]]  # pairwise % improvements
+    experiment_config:  ExperimentConfig
+    generated_at:       datetime
+
+    def summary_table(self) -> dict[str, dict]:  ...  # scalars per controller
+    def to_json_dict(self) -> dict:              ...  # full JSON-serialisable form
+    def to_dict(self) -> dict:                  ...  # alias for script compatibility
+```
+
+---
+
+**Adapter factories:**
+
+| Function | Line | Description |
+|---|---|---|
+| `make_baseline_adapter()` | L418 | Wraps `RuleBasedController`; no config needed |
+| `make_mpc_adapter(config)` | L444 | Wraps `MPCSolver`; assembles `FusedState` per step |
+
+---
+
+**Scenario helpers:**
+
+| Function | Line | Description |
+|---|---|---|
+| `generate_default_weather(n_steps, dt_minutes, base_temp, base_humidity)` | L502 | Sinusoidal diurnal weather, starts from hour 0 |
+| `generate_default_growth_stages(n_steps, stage)` | L553 | Constant growth-stage sequence |
+| `make_default_initial_state()` | L570 | Healthy flowering-stage greenhouse at mid-morning |
+
+Uses canonical disease labels (`"healthy leaves"`, `"early blight"`) and canonical
+stage indexing (`stage_label_to_index("flowering")`) — no hardcoded integers.
+
+**Inputs**: `ExperimentConfig` + registered adapters (no DB session needed).  
+**Outputs**: `ComparisonReport` with per-controller `ControllerMetricsBundle`,
+`YieldProxyResult`, and pairwise improvement dict.
+
+Used by `scripts/run_full_mpc_evaluation.py` for the five-scenario validation suite.
 
 ---
 
@@ -1965,25 +2024,110 @@ def constraint_violation_count(trajectory, constraints) -> int:
 
 ### 6.23 `__init__.py`
 
-**Purpose**: Defines the public API of the MPC package.
+**Purpose**: Defines the public API of the MPC package with comprehensive re-exports.
 
-**Exports:**
+**Key exported symbols** (grouped by origin):
 
 ```python
 from agritwin_gh.mpc import (
-    MPCRunner,
-    MPCConfig,
-    load_mpc_config,
-    FusedState,
-    MPCSolution,
-    DigitalTwinStepPayload,
-    DigitalTwinTrajectoryPayload,
+    # ── State dataclasses ────────────────────────────────────────────────────
+    GreenhouseState, ActuatorState, WeatherState, FusedState,
+    MPCSolution, DigitalTwinStepPayload, DigitalTwinTrajectoryPayload,
     ComparisonMetrics,
+
+    # ── Constants & helpers ──────────────────────────────────────────────────
+    GROWTH_STAGES, DISEASE_CATEGORIES, DT_MINUTES, STEPS_PER_HOUR,
+    stage_label_to_index, stage_index_to_label,
+    compute_disease_risk_score, compute_vpd, compute_dew_point,
+
+    # ── Configuration ────────────────────────────────────────────────────────
+    MPCConfig, load_mpc_config,
+
+    # ── Constraints & setpoints ──────────────────────────────────────────────
+    ConstraintSet, get_default_constraints, tighten_constraints_for_disease,
+    StageSetpoint, get_setpoint,
+
+    # ── Orchestration ────────────────────────────────────────────────────────
+    MPCRunner, MPCSolver,
+
+    # ── Evaluation metrics ───────────────────────────────────────────────────
+    ControllerMetricsBundle, compute_all_metrics,
+
+    # ── Yield proxy ──────────────────────────────────────────────────────────
+    YieldProxyWeights, YieldProxyResult, compute_yield_proxy,
+
+    # ── Offline experiment runner ─────────────────────────────────────────────
+    ExperimentConfig, ExperimentRunner, ComparisonReport,
+    make_baseline_adapter, make_mpc_adapter,
+    generate_default_weather, generate_default_growth_stages,
+    make_default_initial_state,
+
+    # ── DT loop ──────────────────────────────────────────────────────────────
+    DTLoop, DTLoopStepResult, DigitalTwinEngine,
+    SyntheticInputProvider, prepare_initial_state, prepare_weather_sequence,
+
+    # ── Utilities ────────────────────────────────────────────────────────────
     discover_latest_artifact,
 )
 ```
 
-Only these symbols need to be imported by code *outside* the MPC package. Internal files use relative imports.
+Internal files use relative imports. Only symbols listed here should be
+imported by code *outside* the MPC package.
+
+---
+
+### 6.24 `yield_proxy.py`
+
+**Purpose**: Transparent, configurable scalar quality proxy (0–100) that
+estimates the impact of controller behaviour on tomato crop yield without
+requiring a full biophysical crop model.
+
+↗ `yield_proxy.py · L1`
+
+**Dataclass `YieldProxyWeights`** *(L37)* — component importance weights:
+
+```python
+@dataclass
+class YieldProxyWeights:
+    climate_tracking:   float = 0.40   # closeness to stage-specific setpoints
+    disease_burden:     float = 0.25   # integrated disease risk over window
+    stress_exposure:    float = 0.20   # temp + humidity excursions outside safe envelopes
+    resource_stability: float = 0.15   # penalises erratic actuator behaviour
+```
+
+**Dataclass `YieldProxyResult`** *(L72)* — audit-ready score breakdown:
+
+```python
+@dataclass
+class YieldProxyResult:
+    overall_score:           float   # 0–100 composite
+    climate_tracking_score:  float   # 0–100
+    disease_burden_score:    float   # 0–100
+    stress_exposure_score:   float   # 0–100
+    resource_stability_score: float  # 0–100
+    weights_used:            dict[str, float]
+    per_step_scores:         list[float]
+
+    def to_dict(self) -> dict: ...  # includes per_step summary stats
+```
+
+**Function `compute_yield_proxy`** *(L100)*:
+
+```python
+def compute_yield_proxy(
+    states: Sequence[GreenhouseState],
+    actuators: Sequence[ActuatorState],
+    growth_stages: Sequence[str],
+    weights: YieldProxyWeights | None = None,
+) -> YieldProxyResult:
+    """Compute the yield/growth quality proxy for a full simulation window."""
+```
+
+Used by `ExperimentRunner.run()` to score each controller and by
+`scripts/run_full_mpc_evaluation.py` to populate the yield proxy table.
+
+**Inputs**: State trajectory, actuator trajectory, growth-stage sequence, optional weights.  
+**Outputs**: `YieldProxyResult` with auditable component breakdown.
 
 ---
 
@@ -2716,6 +2860,25 @@ src/agritwin_gh/models/artifacts/greenhouse_model_<run_id>/
 └── calibration_report.json      # R², residual stats per sub-model
 ```
 
+### Database Schema Files
+
+The PostgreSQL tables consumed by the MPC pipeline are defined in:
+
+| File | Tables defined | Purpose |
+|---|---|---|
+| `database/schema/timeseries_data.sql` | `weather_data`, `greenhouse_data`, `disease_progression`, `growth_progression_hourly`, `growth_progression_stage_summary`, `growth_progression_cycle_summary`, `growth_progression_metadata` | Sensor telemetry and AI model output ingested by `mpc_input_preparation.py` |
+| `database/schema/image_metadata.sql` | `image_metadata`, `image_annotations` | MinIO object metadata queried by `image_streamer.py`; includes JSONB column for ML model predictions |
+
+Apply to the `agritwin_db` database:
+
+```powershell
+psql -U <user> -d agritwin_db -f database/schema/timeseries_data.sql
+psql -U <user> -d agritwin_db -f database/schema/image_metadata.sql
+```
+
+Both files use `CREATE TABLE IF NOT EXISTS` — safe to re-run on an existing database.  
+Optional TimescaleDB hypertable commands are commented out; uncomment if TimescaleDB is installed.
+
 ---
 
 ## 13. Assumptions & Design Decisions
@@ -2785,7 +2948,7 @@ The MPC module was built in 10 ordered phases. Understanding this helps you know
 
 ---
 
-*AgriTwin-GH MPC Complete Guide — `src/agritwin_gh/mpc/` (26 files)*
+*AgriTwin-GH MPC Complete Guide — `src/agritwin_gh/mpc/` (27 files)*
 
 ---
 
@@ -2939,7 +3102,9 @@ In addition to the hard environmental limits above, **crop safety overrides** na
 
 ### 17.6 Disease-Sensitive Constraint Tightening
 
-When disease risk exceeds configurable thresholds, constraints are dynamically tightened by the function `apply_disease_tightening()` in `constraints.py`:
+When disease risk exceeds configurable thresholds, constraints are dynamically tightened by the function `tighten_constraints_for_disease()` in `constraints.py`:
+
+*↗ `constraints.py · tighten_constraints_for_disease() · L223`  (formula at L297)*
 
 **RH Ceiling Lowering:**
 
@@ -3010,6 +3175,9 @@ where $c_j$ is the energy coefficient and $u_j$ is the actuator setting for the 
 
 $$E_{\text{total}} = \sum_{k=1}^{N_{\text{steps}}} E_{\text{step},k} \quad \text{(kWh)}$$
 
+*↗ `dt_engine.py · _compute_resource_usage() · L541`  (step-level energy model); actuator coefficients at L55–64.*  
+*↗ `scripts/run_full_mpc_evaluation.py`  (per-scenario energy accumulation)*
+
 ### 18.3 Water Consumption Model
 
 Water usage per step:
@@ -3019,9 +3187,13 @@ Water usage per step:
 
 $$W_{\text{step}} = u_{\text{irrigation}} + 2.0 \times u_{\text{fogger}} \quad \text{(litres)}$$
 
+*↗ `dt_engine.py · _compute_resource_usage() · L541`  (`_WATER_PER_IRRIGATION_UNIT = 1.0`, `_WATER_PER_FOGGER_STEP = 2.0` at L66–67)*
+
 ### 18.4 Total Resource Cost Formula
 
 $$\text{Total Cost (₹)} = E_{\text{total}} \times 6.60 + W_{\text{total}} \times 0.05$$
+
+*↗ `scripts/run_full_mpc_evaluation.py`  (`TN_ELECTRICITY_RATE = 6.60`, `TN_WATER_RATE = 0.05` top-of-file constants; compiled and printed by `_print_cost_table()`)*
 
 ### 18.5 Interpreting Resource Cost Comparisons
 
@@ -3055,6 +3227,10 @@ The evaluation script `scripts/run_full_mpc_evaluation.py` is the primary tool f
 cd e:\AgriTwin-GH
 python scripts/run_full_mpc_evaluation.py
 ```
+
+> **Windows note:** The script calls `sys.stdout.reconfigure(encoding="utf-8")` on
+> startup so all UTF-8 characters (₹, ✓, ×, …) display correctly in Windows
+> PowerShell and Command Prompt. No manual `PYTHONIOENCODING` setting is needed.
 
 **Runtime:** Approximately 8–10 minutes total (≈90 s for S1, ≈200 s each for S2/S3, seconds for S4/S5).
 
