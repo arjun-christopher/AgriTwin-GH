@@ -1,0 +1,2519 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AgriTwin Greenhouse Digital Twin - Documentation and Feature Demos">
+      
+      
+        <meta name="author" content="AgriTwin Team">
+      
+      
+        <link rel="canonical" href="https://arjun-christopher.github.io/AgriTwin-GH/WEATHER_FORECAST_MODEL/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Greenhouse Weather Forecast Model (Chronos + XGBoost + LSTM Ensemble) - AgriTwin-GH Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#greenhouse-weather-forecast-model-chronos-xgboost-lstm-ensemble" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="AgriTwin-GH Documentation" class="md-header__button md-logo" aria-label="AgriTwin-GH Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AgriTwin-GH Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Greenhouse Weather Forecast Model (Chronos + XGBoost + LSTM Ensemble)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/arjun-christopher/AgriTwin-GH" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AgriTwin-GH
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../FEATURE_DEMOS_GUIDE/" class="md-tabs__link">
+          
+  
+  
+  Feature Demos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../DATABASE_REFERENCE/" class="md-tabs__link">
+          
+  
+  
+  Data & Database
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../TOMATO_DISEASE_CLASSIFICATION/" class="md-tabs__link">
+          
+  
+  
+  ML Models
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../DOCS_DEPLOYMENT/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Deployment Guide
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="AgriTwin-GH Documentation" class="md-nav__button md-logo" aria-label="AgriTwin-GH Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AgriTwin-GH Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/arjun-christopher/AgriTwin-GH" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AgriTwin-GH
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature Demos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Feature Demos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FEATURE_DEMOS_GUIDE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data & Database
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data & Database
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DATABASE_REFERENCE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../POSTGRESQL_QUICKSTART/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PostgreSQL Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../IMAGE_STORAGE_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Image Storage Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../INDOOR_GREENHOUSE_DATASET/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Indoor Greenhouse Dataset
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DATA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Directory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ML Models
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ML Models
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_DISEASE_CLASSIFICATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_DISEASE_PROGRESSION_NOTEBOOK_DETAILED_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Progression Notebook (Detailed)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_GROWTH_STAGE_CLASSIFICATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Growth Stage Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOCS_DEPLOYMENT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-big-picture-what-problem-are-we-solving" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Big Picture: What Problem Are We Solving?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-what-exactly-does-the-model-predict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. What Exactly Does the Model Predict?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-where-does-the-data-come-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Where Does the Data Come From?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-step-by-step-pipeline-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Step-by-Step Pipeline Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-feature-engineering-turning-raw-weather-into-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Feature Engineering (Turning Raw Weather Into Inputs)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Feature Engineering (Turning Raw Weather Into Inputs)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-cyclical-time-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Cyclical Time Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-dindigul-seasonal-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Dindigul Seasonal Flags
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-lag-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Lag Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-rolling-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Rolling Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-climate-normals-and-anomalies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Climate Normals and Anomalies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-solar-geometry-chronos-meta-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 Solar Geometry &amp; Chronos Meta-Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#57-volatility-features-new-for-sparseerratic-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.7 Volatility Features (NEW - For Sparse/Erratic Variables)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-the-three-model-families" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. The Three Model Families
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. The Three Model Families">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-chronos-t5-small-pretrained-time-series-foundation-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Chronos-T5-Small: Pretrained Time-Series Foundation Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-xgboost-gradient-boosted-direct-multi-step-forecaster-per-column-regularization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 XGBoost: Gradient-Boosted Direct Multi-Step Forecaster (Per-Column Regularization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-lstm-recurrent-sequential-regressor-per-horizon-separate-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 LSTM: Recurrent Sequential Regressor (Per-Horizon Separate Models)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-how-we-train-all-models-together" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 How We Train All Models Together
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-ensemble-optuna-optimised-weight-blending-1200-trials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Ensemble: Optuna-Optimised Weight Blending (1200 Trials)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-conditions-classifier-sky-condition-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Conditions Classifier (Sky Condition Labels)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-what-gets-saved-after-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. What Gets Saved After Training?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-how-to-use-the-final-model-for-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. How to Use the Final Model for Inference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. How to Use the Final Model for Inference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-minimal-usage-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Minimal Usage Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-what-features-must-df_context-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 What Features Must df_context Have?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-key-metrics-and-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Key Metrics and Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Key Metrics and Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-error-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Error Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-correlationexplanation-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Correlation/Explanation Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-accuracy-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Accuracy Proxy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-conditions-classifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Conditions Classifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#115-final-test-performance-post-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.5 Final Test Performance (Post-Optimization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-architecture-summary-design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Architecture Summary &amp; Design Decisions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Architecture Summary &amp; Design Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-per-column-hyperparameters-for-xgboost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Per-Column Hyperparameters for XGBoost?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-per-horizon-lstm-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Per-Horizon LSTM Models?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-1200-trials-for-ensemble-weights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why 1200 Trials for Ensemble Weights?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-lstm-over-temporal-fusion-transformer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why LSTM Over Temporal Fusion Transformer?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-chronos-meta-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Chronos Meta-Features?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#realtime-inference-footprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Realtime Inference Footprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-glossary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Glossary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="greenhouse-weather-forecast-model-chronos-xgboost-lstm-ensemble">Greenhouse Weather Forecast Model (Chronos + XGBoost + LSTM Ensemble)<a class="headerlink" href="#greenhouse-weather-forecast-model-chronos-xgboost-lstm-ensemble" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>Who is this for?</strong><br />
+Anyone — farmer, student, developer, or complete beginner — who wants to understand <em>what</em> the <code>weather_forecast.ipynb</code> notebook does, <em>why</em> it matters, and <em>how</em> to use the final model in practice. No maths or machine-learning background is required.</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#1-big-picture-what-problem-are-we-solving">Big Picture: What Problem Are We Solving?</a></li>
+<li><a href="#2-what-exactly-does-the-model-predict">What Exactly Does the Model Predict?</a></li>
+<li><a href="#3-where-does-the-data-come-from">Where Does the Data Come From?</a></li>
+<li><a href="#4-step-by-step-pipeline-overview">Step-by-Step Pipeline Overview</a></li>
+<li><a href="#5-feature-engineering-turning-raw-weather-into-inputs">Feature Engineering (Turning Raw Weather Into Inputs)</a></li>
+<li><a href="#6-the-three-model-families">The Three Model Families</a></li>
+<li><a href="#61-chronos-t5-small-pretrained-time-series-foundation-model">6.1 Chronos-T5-Small: Pretrained Time-Series Foundation Model</a></li>
+<li><a href="#62-xgboost-gradient-boosted-direct-multi-step-forecaster">6.2 XGBoost: Gradient-Boosted Direct Multi-Step Forecaster</a></li>
+<li><a href="#63-lstm-recurrent-sequential-regressor">6.3 LSTM: Recurrent Sequential Regressor</a></li>
+<li><a href="#64-how-we-train-all-models-together">6.4 How We Train All Models Together</a></li>
+<li><a href="#7-ensemble-optuna-optimised-weight-blending">Ensemble: Optuna-Optimised Weight Blending</a></li>
+<li><a href="#8-conditions-classifier-sky-condition-labels">Conditions Classifier (Sky Condition Labels)</a></li>
+<li><a href="#9-what-gets-saved-after-training">What Gets Saved After Training?</a></li>
+<li><a href="#10-how-to-use-the-final-model-for-inference">How to Use the Final Model for Inference</a></li>
+<li><a href="#11-key-metrics-and-performance">Key Metrics and Performance</a></li>
+<li><a href="#12-architecture-summary--design-decisions">Architecture Summary &amp; Design Decisions</a></li>
+<li><a href="#13-glossary">Glossary</a></li>
+</ol>
+<hr />
+<h2 id="1-big-picture-what-problem-are-we-solving">1. Big Picture: What Problem Are We Solving?<a class="headerlink" href="#1-big-picture-what-problem-are-we-solving" title="Permanent link">&para;</a></h2>
+<p>Inside a controlled greenhouse, <strong>weather is not just outside</strong> — it is also <strong>inside</strong>:</p>
+<ul>
+<li>Air temperature</li>
+<li>Relative humidity</li>
+<li>Solar radiation / light intensity</li>
+<li>Wind speed and other variables</li>
+</ul>
+<p>If we can <strong>predict the next 24–48 hours of indoor conditions</strong>, we can:</p>
+<ul>
+<li>Adjust heating, cooling, fans, and fogging <em>before</em> conditions drift out of the safe zone.</li>
+<li>Plan irrigation and nutrient dosing more precisely.</li>
+<li>Anticipate disease risk windows where temperature and humidity combinations are dangerous.</li>
+<li>Feed a <strong>digital twin</strong> (AgriTwin-GH) that simulates future plant growth and disease.</li>
+</ul>
+<p>The <code>weather_forecast.ipynb</code> notebook builds a <strong>multi-model ensemble forecasting system</strong> for the greenhouse environment. It does not just guess tomorrow's value from thin air — it learns from historical sensor data (2024–2025 observations for Dindigul, Tamil Nadu) using three complementary machine-learning approaches: Chronos (pretrained foundation model), XGBoost (tree-based), and LSTM (recurrent neural network).</p>
+<hr />
+<h2 id="2-what-exactly-does-the-model-predict">2. What Exactly Does the Model Predict?<a class="headerlink" href="#2-what-exactly-does-the-model-predict" title="Permanent link">&para;</a></h2>
+<p>The model predicts <strong>future values of several indoor climate variables</strong> at two time horizons:</p>
+<ul>
+<li><strong>24 hours ahead</strong> ("24h")</li>
+<li><strong>48 hours ahead</strong> ("48h")</li>
+</ul>
+<p><strong>Target variables:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Unit</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>temp</code></td>
+<td>°C</td>
+<td>Continuous</td>
+</tr>
+<tr>
+<td><code>humidity</code></td>
+<td>%</td>
+<td>Continuous</td>
+</tr>
+<tr>
+<td><code>windspeed</code></td>
+<td>km/h</td>
+<td>Continuous</td>
+</tr>
+<tr>
+<td><code>solarradiation</code></td>
+<td>W/m²</td>
+<td>Continuous</td>
+</tr>
+<tr>
+<td><code>conditions</code></td>
+<td>Label</td>
+<td>Categorical (e.g. "Sunny", "Cloudy")</td>
+</tr>
+</tbody>
+</table>
+<p>For each numeric target variable and horizon, the final system outputs a <strong>point forecast</strong> (single predicted value). Optionally, the <code>conditions</code> variable is predicted as a discrete label via a separate classifier.</p>
+<p>Example output:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>temp:           24h = 28.3°C,  48h = 29.1°C
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>humidity:       24h = 67.8%,   48h = 65.2%
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>windspeed:      24h = 4.2 km/h, 48h = 3.8 km/h
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>solarradiation: 24h = 450 W/m², 48h = 480 W/m²
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>conditions_24h: &quot;Partly Cloudy&quot;
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>conditions_48h: &quot;Sunny&quot;
+</code></pre></div></p>
+<hr />
+<h2 id="3-where-does-the-data-come-from">3. Where Does the Data Come From?<a class="headerlink" href="#3-where-does-the-data-come-from" title="Permanent link">&para;</a></h2>
+<p>The notebook assumes that you have a <strong>historical time series</strong> of greenhouse indoor conditions, for example:</p>
+<ul>
+<li>One row per <strong>day</strong> (or per fixed time step, e.g. daily aggregates)</li>
+<li>Columns for each weather variable (temperature, humidity, windspeed, solar radiation, sky conditions)</li>
+<li>A date/time index to keep everything ordered</li>
+</ul>
+<p>For this project:
+- <strong>Data source:</strong> Dindigul District, Tamil Nadu weather data (2024–2025)
+- <strong>Frequency:</strong> Daily observations
+- <strong>Expected columns:</strong> <code>datetime</code>, <code>temp</code>, <code>humidity</code>, <code>windspeed</code>, <code>solarradiation</code>, <code>conditions</code>, <code>sunriseEpoch</code>, <code>sunsetEpoch</code>, and others</p>
+<p>This historical dataset is split into three parts:</p>
+<ol>
+<li><strong>Training set</strong> (70%) – earlier part of the history the models learn from.</li>
+<li><strong>Validation set</strong> (15%) – a slice used to tune hyperparameters, optimise ensemble weights, and prevent overfitting.</li>
+<li><strong>Test set</strong> (15%) – the last portion of history used only to check final performance (held out until the very end).</li>
+</ol>
+<p>The notebook builds features from these time series and feeds them into the models described below.</p>
+<hr />
+<h2 id="4-step-by-step-pipeline-overview">4. Step-by-Step Pipeline Overview<a class="headerlink" href="#4-step-by-step-pipeline-overview" title="Permanent link">&para;</a></h2>
+<p>At a high level, the notebook does the following:</p>
+<ol>
+<li><strong>Load and clean raw weather data</strong></li>
+<li>Read indoor greenhouse measurements (2024–2025 Dindigul data)</li>
+<li>Handle missing values and ensure a continuous timeline</li>
+<li>
+<p>Extract temporal features (month, day-of-year, etc.)</p>
+</li>
+<li>
+<p><strong>Engineer features</strong> that help models understand seasonality, trends, and interactions:</p>
+</li>
+<li>Cyclical time encodings (sin/cos)</li>
+<li>Lag features (past 1, 2, 3, 7, 14, 30 days)</li>
+<li>Rolling statistics (7/14/30-day mean, std, min, max)</li>
+<li>Dindigul seasonal flags</li>
+<li>Climate normals and anomalies</li>
+<li>Solar geometry features</li>
+<li>
+<p>Interaction terms (e.g. temperature × humidity)</p>
+</li>
+<li>
+<p><strong>Prepare three types of models</strong> in parallel:</p>
+</li>
+<li><strong>Chronos-T5-small</strong> – pretrained time-series transformer</li>
+<li><strong>XGBoost</strong> – gradient-boosted tree ensemble (8 models for 4 targets × 2 horizons)</li>
+<li><strong>LSTM</strong> – stacked recurrent network (1 model per target)</li>
+<li>
+<p><strong>Random Forest classifier</strong> – maps numeric forecasts → sky condition labels</p>
+</li>
+<li>
+<p><strong>Train each model family</strong> on the training set:</p>
+</li>
+<li>Chronos: warm-up (frozen encoder) → full fine-tune</li>
+<li>XGBoost: warm-up (shallow) → fine-tune (deep) with early stopping</li>
+<li>LSTM: sliding-window dataset, Huber loss, gradient clipping, early stopping</li>
+<li>
+<p>RF classifier: balanced class weighting</p>
+</li>
+<li>
+<p><strong>Optimise ensemble weights</strong> via Bayesian search (Optuna):</p>
+</li>
+<li>For each (target, horizon) pair, find optimal blend of Chronos + XGBoost + LSTM</li>
+<li>Minimises validation MAPE</li>
+<li>
+<p>300 trials per combination</p>
+</li>
+<li>
+<p><strong>Evaluate performance</strong> on the test set and generate plots</p>
+</li>
+<li>
+<p><strong>Save all necessary artefacts</strong> for realtime use:</p>
+</li>
+<li>Scalers, encoders, feature configurations</li>
+<li>All model weights (Chronos, XGBoost, LSTM)</li>
+<li>Ensemble weights and evaluation metrics</li>
+<li>
+<p>A ready-to-use Python loader for inference</p>
+</li>
+<li>
+<p><strong>Clean up intermediate files</strong> so only the final realtime bundle and required artefacts remain</p>
+</li>
+</ol>
+<hr />
+<h2 id="5-feature-engineering-turning-raw-weather-into-inputs">5. Feature Engineering (Turning Raw Weather Into Inputs)<a class="headerlink" href="#5-feature-engineering-turning-raw-weather-into-inputs" title="Permanent link">&para;</a></h2>
+<p>Raw numbers alone ("temperature = 26.3 °C") do not directly capture:</p>
+<ul>
+<li>Time of year and seasonal patterns</li>
+<li>Recent trends and local volatility</li>
+<li>Typical baseline values for this time/location</li>
+<li>Interactions between variables</li>
+</ul>
+<p>To help the models, the notebook creates several <strong>feature types</strong>:</p>
+<h3 id="51-cyclical-time-features">5.1 Cyclical Time Features<a class="headerlink" href="#51-cyclical-time-features" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Day-of-year</strong> (sin/cos encoded)</li>
+<li><strong>Month</strong> (sin/cos encoded)</li>
+<li><strong>Day-of-week</strong> (sin/cos encoded)</li>
+</ul>
+<p>The sine/cosine encoding captures the circular nature of time (month 12 is next to month 1).</p>
+<h3 id="52-dindigul-seasonal-flags">5.2 Dindigul Seasonal Flags<a class="headerlink" href="#52-dindigul-seasonal-flags" title="Permanent link">&para;</a></h3>
+<p>For the Dindigul region, the year is split into <strong>four distinct seasons</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Season</th>
+<th>Months</th>
+<th>Character</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hemant (Winter)</td>
+<td>Jan–Feb</td>
+<td>Cool, dry, post-NE monsoon tail</td>
+</tr>
+<tr>
+<td>Grishma (Summer)</td>
+<td>Mar–May</td>
+<td>Hot, low humidity, pre-monsoon</td>
+</tr>
+<tr>
+<td>Varsha (SW Monsoon)</td>
+<td>Jun–Sep</td>
+<td>High humidity, moderate rain</td>
+</tr>
+<tr>
+<td>Sharad (NE Monsoon)</td>
+<td>Oct–Dec</td>
+<td>Rain peaks, humid</td>
+</tr>
+</tbody>
+</table>
+<p>One-hot encoded flags tell the model which season each day belongs to.</p>
+<h3 id="53-lag-features">5.3 Lag Features<a class="headerlink" href="#53-lag-features" title="Permanent link">&para;</a></h3>
+<p>The model includes <strong>lagged versions</strong> of target variables:</p>
+<ul>
+<li>Values from <strong>1, 2, 3, 7, 14, and 30 days ago</strong></li>
+</ul>
+<p>These help capture <strong>autocorrelation</strong> — the fact that today's temperature is usually similar to yesterday's or last week's.</p>
+<h3 id="54-rolling-statistics">5.4 Rolling Statistics<a class="headerlink" href="#54-rolling-statistics" title="Permanent link">&para;</a></h3>
+<p>To capture <strong>local trends and volatility</strong>, the notebook computes:</p>
+<ul>
+<li>7/14/30-day <strong>rolling mean</strong> (shifted by 1 day to avoid look-ahead bias)</li>
+<li>7/14/30-day <strong>rolling standard deviation</strong></li>
+<li>7/14/30-day <strong>min and max</strong></li>
+</ul>
+<p>These tell the model if the climate has been gradually warming, cooling, or becoming more variable.</p>
+<h3 id="55-climate-normals-and-anomalies">5.5 Climate Normals and Anomalies<a class="headerlink" href="#55-climate-normals-and-anomalies" title="Permanent link">&para;</a></h3>
+<p>The notebook builds <strong>climatological baselines</strong>:</p>
+<ul>
+<li>Typical <strong>monthly</strong> averages</li>
+<li>Typical <strong>weekly</strong> averages</li>
+</ul>
+<p>For each day, the model can compute an <strong>anomaly</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>anomaly = actual_value - typical_value_for_this_time_of_year
+</code></pre></div>
+<p>Because plants and disease risk often depend on <strong>deviations from normal</strong>, not just absolute values.</p>
+<h3 id="56-solar-geometry-chronos-meta-features">5.6 Solar Geometry &amp; Chronos Meta-Features<a class="headerlink" href="#56-solar-geometry-chronos-meta-features" title="Permanent link">&para;</a></h3>
+<p>Additional derived features:</p>
+<ul>
+<li><strong>Day length</strong> (hours between sunrise and sunset)</li>
+<li><strong>Normalised solar radiation</strong> (actual / day_length)</li>
+<li><strong>Chronos meta-features</strong>: predictions from the fine-tuned Chronos model, reused as extra inputs to XGBoost and LSTM<br />
+  (This gives other models a "head start" from the pretrained foundation model)</li>
+</ul>
+<h3 id="57-volatility-features-new-for-sparseerratic-variables">5.7 Volatility Features (NEW - For Sparse/Erratic Variables)<a class="headerlink" href="#57-volatility-features-new-for-sparseerratic-variables" title="Permanent link">&para;</a></h3>
+<p>For variables like windspeed and humidity that exhibit high volatility, additional derived features capture <strong>momentum and regime changes</strong>:</p>
+<ul>
+<li><strong>Momentum</strong> (rate-of-change): RoC over [1, 3, 7] days</li>
+<li><strong>Volatility clustering</strong>: Rolling standard deviation with high/low regime indicators</li>
+<li><strong>Autocorrelation proxies</strong>: ACF-like aggregations at lags [1, 7, 14]</li>
+<li><strong>Regime switches</strong>: Seasonal high/low volatility flags</li>
+</ul>
+<p>These features help models distinguish between <strong>genuine predictable patterns</strong> and <strong>random noise</strong>, improving R² for difficult variables.</p>
+<p>All engineered features are stored in a configuration file (<code>feature_config.json</code>) so inference code can reproduce them.</p>
+<hr />
+<h2 id="6-the-three-model-families">6. The Three Model Families<a class="headerlink" href="#6-the-three-model-families" title="Permanent link">&para;</a></h2>
+<p>The notebook uses <strong>three different forecasting approaches</strong> and later blends them. Each has complementary strengths:</p>
+<ul>
+<li><strong>Chronos</strong> understands general time-series patterns (trends, seasonality, reversals)</li>
+<li><strong>XGBoost</strong> captures tabular interactions and non-linear relationships</li>
+<li><strong>LSTM</strong> captures medium-range temporal structure and local dependencies</li>
+</ul>
+<h3 id="61-chronos-t5-small-pretrained-time-series-foundation-model">6.1 Chronos-T5-Small: Pretrained Time-Series Foundation Model<a class="headerlink" href="#61-chronos-t5-small-pretrained-time-series-foundation-model" title="Permanent link">&para;</a></h3>
+<p><strong>What is Chronos?</strong></p>
+<ul>
+<li>A <strong>T5-based transformer model</strong> released by Amazon for time-series forecasting</li>
+<li>Pre-trained on <strong>~84 billion diverse time-series observations</strong></li>
+<li>Treats time series like the language model treats text: patterns are learned generically, then fine-tuned for specific domains</li>
+</ul>
+<p><strong>How it works conceptually:</strong></p>
+<ul>
+<li><strong>Encoder</strong>: Reads a sequence of past values (e.g. last 30 days of temperature)</li>
+<li><strong>Decoder</strong>: Learns to generate the next values step-by-step</li>
+<li><strong>Attention layers</strong>: Can "look back" at <em>any</em> past position, not just recent history</li>
+</ul>
+<p><strong>Two-Phase Fine-Tuning Strategy</strong></p>
+<ol>
+<li><strong>Warm-up phase</strong> (5 epochs, frozen encoder):</li>
+<li><strong>Freeze</strong> the encoder (pretrained knowledge is fixed)</li>
+<li><strong>Train</strong> only the decoder and output projection head</li>
+<li>Uses learning rate <strong>1e-3</strong> (moderate)</li>
+<li>
+<p>Stabilises training, prevents catastrophic forgetting</p>
+</li>
+<li>
+<p><strong>Full fine-tune phase</strong> (10 epochs, all layers):</p>
+</li>
+<li><strong>Unfreeze</strong> all parameters</li>
+<li>Lower learning rate to <strong>1e-4</strong> (more careful updates)</li>
+<li>Monitor validation MAPE to detect overfitting</li>
+<li>Restore best checkpoint at the end</li>
+</ol>
+<p><strong>Predictions</strong></p>
+<p>For each target variable, Chronos sees a <strong>30-day context window</strong> and forecasts the next <strong>2 steps</strong> (24h, 48h). These predictions are:</p>
+<ul>
+<li><strong>Used directly</strong> in the final weighted ensemble</li>
+<li><strong>Reused as meta-features</strong> for XGBoost and LSTM (bootstrapping other models with pretrained knowledge)</li>
+</ul>
+<hr />
+<h3 id="62-xgboost-gradient-boosted-direct-multi-step-forecaster-per-column-regularization">6.2 XGBoost: Gradient-Boosted Direct Multi-Step Forecaster (Per-Column Regularization)<a class="headerlink" href="#62-xgboost-gradient-boosted-direct-multi-step-forecaster-per-column-regularization" title="Permanent link">&para;</a></h3>
+<p><strong>What is XGBoost?</strong></p>
+<ul>
+<li>A <strong>gradient-boosted decision tree</strong> ensemble</li>
+<li>Builds many small trees sequentially; each new tree corrects errors from previous ones</li>
+<li>Excellent for tabular (structured) data with many features</li>
+</ul>
+<p><strong>Direct Multi-Step Strategy</strong></p>
+<p>Instead of predicting one step at a time (which accumulates errors), we train <strong>one model per (target, horizon)</strong> pair:</p>
+<ul>
+<li><code>xgb_temp_24h.pkl</code> → temperature 24 hours ahead</li>
+<li><code>xgb_humidity_48h.pkl</code> → humidity 48 hours ahead</li>
+<li>(total: 4 targets × 2 horizons = <strong>8 XGBoost models</strong>)</li>
+</ul>
+<p><strong>Per-Column Variable-Specific Hyperparameters</strong></p>
+<p>Key innovation: <strong>different variables get different regularization</strong>, because not all variables are equally prone to overfitting:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>max_depth</th>
+<th>λ (reg_lambda)</th>
+<th>α (reg_alpha)</th>
+<th>min_child_weight</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Temperature</td>
+<td>4</td>
+<td>2.0</td>
+<td>0.1</td>
+<td>5</td>
+<td>Stable; standard regularisation</td>
+</tr>
+<tr>
+<td>Humidity</td>
+<td>2</td>
+<td>6.0</td>
+<td>0.5</td>
+<td>15</td>
+<td>Very volatile; strong regularisation</td>
+</tr>
+<tr>
+<td>Windspeed</td>
+<td><strong>1</strong></td>
+<td><strong>20.0</strong></td>
+<td><strong>2.0</strong></td>
+<td>15</td>
+<td>Extremely sparse; ultra-aggressive regularisation</td>
+</tr>
+<tr>
+<td>Solar Radiation</td>
+<td>4</td>
+<td>2.0</td>
+<td>0.1</td>
+<td>5</td>
+<td>Stable; standard regularisation</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rationale for Aggressive Windspeed Regularisation:</strong>
+- Windspeed data is sparse and highly variable (many days with similar values)
+- Deep trees overfit on noise
+- Depth=1 (stump-like trees) paired with extreme L1/L2 penalties forces the model to find only the <strong>strongest feature interactions</strong>
+- Result: model generalises better to unseen data</p>
+<p><strong>Two-Phase Training for Small Data</strong></p>
+<p>The dataset is limited (~300 useful samples after feature engineering), so XGBoost uses:</p>
+<ol>
+<li><strong>Warm-up phase</strong>:</li>
+<li>Shallow trees (<code>max_depth=3</code>, uniform for all)</li>
+<li>Few boosting rounds (200 estimators)</li>
+<li>Higher learning rate (0.10)</li>
+<li>
+<p>Quick convergence to a warm baseline</p>
+</li>
+<li>
+<p><strong>Fine-tune phase</strong> (inherits warm-up booster):</p>
+</li>
+<li><strong>Per-column max_depth</strong> (see table above)</li>
+<li>More boosting rounds (600 estimators)</li>
+<li>Lower learning rate (0.04)</li>
+<li><strong>Per-column regularisation</strong> (λ, α, min_child_weight from table)</li>
+<li>Early stopping: stops if validation MAE doesn't improve for 30 rounds</li>
+</ol>
+<p><strong>What XGBoost sees</strong></p>
+<p>Each model receives the full <strong>feature vector</strong> for the last available day:
+- All lag features, rolling statistics, season flags, Chronos meta-features, etc.</p>
+<p>XGBoost excels at finding the <strong>best combination of features</strong> for each prediction, complementing the sequence-focused Chronos and LSTM.</p>
+<hr />
+<h3 id="63-lstm-recurrent-sequential-regressor-per-horizon-separate-models">6.3 LSTM: Recurrent Sequential Regressor (Per-Horizon Separate Models)<a class="headerlink" href="#63-lstm-recurrent-sequential-regressor-per-horizon-separate-models" title="Permanent link">&para;</a></h3>
+<p><strong>What is LSTM?</strong></p>
+<ul>
+<li><strong>Long Short-Term Memory</strong> — a type of recurrent neural network (RNN)</li>
+<li>Designed to process sequences while maintaining internal memory</li>
+<li>Can "remember" distant past events (via gating mechanisms)</li>
+</ul>
+<p><strong>Architecture</strong></p>
+<p>Each model has:
+- <strong>2 stacked LSTM layers</strong> (128 hidden units per layer)
+- <strong>LayerNorm</strong> on the final hidden state (improves training stability)
+- <strong>Per-horizon dropout</strong>: Different for 24h vs 48h horizons (see table below)
+- <strong>Feed-forward head</strong>: maps hidden state → <strong>single step prediction</strong> (not 2 like before)</p>
+<p><strong>Per-Horizon Separate Models — Key Architectural Change</strong></p>
+<p><strong>OLD approach (single model per target):</strong>
+- One model per variable (e.g., <code>lstm_temperature</code>) outputting both 24h and 48h simultaneously
+- Result: model had to balance two incompatible objectives, producing suboptimal 48h predictions</p>
+<p><strong>NEW approach (separate model per target × horizon):</strong>
+- <strong>8 separate models total</strong>: one for each (target, horizon) pair
+  - <code>lstm_temp_24h</code>, <code>lstm_temp_48h</code>, <code>lstm_humidity_24h</code>, <code>lstm_humidity_48h</code>, etc.
+- Each model outputs <strong>only one horizon</strong>, allowing horizon-specific tuning
+- Result: 48h predictions can be heavily regularised without hurting 24h</p>
+<p><strong>Per-Horizon Dropout Strategy</strong></p>
+<table>
+<thead>
+<tr>
+<th>Horizon</th>
+<th>Base Dropout Increase</th>
+<th>Effective Dropout (humidity)</th>
+<th>Effective Dropout (windspeed)</th>
+<th>Effective Dropout (temp)</th>
+<th>Effective Dropout (solar)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>24h</td>
+<td>0.00</td>
+<td>0.10</td>
+<td>0.05</td>
+<td>0.25</td>
+<td>0.25</td>
+</tr>
+<tr>
+<td>48h</td>
+<td><strong>+0.15</strong></td>
+<td><strong>0.25</strong></td>
+<td><strong>0.20</strong></td>
+<td><strong>0.40</strong></td>
+<td><strong>0.40</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rationale:</strong> Predicting 48 hours ahead is fundamentally harder (exponentially more uncertainty). Adding 0.15 extra dropout for 48h forces the model to rely on only the most robust learned patterns, preventing overfitting on noise.</p>
+<p><strong>Variable-Specific Learning Rates &amp; Base Dropout</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Learning Rate</th>
+<th>Base Dropout</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Temperature</td>
+<td>1e-3</td>
+<td>0.25</td>
+<td>Stable temporal patterns; standard LR</td>
+</tr>
+<tr>
+<td>Humidity</td>
+<td>2e-4</td>
+<td>0.10</td>
+<td>Volatile swings; smaller LR for finer search</td>
+</tr>
+<tr>
+<td>Windspeed</td>
+<td>1e-4</td>
+<td>0.05</td>
+<td>Ultra-sparse data; conservative LR and light dropout</td>
+</tr>
+<tr>
+<td>Solar Radiation</td>
+<td>1e-3</td>
+<td>0.25</td>
+<td>Complex multi-modal; standard LR</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Sliding-Window Dataset</strong></p>
+<p>Unlike direct multi-step, LSTM trains on <strong>sliding windows</strong> of features:</p>
+<ul>
+<li>For each day in the training period, take the previous <strong>30 days</strong> of features as input</li>
+<li>Target: <strong>single horizon value</strong> (24h-ahead OR 48h-ahead, not both)</li>
+<li>Create per-horizon <code>StandardScaler</code> fitted on training data only</li>
+<li>Result: many overlapping training examples, each associated with one specific horizon</li>
+</ul>
+<p><strong>Loss Function: Huber Loss</strong></p>
+<p>Instead of simple mean-squared-error, we use <strong>Huber loss</strong> (<span class="arithmatex">\(\delta=1.0\)</span>), which is <strong>robust to outliers</strong>:</p>
+<ul>
+<li>For small errors: acts like MSE (smooth quadratic penalty)</li>
+<li>For large errors: acts like MAE (linear penalty, less severe)</li>
+</ul>
+<p>This matters for weather data because occasional extreme events (dust storms, unusual wind gusts) shouldn't dominate the loss.</p>
+<p><strong>Training Strategy</strong></p>
+<ol>
+<li><strong>Optimiser:</strong> Adam with weight decay (L2 regularisation: 1e-5)</li>
+<li><strong>Learning rate schedule:</strong> Cosine annealing (starts at per-column LR in table, gradually drops to 1e-6 minimum over 100 epochs)</li>
+<li><strong>Gradient clipping:</strong> Prevents exploding gradients (<code>||g|| ≤ 1.0</code>)</li>
+<li><strong>Early stopping:</strong> Halts if validation loss doesn't improve for 20 epochs</li>
+<li><strong>Per-target &amp; per-horizon scalers:</strong> Each (variable, horizon) pair gets its own <code>StandardScaler</code>:</li>
+<li>Fit on training data only (prevents data leakage)</li>
+<li>Predictions are inverse-transformed back to original units (°C, %, km/h, W/m²)</li>
+</ol>
+<p><strong>Why Per-Horizon Separate Models?</strong></p>
+<ul>
+<li><strong>Problem with single model for both horizons:</strong> Model forced to average prediction quality across 24h and 48h; heavy regularisation helps 48h but hurts 24h</li>
+<li><strong>Solution (per-horizon models):</strong> Each horizon gets its own model, tuned to its own difficulty level</li>
+<li><strong>Result:</strong> 48h predictions maintain competitive R² scores (e.g., humidity 48h improved from negative to +0.0024, windspeed 48h from -0.2574 to +0.0128)</li>
+</ul>
+<p><strong>Why LSTM Over Temporal Fusion Transformer?</strong></p>
+<p>The notebook originally tried <strong>Temporal Fusion Transformer (TFT)</strong> — a powerful multi-entity forecasting architecture. However:</p>
+<ul>
+<li><strong>TFT</strong> is designed for hundreds/thousands of time series (multi-entity datasets)</li>
+<li>On a <strong>single daily series of ~300 training samples</strong>, TFT tends to <strong>underfit or diverge</strong>, producing <strong>negative R²</strong></li>
+<li><strong>LSTM</strong> is more <strong>data-efficient</strong>:</li>
+<li>Far fewer parameters (less overfitting risk)</li>
+<li>More stable convergence on small data</li>
+<li>Proven track record on weather-like sequences</li>
+</ul>
+<hr />
+<h3 id="64-how-we-train-all-models-together">6.4 How We Train All Models Together<a class="headerlink" href="#64-how-we-train-all-models-together" title="Permanent link">&para;</a></h3>
+<p>The full training pipeline follows this sequence:</p>
+<p><strong>Step 1: Data Loading &amp; Preprocessing + Configuration</strong>
+- Load 2024–2025 Dindigul weather data
+- Align timestamps, remove duplicates
+- Extract temporal features (year, month, day, dayofweek, etc.)
+- <strong>Initialize CONFIG with per-column and per-horizon hyperparameters:</strong>
+  - <code>lstm_dropout_per_col</code>: {temp: 0.25, humidity: 0.10, windspeed: 0.05, solarradiation: 0.25}
+  - <code>lstm_dropout_per_horizon</code>: {1: 0.00, 2: 0.15} (add 0.15 to 48h predictions)
+  - <code>lstm_lr_per_col</code>: {temp: 1e-3, humidity: 2e-4, windspeed: 1e-4, solarradiation: 1e-3}
+  - <code>xgb_max_depth_per_col</code>: {temp: 4, humidity: 2, windspeed: 1, solarradiation: 4}
+  - <code>xgb_reg_lambda_per_col</code>: {temp: 2.0, humidity: 6.0, windspeed: 20.0, solarradiation: 2.0}
+  - <code>xgb_reg_alpha_per_col</code>: {temp: 0.1, humidity: 0.5, windspeed: 2.0, solarradiation: 0.1}
+  - <code>xgb_min_child_weight_per_col</code>: {temp: 5, humidity: 15, windspeed: 15, solarradiation: 5}</p>
+<p><strong>Step 2: Feature Engineering (Done Once on All Data)</strong>
+- Cyclical encodings (sin/cos for time features)
+- Lag features (1, 2, 3, 7, 14, 30 days per target)
+- Rolling statistics (7/14/30-day mean/std/min/max, shifted by 1 day)
+- Dindigul seasons (one-hot encoded)
+- Climate normals (monthly/weekly averages, computed on full dataset)
+- Anomalies (actual - normal)
+- Solar geometry (day length, normalized radiation)
+- Interaction features (temp × humidity, wind × solar, etc.)
+- Volatility features (momentum, regime detection for wind/humidity)
+- Create forward-shifted targets for t+1 (24h) and t+2 (48h)
+- Store all engineered features with versions in <code>feature_config.json</code></p>
+<p><strong>Step 3: Chronological Train/Val/Test Split</strong>
+- <strong>Train:</strong> first 70% of samples
+- <strong>Validation:</strong> next 15%
+- <strong>Test:</strong> final 15% (held out completely until final evaluation)
+- Split along time axis (no shuffling) to avoid look-ahead bias</p>
+<p><strong>Step 4: Feature Scaling</strong>
+- Fit <code>RobustScaler</code> on training data only
+- Apply to validation and test
+- Prevents data leakage</p>
+<p><strong>Step 5: Chronos Training</strong>
+- Build time-series windows (30 days context, 2 steps target)
+- Warm-up (5 epochs, frozen encoder only)
+- Full fine-tune (10 epochs, all layers, restore best checkpoint)
+- Generate meta-features by predicting on all splits</p>
+<p><strong>Step 6: XGBoost Training (Per-Column Hyperparameters)</strong>
+- For each (target, horizon) pair (8 total):
+  - <strong>Warm-up phase</strong>:
+    - 200 estimators, shallow trees (depth=3 fixed), LR=0.10
+    - Goal: quick baseline convergence
+  - <strong>Fine-tune phase</strong> (inherits warm-up booster):
+    - 600 estimators, <strong>per-column depth</strong> (e.g., windspeed depth=1, humidity depth=2)
+    - LR=0.04
+    - <strong>Per-column regularisation</strong>: read λ, α, min_child_weight from CONFIG per-col dicts
+    - Example: windspeed uses λ=20.0 (ultra-aggressive L2 penalty)
+    - Early stopping: 30 rounds on validation MAE</p>
+<p><strong>Step 7: LSTM Training (Per-Horizon Separate Models)</strong>
+- <strong>For each (target, horizon) pair (8 total):</strong>
+  - Build horizon-specific sliding-window dataset (30-day context → single horizon)
+  - Create per-horizon <code>StandardScaler</code> (fit on training data only)
+  - <strong>Read per-column hyperparameters from CONFIG:</strong>
+    - Base dropout: <code>lstm_dropout_per_col[target]</code> (e.g., humidity=0.10)
+    - Horizon addon: <code>lstm_dropout_per_horizon[h]</code> (e.g., horizon 2 adds +0.15 for 48h)
+    - Final dropout: 0.10 + 0.15 = 0.25 for humidity 48h
+    - Learning rate: <code>lstm_lr_per_col[target]</code> (e.g., windspeed=1e-4)
+  - Train with Huber loss (δ=1.0), Adam with weight decay (L2=1e-5)
+  - Learning rate schedule: Cosine annealing over 100 epochs
+  - Early stopping on validation loss (patience=20)
+  - Restore best checkpoint
+  - Save per-(col, h) state dict and scaler</p>
+<p><strong>Step 8: Ensemble Weight Optimisation (1200 Trials)</strong>
+- Collect validation predictions from all three model families on held-out validation set
+- Use <strong>Optuna</strong> (Bayesian Tree-Parzen Estimator sampler) to find optimal weights:
+  - Constraint: <span class="arithmatex">\(w_\text{Chronos} + w_\text{XGB} + w_\text{LSTM} = 1\)</span>, all ≥ 0
+  - Objective: minimise validation MAPE (per target, per horizon)
+  - <strong>1200 trials per (target, horizon) pair</strong> (increased from 300 to find better combinations)
+  - Optimization discovers which model dominates for each: e.g., solar 48h prefers pure LSTM (weight=1.0)
+- Store best weights in <code>ensemble_weights.json</code></p>
+<p><strong>Step 9: Conditions Classifier Training</strong>
+- For each horizon (24h, 48h):
+  - Build input: raw weather values + temporal features
+  - Target: observed sky condition (Sunny, Cloudy, etc.)
+  - Train Random Forest (400 trees, max_depth=10, balanced class weights)</p>
+<p><strong>Step 10: Final Evaluation on Test Set</strong>
+- Ensemble predictions: blend Chronos + XGBoost + LSTM with optimised weights (per-col, per-horizon)
+- Compute metrics: MAPE, R², RMSE, MAE, Accuracy per target/horizon
+- <strong>All R² values confirmed &gt; 0</strong> (including previously negative humidity/windspeed 48h)
+- Generate visualisations (actual vs predicted, metric summaries, weight distributions)</p>
+<p><strong>Step 11: Save Artefacts &amp; Cleanup</strong>
+- Bundle LSTM states (8 models × state dict per (col, h)) + scalers (8 per-horizon scalers) into <code>environment_forecast_&lt;run_id&gt;.pt</code>
+- Save all supporting files:
+  - <code>feature_config.json</code> (feature names, target cols, context length, volatility flags)
+  - Per-column hyperparameter configs (for audit trail)
+  - Ensemble weights with confidence intervals
+  - Evaluation metrics (final R², MAPE, RMSE per target/horizon)
+- Move plots to artefacts folder
+- <strong>Delete intermediate files</strong> (fine-tuned checkpoints, temp models, Lightning logs, warm-up boosters)</p>
+<p>This ensures:
+- All models see <strong>consistent features and splits</strong>
+- Chronos and LSTM exploit temporal structure with <strong>horizon-aware regularisation</strong>
+- XGBoost focuses on rich tabular interactions with <strong>variable-specific regularisation</strong>
+- Ensemble learns <strong>data-driven weights per-target-per-horizon</strong> (no manual guessing)
+- All volatile variables (humidity, windspeed) recover to <strong>positive R² values</strong></p>
+<hr />
+<h2 id="7-ensemble-optuna-optimised-weight-blending-1200-trials">7. Ensemble: Optuna-Optimised Weight Blending (1200 Trials)<a class="headerlink" href="#7-ensemble-optuna-optimised-weight-blending-1200-trials" title="Permanent link">&para;</a></h2>
+<p>No single model is perfect. Instead of choosing just one, the notebook uses an <strong>ensemble</strong>:</p>
+<p>For each <strong>target variable</strong> and <strong>horizon</strong> (24h, 48h), it learns a set of <strong>weights</strong> that blend the three predictions:</p>
+<div class="arithmatex">\[\text{final\_prediction} = w_\text{Chronos} \cdot \hat{y}_\text{Chronos} + w_\text{XGB} \cdot \hat{y}_\text{XGB} + w_\text{LSTM} \cdot \hat{y}_\text{LSTM}\]</div>
+<p><strong>Constraints:</strong>
+- <span class="arithmatex">\(w_\text{Chronos} + w_\text{XGB} + w_\text{LSTM} = 1\)</span>
+- All weights ≥ 0</p>
+<p><strong>Optimisation Method: Optuna (Bayesian TPE Sampler)</strong></p>
+<ul>
+<li><strong>1200 trials per (target, horizon)</strong> (increased from 300 to find better weight combinations after model improvements)</li>
+<li>Objective: minimise validation MAPE</li>
+<li>Sampler: Tree-Parzen Estimator (Bayesian search)</li>
+<li>Output: optimal weights stored in <code>ensemble_weights.json</code></li>
+</ul>
+<p><strong>Final Ensemble Weight Patterns</strong></p>
+<p>The optimised weights show distinct patterns per variable and horizon:</p>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Horizon</th>
+<th>Chronos</th>
+<th>XGBoost</th>
+<th>LSTM</th>
+<th>Pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Temperature</td>
+<td>24h</td>
+<td>0.163</td>
+<td><strong>0.780</strong></td>
+<td>0.057</td>
+<td>XGBoost dominant (tabular features work well)</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>48h</td>
+<td>0.093</td>
+<td>0.225</td>
+<td><strong>0.682</strong></td>
+<td>LSTM dominant (temporal structure matters for distant forecast)</td>
+</tr>
+<tr>
+<td>Humidity</td>
+<td>24h</td>
+<td>0.405</td>
+<td>0.411</td>
+<td>0.184</td>
+<td>Balanced Chronos + XGBoost (volatile variable)</td>
+</tr>
+<tr>
+<td>Humidity</td>
+<td>48h</td>
+<td>0.479</td>
+<td>0.000</td>
+<td><strong>0.521</strong></td>
+<td>LSTM dominant (48h adds uncertainty; XGBoost muted)</td>
+</tr>
+<tr>
+<td>Windspeed</td>
+<td>24h</td>
+<td>0.457</td>
+<td>0.374</td>
+<td>0.169</td>
+<td>Chronos + XGBoost balanced (sparse data)</td>
+</tr>
+<tr>
+<td>Windspeed</td>
+<td>48h</td>
+<td>0.420</td>
+<td><strong>0.579</strong></td>
+<td>0.000</td>
+<td>XGBoost dominant (regularised XGBoost depth=1 works better for 48h)</td>
+</tr>
+<tr>
+<td>Solar Radiation</td>
+<td>24h</td>
+<td>0.052</td>
+<td>0.000</td>
+<td><strong>0.948</strong></td>
+<td>LSTM dominant (complex intra-day variations)</td>
+</tr>
+<tr>
+<td>Solar Radiation</td>
+<td>48h</td>
+<td>0.000</td>
+<td>0.000</td>
+<td><strong>1.000</strong></td>
+<td>LSTM only (pure LSTM for very uncertain distant solar)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key Observations:</strong>
+- <strong>Temperature 48h is LSTM-heavy</strong> (0.682): temporal patterns matter for distant forecasts
+- <strong>Solar 48h is LSTM-only</strong> (1.000): distant solar is too uncertain for tree or pretrained models
+- <strong>Windspeed 48h is XGB-heavy</strong> (0.579): aggressive regularisation (depth=1) forces robustness
+- <strong>Humidity 48h LSTM-dominant</strong> (0.521): volatile variable benefits from horizon-specific tuning</p>
+<p>This data-driven, <strong>per-horizon-per-variable approach</strong> often produces more robust predictions than any single component, and adapts the blend to variable difficulty.</p>
+<hr />
+<h2 id="8-conditions-classifier-sky-condition-labels">8. Conditions Classifier (Sky Condition Labels)<a class="headerlink" href="#8-conditions-classifier-sky-condition-labels" title="Permanent link">&para;</a></h2>
+<p>Numbers like "26.7 °C" and "65% humidity" are informative, but sometimes we want a <strong>human-friendly label</strong> such as:</p>
+<ul>
+<li>"Sunny"</li>
+<li>"Partly Cloudy"</li>
+<li>"Overcast"</li>
+<li>"Rainy"</li>
+</ul>
+<p><strong>How it works:</strong></p>
+<p>The notebook trains a separate <strong>Random Forest classifier</strong> (per horizon) that:</p>
+<ol>
+<li>Takes the numeric forecast values (temperature, humidity, windspeed, solar radiation) and temporal features</li>
+<li>Maps them to a discrete sky-condition label</li>
+</ol>
+<p><strong>Saved artifacts:</strong></p>
+<ul>
+<li><code>conditions_classifier_24h.pkl</code> – condition forecast 24h ahead</li>
+<li><code>conditions_classifier_48h.pkl</code> – condition forecast 48h ahead</li>
+<li><code>label_encoder.pkl</code> – decoder from integer codes back to label strings</li>
+</ul>
+<hr />
+<h2 id="9-what-gets-saved-after-training">9. What Gets Saved After Training?<a class="headerlink" href="#9-what-gets-saved-after-training" title="Permanent link">&para;</a></h2>
+<p>After the notebook finishes, you will have a directory structure like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>src/agritwin_gh/models/
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>├── environment_forecast_&lt;run_id&gt;.pt
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>│   └── Primary LSTM bundle (all targets, scalers, configs)
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>│
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>└── artifacts/environment_forecast_&lt;run_id&gt;/
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    ├── feature_config.json
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    │   └── All feature names, target cols, context length, season map, condition classes
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    │
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    ├── scalers.pkl
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    │   └── RobustScaler for the engineered feature matrix (fit on train only)
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    │
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    ├── label_encoder.pkl
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    │   └── LabelEncoder for sky condition labels (e.g. &quot;Sunny&quot; → 0, &quot;Cloudy&quot; → 1)
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    │
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    ├── climate_normals.json
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    │   └── Monthly and weekly climatological means for each target variable
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    │
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    ├── ensemble_weights.json
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    │   └── Optimal blend weights for each (target, horizon) combination
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    │
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    ├── evaluation_metrics.json
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    │   └── Test set metrics: MAPE, R², RMSE, MAE, accuracy per target/horizon
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    │
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>    ├── xgb_temp_24h.pkl
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>    ├── xgb_temp_48h.pkl
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>    ├── xgb_humidity_24h.pkl
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>    ├── xgb_humidity_48h.pkl
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>    ├── xgb_windspeed_24h.pkl
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>    ├── xgb_windspeed_48h.pkl
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>    ├── xgb_solarradiation_24h.pkl
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>    ├── xgb_solarradiation_48h.pkl
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>    │   └── 8 XGBoost models (one per target × horizon)
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>    │
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>    ├── conditions_classifier_24h.pkl
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>    ├── conditions_classifier_48h.pkl
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>    │   └── Random Forest classifiers for sky condition prediction
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>    │
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>    ├── chronos_finetuned/
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>    │   ├── t5_finetuned_state_dict.pt
+<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a>    │   │   └── Fine-tuned Chronos model weights
+<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a>    │   └── chronos_finetune_config.json
+<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a>    │       └── Training hyperparameters and loss history
+<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a>    │
+<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a>    ├── environment_forecast_loader.py
+<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a>    │   └── Reusable Python inference helper (standalone, no notebook state)
+<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a>    │
+<a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a>    └── plots/
+<a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a>        ├── eda_timeseries.png
+<a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a>        ├── eda_seasonal_boxplot.png
+<a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a>        ├── eda_correlation.png
+<a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a>        ├── chronos_training_curve.png
+<a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a>        ├── xgb_shap_importance.png
+<a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a>        ├── ensemble_predictions_test.png
+<a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a>        ├── metrics_summary.png
+<a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a>        └── (other visualisations)
+</code></pre></div>
+<blockquote>
+<p><strong>Important Cleanup Policy:</strong> The notebook deletes all intermediate model files and logs. Only the <strong>final realtime bundle</strong> (<code>environment_forecast_&lt;run_id&gt;.pt</code>) and necessary artefacts remain on disk, keeping the deployment footprint small.</p>
+</blockquote>
+<hr />
+<h2 id="10-how-to-use-the-final-model-for-inference">10. How to Use the Final Model for Inference<a class="headerlink" href="#10-how-to-use-the-final-model-for-inference" title="Permanent link">&para;</a></h2>
+<p>After training, the notebook generates a reusable Python helper: <code>environment_forecast_loader.py</code></p>
+<p>This module contains a class <code>EnvironmentForecastModel</code> that:
+- Loads all necessary artefacts (scalers, encoders, weights, model files)
+- Handles feature engineering and scaling
+- Executes Chronos, XGBoost, and LSTM models
+- Blends predictions using optimised weights
+- Returns forecast dict</p>
+<h3 id="101-minimal-usage-example">10.1 Minimal Usage Example<a class="headerlink" href="#101-minimal-usage-example" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">src.agritwin_gh.models.artifacts.environment_forecast_</span><span class="o">&lt;</span><span class="n">run_id</span><span class="o">&gt;.</span><span class="n">environment_forecast_loader</span> <span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">EnvironmentForecastModel</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># Paths to artefacts and main model bundle</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">artifacts_dir</span> <span class="o">=</span> <span class="s2">&quot;src/agritwin_gh/models/artifacts/environment_forecast_&lt;run_id&gt;&quot;</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="n">model_path</span>   <span class="o">=</span> <span class="s2">&quot;src/agritwin_gh/models/environment_forecast_&lt;run_id&gt;.pt&quot;</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1"># Instantiate model (CPU by default, or &quot;cuda&quot; for GPU)</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="n">model</span> <span class="o">=</span> <span class="n">EnvironmentForecastModel</span><span class="p">(</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="n">artifacts_dir</span><span class="o">=</span><span class="n">artifacts_dir</span><span class="p">,</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="n">main_model_path</span><span class="o">=</span><span class="n">model_path</span><span class="p">,</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="p">)</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="c1"># df_context must have:</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="c1"># - At least `context_length` rows (typically 30)</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="c1"># - All feature columns (temperature, humidity, lags, rolling stats, etc.)</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="c1">#   Names are defined in feature_config.json</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">df_context</span><span class="p">)</span>
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="nb">print</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span>
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="c1"># Example output:</span>
+<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="c1"># {</span>
+<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="c1">#   &quot;temp&quot;: {&quot;24h&quot;: 28.3, &quot;48h&quot;: 29.1},</span>
+<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="c1">#   &quot;humidity&quot;: {&quot;24h&quot;: 67.8, &quot;48h&quot;: 65.2},</span>
+<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="c1">#   &quot;windspeed&quot;: {&quot;24h&quot;: 4.2, &quot;48h&quot;: 3.8},</span>
+<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a><span class="c1">#   &quot;solarradiation&quot;: {&quot;24h&quot;: 450, &quot;48h&quot;: 480}</span>
+<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="c1"># }</span>
+</code></pre></div>
+<h3 id="102-what-features-must-df_context-have">10.2 What Features Must df_context Have?<a class="headerlink" href="#102-what-features-must-df_context-have" title="Permanent link">&para;</a></h3>
+<p>Look inside <code>feature_config.json</code> in the artefacts directory:</p>
+<ul>
+<li><code>all_feature_names</code> – complete list of feature column names (lags, rolling stats, etc.)</li>
+<li><code>target_cols</code> – variables being predicted (temp, humidity, etc.)</li>
+<li><code>context_length</code> – how many recent rows are required (typically 30 days)</li>
+</ul>
+<p>Your <code>df_context</code> should have all these columns in the exact order/names, with at least <code>context_length</code> rows.</p>
+<hr />
+<h2 id="11-key-metrics-and-performance">11. Key Metrics and Performance<a class="headerlink" href="#11-key-metrics-and-performance" title="Permanent link">&para;</a></h2>
+<p>The notebook evaluates the ensemble on the <strong>test set</strong> (held out from training). Key metrics include:</p>
+<h3 id="111-error-metrics">11.1 Error Metrics<a class="headerlink" href="#111-error-metrics" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>MAE (Mean Absolute Error)</strong> – average absolute difference between forecast and actual</li>
+<li><strong>RMSE (Root Mean Squared Error)</strong> – penalises larger errors more</li>
+<li><strong>MAPE (Mean Absolute Percentage Error)</strong> – percentage error (useful for comparing variables with different scales)</li>
+</ul>
+<h3 id="112-correlationexplanation-metrics">11.2 Correlation/Explanation Metrics<a class="headerlink" href="#112-correlationexplanation-metrics" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>R² Score</strong> – how much variance the model explains (1.0 = perfect, 0.0 = no better than constant, &lt;0 = worse than constant)</li>
+</ul>
+<h3 id="113-accuracy-proxy">11.3 Accuracy Proxy<a class="headerlink" href="#113-accuracy-proxy" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Accuracy = 100 - MAPE(%)</strong><br />
+  A target accuracy of <strong>≥ 95%</strong> means <strong>MAPE ≤ 5%</strong></li>
+</ul>
+<h3 id="114-conditions-classifier">11.4 Conditions Classifier<a class="headerlink" href="#114-conditions-classifier" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Accuracy</strong> – percentage of correctly predicted sky condition labels (24h and 48h)</li>
+</ul>
+<p>All metrics are saved in <code>evaluation_metrics.json</code>.</p>
+<hr />
+<h3 id="115-final-test-performance-post-optimization">11.5 Final Test Performance (Post-Optimization)<a class="headerlink" href="#115-final-test-performance-post-optimization" title="Permanent link">&para;</a></h3>
+<p>After implementing per-column XGBoost regularization, separate per-horizon LSTM models, and 1200-trial ensemble optimization, all R² values are now <strong>≥ 0</strong> (a major improvement from early negative R² values on volatile variables):</p>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Horizon</th>
+<th>MAPE (%)</th>
+<th>Accuracy (%)</th>
+<th>RMSE</th>
+<th>MAE</th>
+<th>R²</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Temperature</td>
+<td>24h</td>
+<td>3.11</td>
+<td>96.89</td>
+<td>1.086</td>
+<td>0.824</td>
+<td><strong>0.6983</strong></td>
+<td>✅ Excellent</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>48h</td>
+<td>3.37</td>
+<td>96.63</td>
+<td>1.175</td>
+<td>0.890</td>
+<td><strong>0.6486</strong></td>
+<td>✅ Excellent</td>
+</tr>
+<tr>
+<td>Humidity</td>
+<td>24h</td>
+<td>8.56</td>
+<td>91.44</td>
+<td>7.226</td>
+<td>6.092</td>
+<td><strong>0.3402</strong></td>
+<td>✅ Good</td>
+</tr>
+<tr>
+<td>**Humidity</td>
+<td>48h**</td>
+<td><strong>9.75</strong></td>
+<td><strong>90.25</strong></td>
+<td><strong>8.886</strong></td>
+<td><strong>7.135</strong></td>
+<td><strong>0.0024</strong></td>
+<td>✅ Fixed (was -0.1716)</td>
+</tr>
+<tr>
+<td>**Windspeed</td>
+<td>24h**</td>
+<td><strong>26.34</strong></td>
+<td><strong>73.66</strong></td>
+<td><strong>5.709</strong></td>
+<td><strong>4.647</strong></td>
+<td><strong>0.0294</strong></td>
+<td>✅ Fixed (was -0.0231)</td>
+</tr>
+<tr>
+<td>**Windspeed</td>
+<td>48h**</td>
+<td><strong>26.86</strong></td>
+<td><strong>73.14</strong></td>
+<td><strong>5.733</strong></td>
+<td><strong>4.676</strong></td>
+<td><strong>0.0128</strong></td>
+<td>✅ Fixed (was -0.2574)</td>
+</tr>
+<tr>
+<td>Solar Radiation</td>
+<td>24h</td>
+<td>42.84</td>
+<td>57.16</td>
+<td>54.562</td>
+<td>42.776</td>
+<td><strong>0.2383</strong></td>
+<td>⚠️ Challenging</td>
+</tr>
+<tr>
+<td>Solar Radiation</td>
+<td>48h</td>
+<td>41.03</td>
+<td>58.97</td>
+<td>52.440</td>
+<td>43.993</td>
+<td><strong>0.2965</strong></td>
+<td>⚠️ Challenging</td>
+</tr>
+<tr>
+<td>Skill (Conditions)</td>
+<td>24h</td>
+<td>—</td>
+<td>55.77</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>⚠️ Fair</td>
+</tr>
+<tr>
+<td>Skill (Conditions)</td>
+<td>48h</td>
+<td>—</td>
+<td>50.00</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>⚠️ Fair</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Success Criteria Met:</strong>
+- ✅ <strong>All R² values &gt; 0</strong> (humidity 48h and windspeed 48h recovered from negative to positive)
+- ✅ <strong>Temperature predictions robust</strong> (R² &gt; 0.64 for both horizons)
+- ✅ <strong>Humidity predictions good</strong> (R² &gt; 0.30)
+- ⚠️ Solar radiation challenging (R² 0.24–0.30); inherent data scarcity and multi-modal patterns</p>
+<p><strong>What Drove the Improvements:</strong></p>
+<ol>
+<li><strong>Per-column XGBoost regularization:</strong> Windspeed/humidity benefit from aggressive depth=1 and λ=20–6.0</li>
+<li><strong>Per-horizon LSTM models:</strong> 48h can now be heavily regularised (+0.15 dropout) without hurting 24h</li>
+<li><strong>1200-trial Optuna:</strong> Better weight optimization found superior model blends (e.g., windspeed 48h prefers XGB, humidity 48h prefers LSTM)</li>
+<li><strong>Volatility-aware features:</strong> Momentum, regime detection help volatile variables</li>
+</ol>
+<hr />
+<h2 id="12-architecture-summary-design-decisions">12. Architecture Summary &amp; Design Decisions<a class="headerlink" href="#12-architecture-summary-design-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="why-per-column-hyperparameters-for-xgboost">Why Per-Column Hyperparameters for XGBoost?<a class="headerlink" href="#why-per-column-hyperparameters-for-xgboost" title="Permanent link">&para;</a></h3>
+<p>Different variables have different predictability:</p>
+<ul>
+<li><strong>Temperature &amp; Solar</strong> (stable): Standard depth=4, moderate regularisation (λ=2.0)</li>
+<li><strong>Humidity</strong> (volatile): Aggressive depth=2, stronger regularisation (λ=6.0)</li>
+<li><strong>Windspeed</strong> (ultra-sparse): Extreme depth=1 with λ=20.0, forcing stump-like trees that capture only the most robust patterns</li>
+</ul>
+<p>This <strong>variable-aware tuning</strong> prevents overfitting on small data while allowing stronger models on easier targets.</p>
+<h3 id="why-per-horizon-lstm-models">Why Per-Horizon LSTM Models?<a class="headerlink" href="#why-per-horizon-lstm-models" title="Permanent link">&para;</a></h3>
+<p>Single model for both horizons creates a <strong>compromise</strong>:
+- Heavy regularisation helps 48h but hurts 24h accuracy
+- Light regularisation helps 24h but allows 48h to overfit</p>
+<p><strong>Separate per-horizon models</strong> allow:
+- 24h model: light regularisation for precision (dropout=0.05-0.10 base)
+- 48h model: aggressive regularisation to fight uncertainty (dropout adds +0.15)</p>
+<p>Result: humidity 48h R² improved from <strong>-0.1716 → +0.0024</strong>, windspeed 48h from <strong>-0.2574 → +0.0128</strong>.</p>
+<h3 id="why-1200-trials-for-ensemble-weights">Why 1200 Trials for Ensemble Weights?<a class="headerlink" href="#why-1200-trials-for-ensemble-weights" title="Permanent link">&para;</a></h3>
+<p>After model improvements, ensemble weight optimization became crucial:
+- Initial 300 trials found local optima
+- 1200 trials enabled discovery of better blends
+- Example: windspeed 48h found XGB-dominant (0.579) better than LSTM-heavy
+- Example: solar 48h found pure LSTM (1.000) optimal</p>
+<h3 id="why-lstm-over-temporal-fusion-transformer">Why LSTM Over Temporal Fusion Transformer?<a class="headerlink" href="#why-lstm-over-temporal-fusion-transformer" title="Permanent link">&para;</a></h3>
+<p><strong>TFT (Temporal Fusion Transformer)</strong> is state-of-the-art for <strong>large multi-entity datasets</strong>. On a <strong>single daily series of ~300 samples</strong>, it tends to:
+- Overfire on complex interactions (too many parameters)
+- Underfit or produce negative R²</p>
+<p><strong>LSTM</strong> is more data-efficient:
+- Fewer parameters
+- Proven convergence on small weather datasets
+- Huber loss handles outliers robustly</p>
+<h3 id="why-chronos-meta-features">Why Chronos Meta-Features?<a class="headerlink" href="#why-chronos-meta-features" title="Permanent link">&para;</a></h3>
+<p>Chronos is a pretrained "time-series language model." Its predictions contain valuable generalised knowledge:
+- Reusing as features for XGBoost and LSTM <strong>bootstraps</strong> weaker models
+- Gives tree and RNN methods a "head start" on temporal patterns</p>
+<h3 id="realtime-inference-footprint">Realtime Inference Footprint<a class="headerlink" href="#realtime-inference-footprint" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The <code>.pt</code> bundle contains only the LSTM weights and scalers</li>
+<li>XGBoost and RF models are separate small pickle files</li>
+<li>Fine-tuned Chronos state dict is a few MB</li>
+<li>Total footprint: <strong>&lt; 50 MB</strong> (easily deployable to edge devices or cloud APIs)</li>
+</ul>
+<hr />
+<h2 id="13-glossary">13. Glossary<a class="headerlink" href="#13-glossary" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>LSTM</strong> – Long Short-Term Memory; a type of recurrent neural network designed to handle sequences and long-range dependencies</li>
+<li><strong>XGBoost</strong> – Extreme Gradient Boosting; a tree ensemble method that iteratively improves by correcting previous errors</li>
+<li><strong>Chronos</strong> – Amazon's pretrained transformer for time-series forecasting</li>
+<li><strong>Ensemble</strong> – A combination of multiple models; predictions are blended (often improving accuracy and robustness)</li>
+<li><strong>Horizon</strong> – How far into the future we are predicting (e.g., 24h, 48h)</li>
+<li><strong>Context Window</strong> – A sliding window of recent historical data (e.g., last 30 days) fed into a model</li>
+<li><strong>Feature</strong> – An input variable to a model (e.g., day-of-year, lagged temperature)</li>
+<li><strong>Target Variable</strong> – The value we want to predict (e.g., tomorrow's temperature)</li>
+<li><strong>Scaler</strong> – A transformation that normalises input data (e.g., <code>RobustScaler</code>, <code>StandardScaler</code>)</li>
+<li><strong>Label Encoder</strong> – Converts categorical strings ("Sunny", "Cloudy") to numeric codes (0, 1, etc.)</li>
+<li><strong>MAE / RMSE / MAPE / R²</strong> – Common performance metrics for regression tasks</li>
+<li><strong>Huber Loss</strong> – A robust loss function that behaves like MSE for small errors and MAE for large errors</li>
+<li><strong>Optuna</strong> – A hyperparameter optimisation framework using Bayesian search (TPE sampler)</li>
+<li><strong>Gradient Clipping</strong> – Preventing exploding gradients in neural networks by capping their magnitude</li>
+<li><strong>Early Stopping</strong> – Halting training if a metric (e.g., validation loss) doesn't improve for a patience period</li>
+<li><strong>Autoregressive</strong> – Predicting future values based on past values of the same variable (e.g., temperature depends on past temperatures)</li>
+</ul>
+<hr />
+<p><strong>This document is a comprehensive reference for the <code>weather_forecast.ipynb</code> notebook.</strong><br />
+Treat the notebook as the <em>implementation</em> and this markdown as the <em>guided tour</em> and reference manual.</p>
+<p>For detailed code, cell-by-cell execution, and interactive plots, refer to the notebook itself.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/arjun-christopher" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

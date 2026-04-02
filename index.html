@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -486,6 +486,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#model-predictive-control-mpc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎮 Model Predictive Control (MPC)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#technology-stack" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -938,6 +949,34 @@
   
   
     <li class="md-nav__item">
+      <a href="TOMATO_DISEASE_PROGRESSION_NOTEBOOK_DETAILED_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Progression Notebook (Detailed)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="TOMATO_GROWTH_STAGE_CLASSIFICATION/" class="md-nav__link">
         
   
@@ -1075,6 +1114,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#model-predictive-control-mpc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎮 Model Predictive Control (MPC)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#technology-stack" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1172,6 +1222,7 @@
 <ul>
 <li><strong>Predictive Disease Management</strong> — Risk indexing from environmental sensor data to prevent fungal outbreaks before they occur</li>
 <li><strong>Growth-Aware Control</strong> — Adaptive MPC policies that respond to detected crop development stages</li>
+<li><strong>Stage Transition Forecasting</strong> — Multi-task LSTM predicts the next growth stage and hours to transition directly from sensor time-series, enabling proactive greenhouse interventions</li>
 <li><strong>Digital Twin Simulation</strong> — Physics-based virtual replica enabling what-if scenario analysis</li>
 <li><strong>Image Intelligence</strong> — EfficientNet classifiers for tomato leaf disease detection and growth stage classification</li>
 <li><strong>Data Infrastructure</strong> — PostgreSQL + TimescaleDB for time-series, MinIO for image object storage</li>
@@ -1198,11 +1249,6 @@
 <td>✅ Complete</td>
 </tr>
 <tr>
-<td><strong>Disease Risk Index</strong></td>
-<td>ML-based fungal risk prediction from environmental data</td>
-<td>✅ Complete</td>
-</tr>
-<tr>
 <td><strong>Disease Classifier</strong></td>
 <td>EfficientNetB0 — 6-class tomato leaf disease classification</td>
 <td>✅ Complete</td>
@@ -1210,6 +1256,21 @@
 <tr>
 <td><strong>Growth Stage Classifier</strong></td>
 <td>EfficientNetB3 — 6-stage tomato plant growth classification</td>
+<td>✅ Complete</td>
+</tr>
+<tr>
+<td><strong>Growth Progression Model</strong></td>
+<td>Multi-task LSTM predicting current stage, next stage, and hours to transition from sensor time-series</td>
+<td>✅ Complete</td>
+</tr>
+<tr>
+<td><strong>Disease Progression Model</strong></td>
+<td>Baseline + LSTM/GRU progression pipeline predicting per-disease current presence, 24h infection severity, and 24h trend (absent/emerging/reducing/stable/worsening) from hourly sensor time-series</td>
+<td>✅ Complete</td>
+</tr>
+<tr>
+<td><strong>Greenhouse Weather Forecast Model</strong></td>
+<td>Chronos + XGBoost + LSTM ensemble forecasting 24h/48h indoor climate conditions for digital twin and control</td>
 <td>✅ Complete</td>
 </tr>
 <tr>
@@ -1291,6 +1352,16 @@
 <ul>
 <li><strong>Disease Classifier</strong> — EfficientNetB0, 6 classes: Early Blight, Late Blight, Leaf Mold, Powdery Mildew, Septoria Leaf Spot, Spider Mites + Healthy → <a href="docs/TOMATO_DISEASE_CLASSIFICATION.md">Disease Classification</a></li>
 <li><strong>Growth Stage Classifier</strong> — EfficientNetB3, 6 stages: Seedling → Early Vegetative → Flowering Initiation → Flowering → Unripe → Ripe, with TTA support → <a href="docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md">Growth Stage Classification</a></li>
+<li><strong>Growth Progression Model</strong> — Multi-task LSTM trained on hourly sensor time-series; simultaneously predicts the current growth stage, next stage, hours until stage transition, and 24h/48h transition probability in a single forward pass → <a href="docs/TOMATO_GROWTH_PROGRESSION_MODEL.md">Growth Progression Model</a></li>
+<li><strong>Disease Progression Model</strong> — Baseline + LSTM/GRU progression workflow on hourly greenhouse sensor time-series; predicts per-disease current presence, 24h infection severity, and 24h trend labels (absent, emerging, reducing, stable, worsening) → <a href="docs/TOMATO_DISEASE_PROGRESSION_MODEL.md">Disease Progression Model</a></li>
+<li><strong>Greenhouse Weather Forecast Model</strong> — Chronos time-series foundation model + XGBoost + LSTM ensemble for 24h/48h indoor climate forecasting, feeding the digital twin and control policies → <a href="docs/WEATHER_FORECAST_MODEL.md">Weather Forecast Model</a></li>
+</ul>
+<h2 id="model-predictive-control-mpc">🎮 Model Predictive Control (MPC)<a class="headerlink" href="#model-predictive-control-mpc" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>MPC Module</strong> — Receding-horizon SLSQP optimisation over a 12-hour prediction window; integrates growth stage detection, disease risk scoring, and weather forecasts to compute optimal actuator actions every 5 minutes</li>
+<li><strong>Stage-Aware Constraints</strong> — Dynamically adjusts environmental bounds (temperature, humidity, CO₂) based on detected growth stage and disease risk, with soft penalty-based enforcement</li>
+<li><strong>Cost Function</strong> — Nine-term objective balancing setpoint tracking, disease suppression, humidity exposure, energy costs, water costs, and actuator efficiency</li>
+<li><strong>Comparison Framework</strong> — Evaluated against a rule-based baseline controller; all three scenarios (standard, disease-pressure, stage-transition) show positive yield improvement and reduced resource costs → <a href="docs/MPC_COMPLETE_GUIDE.md">MPC Complete Guide</a></li>
 </ul>
 <h2 id="technology-stack">🛠️ Technology Stack<a class="headerlink" href="#technology-stack" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1351,6 +1422,22 @@
 <tr>
 <td><a href="docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md">Growth Stage Classification</a></td>
 <td>EfficientNetB3 growth stage model</td>
+</tr>
+<tr>
+<td><a href="docs/TOMATO_GROWTH_PROGRESSION_MODEL.md">Growth Progression Model</a></td>
+<td>Multi-task LSTM for stage transition forecasting from sensor time-series</td>
+</tr>
+<tr>
+<td><a href="docs/TOMATO_DISEASE_PROGRESSION_MODEL.md">Disease Progression Model</a></td>
+<td>Baseline + LSTM/GRU disease progression forecasting for per-disease presence, 24h severity, and 24h trend labels</td>
+</tr>
+<tr>
+<td><a href="docs/WEATHER_FORECAST_MODEL.md">Weather Forecast Model</a></td>
+<td>Chronos + XGBoost + LSTM ensemble for 24h/48h greenhouse climate forecasting</td>
+</tr>
+<tr>
+<td><a href="docs/MPC_COMPLETE_GUIDE.md">MPC Complete Guide</a></td>
+<td>Model predictive control module: solver tuning, constraint strategy, cost function design, and end-to-end evaluation</td>
 </tr>
 <tr>
 <td><a href="docs/DOCS_DEPLOYMENT.md">Deployment Guide</a></td>
