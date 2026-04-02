@@ -43,21 +43,21 @@ class MPCConfig:
     solver_ftol: float = 1e-6
 
     # Cost weights (defaults — overridden per stage by multiplier table)
-    w_temp: float = 1.0
-    w_humidity: float = 1.0
-    w_soil_moisture: float = 0.8
-    w_co2: float = 0.5
-    w_vpd: float = 0.6
+    w_temp: float = 2.0
+    w_humidity: float = 2.0
+    w_soil_moisture: float = 1.5
+    w_co2: float = 1.0
+    w_vpd: float = 1.0
     w_light: float = 0.4
-    w_disease: float = 2.0
-    w_energy: float = 0.3
-    w_water: float = 0.3
-    w_switch: float = 0.1
+    w_disease: float = 0.8
+    w_energy: float = 0.10
+    w_water: float = 0.10
+    w_switch: float = 0.30
 
     # Disease-aware cost tuning
-    w_humidity_exposure: float = 0.5       # penalty for RH above setpoint when predicted disease risk is elevated
-    w_fogger_suppression: float = 0.3      # extra fogger cost when predicted disease risk exceeds threshold
-    w_irrigation_caution: float = 0.2      # extra irrigation cost when RH is high AND disease risk is elevated
+    w_humidity_exposure: float = 0.1       # penalty for RH above setpoint when predicted disease risk is elevated
+    w_fogger_suppression: float = 0.1      # extra fogger cost when predicted disease risk exceeds threshold
+    w_irrigation_caution: float = 0.05     # extra irrigation cost when RH is high AND disease risk is elevated
     w_severity_amplification: float = 1.0  # how much severity forecast amplifies the base disease weight
 
     # Disease-sensitive constraint thresholds

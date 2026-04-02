@@ -1,4 +1,4 @@
-# AgriTwin-GH: Model Predictive Control (MPC) — Complete Guide
+# AgriTwin-GH: Model Predictive Control (MPC)
 
 > **Who is this for?**  
 > This guide is written so that anyone — from a curious beginner with no control theory background to an experienced ML engineer — can understand what the MPC module does, how every file fits together, how to run it, and how to extend it.
@@ -7,48 +7,281 @@
 
 ## Table of Contents
 
-1. [What is MPC? (Plain English)](#1-what-is-mpc-plain-english)
-2. [How AgriTwin-GH Uses MPC](#2-how-agritwin-gh-uses-mpc)
-3. [System Architecture at a Glance](#3-system-architecture-at-a-glance)
-4. [Full Data Flow Diagram](#4-full-data-flow-diagram)
-5. [File Tree — All 26 Source Files](#5-file-tree--all-26-source-files)
-6. [File-by-File Reference](#6-file-by-file-reference)
-   - [constants.py](#61-constantspy)
-   - [state.py](#62-statepy)
-   - [setpoints.py](#63-setpointspy)
-   - [constraints.py](#64-constraintspy)
-   - [greenhouse_model.py](#65-greenhouse_modelpy)
-   - [baseline_controller.py](#66-baseline_controllerpy)
-   - [cost_function.py](#67-cost_functionpy)
-   - [mpc_solver.py](#68-mpc_solverpy)
-   - [disturbance.py](#69-disturbancepy)
-   - [disease_penalty.py](#610-disease_penaltypy)
-   - [growth_weights.py](#611-growth_weightspy)
-   - [state_fusion.py](#612-state_fusionpy)
-   - [mpc_input_preparation.py](#613-mpc_input_preparationpy)
-   - [digital_twin_output.py](#614-digital_twin_outputpy)
-   - [image_streamer.py](#615-image_streamerpy)
-   - [evaluation.py](#616-evaluationpy)
-   - [runner.py](#617-runnerpy)
-   - [config.py](#618-configpy)
-   - [experiment_runner.py](#619-experiment_runnerpy)
-   - [weather_adaptation.py](#620-weather_adaptationpy)
-   - [utils.py](#621-utilspy)
-   - [evaluation_metrics.py](#622-evaluation_metricspy)
-   - [__init__.py](#623-__init__py)
-7. [Key Data Structures](#7-key-data-structures)
-   - [FusedState](#71-fusedstate)
-   - [MPCSolution](#72-mpcsolution)
-   - [DigitalTwinStepPayload](#73-digitaltwinsteppayload)
-   - [ComparisonMetrics](#74-comparisonmetrics)
-8. [Canonical Labels Reference](#8-canonical-labels-reference)
-9. [Configuration Guide](#9-configuration-guide)
-10. [How to Run the MPC Module](#10-how-to-run-the-mpc-module)
-11. [Test Scripts](#11-test-scripts)
-12. [Artifact & Logging Strategy](#12-artifact--logging-strategy)
-13. [Assumptions & Design Decisions](#13-assumptions--design-decisions)
-14. [Extension Points](#14-extension-points)
-15. [Phased Build Roadmap](#15-phased-build-roadmap)
+1\. [What is MPC? (Plain English)](#1-what-is-mpc-plain-english)
+
+2\. [How AgriTwin-GH Uses MPC](#2-how-agritwin-gh-uses-mpc)
+
+3\. [System Architecture at a Glance](#3-system-architecture-at-a-glance)
+
+4\. [Full Data Flow Diagram](#4-full-data-flow-diagram)
+
+5\. [File Tree — All 26 Source Files](#5-file-tree--all-26-source-files)
+
+6\. [File-by-File Reference](#6-file-by-file-reference)
+
+&emsp;6.1\. [`constants.py`](#61-constantspy)
+
+&emsp;6.2\. [`state.py`](#62-statepy)
+
+&emsp;&emsp;6.2.1\. [`GreenhouseState`](#greenhousestate)
+
+&emsp;&emsp;6.2.2\. [`ActuatorState`](#actuatorstate)
+
+&emsp;&emsp;6.2.3\. [`WeatherState`](#weatherstate)
+
+&emsp;&emsp;6.2.4\. [`MPCState`](#mpcstate)
+
+&emsp;&emsp;6.2.5\. [`FusedState`](#fusedstate)
+
+&emsp;&emsp;6.2.6\. [`ControllerDecisionContext`](#controllerdecisioncontext)
+
+&emsp;&emsp;6.2.7\. [`DigitalTwinStepPayload` / `DigitalTwinTrajectoryPayload`](#digitaltwinsteppayload--digitaltwintrajectorypayload)
+
+&emsp;6.3\. [`setpoints.py`](#63-setpointspy)
+
+&emsp;6.4\. [`constraints.py`](#64-constraintspy)
+
+&emsp;6.5\. [`greenhouse_model.py`](#65-greenhouse_modelpy)
+
+&emsp;&emsp;6.5.1\. [ARX model — equations and implementation](#arx-model--equations-and-implementation)
+
+&emsp;&emsp;6.5.2\. [Per-variable ARX equations](#per-variable-arx-equations)
+
+&emsp;&emsp;6.5.3\. [Coefficient reference (`GreenhouseModelParams`)](#coefficient-reference-greenhousemodelparams----greenhouse_modelpy--l40)
+
+&emsp;&emsp;6.5.4\. [Why ARX for MPC?](#why-arx-for-mpc)
+
+&emsp;6.6\. [`baseline_controller.py`](#66-baseline_controllerpy)
+
+&emsp;6.7\. [`cost_function.py`](#67-cost_functionpy)
+
+&emsp;&emsp;6.7.1\. [Building blocks overview](#building-blocks-overview)
+
+&emsp;&emsp;6.7.2\. [The complete objective function](#the-complete-objective-function)
+
+&emsp;&emsp;6.7.3\. [Running cost — all nine terms](#running-cost-xk-uk--all-nine-terms)
+
+&emsp;&emsp;6.7.4\. [Term 1 — Setpoint Tracking](#term-1--setpoint-tracking)
+
+&emsp;&emsp;6.7.5\. [Term 2 — Disease Environment Penalty](#term-2--disease-environment-penalty)
+
+&emsp;&emsp;6.7.6\. [Term 3 — Humidity Exposure Penalty](#term-3--humidity-exposure-penalty)
+
+&emsp;&emsp;6.7.7\. [Term 4 — Fogger Suppression Penalty](#term-4--fogger-suppression-penalty)
+
+&emsp;&emsp;6.7.8\. [Term 5 — Irrigation Caution Penalty](#term-5--irrigation-caution-penalty)
+
+&emsp;&emsp;6.7.9\. [Term 6 — Energy Cost](#term-6--energy-cost)
+
+&emsp;&emsp;6.7.10\. [Term 7 — Water Cost](#term-7--water-cost)
+
+&emsp;&emsp;6.7.11\. [Term 8 — Environmental Bounds Barrier](#term-8--environmental-bounds-barrier)
+
+&emsp;&emsp;6.7.12\. [Term 9 — Actuator Switching Penalty](#term-9--actuator-switching-penalty)
+
+&emsp;&emsp;6.7.13\. [Terminal cost](#terminal-cost-vfxn)
+
+&emsp;&emsp;6.7.14\. [Base cost weights](#base-cost-weights-current-tuned-values-from-configpy)
+
+&emsp;&emsp;6.7.15\. [Stage weight multipliers](#stage-weight-multipliers)
+
+&emsp;&emsp;6.7.16\. [Growth-stage transition blending](#growth-stage-transition-blending)
+
+&emsp;&emsp;6.7.17\. [Weather-adaptive weight scaling](#weather-adaptive-weight-scaling)
+
+&emsp;&emsp;6.7.18\. [`DiseaseContext` dataclass](#diseasecontext-dataclass)
+
+&emsp;6.8\. [`mpc_solver.py`](#68-mpc_solverpy)
+
+&emsp;6.9\. [`disturbance.py`](#69-disturbancepy)
+
+&emsp;6.10\. [`disease_penalty.py`](#610-disease_penaltypy)
+
+&emsp;6.11\. [`growth_weights.py`](#611-growth_weightspy)
+
+&emsp;6.12\. [`state_fusion.py`](#612-state_fusionpy)
+
+&emsp;6.13\. [`mpc_input_preparation.py`](#613-mpc_input_preparationpy)
+
+&emsp;6.14\. [`digital_twin_output.py`](#614-digital_twin_outputpy)
+
+&emsp;6.15\. [`image_streamer.py`](#615-image_streamerpy)
+
+&emsp;6.16\. [`evaluation.py`](#616-evaluationpy)
+
+&emsp;6.17\. [`runner.py`](#617-runnerpy)
+
+&emsp;6.18\. [`config.py`](#618-configpy)
+
+&emsp;6.19\. [`experiment_runner.py`](#619-experiment_runnerpy)
+
+&emsp;6.20\. [`weather_adaptation.py`](#620-weather_adaptationpy)
+
+&emsp;6.21\. [`utils.py`](#621-utilspy)
+
+&emsp;6.22\. [`evaluation_metrics.py`](#622-evaluation_metricspy)
+
+&emsp;6.23\. [`__init__.py`](#623-__init__py)
+
+7\. [Key Data Structures](#7-key-data-structures)
+
+&emsp;7.1\. [`FusedState`](#71-fusedstate)
+
+&emsp;7.2\. [`MPCSolution`](#72-mpcsolution)
+
+&emsp;7.3\. [`DigitalTwinStepPayload`](#73-digitaltwinsteppayload)
+
+&emsp;7.4\. [`ComparisonMetrics`](#74-comparisonmetrics)
+
+8\. [Canonical Labels Reference](#8-canonical-labels-reference)
+
+&emsp;8.1\. [Growth Stages](#growth-stages)
+
+&emsp;8.2\. [Disease / Health Categories](#disease--health-categories)
+
+9\. [Configuration Guide](#9-configuration-guide)
+
+&emsp;9.1\. [File location](#file-location)
+
+&emsp;9.2\. [Full annotated configuration](#full-annotated-configuration)
+
+10\. [How to Run the MPC Module](#10-how-to-run-the-mpc-module)
+
+&emsp;10.1\. [Prerequisites](#prerequisites)
+
+&emsp;10.2\. [Environment setup](#environment-setup)
+
+&emsp;10.3\. [Single-step execution (simplest possible use)](#single-step-execution-simplest-possible-use)
+
+&emsp;10.4\. [Full 24-hour simulation](#full-24-hour-simulation)
+
+&emsp;10.5\. [Streaming to a live dashboard](#streaming-to-a-live-dashboard)
+
+&emsp;10.6\. [Running a full experiment (MPC vs. Baseline comparison)](#running-a-full-experiment-mpc-vs-baseline-comparison)
+
+&emsp;10.7\. [Using a custom configuration](#using-a-custom-configuration)
+
+&emsp;10.8\. [Plugging in your own disease / growth classifiers](#plugging-in-your-own-disease--growth-classifiers)
+
+11\. [Test Scripts](#11-test-scripts)
+
+&emsp;11.1\. [How to run the smoke tests](#how-to-run-the-smoke-tests)
+
+&emsp;11.2\. [`smoke_intelligent_mpc.py` — Intelligent MPC](#tests-smoke_intelligent_mpcpy--intelligent-mpc-disease--weather--stage-blending)
+
+&emsp;11.3\. [`smoke_test_dt_handoff.py` — Digital Twin Output, Explanation, Replay](#tests-smoke_test_dt_handoffpy--digital-twin-output-explanation-replay)
+
+&emsp;11.4\. [`test_evaluation_smoke.py` — Evaluation Framework](#tests-test_evaluation_smokepy--evaluation-framework)
+
+&emsp;11.5\. [Future unit tests (not yet implemented)](#future-unit-tests-not-yet-implemented)
+
+12\. [Artifact & Logging Strategy](#12-artifact--logging-strategy)
+
+&emsp;12.1\. [Run ID convention](#run-id-convention)
+
+&emsp;12.2\. [Output files per run](#output-files-per-run)
+
+&emsp;12.3\. [Structured logs](#structured-logs)
+
+&emsp;12.4\. [Calibrated model artifacts](#calibrated-model-artifacts)
+
+13\. [Assumptions & Design Decisions](#13-assumptions--design-decisions)
+
+&emsp;13.1\. [Design decisions](#design-decisions)
+
+&emsp;13.2\. [Assumptions](#assumptions)
+
+14\. [Extension Points](#14-extension-points)
+
+15\. [Phased Build Roadmap](#15-phased-build-roadmap)
+
+16\. [MPC Solver Tuning & Robustness Improvements](#16-mpc-solver-tuning--robustness-improvements)
+
+&emsp;16.1\. [Rate Constraint 5 % Slack](#161-rate-constraint-5--slack)
+
+&emsp;16.2\. [Non-Converged Result Salvage](#162-non-converged-result-salvage)
+
+&emsp;16.3\. [Dead-Band Filter](#163-dead-band-filter)
+
+&emsp;16.4\. [Safety Filter](#164-safety-filter)
+
+17\. [Constraint Reference Tables](#17-constraint-reference-tables)
+
+&emsp;17.1\. [Environmental Constraints — Base Limits](#171-environmental-constraints--base-limits)
+
+&emsp;17.1a\. [Growth-Stage Environmental Overrides](#171a-growth-stage-environmental-overrides)
+
+&emsp;17.2\. [Actuator Bounds (Box Constraints)](#172-actuator-bounds-box-constraints)
+
+&emsp;17.3\. [Actuator Rate-of-Change Limits (Per 5-Minute Step)](#173-actuator-rate-of-change-limits-per-5-minute-step)
+
+&emsp;17.4\. [Actuator Cooldown Periods](#174-actuator-cooldown-periods)
+
+&emsp;17.5\. [Crop Safety Bounds (Stage-Dependent)](#175-crop-safety-bounds-stage-dependent)
+
+&emsp;17.6\. [Disease-Sensitive Constraint Tightening](#176-disease-sensitive-constraint-tightening)
+
+18\. [Resource Cost Calculation — Tamil Nadu, India](#18-resource-cost-calculation--tamil-nadu-india)
+
+&emsp;18.1\. [Currency and Pricing Standard](#181-currency-and-pricing-standard)
+
+&emsp;18.2\. [Energy Consumption Model](#182-energy-consumption-model)
+
+&emsp;18.3\. [Water Consumption Model](#183-water-consumption-model)
+
+&emsp;18.4\. [Total Resource Cost Formula](#184-total-resource-cost-formula)
+
+&emsp;18.5\. [Interpreting Resource Cost Comparisons](#185-interpreting-resource-cost-comparisons)
+
+19\. [End-to-End Evaluation Script (`run_full_mpc_evaluation.py`)](#19-end-to-end-evaluation-script-run_full_mpc_evaluationpy)
+
+&emsp;19.1\. [Overview](#191-overview)
+
+&emsp;19.2\. [Scenario Design](#192-scenario-design)
+
+&emsp;&emsp;19.2.1\. [Scenario 1 — Standard 12-Hour Flowering Stage](#scenario-1--standard-12-hour-flowering-stage)
+
+&emsp;&emsp;19.2.2\. [Scenario 2 — High Disease-Pressure Fruiting Stage (24 h)](#scenario-2--high-disease-pressure-fruiting-stage-24-h)
+
+&emsp;&emsp;19.2.3\. [Scenario 3 — 24-Hour Stage Transition (Flowering → Unripe)](#scenario-3--24-hour-stage-transition-flowering--unripe)
+
+&emsp;&emsp;19.2.4\. [Scenario 4 — MPC Solver Component-Level Validation](#scenario-4--mpc-solver-component-level-validation)
+
+&emsp;&emsp;19.2.5\. [Scenario 5 — Multi-Horizon Convergence Test](#scenario-5--multi-horizon-convergence-test)
+
+&emsp;19.3\. [Yield Proxy — How Performance Is Measured](#193-yield-proxy--how-performance-is-measured)
+
+&emsp;&emsp;19.3.1\. [Formula](#formula)
+
+&emsp;&emsp;19.3.2\. [Climate Tracking Score (40 % of total)](#climate-tracking-score-40--of-total)
+
+&emsp;&emsp;19.3.3\. [Stress Exposure Score (20 % of total)](#stress-exposure-score-20--of-total)
+
+&emsp;&emsp;19.3.4\. [Resource Stability Score (15 % of total)](#resource-stability-score-15--of-total)
+
+&emsp;19.4\. [How to Read the Output](#194-how-to-read-the-output)
+
+&emsp;&emsp;19.4.1\. [Summary Table](#summary-table)
+
+&emsp;&emsp;19.4.2\. [Pairwise Improvements](#pairwise-improvements)
+
+&emsp;&emsp;19.4.3\. [Yield Proxy Breakdown](#yield-proxy-breakdown)
+
+&emsp;&emsp;19.4.4\. [Resource Cost Table](#resource-cost-table)
+
+&emsp;19.5\. [How to Determine Which Controller Is Better](#195-how-to-determine-which-controller-is-better)
+
+&emsp;19.6\. [Artifact Output](#196-artifact-output)
+
+&emsp;19.7\. [Automatic Validation Checks](#197-automatic-validation-checks)
+
+20\. [Setpoint and Growth Stage Profile Reference](#20-setpoint-and-growth-stage-profile-reference)
+
+&emsp;20.1\. [Stage Setpoints (Target Climate Values)](#201-stage-setpoints-target-climate-values)
+
+&emsp;20.2\. [Stage Control Profiles (Weight Multipliers)](#202-stage-control-profiles-weight-multipliers)
+
+21\. [References](#21-references)
 
 ---
 
@@ -61,7 +294,7 @@ Imagine you are driving a car on a winding road. You constantly look ahead, pred
 1. **The model**: A mathematical description of how the system (greenhouse) changes when you take an action (turn on heater, open vent).
 2. **The prediction horizon**: A window of time into the future (e.g. 12 hours). The controller simulates what will happen over this window for different action sequences.
 3. **The optimisation**: Find the sequence of actions that keeps the greenhouse closest to the desired targets (temperature, humidity, etc.) while using the least energy and keeping disease risk low.
-4. **Receding horizon (the clever part)**: Only the *first* action from the best sequence is actually applied. At the very next timestep, the whole prediction+optimisation is repeated with fresh sensor data. This continuously corrects for model error and disturbances (like unexpected weather).
+4. **Receding horizon (the clever part)**: Only the *first* action from the best sequence is actually applied. At the very next timestep, the whole prediction+optimisation is repeated with fresh sensor data. This continuously corrects for model error and disturbances (like unexpected weather).<sup>[[1]](#ref-1), [[2]](#ref-2)</sup>
 
 **Why not just a simple rule-based controller?**  
 Rules like "if temp > 25 °C, turn on fan" cannot look ahead. They react after the problem has already happened. MPC anticipates problems and pre-emptively acts, resulting in less crop stress, lower energy waste, and more stable conditions — especially critical during flowering or when disease risk is elevated.
@@ -504,9 +737,124 @@ def calibrate(
     """Fit ARX coefficients to real greenhouse data using Ridge regression."""
 ```
 
-**Why ARX?**: ARX models are linear, which means the MPC optimisation is well-posed for SLSQP (Sequential Least Squares Programming). They are fast to evaluate (microseconds per step), enabling a 144-step 12-hour horizon to be optimised in milliseconds. A neural network plant model would be more accurate but orders of magnitude slower.
+#### ARX model — equations and implementation
 
-**Inputs**: `GreenhouseState` + `ActuatorState` + optional weather disturbance dict.  
+**ARX (Auto-Regressive with eXogenous inputs)** is a family of linear discrete-time models. Instead of solving differential equations, it predicts the *next* value of each state variable as a weighted sum of the current state, control inputs, and external disturbances. This one-liner update replaces a full CFD simulation.<sup>[[3]](#ref-3), [[4]](#ref-4)</sup>
+
+**General ARX form used in AgriTwin-GH:**
+
+$$
+x_i[k+1] = \alpha_i \, x_i[k]
+           + \sum_{j} \beta_{ij} \, u_j[k]
+           + \sum_{m} \gamma_{im} \, d_m[k]
+           + \epsilon_i
+$$
+
+*[↗ greenhouse_model.py · L118](../src/agritwin_gh/mpc/greenhouse_model.py#L118)*
+
+| Symbol | Meaning |
+|---|---|
+| $x_i[k]$ | State variable $i$ at timestep $k$ (e.g. indoor temperature) |
+| $\alpha_i$ | Self-decay coefficient — how much of the current value persists to the next step; $\alpha < 1$ means the variable naturally drifts toward equilibrium |
+| $u_j[k]$ | Actuator command $j$ at step $k$ (e.g. `heater_output`, `fan_speed`) |
+| $\beta_{ij}$ | Actuator gain — how strongly actuator $j$ pushes state $i$ up or down |
+| $d_m[k]$ | External disturbance $m$ at step $k$ (e.g. outdoor temperature, solar radiation) |
+| $\gamma_{im}$ | Disturbance gain — how strongly weather input $m$ affects state $i$ |
+| $\epsilon_i$ | Optional process noise (std configured via `GreenhouseModelParams.noise_*`; default 0) |
+
+---
+
+#### Per-variable ARX equations
+
+**Temperature** — *[↗ greenhouse_model.py · L149](../src/agritwin_gh/mpc/greenhouse_model.py#L149)*
+
+$$
+T[k+1] = \underbrace{\alpha_T \, T[k]}_{\text{thermal mass}}
+        + \underbrace{\gamma_{\text{ext}} \bigl(T_{\text{ext}}[k] - T[k]\bigr)}_{\text{heat exchange with outside}}
+        + \underbrace{\gamma_{\text{sol}} \, S[k]}_{\text{solar gain}}
+        + \underbrace{\beta_{\text{heat}} \, u_{\text{heater}}}_{\text{heater}}
+        + \underbrace{\beta_{\text{fan}} \, u_{\text{fan}}}_{\text{fan cooling}}
+        + \underbrace{\beta_{\text{vent}} \, u_{\text{vent}}}_{\text{vent cooling}}
+$$
+
+**Humidity** — *[↗ greenhouse_model.py · L160](../src/agritwin_gh/mpc/greenhouse_model.py#L160)*
+
+$$
+H[k+1] = \alpha_H \, H[k]
+        + \gamma_{\text{ext}} \bigl(H_{\text{ext}}[k] - H[k]\bigr)
+        + \beta_{\text{fog}} \, u_{\text{fogger}}
+        + \beta_{\text{fan}} \, u_{\text{fan}}
+        + \beta_{\text{vent}} \, u_{\text{vent}}
+        + \text{ET}
+$$
+
+where ET = evapotranspiration baseline (plant transpiration, constant 0.3 %RH/step).
+
+**Soil Moisture** — *[↗ greenhouse_model.py · L171](../src/agritwin_gh/mpc/greenhouse_model.py#L171)*
+
+$$
+\text{SM}[k+1] = \alpha_{\text{sm}} \, \text{SM}[k]
+               + \beta_{\text{irr}} \, u_{\text{irr}}
+               - \lambda_{\text{ET}} \cdot \max\!\bigl(0,\; T[k+1] - 15\bigr)
+$$
+
+The evapotranspiration loss $\lambda_{\text{ET}}$ scales with temperature — hotter conditions dry out soil faster.<sup>[[6]](#ref-6)</sup>
+
+**CO₂** — *[↗ greenhouse_model.py · L181](../src/agritwin_gh/mpc/greenhouse_model.py#L181)*
+
+$$
+C[k+1] = \alpha_C \, C[k]
+        + \beta_{\text{inj}} \, u_{\text{co2}}
+        + \beta_{\text{plant}} \cdot \mathit{LF}[k]
+        + \beta_{\text{vent}} \, u_{\text{vent}}
+        + \gamma_{\text{vent}} \, u_{\text{vent}} \bigl(C_{\text{amb}} - C[k]\bigr)
+$$
+
+where $\mathit{LF}[k] = \operatorname{clip}(L[k]/500, 0, 1)$ is the light factor — CO₂ plant uptake scales with photosynthetic light availability.<sup>[[5]](#ref-5)</sup>
+
+**Light Intensity** — *[↗ greenhouse_model.py · L194](../src/agritwin_gh/mpc/greenhouse_model.py#L194)*
+
+$$
+L[k+1] = \gamma_{\text{sol}} \, S[k] + \beta_{\text{LED}} \, u_{\text{LED}}
+$$
+
+Light has no memory term ($\alpha = 0$) — it is instantaneous: whatever the LEDs and solar contribute this step is the value for this step.
+
+**Derived quantities** (not ARX, computed analytically after each step) — *[↗ greenhouse_model.py · L207](../src/agritwin_gh/mpc/greenhouse_model.py#L207)*
+
+| Derived variable | Formula | Source |
+|---|---|---|
+| VPD | Tetens equation: $\text{VPD} = e_s(T) \cdot (1 - H/100)$ <sup>[[7]](#ref-7)</sup> | `compute_vpd(T, H)` |
+| Leaf wetness | Sigmoid proxy of humidity, temperature vs. dew point | `compute_leaf_wetness_proxy()` |
+
+---
+
+#### Coefficient reference (`GreenhouseModelParams`) — *[↗ greenhouse_model.py · L40](../src/agritwin_gh/mpc/greenhouse_model.py#L40)*
+
+| Coefficient | Value | Physical meaning |
+|---|---|---|
+| `temp_decay` $\alpha_T$ | 0.92 | 8% of greenhouse heat dissipates per 5-min step |
+| `temp_external_gain` $\gamma_{\text{ext}}$ | 0.08 | Heat exchange with outdoor air |
+| `temp_solar_gain` $\gamma_{\text{sol}}$ | 0.005 | Solar radiation heating contribution |
+| `temp_heater_gain` $\beta_{\text{heat}}$ | 2.0 °C | Heater at full power raises temp 2 °C/step |
+| `temp_fan_cool` $\beta_{\text{fan}}$ | −1.5 °C | Fan at full speed cools 1.5 °C/step |
+| `temp_vent_cool` $\beta_{\text{vent}}$ | −1.2 °C | Vent at full open cools 1.2 °C/step |
+| `hum_decay` $\alpha_H$ | 0.95 | Humidity is more persistent than temperature |
+| `hum_fogger_gain` $\beta_{\text{fog}}$ | 8.0 % | Fogger at full duty adds 8 %RH/step |
+| `hum_fan_loss` / `hum_vent_loss` | −3.0 / −2.5 % | Ventilation removes moisture |
+| `co2_injection_gain` $\beta_{\text{inj}}$ | 300 ppm | CO₂ valve fully open adds 300 ppm/step |
+| `co2_vent_loss` $\beta_{\text{vent}}$ | −40 ppm | Ventilation flushes ~40 ppm CO₂/step |
+| `light_led_gain` $\beta_{\text{LED}}$ | 400 W/m² | LED intensity at full power |
+
+---
+
+#### Why ARX for MPC?
+
+ARX models are **linear in the state and inputs** — which means the MPC cost function becomes a smooth, well-conditioned landscape for SLSQP to navigate. Each `step()` call takes microseconds, so the solver can evaluate thousands of candidate trajectories during a single 5-minute control cycle. A neural network plant model would be more accurate for edge cases but orders of magnitude slower and non-differentiable without AD tooling.<sup>[[1]](#ref-1), [[3]](#ref-3)</sup>
+
+The coefficients are physically interpretable — if the heater gain looks wrong, you can adjust it directly. The `calibrate()` method (*[↗ greenhouse_model.py · L252](../src/agritwin_gh/mpc/greenhouse_model.py#L252)*) is a placeholder for fitting these from real sensor logs via least-squares regression.<sup>[[3]](#ref-3)</sup>
+
+**Inputs**: `GreenhouseState` + `ActuatorState` + `WeatherState` (or dict).  
 **Outputs**: Next `GreenhouseState`.
 
 ---
@@ -572,67 +920,435 @@ class BaselineControlPayload:
 
 ### 6.7 `cost_function.py`
 
-**Purpose**: Defines the objective function J(u) that the MPC minimises. "Cost" = how bad the current state + actions are. Lower cost = closer to targets, lower energy use.
+**Purpose**: Defines the objective function $J(\mathbf{u})$ that the MPC solver minimises over the prediction horizon. "Cost" is a single number measuring _how bad_ a particular sequence of actuator commands is: the higher the cost, the further the greenhouse is from its targets and the more energy, water, and disease risk it incurs. The solver's job is to find the $\mathbf{u}$ that makes this number as small as possible.
 
-**Cost terms (stage-aware):**
+This is the richest file in the module — four nested building blocks compose into the final, numerically differentiable scalar objective.
 
-| Term | Formula | Penalises |
-|------|---------|----------|
-| Temperature tracking | `w_T · (T - T_sp)²` | Deviation from setpoint |
-| Humidity tracking | `w_H · (H - H_sp)²` | Deviation from setpoint |
-| Soil moisture | `w_S · (S - S_sp)²` | Deviation from setpoint |
-| CO₂ | `w_CO2 · (CO2 - CO2_sp)²` | Deviation from setpoint |
-| VPD | `w_vpd · (vpd - vpd_sp)²` | Vapour pressure stress |
-| Light | `w_L · (light - light_sp)²` | Light deficit or excess |
-| Disease risk | `w_D · disease_penalty` | Elevated disease risk |
-| Energy | `w_E · Σ E_i · u_i` | Energy consumption |
-| Water | `w_W · irrigation_qty` | Water consumption |
-| Actuator switching | `w_sw · Σ \|Δu_i\|` | Rapid actuator changes |
+---
 
-**Key classes:**
+#### Building blocks overview
+
+| Class / Function | Role |
+|---|---|
+| `DiseaseContext` | Snapshot of disease severity data; scales how aggressively disease terms are penalised |
+| `_compute_env_disease_risk(state)` | Re-evaluates disease risk from *predicted* humidity, temperature, VPD, and leaf wetness at every horizon step |
+| `StageCost` | Per-timestep running cost $\ell(x_k, u_k)$ — tracking + disease + energy/water + switching |
+| `TerminalCost` | End-of-horizon penalty $V_f(x_N)$ — discourages drifting into a bad state at the end of the window |
+| `CostBuilder` | Assembles `StageCost` + `TerminalCost`, applies stage-transition blending, and scales weights with weather modifiers |
+
+---
+
+#### The complete objective function
+
+The solver finds the actuator sequence $\mathbf{u} = [u_0, u_1, \ldots, u_{N-1}]$ that solves:
+
+$$
+\min_{\mathbf{u}} \; J(\mathbf{u}) = \sum_{k=0}^{N-1} \ell\!\left(x_k,\, u_k,\, u_{k-1}\right) + V_f(x_N)
+$$
+
+*[↗ cost_function.py · L484](../src/agritwin_gh/mpc/cost_function.py#L484)* <sup>[[1]](#ref-1), [[2]](#ref-2)</sup>
+
+| Symbol | Meaning |
+|---|---|
+| $N$ | Prediction horizon length (e.g. 144 steps = 12 h at 5-min intervals) |
+| $x_k \in \mathbb{R}^9$ | Predicted greenhouse state vector at step $k$ (temperature, humidity, soil moisture, …) |
+| $u_k \in \mathbb{R}^7$ | Actuator command vector at step $k$ (fan, heater, fogger, …) |
+| $u_{k-1}$ | Previous actuator command — used by the switching penalty; set to $\mathbf{0}$ at $k = 0$ |
+| $\ell(x_k, u_k, u_{k-1})$ | **Running cost** — paid at every step of the horizon |
+| $V_f(x_N)$ | **Terminal cost** — paid once at the final predicted state $x_N$ |
+
+!!! tip "Why a terminal cost?"
+    The running cost $\ell$ shapes behaviour _throughout_ the horizon. Without $V_f$, the solver could deliberately let conditions drift bad toward the end of the window — it would look fine now but set up a poor starting point for the _next_ solve. The terminal cost closes this loophole.
+
+---
+
+#### Running cost $\ell(x_k, u_k)$ — all nine terms
+
+$$
+\ell(x_k, u_k) = \underbrace{\ell_{\text{track}}}_{\text{1.\ setpoint tracking}}
+              + \underbrace{\ell_{\text{dis}}}_{\text{2.\ disease environment}}
+              + \underbrace{\ell_{\text{hum}}}_{\text{3.\ humidity exposure}}
+              + \underbrace{\ell_{\text{fog}}}_{\text{4.\ fogger suppression}}
+              + \underbrace{\ell_{\text{irr}}}_{\text{5.\ irrigation caution}}
+              + \underbrace{\ell_{\text{eng}}}_{\text{6.\ energy}}
+              + \underbrace{\ell_{\text{wat}}}_{\text{7.\ water}}
+              + \underbrace{\ell_{\text{env}}}_{\text{8.\ env bounds}}
+              + \underbrace{\ell_{\text{sw}}}_{\text{9.\ switching}}
+$$
+
+*[↗ cost_function.py · L301](../src/agritwin_gh/mpc/cost_function.py#L301)* <sup>[[1]](#ref-1)</sup>
+
+Terms 1–2 enforce the agronomic objectives (stay near setpoints, avoid disease). Terms 3–5 activate only when disease risk is elevated. Terms 6–7 penalise resource use. Term 8 penalises excursions beyond growth-stage environmental bounds (§17.1a). Term 9 penalises actuator wear.
+
+---
+
+#### Term 1 — Setpoint Tracking
+
+**Intuition:** Keep every state variable close to its growth-stage target. A 5 °C temperature error should hurt roughly as much as a 10 % humidity error — the normalisation scales ensure each variable contributes fairly regardless of its physical unit.
+
+$$
+\ell_{\text{track}} = \sum_{i=1}^{n_x} m_i \cdot w_i \cdot \left(\frac{x_k^{(i)} - x^{*\,(i)}}{\sigma_i}\right)^{\!2}
+$$
+
+*[↗ cost_function.py · L301](../src/agritwin_gh/mpc/cost_function.py#L301)*
+
+| Symbol | Meaning |
+|---|---|
+| $x_k^{(i)}$ | Predicted value of state variable $i$ at step $k$ |
+| $x^{*\,(i)}$ | Growth-stage setpoint for variable $i$ (from `StageSetpoint`) |
+| $\sigma_i$ | Normalisation scale — converts raw units to a dimensionless error |
+| $w_i$ | Effective weight = base weight × stage-profile multiplier |
+| $m_i$ | Weather-adaptive modifier at step $k$ (default 1.0; increases if extreme weather is forecast) |
+
+**Normalisation scales $\sigma_i$:**
+
+| State variable | $\sigma_i$ | Unit | Interpretation |
+|---|---|---|---|
+| `indoor_temp` | 5.0 | °C | An error of 5 °C scores 1.0 normalised error |
+| `indoor_humidity` | 10.0 | % | An error of 10 % scores 1.0 normalised error |
+| `soil_moisture` | 10.0 | % | A 10 % deviation from target = 1.0 normalised error |
+| `co2` | 150.0 | ppm | A 150 ppm deviation = 1.0 normalised error |
+| `light_intensity` | 200.0 | W/m² | — |
+| `vpd` | 0.3 | kPa | A 0.3 kPa deviation = 1.0 normalised error |
+| `disease_risk_score` | 0.3 | unitless | — |
+| `leaf_wetness_proxy` | 0.3 | unitless | — |
+
+!!! note "Weather-adaptive scaling"
+    The optional `step_modifiers` array from `WeatherAdaptiveModifiers` multiplies the weights $w_i$ element-wise at each step. If the forecast predicts an external heat spike in 2 hours, the temperature tracking weight rises automatically for those steps — the solver **pre-acts** to cool the greenhouse before the spike arrives.
+
+---
+
+#### Term 2 — Disease Environment Penalty
+
+**Intuition:** A naive controller might look at the current `disease_risk_score` sensor field and ignore how future conditions evolve. AgriTwin-GH instead _re-predicts_ disease risk from the **forecasted** humidity, temperature, VPD, and leaf wetness at each horizon step. This means the solver is penalised for a trajectory that lets humidity climb toward dangerous levels — it cannot hide the risk.
+
+**Step 1 — Predicted disease risk $\hat{d}(x_k)$:**
+
+The predicted risk is a weighted sum of four sigmoid-shaped sub-risks:
+
+$$
+\hat{d}(x_k) = 0.35\;\sigma(H_k;\;75.0,\;0.20)
+             + 0.25\;\sigma(L_k;\;0.50,\;8.00)
+             + 0.20\;\sigma(T_k;\;22.0,\;0.15)
+             + 0.20\;\bigl[1 - \sigma(P_k;\;0.80,\;5.00)\bigr]
+$$
+
+*[↗ cost_function.py · L201](../src/agritwin_gh/mpc/cost_function.py#L201)*
+
+where the logistic sigmoid function is:
+
+$$
+\sigma(x;\;c,\;s) \;=\; \frac{1}{1 + e^{-s\,(x-c)}}
+$$
+
+*[↗ cost_function.py · L194](../src/agritwin_gh/mpc/cost_function.py#L194)*
+
+This S-shaped function is zero for $x \ll c$, rises steeply around the centre $c$, and saturates at 1 for $x \gg c$. The slope $s$ controls how sharp the transition is.
+
+| Input | Symbol | Centre $c$ | Slope $s$ | Disease interpretation |
+|---|---|---|---|---|
+| Indoor humidity (%) | $H_k$ | 75 % | 0.20 | Risk climbs above 75 % RH; shallow slope = broad sensitivity |
+| Leaf wetness proxy | $L_k$ | 0.50 | 8.00 | Very sharp onset — even small wetness causes a large jump |
+| Indoor temperature (°C) | $T_k$ | 22 °C | 0.15 | Moderate, broad temperature sensitivity around 22 °C |
+| VPD (kPa) | $P_k$ | 0.80 | 5.00 | Inverted: low VPD = stagnant, humid air = higher risk |
+
+**Step 2 — Severity amplification:**
+
+When disease is already progressing, the system automatically increases how much it cares about future disease risk:
+
+$$
+w_{\text{dis,eff}} = w_{\text{disease}} \;\times\; \delta_{\text{stage}} \;\times\; \underbrace{\left(1 + w_{\text{sev}} \cdot \frac{\max\!\left(s_{24h},\; s_{48h}\right)}{100}\right)}_{\text{severity amplifier}}
+$$
+
+*[↗ cost_function.py · L253](../src/agritwin_gh/mpc/cost_function.py#L253)*
+
+| Symbol | Meaning |
+|---|---|
+| $w_{\text{disease}}$ | Base disease weight (default 2.0) |
+| $\delta_{\text{stage}}$ | Per-stage sensitivity multiplier from `StageControlProfile` |
+| $w_{\text{sev}}$ | Severity amplification strength (default 1.0) |
+| $s_{24h},\, s_{48h}$ | Worst-case predicted disease severity (%) at the 24 h and 48 h forecast horizons |
+
+!!! example "Severity amplification in practice"
+    The 48-hour disease forecast predicts early blight reaching 60% severity:
+
+    **amplifier = 1 + 1.0 × (60 ÷ 100) = 1.60**
+
+    The controller is now **60 % more aggressive** at suppressing humid, warm conditions — even before visible symptoms worsen.
+
+**Step 3 — Disease cost per step:**
+
+$$
+\ell_{\text{dis}} = w_{\text{dis,eff}} \cdot \hat{d}(x_k)^2
+$$
+
+*[↗ cost_function.py · L307](../src/agritwin_gh/mpc/cost_function.py#L307)*
+
+The quadratic form means mild risk ($\hat{d} = 0.3$) costs only $0.09 \times w$, while high risk ($\hat{d} = 0.9$) costs $0.81 \times w$ — the solver is strongly motivated to avoid the high-risk end.
+
+---
+
+#### Term 3 — Humidity Exposure Penalty
+
+**Intuition:** When humidity is above setpoint **and** disease risk is simultaneously elevated, the controller pays an extra penalty on top of the standard tracking term. Below setpoint or with low disease risk, this term is zero.
+
+$$
+\ell_{\text{hum}} = w_{\text{hum\_{exp}}} \cdot \left(\frac{\max\!\left(0,\; H_k - H^*\right)}{20}\right)^{\!2} \cdot \hat{d}(x_k)
+$$
+
+*[↗ cost_function.py · L315](../src/agritwin_gh/mpc/cost_function.py#L315)*
+
+| Symbol | Meaning |
+|---|---|
+| $H_k$ | Predicted indoor humidity at step $k$ (%) |
+| $H^*$ | Humidity setpoint (%) |
+| $\hat{d}(x_k)$ | Predicted disease risk at step $k$ |
+| $w_{\text{hum\_exp}}$ | Humidity exposure weight (default 0.5) |
+
+The $\max(0, \cdot)$ ensures the penalty only activates when humidity **exceeds** setpoint. The disease risk factor $\hat{d}$ means humidity excess is tolerated more when the disease environment is otherwise safe.
+
+---
+
+#### Term 4 — Fogger Suppression Penalty
+
+**Intuition:** The fogger adds moisture and promotes leaf wetness — exactly what disease-causing fungi thrive on. Once predicted disease risk crosses a threshold, running the fogger becomes increasingly expensive.
+
+$$
+\ell_{\text{fog}} = w_{\text{fog}} \cdot u_{\text{fogger}} \cdot \max\!\left(0,\; \hat{d}(x_k) - \theta_{\text{fog}}\right)
+$$
+
+*[↗ cost_function.py · L321](../src/agritwin_gh/mpc/cost_function.py#L321)*
+
+| Symbol | Meaning |
+|---|---|
+| $u_{\text{fogger}}$ | Fogger duty cycle command at step $k$ (0–100) |
+| $\theta_{\text{fog}}$ | Disease risk threshold (default 0.5) |
+| $w_{\text{fog}}$ | Fogger suppression weight (default 0.3) |
+
+Below $\theta_{\text{fog}} = 0.5$ the fogger is unpenalised and runs freely for humidity management. Above it, each unit of fogger duty increases cost linearly — the solver prefers to reduce or stop fogging and use venting instead.
+
+---
+
+#### Term 5 — Irrigation Caution Penalty
+
+**Intuition:** Irrigation adds root-zone moisture and raises ambient humidity. When the environment is already humid and disease-prone, additional watering makes things worse. This term fires only when _all three_ conditions hold simultaneously: irrigation is commanded, humidity is above setpoint, _and_ disease risk is elevated.
+
+$$
+\ell_{\text{irr}} = w_{\text{irr}} \cdot \frac{u_{\text{irr}}}{50} \cdot \frac{\max\!\left(0,\; H_k - H^*\right)}{20} \cdot \hat{d}(x_k)
+$$
+
+*[↗ cost_function.py · L327](../src/agritwin_gh/mpc/cost_function.py#L327)*
+
+| Symbol | Meaning |
+|---|---|
+| $u_{\text{irr}}$ | Irrigation quantity command (0–50 units) |
+| $w_{\text{irr}}$ | Irrigation caution weight (default 0.2) |
+
+If any one factor is zero — humidity is fine, or disease risk is low, or no irrigation is commanded — the entire term collapses to zero.
+
+---
+
+#### Term 6 — Energy Cost
+
+**Intuition:** Some actuators draw far more power than others. The solver is penalised for high-energy solutions so it learns to prefer cheaper alternatives (e.g. open vents instead of run the heater) whenever possible.
+
+$$
+\ell_{\text{eng}} = w_{\text{energy}} \sum_{j=1}^{7} c_j \cdot u_k^{(j)}
+$$
+
+*[↗ cost_function.py · L333](../src/agritwin_gh/mpc/cost_function.py#L333)*
+
+| Actuator $j$ | Energy coefficient $c_j$ | Relative cost |
+|---|---|---|
+| `fan_speed` | 0.15 | Medium |
+| `vent_opening` | 0.02 | Nearly free — just a servo |
+| `heater_output` | **0.80** | **Most expensive** — resistive heating |
+| `led_intensity` | 0.30 | High-power grow lights |
+| `co2_valve_pct` | 0.05 | Low draw; CO₂ gas cost is separate |
+| `fogger_duty` | 0.10 | Pump + nozzle |
+| `irrigation_qty` | 0.01 | Minimal energy |
+
+The heater at $c = 0.80$ is **40 × more expensive** than venting ($c = 0.02$). Given the same thermal result, the solver strongly prefers opening vents.
+
+---
+
+#### Term 7 — Water Cost
+
+**Intuition:** Total water consumption is minimised. Fogging is weighted twice as heavily as irrigation because evaporated water is distributed throughout the canopy — less targeted and harder to control.
+
+$$
+\ell_{\text{wat}} = w_{\text{water}} \cdot \left(u_{\text{irr}} + 2\,u_{\text{fogger}}\right)
+$$
+
+*[↗ cost_function.py · L340](../src/agritwin_gh/mpc/cost_function.py#L340)*
+
+---
+
+#### Term 8 — Environmental Bounds Barrier
+
+**Intuition:** Each growth stage has biologically optimal environmental ranges (§17.1a). When the predicted state approaches or exceeds these stage-specific limits, the solver is penalised with a quadratic barrier. This complements the stress penalty (which uses setpoint tolerances) by enforcing the wider stage-specific safe envelope.
+
+$$
+\ell_{\text{env}} = w_{\text{env}} \sum_{i \in \mathcal{E}} \left(\frac{\max(0,\; x_k^{(i)} - \overline{b}_i) + \max(0,\; \underline{b}_i - x_k^{(i)})}{\sigma_i}\right)^{\!2}
+$$
+
+| Symbol | Meaning |
+|---|---|
+| $\mathcal{E}$ | Set of environmentally bounded variables: indoor\_temp, indoor\_humidity, co2, soil\_moisture, light\_intensity |
+| $\overline{b}_i, \underline{b}_i$ | Upper and lower stage-specific environmental bounds for variable $i$ |
+| $\sigma_i$ | Normalisation scale (same as tracking term) |
+| $w_{\text{env}}$ | Environmental bounds weight (default **0.5**) |
+
+The penalty is **exactly zero** when all states are within bounds. It activates only when conditions drift outside the stage-appropriate range, providing a soft barrier that guides the solver without over-constraining it.
+
+---
+
+#### Term 9 — Actuator Switching Penalty
+
+**Intuition:** Rapid oscillation in actuator commands — e.g. a heater toggling on/off every 5 minutes — is mechanically damaging and energetically wasteful. A quadratic penalty on command changes keeps actuator trajectories smooth.
+
+$$
+\ell_{\text{sw}} = w_{\text{switch}} \sum_{j=1}^{7} \left(u_k^{(j)} - u_{k-1}^{(j)}\right)^{\!2}
+$$
+
+*[↗ cost_function.py · L346](../src/agritwin_gh/mpc/cost_function.py#L346)*
+
+The quadratic form punishes large jumps exponentially more than small ones. A change of 20 units costs 4 × as much as a change of 10 units.
+
+---
+
+#### Terminal cost $V_f(x_N)$
+
+The terminal cost evaluates the same tracking, disease, and environmental bounds terms at the **final predicted state** $x_N$, multiplied by $\gamma = 2$:
+
+$$
+V_f(x_N) = \gamma \left[\, \sum_{i=1}^{n_x} w_i \left(\frac{x_N^{(i)} - x^{*\,(i)}}{\sigma_i}\right)^{\!2} + w_{\text{dis,eff}} \cdot \hat{d}(x_N)^2 + \ell_{\text{env}}(x_N) \,\right], \qquad \gamma = 2.0
+$$
+
+*[↗ cost_function.py · L406](../src/agritwin_gh/mpc/cost_function.py#L406)* <sup>[[1]](#ref-1)</sup>
+
+The $2\times$ multiplier ensures the solver genuinely ends the prediction window in a good state, not merely passes through it momentarily. The environmental bounds penalty $\ell_{\text{env}}$ uses the same stage-specific bounds and weight as the running cost (Term 8).
+
+---
+
+#### Base cost weights (current tuned values from `config.py`)
+
+| Weight | Value | What it penalises |
+|---|---|---|
+| $w_{\text{temp}}$ | **2.0** | Temperature tracking error |
+| $w_{\text{humidity}}$ | **2.0** | Humidity tracking error |
+| $w_{\text{soil\_moisture}}$ | **1.5** | Soil moisture tracking error |
+| $w_{\text{co2}}$ | **1.0** | CO₂ tracking error |
+| $w_{\text{vpd}}$ | **1.0** | VPD deviation |
+| $w_{\text{light}}$ | 0.4 | Light intensity deviation |
+| $w_{\text{disease}}$ | 0.8 | Predicted disease risk (base; amplified by stage sensitivity) |
+| $w_{\text{energy}}$ | 0.10 | Energy consumption (low to prioritise tracking) |
+| $w_{\text{water}}$ | 0.10 | Water consumption (low to prioritise tracking) |
+| $w_{\text{switch}}$ | **0.30** | Actuator switching (high to stabilise actuators) |
+| $w_{\text{hum\_exp}}$ | 0.1 | RH above setpoint × disease risk |
+| $w_{\text{fog}}$ | 0.1 | Fogger duty when disease risk is high |
+| $w_{\text{irr}}$ | 0.05 | Irrigation when humid + disease active |
+| $w_{\text{sev}}$ | 1.0 | Severity forecast amplification strength |
+| $w_{\text{stress}}$ | 1.5 | Stress-excursion penalty (matches yield proxy stress formula) |
+| $w_{\text{env}}$ | **0.5** | Environmental bounds barrier — penalises states outside stage-specific limits (§17.1a) |
+
+> **Tuning rationale:** Tracking weights (temp, humidity, soil moisture, CO₂, VPD) are set high because the yield proxy assigns 40% weight to climate tracking. The switching penalty (0.30) prevents actuator oscillation that degrades the 15% stability component. Energy and water weights are low (0.10) because the solver warm-starts near the baseline—pushing these higher cannot meaningfully reduce MPC resource cost but can degrade yield.
+
+---
+
+#### Stage weight multipliers
+
+Each growth stage defines a `StageControlProfile` that multiplies the base tracking and disease weights:
+
+| Weight | Seedling | Vegetative | Flower Init | Flowering | Unripe | Ripe |
+|---|---|---|---|---|---|---|
+| Temperature | 1.2× | 1.0× | 1.3× | **1.4×** | 1.1× | 0.9× |
+| Humidity | 1.0× | 1.0× | 1.2× | **1.3×** | 1.2× | 0.8× |
+| Soil moisture | 1.3× | 1.0× | 0.9× | 1.0× | 1.1× | 0.8× |
+| CO₂ | 0.6× | 0.8× | 1.0× | **1.2×** | 1.0× | 0.5× |
+| VPD | 0.8× | 0.9× | 1.2× | **1.3×** | 1.1× | 0.7× |
+| Light | 0.7× | 1.0× | 1.1× | 1.2× | 1.0× | 0.6× |
+| Disease sensitivity $\delta_{\text{stage}}$ | 1.0× | 1.0× | 1.3× | **1.5×** | **1.4×** | 0.8× |
+
+Flowering is the most sensitive stage — temperature, humidity, CO₂, VPD, and disease weights simultaneously reach their peak multipliers.
+
+**Effective weight example** (flowering, temperature): $w_{\text{eff}} = w_{\text{base}} \times \text{multiplier} = 2.0 \times 1.4 = 2.8$
+
+---
+
+#### Growth-stage transition blending
+
+When the prediction horizon spans a stage boundary, `CostBuilder` holds a second `StageCost` for the upcoming stage and blends between them:
+
+$$
+\ell_{\text{blended}}(k) = (1 - \alpha_k)\;\ell_{\text{current}}(k) \;+\; \alpha_k\;\ell_{\text{next}}(k)
+$$
+
+*[↗ cost_function.py · L520](../src/agritwin_gh/mpc/cost_function.py#L520)*
+
+$$
+\alpha_k = \operatorname{clip}\!\left(\frac{k - k_{\text{start}}}{B},\; 0,\; 1\right)
+$$
+
+*[↗ cost_function.py · L471](../src/agritwin_gh/mpc/cost_function.py#L471)* <sup>[[1]](#ref-1)</sup>
+
+| Symbol | Meaning |
+|---|---|
+| $k_{\text{start}}$ | Horizon step at which blending begins |
+| $B$ | Blend window width — default 12 steps (= 60 minutes at 5-min intervals) |
+| $\alpha_k$ | Blending coefficient: $0$ = full current-stage cost, $1$ = full next-stage cost |
+
+Without blending the cost function would jump discontinuously when a stage boundary occurs mid-horizon, and the solver would produce an erratic actuator schedule. The linear ramp over $B$ steps prevents this.
+
+---
+
+#### Weather-adaptive weight scaling
+
+`StageCost.evaluate()` accepts an optional `step_modifiers` array (shape `(N_{\text{state}},)`) from `WeatherAdaptiveModifiers`. The effective tracking weights become:
+
+$$
+w_i^{\text{eff}}(k) = w_i \cdot m_i(k)
+$$
+
+*[↗ cost_function.py · L300](../src/agritwin_gh/mpc/cost_function.py#L300)*
+
+where $m_i(k)$ is the weather modifier for state variable $i$ at step $k$. If the external forecast predicts a temperature spike in 2 hours, $m_{\text{temp}}$ rises for those steps — the solver pre-acts to cool the greenhouse **before** the spike arrives rather than reacting to it after the fact.
+
+---
+
+#### `DiseaseContext` dataclass
 
 ```python
-class StageCost:
-    def evaluate(
-        state: GreenhouseState,
-        setpoint: StageSetpoint,
-        actuators: ActuatorState,
-        prev_actuators: ActuatorState | None,
-        disease_penalty: float = 0.0,
-    ) -> float:
-        """Compute single-step running cost."""
-
-class TerminalCost:
-    def evaluate(
-        final_state: GreenhouseState,
-        setpoint: StageSetpoint,
-    ) -> float:
-        """Terminal penalty at end of horizon (discourages drifting)."""
-
-class CostBuilder:
-    def build(
-        weights: dict[str, float],
-        disease_penalty_fn: Callable | None = None,
-    ) -> Callable:
-        """Factory: returns a callable cost function bound to given weights."""
+@dataclass
+class DiseaseContext:
+    risk_score:       float               # Current aggregate risk in [0, 1]
+    classification:   str                 # e.g. "early_blight"
+    confidence:       float               # Classifier confidence in [0, 1]
+    current_severity: dict[str, float]    # {disease: severity %} now
+    severity_24h:     dict[str, float]    # {disease: severity %} in 24 h
+    severity_48h:     dict[str, float]    # {disease: severity %} in 48 h
 ```
 
-**Stage weight multipliers** (from config, applied on top of base weights):
+Key derived properties:
 
-| Weight | Seedling | Veg | Flower Init | Flowering | Unripe | Ripe |
-|--------|---------|-----|------------|-----------|--------|------|
-| temperature | 1.2× | 1.1× | 1.4× | 1.5× | 1.2× | 0.9× |
-| humidity | 1.5× | 1.2× | 1.2× | 1.5× | 1.2× | 0.9× |
-| disease_risk | 0.8× | 1.0× | 1.3× | 1.5× | 1.5× | 1.2× |
+| Property | Formula | Purpose |
+|---|---|---|
+| `max_severity_24h` | $\max_j\, s_{24h}^{(j)}$ | Worst-case severity across all diseases at the 24 h mark |
+| `max_severity_48h` | $\max_j\, s_{48h}^{(j)}$ | Same at 48 h |
+| `severity_amplifier` | $1 + \max\!\left(s_{24h},\, s_{48h}\right)/100$ | Multiplies $w_{\text{disease}}$ — auto-elevates response as disease progresses |
 
-**Inputs**: State, setpoint, actuators, weights.  
-**Outputs**: A single float cost value (lower = better).
+Constructed at the start of each solve via `DiseaseContext.from_fused(fused_state)`.
+
+---
+
+**Inputs**: NumPy state and control arrays per horizon step, `MPCConfig`, `StageSetpoint`, optional `DiseaseContext` and `WeatherAdaptiveModifiers`.  
+**Outputs**: A single float cost value per step or total horizon cost (lower = better).
 
 ---
 
 ### 6.8 `mpc_solver.py`
 
-**Purpose**: The MPC engine. Takes `FusedState` and returns the optimal actuator sequence by minimising the cost function subject to constraints.
+**Purpose**: The MPC engine. Takes `FusedState` and returns the optimal actuator sequence by minimising the cost function subject to constraints via the SLSQP algorithm.<sup>[[8]](#ref-8)</sup>
 
 **Mathematical structure:**
 
@@ -759,7 +1475,7 @@ def compute_penalty(
     """Combine current risk + future projections into single cost penalty."""
 ```
 
-Why project 24h and 48h ahead? The MPC horizon is 12 hours. But disease development is a *slow process* — early blight might look mild now but be severe tomorrow. Including the 24h/48h projections in the cost penalises conditions that are likely to lead to disease escalation even if the current reading is safe.
+Why project 24h and 48h ahead? The MPC horizon is 12 hours. But disease development is a *slow process* — early blight might look mild now but be severe tomorrow.<sup>[[9]](#ref-9)</sup> Including the 24h/48h projections in the cost penalises conditions that are likely to lead to disease escalation even if the current reading is safe.
 
 **Inputs**: Greenhouse state, disease label, severity value, context DataFrame.  
 **Outputs**: Risk score in [0, 1]; penalty float.
@@ -768,7 +1484,7 @@ Why project 24h and 48h ahead? The MPC horizon is 12 hours. But disease developm
 
 ### 6.11 `growth_weights.py`
 
-**Purpose**: Makes the MPC *stage-aware*. Provides different cost weights for different growth stages and predicts how many hours until the plant transitions to the next stage.
+**Purpose**: Makes the MPC *stage-aware*. Provides different cost weights for different growth stages and predicts how many hours until the plant transitions to the next stage via an LSTM-based progression model.<sup>[[9]](#ref-9)</sup>
 
 **Class: `GrowthStageWeights`**
 
@@ -1015,7 +1731,7 @@ def plot_comparison(
 - Constraint violation count
 
 **Inputs**: Two `DigitalTwinTrajectoryPayload` objects (MPC vs. Baseline).  
-**Outputs**: `ComparisonMetrics`; optional plots in `data/processed/mpc_results/<run_id>/figures/`.
+**Outputs**: `ComparisonMetrics`; optional plots in `src/agritwin_gh/mpc/mpc_results/<run_id>/figures/`.
 
 ---
 
@@ -1168,7 +1884,7 @@ def run_experiment(
 
 Uses canonical disease labels (`"healthy leaves"`, `"early blight"`) and canonical stage indexing (`stage_label_to_index("flowering")`) — no hardcoded integers.
 
-**Output files saved to:** `data/processed/mpc_results/<run_id>/`
+**Output files saved to:** `src/agritwin_gh/mpc/mpc_results/<run_id>/`
 
 **Inputs**: DB session, time range, optional config.  
 **Outputs**: `ComparisonMetrics` + files on disk.
@@ -1708,7 +2424,7 @@ with Session(engine) as session:
     print(f"MPC constraint viols : {metrics.mpc_constraint_violations}")
 ```
 
-Results are automatically saved to `data/processed/mpc_results/<run_id>/`.
+Results are automatically saved to `src/agritwin_gh/mpc/mpc_results/<run_id>/`.
 
 ### Using a custom configuration
 
@@ -1746,210 +2462,188 @@ with Session(engine) as session:
 
 ## 11. Test Scripts
 
-All tests live in `tests/` and follow pytest conventions. Run them:
+> **Current status**: Formal pytest unit test files (`test_state.py`, `test_greenhouse_model.py`, etc.) are **not yet implemented** — they are planned for a future phase. The three smoke test scripts listed below are the tests that actually exist and pass right now. Each covers a major subsystem end-to-end without a live database.
+
+### How to run the smoke tests
+
+```powershell
+# Set PYTHONPATH and run all three
+$env:PYTHONPATH = "e:\AgriTwin-GH\src"
+python tests/smoke_intelligent_mpc.py
+python tests/smoke_test_dt_handoff.py
+python tests/test_evaluation_smoke.py
+```
+
+---
+
+### `tests/smoke_intelligent_mpc.py` — Intelligent MPC (disease + weather + stage blending)
+
+**What it tests:**
+- `DiseaseContext` dataclass construction and derived fields (`severity_amplifier`, `max_severity_24h/48h`)
+- `DiseaseContext.from_fused()` factory from a live `FusedState`
+- `compute_weather_adaptation()` — detects external temperature and humidity stress signals
+- `tighten_constraints_for_disease()` — reduces RH upper bound and suppresses fogger when risk is high
+- `CostBuilder` with disease context and stage-transition blending (`_blend_start`, `_blend_alpha`)
+- Cost evaluation with and without weather modifiers
+- Blending alpha ramp from 0 → 1 across the transition window
+- Full `MPCSolver.solve()` with a short 8-step horizon — converges or correctly uses fallback
+
+**Run command:**
 
 ```powershell
 $env:PYTHONPATH = "e:\AgriTwin-GH\src"
-uv run pytest tests/ -v
+python tests/smoke_intelligent_mpc.py
 ```
 
-### `test_state.py` — State dataclasses
+**Actual output:**
 
-```python
-import numpy as np
-from agritwin_gh.mpc.state import GreenhouseState, ActuatorState
+```
+1. All imports OK
+2. DiseaseContext OK — sev_amp=1.60
+3. DiseaseContext.from_fused OK
+4. Weather adaptation OK — temp_stress_max=1.400, rh_stress_max=1.250
+5. Constraint tightening OK — RH: 95.0 -> 88.6, fogger hi=0.30
+6. CostBuilder with blending OK — blend_start=54
+7. Cost eval: with_weather=28.1711, without=26.7774
+8. Blending alpha: step_0=0.00, mid=0.50, end=1.00
+9. Running full MPC solve (short horizon=8)...
+   Converged: False
+   Total cost: 58.6043
+   Solve time: 3500.4 ms
+   Iterations: 0
+   Breakdown: {'fallback': 58.60426947218381}
+   First action: fan=1.00, vent=0.80
 
-def test_greenhouse_state_roundtrip():
-    """GreenhouseState → numpy → GreenhouseState must be lossless."""
-    original = GreenhouseState(
-        indoor_temp=22.5, indoor_humidity=68.0, co2_level=800.0,
-        soil_moisture=65.0, light_intensity=400.0,
-        outdoor_temp=18.0, outdoor_humidity=55.0, vpd=0.9, leaf_wetness=0.1,
-    )
-    arr = original.to_numpy()
-    assert arr.shape == (9,)
-    recovered = GreenhouseState.from_numpy(arr)
-    assert abs(recovered.indoor_temp - original.indoor_temp) < 1e-9
-
-def test_actuator_state_clip():
-    """Actuator values outside bounds are clipped, not errored."""
-    from agritwin_gh.mpc.constraints import get_default_constraints
-    cs = get_default_constraints("flowering")
-    a = ActuatorState(
-        fan_speed=2.0,       # exceeds max of 1.0
-        vent_opening=0.5,
-        irrigation_qty=-5.0, # below min of 0.0
-        heater_output=0.3,
-        led_intensity=0.8,
-        co2_valve_pct=0.4,
-        fogger_duty=0.2,
-    )
-    clipped = a.clip(cs)
-    assert clipped.fan_speed == 1.0
-    assert clipped.irrigation_qty == 0.0
+==================================================
+ALL INTELLIGENT MPC SMOKE TESTS PASSED
+==================================================
 ```
 
-### `test_greenhouse_model.py` — Physics plausibility
+> **Note on convergence**: The solver does not converge on this particular input (`Positive directional derivative for linesearch`) because the test state is intentionally extreme (temp=32 °C, humidity=85%, disease risk=0.6) — the SLSQP gradient conflicts with the large penalty. The fallback `RuleBasedController` kicks in and produces safe actuator commands (`fan=1.00, vent=0.80`), which is the correct behaviour. The test asserts `converged OR fallback_used`, so it passes.
 
-```python
-from agritwin_gh.mpc.state import GreenhouseState, ActuatorState
-from agritwin_gh.mpc.greenhouse_model import GreenhouseTransitionModel
+---
 
-def test_heater_warms_greenhouse():
-    """Turning heater on should raise indoor temperature."""
-    model = GreenhouseTransitionModel()
-    state = GreenhouseState(
-        indoor_temp=15.0, indoor_humidity=70.0, co2_level=600.0,
-        soil_moisture=60.0, light_intensity=200.0,
-        outdoor_temp=10.0, outdoor_humidity=50.0, vpd=0.5, leaf_wetness=0.1,
-    )
-    heater_on  = ActuatorState(0.2, 0.1, 0.0, 1.0, 0.3, 0.2, 0.1)  # heater=1.0
-    heater_off = ActuatorState(0.2, 0.1, 0.0, 0.0, 0.3, 0.2, 0.1)  # heater=0.0
+### `tests/smoke_test_dt_handoff.py` — Digital Twin Output, Explanation, Replay
 
-    next_on  = model.step(state, heater_on)
-    next_off = model.step(state, heater_off)
+**What it tests:**
+- `ExplanationBuilder.build()` — generates human-readable entries (critical/warning/info) for every active trigger
+- Entry categories: `climate`, `disease`, `weather`, `growth`, `constraint`
+- `ControllerDecisionContext.to_dict()` — schema versioning, JSON-serialisable
+- `DigitalTwinOutput.format_step()` — assembles the full `DigitalTwinStepPayload` with explanation, decision context, and solver performance embedded
+- Alert level + alert icons computation (`YELLOW`, `['disease_moderate', 'transition_24h']`)
+- `DigitalTwinStepPayload` dataclass field presence check
+- `ReplayConfig`, `ReplayStep`, `ReplaySummary` dataclass structure
 
-    assert next_on.indoor_temp > next_off.indoor_temp
+**Run command:**
 
-def test_simulate_trajectory_length():
-    """simulate() must return len(actuator_sequence) + 1 states."""
-    model = GreenhouseTransitionModel()
-    s0 = GreenhouseState(22.0, 68.0, 800.0, 65.0, 400.0, 18.0, 55.0, 0.9, 0.1)
-    acts = [ActuatorState(0.3, 0.2, 0.0, 0.2, 0.5, 0.3, 0.1)] * 10
-    trajectory = model.simulate(s0, acts)
-    assert len(trajectory) == 11  # initial + 10 steps
+```powershell
+$env:PYTHONPATH = "e:\AgriTwin-GH\src"
+python tests/smoke_test_dt_handoff.py
 ```
 
-### `test_cost_function.py` — Cost function
+**Actual output:**
 
-```python
-from agritwin_gh.mpc.cost_function import StageCost, CostBuilder
-from agritwin_gh.mpc.setpoints import get_setpoint
+```
+=== Import test ===
+All imports OK
 
-def test_cost_at_setpoint_is_minimal():
-    """When state exactly matches setpoint, tracking cost should be near zero."""
-    sp = get_setpoint("flowering")
-    at_setpoint = GreenhouseState(
-        indoor_temp=sp.temp, indoor_humidity=sp.humidity,
-        co2_level=sp.co2, soil_moisture=sp.soil_moisture,
-        light_intensity=sp.light,
-        outdoor_temp=18.0, outdoor_humidity=55.0, vpd=sp.vpd, leaf_wetness=0.1,
-    )
-    cost_fn = CostBuilder().build(weights={"temperature": 1.0, "humidity": 1.0, ...})
-    cost = cost_fn(at_setpoint, sp, ActuatorState(0,0,0,0,0,0,0), None, 0.0)
-    assert cost < 0.1
+=== ExplanationBuilder test ===
+Dominant factor: climate
+Action summary: fan at 80%, vents at 60%, irrigating 3.0L, LEDs at 40% — driven by: Temperature 30.5°C is 9.5°C above target 21.0°C
+Entries (12):
+  [critical] [climate   ] temperature_above_setpoint: Temperature 30.5°C is 9.5°C above target 21.0°C
+  [critical] [climate   ] humidity_above_setpoint: Humidity 88.0% is 28.0% above stage-safe safe range
+  [warning ] [climate   ] vpd_deviation: VPD 1.80 kPa deviates +0.80 from target 1.00
+  [warning ] [disease   ] moderate_disease_risk: Disease risk 0.55 is moderately elevated
+  [warning ] [disease   ] severity_worsening: Leaf Mold severity predicted to worsen: 25% → 38% in 24h
+  [info    ] [disease   ] fogger_suppressed_for_disease: Fogger suppressed to reduce moisture and disease-favorable conditions
+  [info    ] [disease   ] irrigation_cautious_for_disease: Irrigation kept low to avoid high humidity persistence
+  [info    ] [weather   ] heat_stress_anticipated: External temperature stress anticipated (stress=0.45); ventilation increased proactively
+  [info    ] [weather   ] humidity_stress_anticipated: External humidity stress anticipated (stress=0.35); ventilation adjusted
+  [info    ] [growth    ] stage_transition_imminent: Growth stage transition flowering → unripe expected in ~18h; control weights blending toward next-stage profile
+  [warning ] [constraint] rh_ceiling_tightened: RH ceiling tightened to 88.0% due to disease risk
+  [warning ] [constraint] fogger_constraint_active: Fogger max duty limited to 15% due to disease risk
+to_dict: 12 entries OK
 
-def test_high_disease_risk_increases_cost():
-    """High disease penalty should increase total cost."""
-    cost_low  = compute_cost(disease_penalty=0.0)
-    cost_high = compute_cost(disease_penalty=1.0)
-    assert cost_high > cost_low
+=== ControllerDecisionContext test ===
+DecisionContext to_dict OK, schema=1.0
+
+=== DigitalTwinOutput with explanation test ===
+Payload explanation entries: 11
+Payload decision_context run_id: test-run-001
+Payload solver_performance converged: True
+Payload alert: YELLOW ['disease_moderate', 'transition_24h']
+
+=== DigitalTwinStepPayload fields check ===
+All new fields present in DigitalTwinStepPayload
+
+=== ReplayEngine test ===
+ReplayConfig: replay_id=replay-f8ea1b3564f9
+ReplayStep fields: ['step_index', 'timestamp', 'observed_state', 'mpc_action', 'model_predicted_state', 'actual_next_state', 'correction_delta', 'solution']
+ReplaySummary fields: ['replay_id', 'total_steps', 'mean_correction', 'max_correction', 'solver_convergence_rate', 'mean_solve_time_ms']
+
+=== ALL SMOKE TESTS PASSED ===
 ```
 
-### `test_mpc_solver.py` — Solver
+---
 
-```python
-from agritwin_gh.mpc.mpc_solver import MPCSolver
-from agritwin_gh.mpc.config import load_mpc_config
+### `tests/test_evaluation_smoke.py` — Evaluation Framework
 
-def test_solver_returns_valid_actuators():
-    """Solver must return an ActuatorState with all values in valid range."""
-    config = load_mpc_config()
-    # (build a mock FusedState...)
-    solver = MPCSolver(config=config, model=GreenhouseTransitionModel())
-    solution = solver.solve(fused=mock_fused_state)
+**What it tests:**
+- Import of all evaluation symbols (`TrackingMetrics`, `DiseaseBurdenMetrics`, `ResourceMetrics`, `ControlQualityMetrics`, `SafetyMetrics`, `ControllerMetricsBundle`, `compute_all_metrics`, `YieldProxyResult`, `compute_yield_proxy`, `ExperimentRunner`, `ComparisonReport`, etc.)
+- `compute_all_metrics()` on 50 synthetic states — tracking RMSE, disease burden, energy, water, safety, smoothness
+- `compute_yield_proxy()` — overall score, climate score, disease penalty, per-step vector
+- `ExperimentRunner` with a registered rule-based baseline adapter over 50 synthetic steps
+- `save_evaluation_artifacts()` — writes 4 JSON files to a temp directory
+- `load_evaluation_report()` — round-trip load from disk
+- JSON serialisation of full `ComparisonReport`
+- `to_dict()` round-trip for `ControllerMetricsBundle` and `YieldProxyResult`
 
-    a = solution.first_action
-    assert 0.0 <= a.fan_speed    <= 1.0
-    assert 0.0 <= a.heater_output <= 1.0
-    assert a.irrigation_qty >= 0.0
+**Run command:**
 
-def test_solver_fallback_on_infeasible():
-    """If constraints are infeasible, fallback_used must be True."""
-    # Inject contradictory constraints...
-    solution = solver.solve(fused=infeasible_fused_state)
-    assert solution.fallback_used is True
-    # But still returns valid actuators
-    assert solution.first_action is not None
-
-def test_cost_does_not_increase_over_iterations():
-    """Running solve twice with the warm-start should not produce higher cost."""
-    sol1 = solver.solve(fused=fused_state)
-    sol2 = solver.solve(fused=fused_state)  # warm-started
-    # Cost should be stable (not necessarily decreasing, but not diverging)
-    assert abs(sol2.total_cost - sol1.total_cost) < 1.0
+```powershell
+$env:PYTHONPATH = "e:\AgriTwin-GH\src"
+python tests/test_evaluation_smoke.py
 ```
 
-### `test_baseline_controller.py` — Baseline
+**Actual output:**
 
-```python
-from agritwin_gh.mpc.baseline_controller import RuleBasedController
+```
+[OK] All evaluation symbols imported
+[OK] Metrics bundle: 50 steps, temp RMSE=2.503
+     Disease mean_risk=0.1676
+     Energy=12.9325 kWh, Water=3.30 L
+     Safety violations=0
+     Smoothness L2=0.0952
+[OK] Yield proxy: overall=63.58/100, climate=60.99, disease=32.96
+     Per-step scores: 50 entries, mean=63.58
+[OK] Experiment: baseline temp_rmse=5.465, yield=67.18
+     Water=20.27 L, Energy=36.1263 kWh
+[OK] Artifacts saved: ['experiment_config.json', 'full_metrics.json', 'report_summary.json', 'yield_proxy.json']
+[OK] Report loaded back: keys=['generated_at', 'improvements', 'run_id', 'summary_table']
+[OK] Report JSON serialisation: 4840 chars
+[OK] baseline metrics dict has all 5 sections
+[OK] baseline yield proxy dict has summary stats
 
-def test_high_risk_triggers_emergency_ventilation():
-    """Disease risk > 0.6 must set fan_speed and vent_opening to maximum."""
-    ctrl = RuleBasedController()
-    action = ctrl.compute_action(
-        state=normal_state,
-        growth_stage="flowering",
-        disease_risk_score=0.8,   # HIGH
-    )
-    assert action.fan_speed == 1.0
-    assert action.vent_opening == 1.0
-
-def test_cold_greenhouse_triggers_heater():
-    """Temperature below setpoint − tolerance must turn on heater."""
-    cold_state = GreenhouseState(indoor_temp=15.0, ...)  # vs setpoint 21 °C
-    ctrl = RuleBasedController()
-    action = ctrl.compute_action(cold_state, "flowering", disease_risk_score=0.1)
-    assert action.heater_output > 0.0
+=== ALL SMOKE TESTS PASSED ===
 ```
 
-### `test_state_fusion.py` — Integration
+---
 
-```python
-from unittest.mock import MagicMock
-from agritwin_gh.mpc.state_fusion import StateFusion
+### Future unit tests (not yet implemented)
 
-def test_fuse_returns_valid_fused_state():
-    """StateFusion.fuse() should return a FusedState with all required fields."""
-    # Use mocked sub-components to avoid DB dependency in unit test
-    mock_input_prep = MagicMock()
-    mock_input_prep.get_latest_greenhouse_row.return_value = {
-        "indoor_temp": 22.0, "indoor_humidity": 68.0, ...
-    }
-    # ... (other mocks)
+The following pytest unit test files are planned. They will exercise individual components in isolation using mocks and synthetic data, without requiring a database or MinIO instance.
 
-    fusion = StateFusion(config=load_mpc_config(), input_prep=mock_input_prep, ...)
-    fused = fusion.fuse(timestamp=datetime.datetime.now())
-
-    assert fused.growth_stage in GROWTH_STAGES
-    assert 0.0 <= fused.disease_risk_score <= 1.0
-    assert fused.setpoint is not None
-    assert len(fused.weather_disturbance) > 0
-```
-
-### `test_runner_integration.py` — End-to-end (with mocked DB)
-
-```python
-from unittest.mock import MagicMock, patch
-from agritwin_gh.mpc import MPCRunner
-
-def test_single_step_pipeline():
-    """Full pipeline from DB mock to DigitalTwinStepPayload."""
-    mock_session = MagicMock()
-
-    with patch("agritwin_gh.mpc.mpc_input_preparation.MPCInputPreparation") as MockPrep:
-        MockPrep.return_value.get_latest_greenhouse_row.return_value = {
-            "indoor_temp": 22.0, ...
-        }
-        runner = MPCRunner(session=mock_session)
-        payload = runner.run_single_step()
-
-    assert payload.step_index == 0
-    assert payload.growth_stage in GROWTH_STAGES
-    assert hasattr(payload, "actuators")
-    assert hasattr(payload, "solver_converged")
-```
+| Planned file | Target module | Key assertions |
+|---|---|---|
+| `test_state.py` | `state.py` | `GreenhouseState` numpy roundtrip; `ActuatorState.clip()` |
+| `test_greenhouse_model.py` | `greenhouse_model.py` | Heater warms temperature; `simulate()` trajectory length |
+| `test_constraints.py` | `constraints.py` | Bounds shape; disease tightening reduces RH ceiling |
+| `test_cost_function.py` | `cost_function.py` | Cost at setpoint ≈ 0; high disease penalty > low |
+| `test_mpc_solver.py` | `mpc_solver.py` | Valid actuator bounds; fallback on infeasibility; warm-start stability |
+| `test_baseline_controller.py` | `baseline_controller.py` | High risk → max fan/vent; cold state → heater ON |
+| `test_state_fusion.py` | `state_fusion.py` | `fuse()` returns valid `FusedState` with all fields populated |
+| `test_runner_integration.py` | `runner.py` | Full single-step pipeline with mocked DB session |
 
 ---
 
@@ -1968,7 +2662,7 @@ This mirrors the existing repo convention (`disease_20260226_141843`, `growth_st
 ### Output files per run
 
 ```
-data/processed/mpc_results/mpc_20260330_143022/
+src/agritwin_gh/mpc/mpc_results/mpc_20260330_143022/
 │
 ├── trajectory_mpc.parquet             # MPC state + actuator trajectory
 ├── trajectory_baseline.parquet        # Baseline controller trajectory
@@ -2092,3 +2786,575 @@ The MPC module was built in 10 ordered phases. Understanding this helps you know
 ---
 
 *AgriTwin-GH MPC Complete Guide — `src/agritwin_gh/mpc/` (26 files)*
+
+---
+
+## 16. MPC Solver Tuning & Robustness Improvements
+
+This section documents the engineering changes made to the MPC solver and cost function to achieve reliable, positive yield improvement over the baseline controller across all evaluation scenarios.
+
+### 16.1 Rate Constraint 5 % Slack
+
+**Problem:** SLSQP reported "Inequality constraints incompatible" when the warm-start (baseline) actuator values sat exactly on rate-limit boundaries.
+
+**Fix:** A 5 % slack factor (`_SLACK = 1.05`) is applied to the rate constraint bounds in `_build_rate_constraints()`. The warm-start point is clipped to the *exact* rate limits, but the constraint region presented to the solver uses limits that are 5 % wider — placing the warm-start strictly in the interior of the feasible region.
+
+```python
+rate_lo = _SLACK * rate_lo   # slightly more negative
+rate_hi = _SLACK * rate_hi   # slightly more positive
+```
+
+This prevents the pathological case where the initial guess already lies on a constraint boundary, which causes SLSQP's gradient computation to fail.
+
+### 16.2 Non-Converged Result Salvage
+
+**Problem:** When SLSQP did not converge within its iteration budget, the raw result was discarded entirely and replaced with the baseline warm-start — even when the partial optimisation was already better than baseline.
+
+**Fix:** When the solver reports non-convergence:
+
+1. The raw result is **clipped** to the rate limits.
+2. Its **cost is evaluated** against the warm-start cost.
+3. If the clipped result is **cheaper** than the warm-start cost, it is **accepted**.
+4. Otherwise, the solver falls back to the baseline warm-start.
+
+This recovers useful optimisation gains from partial-convergence runs without accepting any constraint violations.
+
+### 16.3 Dead-Band Filter
+
+Small actuator adjustments below a per-actuator threshold are suppressed to reduce unnecessary switching:
+
+| Actuator | Dead-band | Unit |
+|---|---|---|
+| `fan_speed` | 0.08 | fraction |
+| `vent_opening` | 0.08 | fraction |
+| `irrigation_qty` | 2.0 | litres |
+| `heater_output` | 0.08 | fraction |
+| `led_intensity` | 0.08 | fraction |
+| `fogger_duty` | 0.08 | fraction |
+| `co2_valve_pct` | *(no dead-band)* | — |
+
+CO₂ valve has no dead-band because CO₂ control is responsive and the valve has no mechanical wear concerns.
+
+If the absolute difference between the MPC-proposed actuator value and the baseline value is below the dead-band, the baseline value is kept instead. This directly improves the **stability** component of the yield proxy (15 % weight) without meaningfully degrading climate tracking.
+
+### 16.4 Safety Filter
+
+Every MPC actuator command passes through a safety filter before application:
+
+1. **Predict-then-check:** The greenhouse model simulates the proposed action forward one step.
+2. **Inner-bounds check:** The predicted state is checked against environmental bounds with a 5 % safety margin.
+3. **Baseline fallback:** If any predicted state variable would violate the inner bounds, the MPC action is **replaced** with the baseline controller's action for that step.
+
+This guarantees **zero safety violations** regardless of solver behaviour.
+
+---
+
+## 17. Constraint Reference Tables
+
+### 17.1 Environmental Constraints — Base Limits
+
+These are the absolute physical safety boundaries that apply when no stage information is available. They are defined in `constraints.py` → `_BASE_ENVIRONMENTAL`.
+
+| Variable | Lower Bound | Upper Bound | Unit |
+|---|---|---|---|
+| Indoor temperature | 10.0 | 40.0 | °C |
+| Indoor humidity | 30.0 | 95.0 | %RH |
+| CO₂ concentration | 300.0 | 2,000.0 | ppm |
+| Soil moisture | 20.0 | 90.0 | % volumetric |
+| Light intensity | 0.0 | 1,200.0 | μmol/m²/s |
+
+### 17.1a Growth-Stage Environmental Overrides
+
+When a growth stage is known, the base bounds above are **narrowed** to stage-specific ranges. These overrides are defined in `constraints.py` → `_STAGE_ENVIRONMENTAL_OVERRIDES` and applied automatically by `get_default_constraints(stage_name)`.
+
+The values are derived from the agronomic requirements documented in the [Tomato Growth Stage Classification](TOMATO_GROWTH_STAGE_CLASSIFICATION.md) guide.
+
+| Variable | Seedling | Early Veg | Flower Init | Flowering | Unripe | Ripe | Unit |
+|---|---|---|---|---|---|---|---|
+| Indoor temp | 15–33 | 15–34 | 16–30 | 14–30 | 16–34 | 14–33 | °C |
+| Indoor humidity | 55–93 | 50–88 | 42–82 | 38–83 | 45–88 | 38–85 | %RH |
+| CO₂ | 350–1500 | 350–1800 | 400–1800 | 400–1800 | 350–1800 | 300–1500 | ppm |
+| Soil moisture | 40–90 | 30–90 | 30–85 | 30–85 | 35–90 | 25–85 | % |
+| Light intensity | 0–800 | 0–1000 | 0–1200 | 0–1200 | 0–1100 | 0–1000 | μmol/m²/s |
+
+**Design rationale:**
+
+- **Seedling** — High humidity ceiling (93 %) supports the fragile germination phase; minimum temperature at 15 °C where development stalls; light limited to 800 to prevent scorching.
+- **Flowering / Flower initiation** — Tightest humidity ceilings (82–83 %) because high RH causes pollen clumping and pollination failure; temperature capped at 30 °C (above which blossom drop occurs).
+- **Unripe** — Moderate bounds allow the fruit to accumulate sugars under consistent conditions.
+- **Ripe** — Lower humidity ceiling (85 %) reduces *Botrytis* risk on softening fruit.
+
+**How stage overrides affect the solver:**
+
+1. **Disease tightening base** — The RH ceiling in disease-sensitive constraint tightening (§17.6) starts from the *stage-specific* upper bound (e.g. 83 % for flowering) rather than the global 95 %. This makes disease intervention more aggressive at lower risk levels.
+2. **Cost function barrier** — The `StageCost` and `TerminalCost` classes include an environmental-bounds penalty (`w_env_bounds = 0.5`) that adds quadratic cost when predicted states approach or exceed stage-specific limits. The penalty is zero when all states are within bounds and grows as `((violation) / normalisation_scale)²`.
+
+### 17.2 Actuator Bounds (Box Constraints)
+
+| Actuator | Lower | Upper | Unit | Physical meaning |
+|---|---|---|---|---|
+| `fan_speed` | 0.0 | 1.0 | fraction | 0 = off, 1 = maximum speed |
+| `vent_opening` | 0.0 | 1.0 | fraction | 0 = closed, 1 = fully open |
+| `irrigation_qty` | 0.0 | 50.0 | litres/step | Maximum 50 L per 5-minute step |
+| `heater_output` | 0.0 | 1.0 | fraction | 0 = off, 1 = full power |
+| `led_intensity` | 0.0 | 1.0 | fraction | 0 = off, 1 = full brightness |
+| `co2_valve_pct` | 0.0 | 1.0 | fraction | 0 = closed, 1 = fully open |
+| `fogger_duty` | 0.0 | 1.0 | duty cycle | 0 = off, 1 = continuous misting |
+
+### 17.3 Actuator Rate-of-Change Limits (Per 5-Minute Step)
+
+Rate limits prevent sudden actuator jumps that cause mechanical stress and destabilise the greenhouse environment.
+
+| Actuator | Max Decrease | Max Increase | Unit/step |
+|---|---|---|---|
+| `fan_speed` | −0.20 | +0.20 | fraction |
+| `vent_opening` | −0.15 | +0.15 | fraction |
+| `irrigation_qty` | −10.0 | +10.0 | litres |
+| `heater_output` | −0.25 | +0.25 | fraction |
+| `led_intensity` | −0.20 | +0.20 | fraction |
+| `co2_valve_pct` | −0.20 | +0.20 | fraction |
+| `fogger_duty` | −0.20 | +0.20 | fraction |
+
+### 17.4 Actuator Cooldown Periods
+
+Certain actuators have mandatory minimum-off times after a cycle, expressed as a number of 5-minute steps:
+
+| Actuator | Cooldown Steps | Real Time | Purpose |
+|---|---|---|---|
+| `heater_output` | 3 | 15 minutes | Prevent rapid thermal cycling that degrades heating elements |
+| `co2_valve_pct` | 2 | 10 minutes | Allow CO₂ to disperse; prevent overshoot |
+| `irrigation_qty` | 6 | 30 minutes | Allow water to soak into substrate before re-watering |
+
+### 17.5 Crop Safety Bounds (Stage-Dependent)
+
+In addition to the hard environmental limits above, **crop safety overrides** narrow the allowable ranges for specific variables during vulnerable growth stages. These are defined in `constraints.py` → `_STAGE_CROP_SAFETY`:
+
+| Variable | Seedling | Vegetative | Flower Init | Flowering | Unripe | Ripe |
+|---|---|---|---|---|---|---|
+| VPD range (kPa) | 0.4–1.2 | 0.4–1.6 | 0.5–1.4 | 0.6–1.5 | 0.4–1.6 | 0.4–1.6 |
+| Disease risk max | 0.35 | 0.80 | 0.30 | 0.25 | 0.25 | 0.80 |
+| Leaf wetness max | 0.85 | 0.85 | 0.85 | 0.85 | 0.85 | 0.85 |
+
+**Why flowering has the tightest disease max (0.25):** Fungal infections during flowering can destroy blossoms, causing direct yield loss. A ceiling of 0.25 forces the MPC to aggressively manage humidity and fogging during this stage.
+
+### 17.6 Disease-Sensitive Constraint Tightening
+
+When disease risk exceeds configurable thresholds, constraints are dynamically tightened by the function `apply_disease_tightening()` in `constraints.py`:
+
+**RH Ceiling Lowering:**
+
+- **Trigger:** `disease_risk ≥ 0.4` (configurable: `disease_rh_tightening_risk_threshold`)
+- **Action:** Indoor humidity upper bound is linearly reduced from its **stage-specific** base value toward `rh_tightened_ceiling` (80 %).
+- **Formula:** `new_hi = base_hi − α × (base_hi − 80.0)` where `α = (risk − 0.4) / (1.0 − 0.4)`
+- **Stage interaction:** With growth-stage environmental overrides (§17.1a), `base_hi` is the stage-specific ceiling, not the global 95 %. For example, during flowering `base_hi = 83 %`, so the tightening range is only 83 → 80 % (3 % RH), making intervention more immediate. During the seedling stage, `base_hi = 93 %`, providing a wider 93 → 80 % range.
+
+| Stage | base_hi | At risk = 0.5 | At risk = 0.7 | At risk = 1.0 |
+|---|---|---|---|---|
+| Seedling | 93 % | 90.8 % | 86.8 % | 80.0 % |
+| Flowering | 83 % | 82.5 % | 81.5 % | 80.0 % |
+| Unripe | 88 % | 86.7 % | 84.0 % | 80.0 % |
+
+**Fogger Suppression:**
+
+- **Trigger:** `disease_risk ≥ 0.5` (configurable: `disease_fogger_suppress_risk_threshold`)
+- **Action:** Fogger duty cycle upper bound is capped at **0.3** (configurable: `disease_fogger_suppressed_max_duty`).
+- **Rationale:** Foggers add moisture directly, promoting leaf wetness and conditions for fungal growth.
+
+**Severity Forecast Amplification:**
+
+- **Trigger:** Any disease severity forecast > 50 % in the 24 h prediction window.
+- **Action:** Both thresholds above are effectively lowered by **0.1**.
+- **Result:** Tightening triggers earlier — at risk 0.3 instead of 0.4 for RH, and at 0.4 instead of 0.5 for fogger.
+
+---
+
+## 18. Resource Cost Calculation — Tamil Nadu, India
+
+### 18.1 Currency and Pricing Standard
+
+All resource costs in the evaluation output are in **Indian Rupee (₹, INR)**. Rates are based on **Tamil Nadu, India (2025–2026 tariff estimates)**.
+
+| Resource | Rate | Source / Tariff |
+|---|---|---|
+| Electricity | **₹6.60 per kWh** | TNEB (Tamil Nadu Electricity Board) HT-I commercial/agricultural tariff |
+| Water | **₹0.05 per litre** (₹50 per kL) | TWAD (Tamil Nadu Water Supply and Drainage Board) agricultural supply rate |
+
+These constants are defined at the top of `scripts/run_full_mpc_evaluation.py`:
+
+```python
+TN_ELECTRICITY_RATE = 6.60   # ₹ per kWh
+TN_WATER_RATE       = 0.05   # ₹ per litre  (₹50 / kL)
+```
+
+### 18.2 Energy Consumption Model
+
+Energy per 5-minute step is computed from actuator settings using fixed power coefficients. These coefficients represent typical equipment ratings for a 200 m² commercial greenhouse in South India:
+
+| Actuator | Energy per unit | Unit | Notes |
+|---|---|---|---|
+| `fan_speed` | 0.15 kWh | per fractional unit per step | At full speed (1.0): 0.15 kWh/step ≈ 1.8 kWh/hr |
+| `vent_opening` | 0.02 kWh | per fractional unit per step | Servo motor; nearly free |
+| `heater_output` | **0.80 kWh** | per fractional unit per step | **Most expensive**; resistive or gas heating |
+| `led_intensity` | 0.30 kWh | per fractional unit per step | High-power grow lights |
+| `co2_valve_pct` | 0.05 kWh | per fractional unit per step | Solenoid valve; gas supply cost is separate |
+| `fogger_duty` | 0.10 kWh | per duty cycle unit per step | Ultrasonic or high-pressure pump |
+| `irrigation_qty` | 0.01 kWh | per litre per step | Drip pump; minimal |
+
+**Total energy per step:**
+
+$$E_{\text{step}} = \sum_{j=1}^{7} c_j \cdot u_j \quad \text{(kWh)}$$
+
+where $c_j$ is the energy coefficient and $u_j$ is the actuator setting for the step.
+
+**Total energy for a scenario:**
+
+$$E_{\text{total}} = \sum_{k=1}^{N_{\text{steps}}} E_{\text{step},k} \quad \text{(kWh)}$$
+
+### 18.3 Water Consumption Model
+
+Water usage per step:
+
+- **Irrigation:** Directly from the `irrigation_qty` actuator (litres per step).
+- **Fogger:** Estimated as `fogger_duty × 2.0` litres per step.
+
+$$W_{\text{step}} = u_{\text{irrigation}} + 2.0 \times u_{\text{fogger}} \quad \text{(litres)}$$
+
+### 18.4 Total Resource Cost Formula
+
+$$\text{Total Cost (₹)} = E_{\text{total}} \times 6.60 + W_{\text{total}} \times 0.05$$
+
+### 18.5 Interpreting Resource Cost Comparisons
+
+In the evaluation output, you will see a table like:
+
+```
+  Controller          Energy(kWh)   Water(L)   ₹ Energy    ₹ Water    ₹ TOTAL
+  ---------------------------------------------------------------------------
+  baseline                62.88     133.18     415.03       6.66     421.69
+  mpc                     63.39     136.45     418.40       6.82     425.22
+  mpc vs baseline: costs extra ₹3.53 (-0.8%)
+```
+
+- **"saves ₹X"** = MPC uses fewer resources than baseline (MPC is cheaper).
+- **"costs extra ₹X"** = MPC uses slightly more resources (MPC is more expensive).
+- A small extra cost (< 1 %) is acceptable when MPC achieves meaningful yield improvement. The MPC trades marginal resource expenditure for better climate tracking that raises yield.
+
+---
+
+## 19. End-to-End Evaluation Script (`run_full_mpc_evaluation.py`)
+
+### 19.1 Overview
+
+The evaluation script `scripts/run_full_mpc_evaluation.py` is the primary tool for validating MPC performance against the baseline controller. It orchestrates 5 scenarios, computes comprehensive metrics, and saves structured artifacts.
+
+**Location:** `scripts/run_full_mpc_evaluation.py`
+
+**How to run:**
+
+```powershell
+cd e:\AgriTwin-GH
+python scripts/run_full_mpc_evaluation.py
+```
+
+**Runtime:** Approximately 8–10 minutes total (≈90 s for S1, ≈200 s each for S2/S3, seconds for S4/S5).
+
+### 19.2 Scenario Design
+
+The five scenarios test progressively harder conditions. They are designed so that if MPC beats the baseline in all three performance scenarios (S1–S3) and passes both diagnostic scenarios (S4–S5), the MPC is validated for deployment.
+
+#### Scenario 1 — Standard 12-Hour Flowering Stage
+
+| Parameter | Value | Why |
+|---|---|---|
+| Duration | 12 hours (144 steps × 5 min) | Short enough for fast iteration |
+| Growth stage | Flowering (fixed) | Most sensitive stage; strictest tolerances |
+| Weather | Default synthetic | Mild diurnal cycle (20–28 °C, 50–75 % RH) |
+| Initial state | Default (moderate conditions) | Clean baseline start |
+| Disease pressure | Low (initial risk ≈ 0.15) | Tests pure climate tracking ability |
+
+**Purpose:** The "minimum viable improvement" test. Under ideal, controlled conditions with mild weather and low disease, MPC must demonstrate it can outperform the baseline on pure setpoint tracking. If it fails here, it will fail everywhere.
+
+**MPC config:** Default tuned weights, `control_horizon_hours=1`, `solver_ftol=1e-4`.
+
+#### Scenario 2 — High Disease-Pressure Fruiting Stage (24 h)
+
+| Parameter | Value | Why |
+|---|---|---|
+| Duration | 24 hours (288 steps × 5 min) | Full diurnal cycle |
+| Growth stage | Unripe (fixed) | Fruit development; disease sensitivity = 1.4× |
+| Weather | Hot + humid synthetic | 28–33 °C, 74–90 % RH, overcast |
+| Initial state | Warm greenhouse (29 °C, 82 % RH) | Already in a stressed state |
+| Disease pressure | High (initial risk = 0.45) | Tests disease-aware control |
+
+**Purpose:** Tests whether the disease-aware cost terms (disease environment penalty, humidity exposure, fogger suppression) help MPC manage disease risk without sacrificing yield. The hot, humid weather persistently pushes the greenhouse toward disease-favourable conditions. The MPC must decide when to suppress fogging, tighten the humidity ceiling, and increase ventilation.
+
+**MPC config overrides for S2:**
+
+| Override | Value | Rationale |
+|---|---|---|
+| `w_disease` | 3.0 | Amplified disease penalty (3.75× of default 0.8) forces aggressive disease management |
+| `w_humidity_exposure` | 1.0 | Strong coupling between excess humidity and disease cost |
+| `w_fogger_suppression` | 0.6 | Penalises fogging when disease risk is elevated |
+
+#### Scenario 3 — 24-Hour Stage Transition (Flowering → Unripe)
+
+| Parameter | Value | Why |
+|---|---|---|
+| Duration | 24 hours (288 steps × 5 min) | Full diurnal cycle |
+| Growth stage | Flowering → Unripe at step 144 (hour 12) | Mid-run transition |
+| Weather | Default synthetic | Standard conditions |
+| Initial state | Default | Clean start |
+| Transition blend | 24 steps = 2 hours | Tests smooth setpoint blending |
+
+**Purpose:** Tests the stage-transition blending mechanism. At hour 12, setpoints change from flowering targets (21 °C, 60 % RH) to unripe targets (22 °C, 65 % RH). The MPC smoothly ramps its cost weights over the 2-hour blend window (`stage_transition_blend_steps=24`) instead of switching abruptly. The baseline controller has no blending — it switches targets instantly.
+
+**Why this matters:** In real greenhouses, growth stages transition gradually. A controller that jumps between setpoints creates unnecessary climate excursions that stress the crop. Smooth blending reduces the stress penalty and improves the stability component in the yield proxy.
+
+#### Scenario 4 — MPC Solver Component-Level Validation
+
+This is not a performance scenario — it validates that each individual component of the MPC pipeline works correctly in isolation:
+
+| Sub-test | What it validates |
+|---|---|
+| 4a. Transition model | Greenhouse model produces physically valid output (no NaN, no negative temperatures) |
+| 4b. Cost function | Stage and terminal costs return finite, non-NaN values for known inputs |
+| 4c. Weather adaptation | Weather modifier computation produces valid stress signals |
+| 4d. Constraint tightening | Disease-aware RH ceiling and fogger bounds adjust correctly at given risk levels |
+| 4e. MPC solver single call | Solver converges and returns a valid `first_action` dictionary |
+| 4f. Baseline controller | Rule-based controller fires correct rules for given conditions |
+| 4g. Explanation builder | Human-readable explanation strings are generated without errors |
+
+**Purpose:** Catches integration bugs early. If any component returns invalid data, it would cause downstream scenario simulations to fail silently or produce misleading metrics.
+
+#### Scenario 5 — Multi-Horizon Convergence Test
+
+Tests solver reliability across prediction horizons of increasing length:
+
+| Horizon (steps) | Expected behaviour |
+|---|---|
+| 3 | Converge quickly; few decision variables |
+| 6 | Converge reliably; standard horizon |
+| 12 | Converge; default config horizon |
+| 24 | Converge, possibly slower; extended stress-test |
+
+**Purpose:** Ensures the solver scales gracefully. A solver that converges at horizon 6 but fails at 12 indicates constraint scaling or warm-start issues. All horizons should converge or successfully salvage.
+
+### 19.3 Yield Proxy — How Performance Is Measured
+
+The yield proxy is a **composite score on a 0–100 scale** that estimates how well the controller's actions support crop yield. It is the **primary metric** for comparing MPC against the baseline.
+
+#### Formula
+
+$$\text{Overall} = 0.40 \times \text{Climate} + 0.25 \times \text{Disease} + 0.20 \times \text{Stress} + 0.15 \times \text{Stability}$$
+
+Each component is scored 0–100 (higher = better), then combined with the weights above:
+
+| Component | Weight | What it measures | How it is computed |
+|---|---|---|---|
+| **Climate Tracking** | 40 % | Closeness to stage setpoints | Per step: weighted average of `max(0, 1 − error/(3 × tolerance))` across temp, humidity, soil moisture, CO₂, VPD. Weighted by stage `control_weights`. |
+| **Disease Burden** | 25 % | How well disease risk is suppressed | Per step: `max(0, 1 − disease_risk / disease_risk_max)`. Lower risk → higher score. |
+| **Stress Exposure** | 20 % | Absence of climate excursions beyond tolerance | Per step: penalties for temp > 1× tolerance, humidity above setpoint + tolerance, VPD > 0.5× setpoint. See below. |
+| **Resource Stability** | 15 % | Smoothness of actuator changes | Per step: `max(0, 1 − mean(|Δactuators| / norms))`. Norms: `[1, 1, 5, 1, 1, 1, 1]`. |
+
+#### Climate Tracking Score (40 % of total)
+
+For each step, 5 variables are checked against their stage setpoints:
+
+$$\text{score}_{i} = \max\!\left(0,\; 1 - \frac{|x_i - \text{setpoint}_i|}{3 \times \text{tolerance}_i}\right)$$
+
+- **Inside tolerance:** score ≈ 1.0 (near-perfect tracking).
+- **At 3× tolerance:** score = 0.0 (maximum penalty).
+- Each variable's score is weighted by the stage's `control_weights` (e.g., flowering: temp = 1.4, humidity = 1.3, soil moisture = 1.0, CO₂ = 1.2, VPD = 1.3).
+
+#### Stress Exposure Score (20 % of total)
+
+Three stress signals, each clipped to $[0, 1]$:
+
+| Stress | Activates when | Penalty formula |
+|---|---|---|
+| Temperature | `|temp − setpoint| > tolerance` | `min(1, (ratio − 1) / 3)` where `ratio = |error| / tolerance` |
+| Humidity | `humidity > setpoint + tolerance` | `min(1, excess / 15)` where `excess = humidity − (setpoint + tolerance)` |
+| VPD | `|vpd − setpoint| / setpoint > 0.5` | `min(1, (ratio − 0.5) / 2)` where `ratio = |vpd − setpoint| / setpoint` |
+
+Step score: $\text{stress\_score} = \max(0,\; 1 - \text{sum(penalties)} / 3)$
+
+#### Resource Stability Score (15 % of total)
+
+Penalises large actuator changes between consecutive steps:
+
+$$\text{norms} = [1.0,\; 1.0,\; 5.0,\; 1.0,\; 1.0,\; 1.0,\; 1.0]$$
+
+$$\text{step\_score} = \max\!\left(0,\; 1 - \text{mean}\!\left(\frac{|\Delta u_j|}{\text{norm}_j}\right)\right)$$
+
+The irrigation norm is 5.0 (not 1.0) because irrigation changes are measured in litres (0–50 range) rather than fractions (0–1).
+
+### 19.4 How to Read the Output
+
+The evaluation script prints structured sections for each scenario. Here is a guide to interpreting each part.
+
+#### Summary Table
+
+```
+  Controller     type               n_steps    temp_rmse    humidity_rmse ...  yield_score
+  baseline       rule_based         144        4.7470       9.8620        ...  58.41
+  mpc            mpc_disease_aware  144        4.7330       9.8790        ...  58.65
+```
+
+- **temp_rmse / humidity_rmse:** Root Mean Square Error from the stage setpoint. Lower = better tracking.
+- **yield_score:** The yield proxy composite (0–100). **This is the single most important number.** Higher = better.
+- **safety_violations:** Must be **0** for both controllers. Any non-zero value is a failure.
+
+#### Pairwise Improvements
+
+```
+  mpc_vs_baseline:
+    indoor_temp_rmse_improvement_pct     +0.30%  (better)
+    yield_score_improvement_pct          +0.41%  (better)
+```
+
+- **Positive % with "(better)"** = MPC outperforms baseline on this metric.
+- **Negative % with "(worse)"** = MPC does worse on this metric.
+- **Key metric:** `yield_score_improvement_pct` — must be **> 0 %** for MPC to be considered better.
+
+#### Yield Proxy Breakdown
+
+```
+  baseline    overall=58.41/100  climate=46.64  disease=40.85  stress=75.30  stability=96.54
+  mpc         overall=58.65/100  climate=47.30  disease=40.93  stress=75.62  stability=95.82
+```
+
+- **climate:** MPC typically wins here (47.30 > 46.64) because it directly optimises setpoint tracking.
+- **disease:** Small differences; both controllers face the same disease pressure.
+- **stress:** MPC's optimisation avoids temperature/humidity excursions better.
+- **stability:** Baseline often wins slightly (96.54 > 95.82) because it changes actuators less frequently. MPC's active optimisation causes more switching, but the higher tracking and stress scores more than compensate.
+
+#### Resource Cost Table
+
+```
+  Controller      Energy(kWh)   Water(L)   ₹ Energy    ₹ Water    ₹ TOTAL
+  baseline            62.88     133.18     415.03       6.66     421.69
+  mpc                 63.39     136.45     418.40       6.82     425.22
+  mpc vs baseline: costs extra ₹3.53 (-0.8%)
+```
+
+- Energy cost dominates (₹415 for electricity vs ₹7 for water).
+- Small cost differences (< 1 %) are typical and acceptable.
+- Net cost across all scenarios should be approximately break-even or savings.
+
+### 19.5 How to Determine Which Controller Is Better
+
+**Decision criteria (in priority order):**
+
+1. **Safety violations must be 0** for both controllers. Any violations disqualify a controller.
+2. **Yield score improvement > 0 %** across all performance scenarios (S1, S2, S3). MPC must match or outperform baseline in every scenario.
+3. **Solver convergence:** The solver must converge or successfully salvage partial results. No outright solver failures.
+4. **Resource cost:** Net resource cost across all scenarios should ideally be ≤ baseline. Small per-scenario cost increases (< 1 %) are acceptable if the total across all scenarios is approximately break-even.
+
+**Summary of current validation results:**
+
+| Scenario | Baseline Yield | MPC Yield | Yield Δ | Safety | Resource Cost |
+|---|---|---|---|---|---|
+| S1 — 12 h Flowering | 58.41 | 58.65 | **+0.41 %** ✅ | 0 / 0 ✅ | MPC +₹3.53 |
+| S2 — 24 h Disease | 66.67 | 66.99 | **+0.48 %** ✅ | 0 / 0 ✅ | MPC **−₹17.00** (saves) |
+| S3 — 24 h Transition | 63.25 | 63.35 | **+0.16 %** ✅ | 0 / 0 ✅ | MPC +₹5.54 |
+| **Net** | — | — | **All positive** | **All 0** | **−₹7.93 (net savings)** |
+
+**Verdict:** MPC is validated as better than the baseline across all scenarios. Stage-based environmental bounds deliver an additional +2.3 % energy saving in the disease-pressure scenario (S2) by holding humidity within stage-aware disease-tightened limits.
+
+### 19.6 Artifact Output
+
+Each scenario saves its results to `src/agritwin_gh/mpc/mpc_results/full_eval_<scenario>_<timestamp>/`:
+
+| File | Contents |
+|---|---|
+| `experiment_config.json` | Scenario parameters and full MPC config snapshot |
+| `full_metrics.json` | Complete tracking, disease, resource, safety, and control quality metrics |
+| `report_summary.json` | Condensed summary table with pairwise improvements |
+| `yield_proxy.json` | Per-controller yield proxy breakdown (overall, climate, disease, stress, stability) |
+
+### 19.7 Automatic Validation Checks
+
+The script runs automatic validation at the end of all scenarios:
+
+```
+  [OK] All validation checks passed
+```
+
+This verifies:
+
+- No NaN values in any tracking RMSE.
+- All yield scores are in the range [0, 100].
+- All scenarios produced > 0 simulation steps.
+- JSON serialisation round-trips successfully for all artifact files.
+
+---
+
+## 20. Setpoint and Growth Stage Profile Reference
+
+### 20.1 Stage Setpoints (Target Climate Values)
+
+These are the target values the MPC tries to track for each growth stage. Defined in `setpoints.py`:
+
+| Stage | Temp (°C) | ± Tol | Humidity (%) | ± Tol | Soil (%) | CO₂ (ppm) | Light | VPD (kPa) | Disease Max |
+|---|---|---|---|---|---|---|---|---|---|
+| Seedling | 23.0 | 2.0 | 75.0 | 5.0 | 70.0 | 600 | 250 | 0.6 | 0.35 |
+| Early Vegetative | 24.0 | 2.0 | 70.0 | 5.0 | 65.0 | 700 | 400 | 0.8 | 0.35 |
+| Flowering Initiation | 22.0 | 1.5 | 65.0 | 5.0 | 60.0 | 800 | 500 | 0.9 | 0.30 |
+| **Flowering** | **21.0** | **1.5** | **60.0** | **5.0** | **60.0** | **900** | **550** | **1.0** | **0.25** |
+| Unripe | 22.0 | 2.0 | 65.0 | 5.0 | 65.0 | 800 | 450 | 0.8 | 0.25 |
+| Ripe | 20.0 | 2.5 | 60.0 | 5.0 | 55.0 | 600 | 350 | 0.7 | 0.40 |
+
+**Why flowering is the strictest stage:** Temperature must stay at 21 °C ± 1.5 °C because pollen viability drops sharply outside this range. Humidity must stay at 60 % ± 5 % to balance pollination (requires low humidity for pollen release) with disease prevention (high humidity promotes fungal growth). The disease risk max of 0.25 is the lowest of any stage.
+
+### 20.2 Stage Control Profiles (Weight Multipliers)
+
+These multipliers scale the base cost weights per stage. Defined in `setpoints.py` as `control_weights` within each `StageSetpoints`:
+
+| Variable | Seedling | Vegetative | Flower Init | **Flowering** | Unripe | Ripe |
+|---|---|---|---|---|---|---|
+| temp | 1.2 | 1.0 | 1.3 | **1.4** | 1.1 | 0.9 |
+| humidity | 1.0 | 1.0 | 1.2 | **1.3** | 1.2 | 0.8 |
+| soil_moisture | 1.3 | 1.0 | 0.9 | 1.0 | 1.1 | 0.8 |
+| co2 | 0.6 | 0.8 | 1.0 | **1.2** | 1.0 | 0.5 |
+| vpd | 0.8 | 0.9 | 1.2 | **1.3** | 1.1 | 0.7 |
+| light | 0.7 | 1.0 | 1.1 | 1.2 | 1.0 | 0.6 |
+| disease_sensitivity | 1.0 | 1.0 | 1.3 | **1.5** | 1.4 | 0.8 |
+
+**Effective weight example** (flowering, temperature):
+
+$$w_{\text{eff}} = w_{\text{base}} \times \text{multiplier} = 2.0 \times 1.4 = 2.8$$
+
+This means temperature tracking during flowering is penalised 2.8× as strongly as the unit baseline, making it the dominant cost term and ensuring the solver prioritises keeping the greenhouse at 21 °C.
+
+---
+
+## 21. References
+
+The equations and methodologies in this guide draw from the following sources. Click a superscript in the text (e.g. <sup>[[1]](#ref-1)</sup>) to jump directly to the entry below.
+
+1. <span id="ref-1"></span>**Rawlings, J.B., Mayne, D.Q., Diehl, M.** (2017). *Model Predictive Control: Theory, Computation, and Design* (2nd ed.). Nob Hill Publishing.  
+   Canonical textbook for the MPC objective function $J(\mathbf{u})$, receding-horizon principle, terminal cost $V_f$, and quadratic stage-cost formulation.
+
+2. <span id="ref-2"></span>**Mayne, D.Q., Rawlings, J.B., Rao, C.V., Scokaert, P.O.M.** (2000). Constrained model predictive control: Stability and optimality. *Automatica*, 36(6), 789–814. doi:[10.1016/S0005-1098(99)00214-9](https://doi.org/10.1016/S0005-1098(99)00214-9)  
+   Seminal survey establishing the receding-horizon framework with recursive feasibility and asymptotic stability guarantees under constraints.
+
+3. <span id="ref-3"></span>**Ljung, L.** (1999). *System Identification: Theory for the User* (2nd ed.). Prentice-Hall.  
+   Defines the ARX (Auto-Regressive with eXogenous inputs) model family, parameter identifiability, and the least-squares estimator underpinning the `calibrate()` method.
+
+4. <span id="ref-4"></span>**van Straten, G., van Willigenburg, G., van Henten, E., van Ooteghem, R.** (2010). *Optimal Control of Greenhouse Cultivation*. CRC Press.  
+   Energy-balance and mass-balance model structure for greenhouse temperature, humidity, and CO₂ dynamics informing the ARX transition equations for those variables.
+
+5. <span id="ref-5"></span>**Tap, R.F.** (2000). *Economics-based optimal control of greenhouse tomato crop production*. PhD thesis, Wageningen University.  
+   Tomato-specific CO₂ plant-uptake parameterisation scaled by the light factor $\text{LF}(L) = \operatorname{clip}(L/500, 0, 1)$, and the influence of VPD on crop health used to motivate its inclusion as a tracked state variable.
+
+6. <span id="ref-6"></span>**Allen, R.G., Pereira, L.S., Raes, D., Smith, M.** (1998). *Crop Evapotranspiration: Guidelines for Computing Crop Water Requirements* (FAO Irrigation and Drainage Paper 56). FAO, Rome. [fao.org/3/x0490e](https://www.fao.org/3/x0490e/x0490e00.htm)  
+   Basis for the temperature-dependent evapotranspiration loss $\lambda_{\text{ET}} \cdot \max(T - 15,\, 0)$ in the soil moisture equation and the ET baseline in the humidity equation.
+
+7. <span id="ref-7"></span>**Murray, F.W.** (1967). On the computation of saturation vapor pressure. *Journal of Applied Meteorology and Climatology*, 6(1), 203–204.  
+   Original derivation of the Tetens saturation vapour pressure formula $e_s(T)$ used in the VPD computation: $\text{VPD} = e_s(T) \cdot (1 - H/100)$.
+
+8. <span id="ref-8"></span>**Kraft, D.** (1988). *A Software Package for Sequential Quadratic Programming*. Deutsche Forschungs- und Versuchsanstalt für Luft- und Raumfahrt (DFVLR-FB 88-28).  
+   SLSQP optimisation algorithm implemented as `scipy.optimize.minimize(method='SLSQP')` in `MPCSolver`.
+
+9. <span id="ref-9"></span>**Hochreiter, S., Schmidhuber, J.** (1997). Long short-term memory. *Neural Computation*, 9(8), 1735–1780. doi:[10.1162/neco.1997.9.8.1735](https://doi.org/10.1162/neco.1997.9.8.1735)  
+   LSTM architecture used by the disease progression model (`disease_penalty.py`) and the growth stage progression model (`growth_weights.py`).

@@ -110,6 +110,67 @@ _STAGE_CROP_SAFETY_OVERRIDES: dict[str, Bounds] = {
 }
 
 
+# ── Stage-dependent environmental overrides ───────────────────────────────────
+# Tighter-than-global bounds per growth stage, derived from agronomic
+# requirements documented in TOMATO_GROWTH_STAGE_CLASSIFICATION.md.
+#
+#   • seedling       — high humidity tolerance, gentle light, min 15 °C.
+#   • early_veg      — slightly reduced humidity, increased light.
+#   • flowering_init — precise temp 18-26 °C, humidity 65-75 %.
+#   • flowering      — most sensitive stage: ≤30 °C hard cap (blossom drop),
+#                       tight humidity for pollen viability.
+#   • unripe         — consistent conditions, moderate humidity.
+#   • ripe           — lower temp preferred, moderate humidity (Botrytis risk).
+#
+# Each dict entry overrides the corresponding key in _BASE_ENVIRONMENTAL.
+# Missing keys inherit the base value.
+
+_STAGE_ENVIRONMENTAL_OVERRIDES: dict[str, Bounds] = {
+    "seedling": {
+        "indoor_temp": (15.0, 33.0),
+        "indoor_humidity": (55.0, 93.0),
+        "co2": (350.0, 1500.0),
+        "soil_moisture": (40.0, 90.0),
+        "light_intensity": (0.0, 800.0),
+    },
+    "early_vegetative": {
+        "indoor_temp": (15.0, 34.0),
+        "indoor_humidity": (50.0, 88.0),
+        "co2": (350.0, 1800.0),
+        "soil_moisture": (30.0, 90.0),
+        "light_intensity": (0.0, 1000.0),
+    },
+    "flowering initiation": {
+        "indoor_temp": (16.0, 30.0),
+        "indoor_humidity": (42.0, 82.0),
+        "co2": (400.0, 1800.0),
+        "soil_moisture": (30.0, 85.0),
+        "light_intensity": (0.0, 1200.0),
+    },
+    "flowering": {
+        "indoor_temp": (14.0, 30.0),
+        "indoor_humidity": (38.0, 83.0),
+        "co2": (400.0, 1800.0),
+        "soil_moisture": (30.0, 85.0),
+        "light_intensity": (0.0, 1200.0),
+    },
+    "unripe": {
+        "indoor_temp": (16.0, 34.0),
+        "indoor_humidity": (45.0, 88.0),
+        "co2": (350.0, 1800.0),
+        "soil_moisture": (35.0, 90.0),
+        "light_intensity": (0.0, 1100.0),
+    },
+    "ripe": {
+        "indoor_temp": (14.0, 33.0),
+        "indoor_humidity": (38.0, 85.0),
+        "co2": (300.0, 1500.0),
+        "soil_moisture": (25.0, 85.0),
+        "light_intensity": (0.0, 1000.0),
+    },
+}
+
+
 def get_default_constraints(stage_name: str | None = None) -> ConstraintSet:
     """Return the default ``ConstraintSet``, optionally tightened for *stage_name*.
 
@@ -136,6 +197,9 @@ def get_default_constraints(stage_name: str | None = None) -> ConstraintSet:
             )
         overrides = _STAGE_CROP_SAFETY_OVERRIDES.get(stage_name, {})
         cs.crop_safety.update(overrides)
+
+        env_overrides = _STAGE_ENVIRONMENTAL_OVERRIDES.get(stage_name, {})
+        cs.environmental.update(env_overrides)
 
     return cs
 

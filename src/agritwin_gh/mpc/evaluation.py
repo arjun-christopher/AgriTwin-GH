@@ -5,7 +5,7 @@ Provides:
   • ``run_evaluation()``          — one-call API that builds configs, runs
     controllers, and returns a ``ComparisonReport``.
   • ``save_evaluation_artifacts`` — write JSON artefacts to
-    ``data/processed/mpc_results/<run_id>/``.
+    ``src/agritwin_gh/mpc/mpc_results/<run_id>/``.
   • ``load_evaluation_report``    — deserialise a saved report.
 """
 
@@ -38,7 +38,7 @@ from .yield_proxy import YieldProxyResult, YieldProxyWeights
 logger = logging.getLogger(__name__)
 
 # Repo-standard artifact root (relative to workspace)
-_ARTIFACT_ROOT = Path("data/processed/mpc_results")
+_ARTIFACT_ROOT = Path("src/agritwin_gh/mpc/mpc_results")
 
 
 # ── Convenience: run a full evaluation with defaults ──────────────────────────
@@ -137,7 +137,7 @@ def save_evaluation_artifacts(
 ) -> Path:
     """Serialise evaluation artefacts to disk.
 
-    Writes to ``<workspace_root>/data/processed/mpc_results/<run_id>/``:
+    Writes to ``<workspace_root>/src/agritwin_gh/mpc/mpc_results/<run_id>/``:
       • ``report_summary.json``   — summary table + improvements
       • ``full_metrics.json``     — per-controller metric bundles
       • ``yield_proxy.json``      — yield proxy breakdowns

@@ -476,6 +476,7 @@ def make_mpc_adapter(
     solver: Any | None = None,
     config: Any | None = None,
     weather_lookahead: int = 12,
+    weather_sequence: list[WeatherState] | None = None,
 ) -> ControllerCallable:
     """Wrap an ``MPCSolver`` into the ``ControllerCallable`` protocol.
 
@@ -490,12 +491,38 @@ def make_mpc_adapter(
         Used only when *solver* is ``None``.
     weather_lookahead : int
         Number of weather steps passed to the solver per call.
+    weather_sequence : list[WeatherState] or None
+        Full weather forecast.  When provided, the adapter slices a
+        lookahead window starting at the current *step_index* so the
+        solver sees upcoming weather transitions.
     """
     if solver is None:
         from .config import MPCConfig
         from .mpc_solver import MPCSolver
         _cfg = config or MPCConfig()
         solver = MPCSolver(_cfg)
+
+    # ── Safety filter: predict-then-check with baseline fallback ──────
+    from .greenhouse_model import GreenhouseTransitionModel
+    from .baseline_controller import RuleBasedController
+    from .constraints import get_default_constraints
+
+    _safety_model = GreenhouseTransitionModel()
+    _baseline = RuleBasedController(constraints=get_default_constraints())
+
+    # Tighter bounds with ~5 % margin inside the evaluation safety bounds
+    _filter_bounds: dict[str, tuple[float, float]] = {
+        "indoor_temp": (11.4, 36.6),
+        "indoor_humidity": (28.5, 91.2),
+        "vpd": (0.385, 1.9),
+        "co2": (287.5, 2375.0),
+        "soil_moisture": (19.0, 91.2),
+    }
+
+    # Convert weather_sequence to dicts once for fast slicing
+    _weather_dicts: list[dict[str, Any]] | None = None
+    if weather_sequence:
+        _weather_dicts = [w.to_dict() for w in weather_sequence]
 
     def _adapter(
         state: GreenhouseState,
@@ -517,12 +544,55 @@ def make_mpc_adapter(
             disease_confidence=0.8,
         )
 
+        # Build weather forecast: lookahead window when full sequence available
+        if _weather_dicts is not None:
+            wf = _weather_dicts[step_index: step_index + weather_lookahead]
+            if not wf:
+                wf = [weather.to_dict()]
+        else:
+            wf = [weather.to_dict()]
+
         solution = solver.solve(
             fused=fused,
-            weather_forecast=[weather.to_dict()],
+            weather_forecast=wf,
             previous_control=prev_actuators,
         )
-        return solution.first_action
+        action = solution.first_action
+
+        # ── Safety filter: simulate one step, check bounds ────────────
+        _w_d = weather.to_dict()
+        predicted = _safety_model.step(state, action, _w_d)
+        safe = True
+        for var, (lo, hi) in _filter_bounds.items():
+            val = getattr(predicted, var, 0.0)
+            if val < lo or val > hi:
+                safe = False
+                break
+
+        if not safe:
+            bl_result = _baseline.compute_action(
+                state, growth_stage, disease_risk=disease_risk,
+            )
+            action = bl_result.actuators
+
+        # ── Dead-band filter: snap small changes to previous action ───
+        # Reduces unnecessary switching → improves yield proxy stability
+        # score without harming tracking for meaningful adjustments.
+        # CO2 valve excluded — frequent small adjustments needed for tracking.
+        if prev_actuators is not None:
+            _db = {
+                'fan_speed': 0.08, 'vent_opening': 0.08,
+                'irrigation_qty': 2.0, 'heater_output': 0.08,
+                'led_intensity': 0.08,
+                'fogger_duty': 0.08,
+            }
+            for attr, threshold in _db.items():
+                cur = getattr(action, attr, 0.0)
+                prev = getattr(prev_actuators, attr, 0.0)
+                if abs(cur - prev) < threshold:
+                    setattr(action, attr, prev)
+
+        return action
 
     return _adapter  # type: ignore[return-value]
 

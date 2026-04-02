@@ -1,0 +1,48 @@
+{
+  "run_id": "full_eval_scenario_2_disease_20260402_151649",
+  "generated_at": "2026-04-02T15:14:53.641767",
+  "summary_table": {
+    "baseline": {
+      "type": "rule_based",
+      "n_steps": 288,
+      "temp_rmse": 3.559,
+      "humidity_rmse": 6.976,
+      "soil_moisture_rmse": 5.025,
+      "disease_risk_mean": 0.1657,
+      "disease_risk_max": 0.9301,
+      "total_water_l": 243.57,
+      "total_energy_kwh": 111.0494,
+      "mean_smoothness": 0.2359,
+      "safety_violations": 0,
+      "yield_score": 66.67
+    },
+    "mpc_disease": {
+      "type": "mpc_disease_aware",
+      "n_steps": 288,
+      "temp_rmse": 3.504,
+      "humidity_rmse": 7.205,
+      "soil_moisture_rmse": 4.399,
+      "disease_risk_mean": 0.1665,
+      "disease_risk_max": 0.9301,
+      "total_water_l": 244.51,
+      "total_energy_kwh": 108.4665,
+      "mean_smoothness": 0.2535,
+      "safety_violations": 0,
+      "yield_score": 66.99
+    }
+  },
+  "improvements": {
+    "mpc_disease_vs_baseline": {
+      "indoor_temp_rmse_improvement_pct": 1.56,
+      "indoor_humidity_rmse_improvement_pct": -3.28,
+      "soil_moisture_rmse_improvement_pct": 12.45,
+      "co2_rmse_improvement_pct": 17.05,
+      "vpd_rmse_improvement_pct": 0.3,
+      "disease_risk_mean_improvement_pct": -0.51,
+      "water_savings_pct": -0.39,
+      "energy_savings_pct": 2.33,
+      "smoothness_improvement_pct": -7.46,
+      "yield_score_improvement_pct": 0.48
+    }
+  }
+}

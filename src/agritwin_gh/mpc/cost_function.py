@@ -55,6 +55,7 @@ from typing import Any
 import numpy as np
 
 from .config import MPCConfig
+from .constraints import get_default_constraints
 from .constants import CONTROL_VARIABLES, STATE_VARIABLES, sigmoid
 from .setpoints import (
     StageControlProfile,
@@ -99,12 +100,12 @@ def _normalisation_scales() -> np.ndarray:
     """Per-variable normalisation denominators to make quadratic terms
     dimensionally comparable (order ``STATE_VARIABLES``)."""
     scales = np.ones(len(STATE_VARIABLES), dtype=np.float64)
-    scales[_STATE_IDX["indoor_temp"]] = 10.0        # °C
-    scales[_STATE_IDX["indoor_humidity"]] = 20.0     # %RH
-    scales[_STATE_IDX["soil_moisture"]] = 20.0       # %
-    scales[_STATE_IDX["co2"]] = 300.0                # ppm
+    scales[_STATE_IDX["indoor_temp"]] = 5.0         # °C
+    scales[_STATE_IDX["indoor_humidity"]] = 10.0     # %RH
+    scales[_STATE_IDX["soil_moisture"]] = 10.0       # %
+    scales[_STATE_IDX["co2"]] = 150.0                # ppm
     scales[_STATE_IDX["light_intensity"]] = 200.0    # W/m²
-    scales[_STATE_IDX["vpd"]] = 0.5                  # kPa
+    scales[_STATE_IDX["vpd"]] = 0.3                  # kPa
     scales[_STATE_IDX["disease_risk_score"]] = 0.3   # unitless
     scales[_STATE_IDX["leaf_wetness_proxy"]] = 0.3   # unitless
     scales[_STATE_IDX["growth_stage_index"]] = 1.0   # not penalised
@@ -204,6 +205,42 @@ def _compute_env_disease_risk(state: np.ndarray) -> float:
 # ── Stage cost ────────────────────────────────────────────────────────────────
 
 
+# Variables penalised by the environmental-bounds barrier.
+_ENV_BOUND_VARS: list[str] = [
+    "indoor_temp",
+    "indoor_humidity",
+    "co2",
+    "soil_moisture",
+    "light_intensity",
+]
+
+
+def _env_bounds_penalty(
+    state: np.ndarray,
+    env_bounds: dict[str, tuple[float, float]],
+    scales: np.ndarray,
+) -> float:
+    """Quadratic penalty for predicted state outside stage environmental bounds.
+
+    Returns 0 when all tracked variables are within ``[lo, hi]``.
+    When a variable exceeds a bound, the penalty grows as
+    ``((violation) / normalisation_scale)²``.
+    """
+    penalty = 0.0
+    for var in _ENV_BOUND_VARS:
+        if var not in env_bounds or var not in _STATE_IDX:
+            continue
+        lo, hi = env_bounds[var]
+        idx = _STATE_IDX[var]
+        val = state[idx]
+        s = scales[idx]
+        if val < lo:
+            penalty += ((lo - val) / s) ** 2
+        elif val > hi:
+            penalty += ((val - hi) / s) ** 2
+    return penalty
+
+
 class StageCost:
     """Per-timestep quadratic tracking cost with disease-aware extensions.
 
@@ -262,6 +299,19 @@ class StageCost:
         self._w_energy = base_weights["w_energy"] * profile.resource_priority.get("energy", 1.0)
         self._w_water = base_weights["w_water"] * profile.resource_priority.get("water", 1.0)
         self._w_switch = base_weights["w_switch"]
+
+        # ── Stress penalty (matches yield-proxy stress score) ─────────
+        self._sp_temp = sp.temp
+        self._sp_temp_tol = max(sp.temp_tol, 0.5)
+        self._sp_hum = sp.humidity
+        self._sp_hum_tol = max(sp.hum_tol, 1.0)
+        self._sp_vpd = sp.vpd
+        self._w_stress = 1.5  # weight for stress-excursion penalty
+
+        # ── Environmental bounds penalty ──────────────────────────────
+        cs = get_default_constraints(growth_stage)
+        self._env_bounds = cs.environmental
+        self._w_env_bounds = 0.5  # weight for env-bounds barrier
 
         self._energy_costs = energy_costs or {
             "fan_speed": 0.15,
@@ -339,7 +389,32 @@ class StageCost:
         )
         water_cost = self._w_water * water
 
-        # ── Switching cost ────────────────────────────────────────────
+        # ── Stress-excursion penalty ──────────────────────────────────
+        # Penalise states outside tolerance bands (matches yield proxy
+        # _stress_step_score).  Activates only when error exceeds 1×tol.
+        stress_penalty = 0.0
+        temp_val = state[_STATE_IDX["indoor_temp"]]
+        temp_err = abs(temp_val - self._sp_temp) / self._sp_temp_tol
+        if temp_err > 1.0:
+            stress_penalty += min(1.0, (temp_err - 1.0) / 3.0)
+
+        hum_val = state[_STATE_IDX["indoor_humidity"]]
+        hum_excess = max(0.0, hum_val - (self._sp_hum + self._sp_hum_tol))
+        stress_penalty += min(1.0, hum_excess / 15.0)
+
+        vpd_val = state[_STATE_IDX["vpd"]]
+        vpd_err = abs(vpd_val - self._sp_vpd) / max(self._sp_vpd, 0.3)
+        if vpd_err > 0.5:
+            stress_penalty += min(1.0, (vpd_err - 0.5) / 2.0)
+
+        stress_cost = self._w_stress * stress_penalty
+
+        # ── Environmental bounds barrier ─────────────────────────────
+        env_cost = self._w_env_bounds * _env_bounds_penalty(
+            state, self._env_bounds, self._scales,
+        )
+
+        # ── Switching cost ───────────────────────────────────────────
         switch_cost = 0.0
         if prev_control is not None:
             delta = control - prev_control
@@ -353,6 +428,8 @@ class StageCost:
             + irr_caution
             + energy_cost
             + water_cost
+            + stress_cost
+            + env_cost
             + switch_cost
         )
 
@@ -395,6 +472,11 @@ class TerminalCost:
         sev_amp = 1.0 + config.w_severity_amplification * (dc.severity_amplifier - 1.0)
         self._w_disease = base_weights["w_disease"] * profile.disease_sensitivity * sev_amp
 
+        # Environmental bounds penalty (same as StageCost)
+        cs = get_default_constraints(growth_stage)
+        self._env_bounds = cs.environmental
+        self._w_env_bounds = 0.5
+
     def evaluate(self, state: np.ndarray) -> float:
         """Compute scalar terminal cost for final predicted state."""
         err = (state - self._ref) / self._scales
@@ -403,7 +485,11 @@ class TerminalCost:
         predicted_risk = _compute_env_disease_risk(state)
         disease_penalty = self._w_disease * predicted_risk ** 2
 
-        return self._multiplier * (tracking + disease_penalty)
+        env_penalty = self._w_env_bounds * _env_bounds_penalty(
+            state, self._env_bounds, self._scales,
+        )
+
+        return self._multiplier * (tracking + disease_penalty + env_penalty)
 
 
 # ── Cost builder ──────────────────────────────────────────────────────────────

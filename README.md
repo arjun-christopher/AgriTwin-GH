@@ -82,6 +82,13 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 - **Disease Progression Model** — Baseline + LSTM/GRU progression workflow on hourly greenhouse sensor time-series; predicts per-disease current presence, 24h infection severity, and 24h trend labels (absent, emerging, reducing, stable, worsening) → [Disease Progression Model](docs/TOMATO_DISEASE_PROGRESSION_MODEL.md)
 - **Greenhouse Weather Forecast Model** — Chronos time-series foundation model + XGBoost + LSTM ensemble for 24h/48h indoor climate forecasting, feeding the digital twin and control policies → [Weather Forecast Model](docs/WEATHER_FORECAST_MODEL.md)
 
+## 🎮 Model Predictive Control (MPC)
+
+- **MPC Module** — Receding-horizon SLSQP optimisation over a 12-hour prediction window; integrates growth stage detection, disease risk scoring, and weather forecasts to compute optimal actuator actions every 5 minutes
+- **Stage-Aware Constraints** — Dynamically adjusts environmental bounds (temperature, humidity, CO₂) based on detected growth stage and disease risk, with soft penalty-based enforcement
+- **Cost Function** — Nine-term objective balancing setpoint tracking, disease suppression, humidity exposure, energy costs, water costs, and actuator efficiency
+- **Comparison Framework** — Evaluated against a rule-based baseline controller; all three scenarios (standard, disease-pressure, stage-transition) show positive yield improvement and reduced resource costs → [MPC Complete Guide](docs/MPC_COMPLETE_GUIDE.md)
+
 ## 🛠️ Technology Stack
 
 - **Python 3.8+** · **UV** (package manager)
@@ -123,6 +130,7 @@ jupyter notebook feature_demos/
 | [Growth Progression Model](docs/TOMATO_GROWTH_PROGRESSION_MODEL.md) | Multi-task LSTM for stage transition forecasting from sensor time-series |
 | [Disease Progression Model](docs/TOMATO_DISEASE_PROGRESSION_MODEL.md) | Baseline + LSTM/GRU disease progression forecasting for per-disease presence, 24h severity, and 24h trend labels |
 | [Weather Forecast Model](docs/WEATHER_FORECAST_MODEL.md) | Chronos + XGBoost + LSTM ensemble for 24h/48h greenhouse climate forecasting |
+| [MPC Complete Guide](docs/MPC_COMPLETE_GUIDE.md) | Model predictive control module: solver tuning, constraint strategy, cost function design, and end-to-end evaluation |
 | [Deployment Guide](docs/DOCS_DEPLOYMENT.md) | MkDocs documentation site setup |
 
 **[📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)**

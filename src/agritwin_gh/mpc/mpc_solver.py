@@ -259,9 +259,12 @@ class MPCSolver:
         bounds = self._build_bounds(N, constraints)
         rate_constraints = self._build_rate_constraints(N, u_prev, constraints)
 
-        # Warm-start from baseline controller
-        u_init = self._warm_start(x0, growth_stage, fused.disease_risk_score,
-                                   weather_seq, N)
+        # Warm-start from baseline controller, clipped to satisfy rate constraints
+        u_init = self._warm_start(
+            x0, growth_stage, fused.disease_risk_score,
+            weather_seq, N,
+        )
+        u_init = self._clip_to_rate_limits(u_init, u_prev, constraints)
 
         # Objective wrapper (closure over model, cost, weather)
         eval_count = [0]
@@ -303,13 +306,31 @@ class MPCSolver:
             )
 
         if not converged:
-            logger.warning(
-                "MPC solver did not converge (%s) — using fallback", solver_status
-            )
-            return self._fallback_solution(
-                x0, growth_stage, fused, weather_seq, N,
-                solve_ms, solver_status, eval_count[0],
-            )
+            # Try to salvage non-converged result if it still improves
+            # over the warm-start (baseline) cost.
+            use_nc = False
+            if np.all(np.isfinite(result.x)):
+                u_nc = result.x.reshape(N, N_U)
+                u_nc = self._clip_to_rate_limits(u_nc, u_prev, constraints)
+                nc_cost = objective(u_nc.ravel())
+                init_cost = objective(u_init.ravel())
+                if nc_cost < init_cost:
+                    u_opt = u_nc
+                    use_nc = True
+                    logger.info(
+                        "Non-converged result improves cost (%.4f → %.4f) "
+                        "— using clipped result",
+                        init_cost, nc_cost,
+                    )
+            if not use_nc:
+                logger.warning(
+                    "MPC solver did not converge (%s) — using fallback",
+                    solver_status,
+                )
+                return self._fallback_solution(
+                    x0, growth_stage, fused, weather_seq, N,
+                    solve_ms, solver_status, eval_count[0],
+                )
 
         # ── Unpack solution ───────────────────────────────────────────
         optimal_controls = [ActuatorState.from_numpy(u_opt[k]) for k in range(N)]
@@ -442,8 +463,12 @@ class MPCSolver:
         Encoded as scipy 'ineq' constraints:  c(u) ≥ 0.
         """
         rate_limits = constraints.actuator_rate_limits
-        rate_lo = np.array([rate_limits.get(n, (-1.0, 1.0))[0] for n in CONTROL_VARIABLES])
-        rate_hi = np.array([rate_limits.get(n, (-1.0, 1.0))[1] for n in CONTROL_VARIABLES])
+        # Add 10% slack to the constraint formulation so the warm-start
+        # (clipped to exact limits) lies strictly inside the feasible
+        # region, preventing SLSQP "Inequality constraints incompatible".
+        _SLACK = 1.05
+        rate_lo = np.array([rate_limits.get(n, (-1.0, 1.0))[0] * _SLACK for n in CONTROL_VARIABLES])
+        rate_hi = np.array([rate_limits.get(n, (-1.0, 1.0))[1] * _SLACK for n in CONTROL_VARIABLES])
 
         def rate_constraint(u_flat: np.ndarray) -> np.ndarray:
             U = u_flat.reshape(N, N_U)
@@ -488,6 +513,36 @@ class MPCSolver:
         return wf[:N]
 
     # ── Warm start ────────────────────────────────────────────────────
+
+    @staticmethod
+    def _clip_to_rate_limits(
+        U: np.ndarray,
+        u_prev: np.ndarray,
+        constraints: ConstraintSet,
+    ) -> np.ndarray:
+        """Clip warm-start control sequence so it satisfies rate constraints.
+
+        Ensures the initial point passed to the optimizer is feasible with
+        respect to both box bounds and rate-of-change limits, preventing
+        SLSQP from starting with an infeasible iterate.
+        """
+        N, Nu = U.shape
+        rate_limits = constraints.actuator_rate_limits
+        act_bounds = constraints.actuator_bounds
+        rate_lo = np.array([rate_limits.get(n, (-1.0, 1.0))[0] for n in CONTROL_VARIABLES])
+        rate_hi = np.array([rate_limits.get(n, (-1.0, 1.0))[1] for n in CONTROL_VARIABLES])
+        box_lo = np.array([act_bounds.get(n, (0.0, 1.0))[0] for n in CONTROL_VARIABLES])
+        box_hi = np.array([act_bounds.get(n, (0.0, 1.0))[1] for n in CONTROL_VARIABLES])
+
+        U_clipped = U.copy()
+        prev = u_prev.copy()
+        for k in range(N):
+            # Clamp to rate limits relative to previous step
+            lo = np.maximum(prev + rate_lo, box_lo)
+            hi = np.minimum(prev + rate_hi, box_hi)
+            U_clipped[k] = np.clip(U_clipped[k], lo, hi)
+            prev = U_clipped[k]
+        return U_clipped
 
     def _warm_start(
         self,
