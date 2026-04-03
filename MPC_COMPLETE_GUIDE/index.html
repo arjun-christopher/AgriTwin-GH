@@ -1860,6 +1860,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#teststest_db_ai_mpc_pipelinepy-end-to-end-db-ai-models-mpc-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        tests/test_db_ai_mpc_pipeline.py — End-to-End DB → AI Models → MPC Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#future-unit-tests-not-yet-implemented" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5356,14 +5367,15 @@ requiring a full biophysical crop model.</p>
 <hr />
 <h2 id="11-test-scripts">11. Test Scripts<a class="headerlink" href="#11-test-scripts" title="Permanent link">&para;</a></h2>
 <blockquote>
-<p><strong>Current status</strong>: Formal pytest unit test files (<code>test_state.py</code>, <code>test_greenhouse_model.py</code>, etc.) are <strong>not yet implemented</strong> — they are planned for a future phase. The three smoke test scripts listed below are the tests that actually exist and pass right now. Each covers a major subsystem end-to-end without a live database.</p>
+<p><strong>Current status</strong>: Formal pytest unit test files (<code>test_state.py</code>, <code>test_greenhouse_model.py</code>, etc.) are <strong>not yet implemented</strong> — they are planned for a future phase. The four smoke test scripts listed below are the tests that actually exist and pass right now. Three cover individual subsystems end-to-end without a live database; the fourth (<code>test_db_ai_mpc_pipeline.py</code>) verifies the full DB → AI models → MPC data flow end-to-end.</p>
 </blockquote>
 <h3 id="how-to-run-the-smoke-tests">How to run the smoke tests<a class="headerlink" href="#how-to-run-the-smoke-tests" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a><span class="c"># Set PYTHONPATH and run all three</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a><span class="c"># Set PYTHONPATH and run all four</span>
 <a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a><span class="nv">$env:PYTHONPATH</span> <span class="p">=</span> <span class="s2">&quot;e:\AgriTwin-GH\src&quot;</span>
 <a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a><span class="n">python</span> <span class="n">tests</span><span class="p">/</span><span class="n">smoke_intelligent_mpc</span><span class="p">.</span><span class="n">py</span>
 <a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a><span class="n">python</span> <span class="n">tests</span><span class="p">/</span><span class="n">smoke_test_dt_handoff</span><span class="p">.</span><span class="n">py</span>
 <a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a><span class="n">python</span> <span class="n">tests</span><span class="p">/</span><span class="n">test_evaluation_smoke</span><span class="p">.</span><span class="n">py</span>
+<a id="__codelineno-58-6" name="__codelineno-58-6" href="#__codelineno-58-6"></a><span class="n">uv</span> <span class="n">run</span> <span class="n">python</span> <span class="n">tests</span><span class="p">/</span><span class="n">test_db_ai_mpc_pipeline</span><span class="p">.</span><span class="n">py</span>
 </code></pre></div>
 <hr />
 <h3 id="testssmoke_intelligent_mpcpy-intelligent-mpc-disease-weather-stage-blending"><code>tests/smoke_intelligent_mpc.py</code> — Intelligent MPC (disease + weather + stage blending)<a class="headerlink" href="#testssmoke_intelligent_mpcpy-intelligent-mpc-disease-weather-stage-blending" title="Permanent link">&para;</a></h3>
@@ -5494,6 +5506,141 @@ requiring a full biophysical crop model.</p>
 <a id="__codelineno-64-17" name="__codelineno-64-17" href="#__codelineno-64-17"></a>=== ALL SMOKE TESTS PASSED ===
 </code></pre></div>
 <hr />
+<h3 id="teststest_db_ai_mpc_pipelinepy-end-to-end-db-ai-models-mpc-pipeline"><code>tests/test_db_ai_mpc_pipeline.py</code> — End-to-End DB → AI Models → MPC Pipeline<a class="headerlink" href="#teststest_db_ai_mpc_pipelinepy-end-to-end-db-ai-models-mpc-pipeline" title="Permanent link">&para;</a></h3>
+<p><strong>What it tests:</strong></p>
+<p>Verifies the full documented data flow from database queries through every AI model layer to a converged <code>MPCSolution</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Subsystem</th>
+<th>Verified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>DB connection (<code>SQLAlchemy</code> / <code>psycopg2</code>)</td>
+<td>Live or graceful skip</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>MPCInputPreparation</code> — four DB query methods</td>
+<td>Row counts, column presence</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>WeatherDisturbanceForecast.get_forecast()</code></td>
+<td>576 5-min steps, expected keys, Chronos + XGBoost + LSTM ensemble</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>DiseaseRiskPenalty.predict_all_diseases()</code></td>
+<td>Returns <code>DiseaseProgressionOutput</code> (Keras LSTM, 5 diseases)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>GrowthStageWeights.predict_from_dataframe()</code></td>
+<td>Returns <code>GrowthProgressionOutput</code> (Keras LSTM, multi-task)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>StateFusion.fuse()</code></td>
+<td>Assembles <code>FusedState</code> from all AI model outputs + DB row</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>MPCSolver.solve()</code></td>
+<td>Returns converged <code>MPCSolution</code> with <code>first_action</code> actuators</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Design:</strong></p>
+<ul>
+<li>DB unavailability is handled gracefully — each AI model step runs with synthetic / empty fallback data so the pipeline checks complete even without a live PostgreSQL connection.</li>
+<li>No results are saved anywhere.</li>
+<li>Steps are individually try/except'd with <code>[PASS]</code> / <code>[FAIL]</code> / <code>[SKIP]</code> / <code>[INFO]</code> markers for easy diagnosis.</li>
+</ul>
+<p><strong>Run command:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a><span class="n">uv</span> <span class="n">run</span> <span class="n">python</span> <span class="n">tests</span><span class="p">/</span><span class="n">test_db_ai_mpc_pipeline</span><span class="p">.</span><span class="n">py</span>
+</code></pre></div>
+<p><strong>Expected output (DB offline):</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>STEP 1 — DB Connection
+<a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>[ SKIP ] DB unavailable — AI model checks will use synthetic / empty fallback
+<a id="__codelineno-66-3" name="__codelineno-66-3" href="#__codelineno-66-3"></a>
+<a id="__codelineno-66-4" name="__codelineno-66-4" href="#__codelineno-66-4"></a>STEP 2 — MPCInputPreparation (DB → raw DataFrames)
+<a id="__codelineno-66-5" name="__codelineno-66-5" href="#__codelineno-66-5"></a>[ SKIP ] All MPCInputPreparation checks skipped (no DB)
+<a id="__codelineno-66-6" name="__codelineno-66-6" href="#__codelineno-66-6"></a>
+<a id="__codelineno-66-7" name="__codelineno-66-7" href="#__codelineno-66-7"></a>STEP 3 — WeatherDisturbanceForecast  (DB weather → disturbance steps)
+<a id="__codelineno-66-8" name="__codelineno-66-8" href="#__codelineno-66-8"></a>[ PASS ] get_forecast → 576 5-min steps | keys: [&#39;humidity&#39;, &#39;offset_hours&#39;, &#39;solarradiation&#39;, &#39;temp&#39;, &#39;windspeed&#39;]
+<a id="__codelineno-66-9" name="__codelineno-66-9" href="#__codelineno-66-9"></a>[ PASS ] All expected forecast keys present in each step
+<a id="__codelineno-66-10" name="__codelineno-66-10" href="#__codelineno-66-10"></a>
+<a id="__codelineno-66-11" name="__codelineno-66-11" href="#__codelineno-66-11"></a>STEP 4 — DiseaseRiskPenalty  (DB disease context → severity dicts)
+<a id="__codelineno-66-12" name="__codelineno-66-12" href="#__codelineno-66-12"></a>[ SKIP ] No disease DB data — testing graceful empty-DataFrame path
+<a id="__codelineno-66-13" name="__codelineno-66-13" href="#__codelineno-66-13"></a>[ PASS ] predict_all_diseases returned DiseaseProgressionOutput
+<a id="__codelineno-66-14" name="__codelineno-66-14" href="#__codelineno-66-14"></a>
+<a id="__codelineno-66-15" name="__codelineno-66-15" href="#__codelineno-66-15"></a>STEP 5 — GrowthStageWeights  (DB growth context → GrowthProgressionOutput)
+<a id="__codelineno-66-16" name="__codelineno-66-16" href="#__codelineno-66-16"></a>[ SKIP ] No growth DB data — testing graceful empty-DataFrame path
+<a id="__codelineno-66-17" name="__codelineno-66-17" href="#__codelineno-66-17"></a>[ PASS ] predict_from_dataframe returned GrowthProgressionOutput
+<a id="__codelineno-66-18" name="__codelineno-66-18" href="#__codelineno-66-18"></a>
+<a id="__codelineno-66-19" name="__codelineno-66-19" href="#__codelineno-66-19"></a>STEP 6 — StateFusion.fuse()  (AI model outputs → FusedState)
+<a id="__codelineno-66-20" name="__codelineno-66-20" href="#__codelineno-66-20"></a>[ PASS ] StateFusion.fuse() returned valid FusedState
+<a id="__codelineno-66-21" name="__codelineno-66-21" href="#__codelineno-66-21"></a>         growth_stage = &#39;seedling&#39; | disease_risk_score = 0.015
+<a id="__codelineno-66-22" name="__codelineno-66-22" href="#__codelineno-66-22"></a>[ PASS ] FusedState.growth_stage resolved (from GrowthStageWeights or fallback)
+<a id="__codelineno-66-23" name="__codelineno-66-23" href="#__codelineno-66-23"></a>
+<a id="__codelineno-66-24" name="__codelineno-66-24" href="#__codelineno-66-24"></a>STEP 7 — MPCSolver.solve()  (FusedState → MPCSolution)
+<a id="__codelineno-66-25" name="__codelineno-66-25" href="#__codelineno-66-25"></a>[ PASS ] MPCSolver.solve() returned MPCSolution
+<a id="__codelineno-66-26" name="__codelineno-66-26" href="#__codelineno-66-26"></a>         converged = True | total_cost = 769.1505
+<a id="__codelineno-66-27" name="__codelineno-66-27" href="#__codelineno-66-27"></a>         first_action -&gt; fan=0.00  vent=0.00  irr=5.00  heat=0.25  led=0.20
+<a id="__codelineno-66-28" name="__codelineno-66-28" href="#__codelineno-66-28"></a>[ PASS ] Solver converged → MPC solution is usable
+<a id="__codelineno-66-29" name="__codelineno-66-29" href="#__codelineno-66-29"></a>
+<a id="__codelineno-66-30" name="__codelineno-66-30" href="#__codelineno-66-30"></a>PIPELINE CHECK COMPLETE
+<a id="__codelineno-66-31" name="__codelineno-66-31" href="#__codelineno-66-31"></a>DB was OFFLINE — AI model checks ran with synthetic / empty fallback data.
+<a id="__codelineno-66-32" name="__codelineno-66-32" href="#__codelineno-66-32"></a>No results saved.
+</code></pre></div>
+<p><strong>Bugs discovered and fixed while writing this test:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Bug</th>
+<th>Fix applied</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>environment_forecast_loader.py</code></td>
+<td><code>torch.load</code> blocked sklearn objects (PyTorch 2.6 changed <code>weights_only</code> default)</td>
+<td><code>weights_only=False</code></td>
+</tr>
+<tr>
+<td><code>environment_forecast_loader.py</code></td>
+<td>LSTM instantiated with global <code>pred_len=2</code> but each bundled model has <code>pred_len=1</code></td>
+<td>Infer from <code>state["head.weight"].shape[0]</code></td>
+</tr>
+<tr>
+<td><code>environment_forecast_loader.py</code></td>
+<td>LSTM state-dict keys are <code>('col', horizon_int)</code> tuples; loader stored/looked up by string</td>
+<td>Preserve tuple keys throughout load + predict</td>
+</tr>
+<tr>
+<td><code>environment_forecast_loader.py</code></td>
+<td><code>predict()</code> passed all 140 features to scaler expecting 132</td>
+<td>Split: scale 132 base features; concatenate 8 Chronos meta-features unscaled</td>
+</tr>
+<tr>
+<td><code>environment_forecast_loader.py</code></td>
+<td><code>predict()</code> received raw DB columns and failed (no feature engineering)</td>
+<td>Added <code>_engineer_features()</code> method; called automatically when raw data is detected</td>
+</tr>
+<tr>
+<td><code>growth_weights.py</code></td>
+<td><code>_engineer_features()</code> called on empty DataFrame → <code>KeyError('timestamp')</code></td>
+<td>Early-exit guard before feature engineering</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h3 id="future-unit-tests-not-yet-implemented">Future unit tests (not yet implemented)<a class="headerlink" href="#future-unit-tests-not-yet-implemented" title="Permanent link">&para;</a></h3>
 <p>The following pytest unit test files are planned. They will exercise individual components in isolation using mocks and synthetic data, without requiring a database or MinIO instance.</p>
 <table>
@@ -5551,54 +5698,54 @@ requiring a full biophysical crop model.</p>
 <h2 id="12-artifact-logging-strategy">12. Artifact &amp; Logging Strategy<a class="headerlink" href="#12-artifact-logging-strategy" title="Permanent link">&para;</a></h2>
 <h3 id="run-id-convention">Run ID convention<a class="headerlink" href="#run-id-convention" title="Permanent link">&para;</a></h3>
 <p>Every MPC run is identified by:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a>mpc_&lt;YYYYMMDD&gt;_&lt;HHMMSS&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>mpc_&lt;YYYYMMDD&gt;_&lt;HHMMSS&gt;
 </code></pre></div>
 Example: <code>mpc_20260330_143022</code></p>
 <p>This mirrors the existing repo convention (<code>disease_20260226_141843</code>, <code>growth_stage_20260302_170744</code>).</p>
 <h3 id="output-files-per-run">Output files per run<a class="headerlink" href="#output-files-per-run" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a>src/agritwin_gh/mpc/mpc_results/mpc_20260330_143022/
-<a id="__codelineno-66-2" name="__codelineno-66-2" href="#__codelineno-66-2"></a>│
-<a id="__codelineno-66-3" name="__codelineno-66-3" href="#__codelineno-66-3"></a>├── trajectory_mpc.parquet             # MPC state + actuator trajectory
-<a id="__codelineno-66-4" name="__codelineno-66-4" href="#__codelineno-66-4"></a>├── trajectory_baseline.parquet        # Baseline controller trajectory
-<a id="__codelineno-66-5" name="__codelineno-66-5" href="#__codelineno-66-5"></a>├── comparison_metrics.json            # ComparisonMetrics serialised
-<a id="__codelineno-66-6" name="__codelineno-66-6" href="#__codelineno-66-6"></a>├── run_config.json                    # MPCConfig snapshot (reproducibility)
-<a id="__codelineno-66-7" name="__codelineno-66-7" href="#__codelineno-66-7"></a>├── fused_states.parquet               # All FusedState snapshots (for replay)
-<a id="__codelineno-66-8" name="__codelineno-66-8" href="#__codelineno-66-8"></a>├── step_payloads.jsonl                # DigitalTwinStepPayload per step (newline JSON)
-<a id="__codelineno-66-9" name="__codelineno-66-9" href="#__codelineno-66-9"></a>│
-<a id="__codelineno-66-10" name="__codelineno-66-10" href="#__codelineno-66-10"></a>└── figures/
-<a id="__codelineno-66-11" name="__codelineno-66-11" href="#__codelineno-66-11"></a>    ├── temperature_comparison.png
-<a id="__codelineno-66-12" name="__codelineno-66-12" href="#__codelineno-66-12"></a>    ├── humidity_comparison.png
-<a id="__codelineno-66-13" name="__codelineno-66-13" href="#__codelineno-66-13"></a>    ├── disease_risk_comparison.png
-<a id="__codelineno-66-14" name="__codelineno-66-14" href="#__codelineno-66-14"></a>    ├── resource_consumption.png
-<a id="__codelineno-66-15" name="__codelineno-66-15" href="#__codelineno-66-15"></a>    ├── actuator_profiles.png
-<a id="__codelineno-66-16" name="__codelineno-66-16" href="#__codelineno-66-16"></a>    └── metrics_bar_chart.png
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a>src/agritwin_gh/mpc/mpc_results/mpc_20260330_143022/
+<a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a>│
+<a id="__codelineno-68-3" name="__codelineno-68-3" href="#__codelineno-68-3"></a>├── trajectory_mpc.parquet             # MPC state + actuator trajectory
+<a id="__codelineno-68-4" name="__codelineno-68-4" href="#__codelineno-68-4"></a>├── trajectory_baseline.parquet        # Baseline controller trajectory
+<a id="__codelineno-68-5" name="__codelineno-68-5" href="#__codelineno-68-5"></a>├── comparison_metrics.json            # ComparisonMetrics serialised
+<a id="__codelineno-68-6" name="__codelineno-68-6" href="#__codelineno-68-6"></a>├── run_config.json                    # MPCConfig snapshot (reproducibility)
+<a id="__codelineno-68-7" name="__codelineno-68-7" href="#__codelineno-68-7"></a>├── fused_states.parquet               # All FusedState snapshots (for replay)
+<a id="__codelineno-68-8" name="__codelineno-68-8" href="#__codelineno-68-8"></a>├── step_payloads.jsonl                # DigitalTwinStepPayload per step (newline JSON)
+<a id="__codelineno-68-9" name="__codelineno-68-9" href="#__codelineno-68-9"></a>│
+<a id="__codelineno-68-10" name="__codelineno-68-10" href="#__codelineno-68-10"></a>└── figures/
+<a id="__codelineno-68-11" name="__codelineno-68-11" href="#__codelineno-68-11"></a>    ├── temperature_comparison.png
+<a id="__codelineno-68-12" name="__codelineno-68-12" href="#__codelineno-68-12"></a>    ├── humidity_comparison.png
+<a id="__codelineno-68-13" name="__codelineno-68-13" href="#__codelineno-68-13"></a>    ├── disease_risk_comparison.png
+<a id="__codelineno-68-14" name="__codelineno-68-14" href="#__codelineno-68-14"></a>    ├── resource_consumption.png
+<a id="__codelineno-68-15" name="__codelineno-68-15" href="#__codelineno-68-15"></a>    ├── actuator_profiles.png
+<a id="__codelineno-68-16" name="__codelineno-68-16" href="#__codelineno-68-16"></a>    └── metrics_bar_chart.png
 </code></pre></div>
 <h3 id="structured-logs">Structured logs<a class="headerlink" href="#structured-logs" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a>logs/mpc/mpc_run_mpc_20260330_143022.json
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>logs/mpc/mpc_run_mpc_20260330_143022.json
 </code></pre></div>
 <p>Each log entry (one per step) contains:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a><span class="p">{</span>
-<a id="__codelineno-68-2" name="__codelineno-68-2" href="#__codelineno-68-2"></a><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-03-30T14:35:22&quot;</span><span class="p">,</span>
-<a id="__codelineno-68-3" name="__codelineno-68-3" href="#__codelineno-68-3"></a><span class="w">  </span><span class="nt">&quot;step_index&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-<a id="__codelineno-68-4" name="__codelineno-68-4" href="#__codelineno-68-4"></a><span class="w">  </span><span class="nt">&quot;solve_time_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">42.3</span><span class="p">,</span>
-<a id="__codelineno-68-5" name="__codelineno-68-5" href="#__codelineno-68-5"></a><span class="w">  </span><span class="nt">&quot;solver_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<a id="__codelineno-68-6" name="__codelineno-68-6" href="#__codelineno-68-6"></a><span class="w">  </span><span class="nt">&quot;cost_breakdown&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-68-7" name="__codelineno-68-7" href="#__codelineno-68-7"></a><span class="w">    </span><span class="nt">&quot;temperature&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.042</span><span class="p">,</span>
-<a id="__codelineno-68-8" name="__codelineno-68-8" href="#__codelineno-68-8"></a><span class="w">    </span><span class="nt">&quot;humidity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.118</span><span class="p">,</span>
-<a id="__codelineno-68-9" name="__codelineno-68-9" href="#__codelineno-68-9"></a><span class="w">    </span><span class="nt">&quot;disease_risk&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.003</span><span class="p">,</span>
-<a id="__codelineno-68-10" name="__codelineno-68-10" href="#__codelineno-68-10"></a><span class="w">    </span><span class="nt">&quot;energy&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.021</span>
-<a id="__codelineno-68-11" name="__codelineno-68-11" href="#__codelineno-68-11"></a><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-68-12" name="__codelineno-68-12" href="#__codelineno-68-12"></a><span class="w">  </span><span class="nt">&quot;constraint_violations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<a id="__codelineno-68-13" name="__codelineno-68-13" href="#__codelineno-68-13"></a><span class="w">  </span><span class="nt">&quot;applied_actuators&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;fan_speed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.45</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;heater_output&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="err">...</span><span class="p">},</span>
-<a id="__codelineno-68-14" name="__codelineno-68-14" href="#__codelineno-68-14"></a><span class="w">  </span><span class="nt">&quot;observed_state_summary&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;indoor_temp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">22.1</span><span class="p">,</span><span class="w"> </span><span class="err">...</span><span class="p">}</span>
-<a id="__codelineno-68-15" name="__codelineno-68-15" href="#__codelineno-68-15"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a><span class="p">{</span>
+<a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-03-30T14:35:22&quot;</span><span class="p">,</span>
+<a id="__codelineno-70-3" name="__codelineno-70-3" href="#__codelineno-70-3"></a><span class="w">  </span><span class="nt">&quot;step_index&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-70-4" name="__codelineno-70-4" href="#__codelineno-70-4"></a><span class="w">  </span><span class="nt">&quot;solve_time_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">42.3</span><span class="p">,</span>
+<a id="__codelineno-70-5" name="__codelineno-70-5" href="#__codelineno-70-5"></a><span class="w">  </span><span class="nt">&quot;solver_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-70-6" name="__codelineno-70-6" href="#__codelineno-70-6"></a><span class="w">  </span><span class="nt">&quot;cost_breakdown&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-70-7" name="__codelineno-70-7" href="#__codelineno-70-7"></a><span class="w">    </span><span class="nt">&quot;temperature&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.042</span><span class="p">,</span>
+<a id="__codelineno-70-8" name="__codelineno-70-8" href="#__codelineno-70-8"></a><span class="w">    </span><span class="nt">&quot;humidity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.118</span><span class="p">,</span>
+<a id="__codelineno-70-9" name="__codelineno-70-9" href="#__codelineno-70-9"></a><span class="w">    </span><span class="nt">&quot;disease_risk&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.003</span><span class="p">,</span>
+<a id="__codelineno-70-10" name="__codelineno-70-10" href="#__codelineno-70-10"></a><span class="w">    </span><span class="nt">&quot;energy&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.021</span>
+<a id="__codelineno-70-11" name="__codelineno-70-11" href="#__codelineno-70-11"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-70-12" name="__codelineno-70-12" href="#__codelineno-70-12"></a><span class="w">  </span><span class="nt">&quot;constraint_violations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<a id="__codelineno-70-13" name="__codelineno-70-13" href="#__codelineno-70-13"></a><span class="w">  </span><span class="nt">&quot;applied_actuators&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;fan_speed&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.45</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;heater_output&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="err">...</span><span class="p">},</span>
+<a id="__codelineno-70-14" name="__codelineno-70-14" href="#__codelineno-70-14"></a><span class="w">  </span><span class="nt">&quot;observed_state_summary&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;indoor_temp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">22.1</span><span class="p">,</span><span class="w"> </span><span class="err">...</span><span class="p">}</span>
+<a id="__codelineno-70-15" name="__codelineno-70-15" href="#__codelineno-70-15"></a><span class="p">}</span>
 </code></pre></div></p>
 <p>Python logger name: <code>agritwin_gh.mpc</code></p>
 <h3 id="calibrated-model-artifacts">Calibrated model artifacts<a class="headerlink" href="#calibrated-model-artifacts" title="Permanent link">&para;</a></h3>
 <p>When <code>GreenhouseTransitionModel.calibrate()</code> is called on historical data, the fitted parameters are saved to:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a>src/agritwin_gh/models/artifacts/greenhouse_model_&lt;run_id&gt;/
-<a id="__codelineno-69-2" name="__codelineno-69-2" href="#__codelineno-69-2"></a>├── calibrated_params.json
-<a id="__codelineno-69-3" name="__codelineno-69-3" href="#__codelineno-69-3"></a>└── calibration_report.json      # R², residual stats per sub-model
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a>src/agritwin_gh/models/artifacts/greenhouse_model_&lt;run_id&gt;/
+<a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a>├── calibrated_params.json
+<a id="__codelineno-71-3" name="__codelineno-71-3" href="#__codelineno-71-3"></a>└── calibration_report.json      # R², residual stats per sub-model
 </code></pre></div></p>
 <h3 id="database-schema-files">Database Schema Files<a class="headerlink" href="#database-schema-files" title="Permanent link">&para;</a></h3>
 <p>The PostgreSQL tables consumed by the MPC pipeline are defined in:</p>
@@ -5624,8 +5771,8 @@ Example: <code>mpc_20260330_143022</code></p>
 </tbody>
 </table>
 <p>Apply to the <code>agritwin_db</code> database:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a><span class="n">psql</span> <span class="n">-U</span> <span class="p">&lt;</span><span class="n">user</span><span class="p">&gt;</span> <span class="n">-d</span> <span class="n">agritwin_db</span> <span class="o">-f</span> <span class="n">database</span><span class="p">/</span><span class="n">schema</span><span class="p">/</span><span class="n">timeseries_data</span><span class="p">.</span><span class="n">sql</span>
-<a id="__codelineno-70-2" name="__codelineno-70-2" href="#__codelineno-70-2"></a><span class="n">psql</span> <span class="n">-U</span> <span class="p">&lt;</span><span class="n">user</span><span class="p">&gt;</span> <span class="n">-d</span> <span class="n">agritwin_db</span> <span class="o">-f</span> <span class="n">database</span><span class="p">/</span><span class="n">schema</span><span class="p">/</span><span class="n">image_metadata</span><span class="p">.</span><span class="n">sql</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a><span class="n">psql</span> <span class="n">-U</span> <span class="p">&lt;</span><span class="n">user</span><span class="p">&gt;</span> <span class="n">-d</span> <span class="n">agritwin_db</span> <span class="o">-f</span> <span class="n">database</span><span class="p">/</span><span class="n">schema</span><span class="p">/</span><span class="n">timeseries_data</span><span class="p">.</span><span class="n">sql</span>
+<a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a><span class="n">psql</span> <span class="n">-U</span> <span class="p">&lt;</span><span class="n">user</span><span class="p">&gt;</span> <span class="n">-d</span> <span class="n">agritwin_db</span> <span class="o">-f</span> <span class="n">database</span><span class="p">/</span><span class="n">schema</span><span class="p">/</span><span class="n">image_metadata</span><span class="p">.</span><span class="n">sql</span>
 </code></pre></div>
 <p>Both files use <code>CREATE TABLE IF NOT EXISTS</code> — safe to re-run on an existing database.<br />
 Optional TimescaleDB hypertable commands are commented out; uncomment if TimescaleDB is installed.</p>
@@ -5875,8 +6022,8 @@ Optional TimescaleDB hypertable commands are commented out; uncomment if Timesca
 <h3 id="161-rate-constraint-5-slack">16.1 Rate Constraint 5 % Slack<a class="headerlink" href="#161-rate-constraint-5-slack" title="Permanent link">&para;</a></h3>
 <p><strong>Problem:</strong> SLSQP reported "Inequality constraints incompatible" when the warm-start (baseline) actuator values sat exactly on rate-limit boundaries.</p>
 <p><strong>Fix:</strong> A 5 % slack factor (<code>_SLACK = 1.05</code>) is applied to the rate constraint bounds in <code>_build_rate_constraints()</code>. The warm-start point is clipped to the <em>exact</em> rate limits, but the constraint region presented to the solver uses limits that are 5 % wider — placing the warm-start strictly in the interior of the feasible region.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a><span class="n">rate_lo</span> <span class="o">=</span> <span class="n">_SLACK</span> <span class="o">*</span> <span class="n">rate_lo</span>   <span class="c1"># slightly more negative</span>
-<a id="__codelineno-71-2" name="__codelineno-71-2" href="#__codelineno-71-2"></a><span class="n">rate_hi</span> <span class="o">=</span> <span class="n">_SLACK</span> <span class="o">*</span> <span class="n">rate_hi</span>   <span class="c1"># slightly more positive</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a><span class="n">rate_lo</span> <span class="o">=</span> <span class="n">_SLACK</span> <span class="o">*</span> <span class="n">rate_lo</span>   <span class="c1"># slightly more negative</span>
+<a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a><span class="n">rate_hi</span> <span class="o">=</span> <span class="n">_SLACK</span> <span class="o">*</span> <span class="n">rate_hi</span>   <span class="c1"># slightly more positive</span>
 </code></pre></div>
 <p>This prevents the pathological case where the initial guess already lies on a constraint boundary, which causes SLSQP's gradient computation to fail.</p>
 <h3 id="162-non-converged-result-salvage">16.2 Non-Converged Result Salvage<a class="headerlink" href="#162-non-converged-result-salvage" title="Permanent link">&para;</a></h3>
@@ -6352,8 +6499,8 @@ Optional TimescaleDB hypertable commands are commented out; uncomment if Timesca
 </tbody>
 </table>
 <p>These constants are defined at the top of <code>scripts/run_full_mpc_evaluation.py</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a><span class="n">TN_ELECTRICITY_RATE</span> <span class="o">=</span> <span class="mf">6.60</span>   <span class="c1"># ₹ per kWh</span>
-<a id="__codelineno-72-2" name="__codelineno-72-2" href="#__codelineno-72-2"></a><span class="n">TN_WATER_RATE</span>       <span class="o">=</span> <span class="mf">0.05</span>   <span class="c1"># ₹ per litre  (₹50 / kL)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a><span class="n">TN_ELECTRICITY_RATE</span> <span class="o">=</span> <span class="mf">6.60</span>   <span class="c1"># ₹ per kWh</span>
+<a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a><span class="n">TN_WATER_RATE</span>       <span class="o">=</span> <span class="mf">0.05</span>   <span class="c1"># ₹ per litre  (₹50 / kL)</span>
 </code></pre></div>
 <h3 id="182-energy-consumption-model">18.2 Energy Consumption Model<a class="headerlink" href="#182-energy-consumption-model" title="Permanent link">&para;</a></h3>
 <p>Energy per 5-minute step is computed from actuator settings using fixed power coefficients. These coefficients represent typical equipment ratings for a 200 m² commercial greenhouse in South India:</p>
@@ -6431,11 +6578,11 @@ Optional TimescaleDB hypertable commands are commented out; uncomment if Timesca
 <p><em>↗ <code>scripts/run_full_mpc_evaluation.py</code>  (<code>TN_ELECTRICITY_RATE = 6.60</code>, <code>TN_WATER_RATE = 0.05</code> top-of-file constants; compiled and printed by <code>_print_cost_table()</code>)</em></p>
 <h3 id="185-interpreting-resource-cost-comparisons">18.5 Interpreting Resource Cost Comparisons<a class="headerlink" href="#185-interpreting-resource-cost-comparisons" title="Permanent link">&para;</a></h3>
 <p>In the evaluation output, you will see a table like:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a>  Controller          Energy(kWh)   Water(L)   ₹ Energy    ₹ Water    ₹ TOTAL
-<a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a>  ---------------------------------------------------------------------------
-<a id="__codelineno-73-3" name="__codelineno-73-3" href="#__codelineno-73-3"></a>  baseline                62.88     133.18     415.03       6.66     421.69
-<a id="__codelineno-73-4" name="__codelineno-73-4" href="#__codelineno-73-4"></a>  mpc                     63.39     136.45     418.40       6.82     425.22
-<a id="__codelineno-73-5" name="__codelineno-73-5" href="#__codelineno-73-5"></a>  mpc vs baseline: costs extra ₹3.53 (-0.8%)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>  Controller          Energy(kWh)   Water(L)   ₹ Energy    ₹ Water    ₹ TOTAL
+<a id="__codelineno-75-2" name="__codelineno-75-2" href="#__codelineno-75-2"></a>  ---------------------------------------------------------------------------
+<a id="__codelineno-75-3" name="__codelineno-75-3" href="#__codelineno-75-3"></a>  baseline                62.88     133.18     415.03       6.66     421.69
+<a id="__codelineno-75-4" name="__codelineno-75-4" href="#__codelineno-75-4"></a>  mpc                     63.39     136.45     418.40       6.82     425.22
+<a id="__codelineno-75-5" name="__codelineno-75-5" href="#__codelineno-75-5"></a>  mpc vs baseline: costs extra ₹3.53 (-0.8%)
 </code></pre></div>
 <ul>
 <li><strong>"saves ₹X"</strong> = MPC uses fewer resources than baseline (MPC is cheaper).</li>
@@ -6448,8 +6595,8 @@ Optional TimescaleDB hypertable commands are commented out; uncomment if Timesca
 <p>The evaluation script <code>scripts/run_full_mpc_evaluation.py</code> is the primary tool for validating MPC performance against the baseline controller. It orchestrates 5 scenarios, computes comprehensive metrics, and saves structured artifacts.</p>
 <p><strong>Location:</strong> <code>scripts/run_full_mpc_evaluation.py</code></p>
 <p><strong>How to run:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a><span class="nb">cd </span><span class="n">e</span><span class="p">:\</span><span class="n">AgriTwin-GH</span>
-<a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a><span class="n">python</span> <span class="n">scripts</span><span class="p">/</span><span class="n">run_full_mpc_evaluation</span><span class="p">.</span><span class="n">py</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a><span class="nb">cd </span><span class="n">e</span><span class="p">:\</span><span class="n">AgriTwin-GH</span>
+<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a><span class="n">python</span> <span class="n">scripts</span><span class="p">/</span><span class="n">run_full_mpc_evaluation</span><span class="p">.</span><span class="n">py</span>
 </code></pre></div>
 <blockquote>
 <p><strong>Windows note:</strong> The script calls <code>sys.stdout.reconfigure(encoding="utf-8")</code> on
@@ -6758,9 +6905,9 @@ PowerShell and Command Prompt. No manual <code>PYTHONIOENCODING</code> setting i
 <h3 id="194-how-to-read-the-output">19.4 How to Read the Output<a class="headerlink" href="#194-how-to-read-the-output" title="Permanent link">&para;</a></h3>
 <p>The evaluation script prints structured sections for each scenario. Here is a guide to interpreting each part.</p>
 <h4 id="summary-table">Summary Table<a class="headerlink" href="#summary-table" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>  Controller     type               n_steps    temp_rmse    humidity_rmse ...  yield_score
-<a id="__codelineno-75-2" name="__codelineno-75-2" href="#__codelineno-75-2"></a>  baseline       rule_based         144        4.7470       9.8620        ...  58.41
-<a id="__codelineno-75-3" name="__codelineno-75-3" href="#__codelineno-75-3"></a>  mpc            mpc_disease_aware  144        4.7330       9.8790        ...  58.65
+<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>  Controller     type               n_steps    temp_rmse    humidity_rmse ...  yield_score
+<a id="__codelineno-77-2" name="__codelineno-77-2" href="#__codelineno-77-2"></a>  baseline       rule_based         144        4.7470       9.8620        ...  58.41
+<a id="__codelineno-77-3" name="__codelineno-77-3" href="#__codelineno-77-3"></a>  mpc            mpc_disease_aware  144        4.7330       9.8790        ...  58.65
 </code></pre></div>
 <ul>
 <li><strong>temp_rmse / humidity_rmse:</strong> Root Mean Square Error from the stage setpoint. Lower = better tracking.</li>
@@ -6768,9 +6915,9 @@ PowerShell and Command Prompt. No manual <code>PYTHONIOENCODING</code> setting i
 <li><strong>safety_violations:</strong> Must be <strong>0</strong> for both controllers. Any non-zero value is a failure.</li>
 </ul>
 <h4 id="pairwise-improvements">Pairwise Improvements<a class="headerlink" href="#pairwise-improvements" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>  mpc_vs_baseline:
-<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a>    indoor_temp_rmse_improvement_pct     +0.30%  (better)
-<a id="__codelineno-76-3" name="__codelineno-76-3" href="#__codelineno-76-3"></a>    yield_score_improvement_pct          +0.41%  (better)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>  mpc_vs_baseline:
+<a id="__codelineno-78-2" name="__codelineno-78-2" href="#__codelineno-78-2"></a>    indoor_temp_rmse_improvement_pct     +0.30%  (better)
+<a id="__codelineno-78-3" name="__codelineno-78-3" href="#__codelineno-78-3"></a>    yield_score_improvement_pct          +0.41%  (better)
 </code></pre></div>
 <ul>
 <li><strong>Positive % with "(better)"</strong> = MPC outperforms baseline on this metric.</li>
@@ -6778,8 +6925,8 @@ PowerShell and Command Prompt. No manual <code>PYTHONIOENCODING</code> setting i
 <li><strong>Key metric:</strong> <code>yield_score_improvement_pct</code> — must be <strong>&gt; 0 %</strong> for MPC to be considered better.</li>
 </ul>
 <h4 id="yield-proxy-breakdown">Yield Proxy Breakdown<a class="headerlink" href="#yield-proxy-breakdown" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-77-1" name="__codelineno-77-1" href="#__codelineno-77-1"></a>  baseline    overall=58.41/100  climate=46.64  disease=40.85  stress=75.30  stability=96.54
-<a id="__codelineno-77-2" name="__codelineno-77-2" href="#__codelineno-77-2"></a>  mpc         overall=58.65/100  climate=47.30  disease=40.93  stress=75.62  stability=95.82
+<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>  baseline    overall=58.41/100  climate=46.64  disease=40.85  stress=75.30  stability=96.54
+<a id="__codelineno-79-2" name="__codelineno-79-2" href="#__codelineno-79-2"></a>  mpc         overall=58.65/100  climate=47.30  disease=40.93  stress=75.62  stability=95.82
 </code></pre></div>
 <ul>
 <li><strong>climate:</strong> MPC typically wins here (47.30 &gt; 46.64) because it directly optimises setpoint tracking.</li>
@@ -6788,10 +6935,10 @@ PowerShell and Command Prompt. No manual <code>PYTHONIOENCODING</code> setting i
 <li><strong>stability:</strong> Baseline often wins slightly (96.54 &gt; 95.82) because it changes actuators less frequently. MPC's active optimisation causes more switching, but the higher tracking and stress scores more than compensate.</li>
 </ul>
 <h4 id="resource-cost-table">Resource Cost Table<a class="headerlink" href="#resource-cost-table" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-78-1" name="__codelineno-78-1" href="#__codelineno-78-1"></a>  Controller      Energy(kWh)   Water(L)   ₹ Energy    ₹ Water    ₹ TOTAL
-<a id="__codelineno-78-2" name="__codelineno-78-2" href="#__codelineno-78-2"></a>  baseline            62.88     133.18     415.03       6.66     421.69
-<a id="__codelineno-78-3" name="__codelineno-78-3" href="#__codelineno-78-3"></a>  mpc                 63.39     136.45     418.40       6.82     425.22
-<a id="__codelineno-78-4" name="__codelineno-78-4" href="#__codelineno-78-4"></a>  mpc vs baseline: costs extra ₹3.53 (-0.8%)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-80-1" name="__codelineno-80-1" href="#__codelineno-80-1"></a>  Controller      Energy(kWh)   Water(L)   ₹ Energy    ₹ Water    ₹ TOTAL
+<a id="__codelineno-80-2" name="__codelineno-80-2" href="#__codelineno-80-2"></a>  baseline            62.88     133.18     415.03       6.66     421.69
+<a id="__codelineno-80-3" name="__codelineno-80-3" href="#__codelineno-80-3"></a>  mpc                 63.39     136.45     418.40       6.82     425.22
+<a id="__codelineno-80-4" name="__codelineno-80-4" href="#__codelineno-80-4"></a>  mpc vs baseline: costs extra ₹3.53 (-0.8%)
 </code></pre></div>
 <ul>
 <li>Energy cost dominates (₹415 for electricity vs ₹7 for water).</li>
@@ -6884,7 +7031,7 @@ PowerShell and Command Prompt. No manual <code>PYTHONIOENCODING</code> setting i
 </table>
 <h3 id="197-automatic-validation-checks">19.7 Automatic Validation Checks<a class="headerlink" href="#197-automatic-validation-checks" title="Permanent link">&para;</a></h3>
 <p>The script runs automatic validation at the end of all scenarios:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-79-1" name="__codelineno-79-1" href="#__codelineno-79-1"></a>  [OK] All validation checks passed
+<div class="highlight"><pre><span></span><code><a id="__codelineno-81-1" name="__codelineno-81-1" href="#__codelineno-81-1"></a>  [OK] All validation checks passed
 </code></pre></div>
 <p>This verifies:</p>
 <ul>
