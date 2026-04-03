@@ -82,6 +82,18 @@ class GreenhouseModelParams:
     noise_soil_moisture: float = 0.0
     noise_co2: float = 0.0
 
+    # Actuator response lag — first-order time constants (minutes).
+    # 0 = instantaneous (legacy behaviour).  Positive values introduce a
+    # first-order lag: effective_output approaches commanded value with
+    # alpha = 1 - exp(-dt / tau).
+    lag_fan_minutes: float = 0.0          # fan spool-up / spool-down
+    lag_vent_minutes: float = 0.0         # vent motor opening/closing
+    lag_heater_minutes: float = 0.0       # heating element warm-up
+    lag_fogger_minutes: float = 0.0       # fogger pressure build-up
+    lag_co2_valve_minutes: float = 0.0    # CO2 valve actuator travel
+    lag_led_minutes: float = 0.0          # LED driver ramp (usually fast)
+    lag_irrigation_minutes: float = 0.0   # pump start / valve open
+
     def to_dict(self) -> dict[str, Any]:
         from dataclasses import asdict
         return asdict(self)
@@ -102,6 +114,16 @@ class GreenhouseTransitionModel:
     The model is **deterministic** by default (noise std = 0).  Set the
     ``noise_*`` parameters in ``GreenhouseModelParams`` for stochastic
     roll-outs (e.g. during MPC scenario evaluation).
+
+    Actuator response lag
+    ---------------------
+    When any ``lag_*_minutes`` parameter is positive, the model applies a
+    first-order lag filter to the corresponding actuator output before using
+    it in the physics equations.  The effective output approaches the
+    commanded value with ``alpha = 1 - exp(-dt / tau)`` each 5-minute step.
+
+    Call ``reset_actuator_state()`` between independent simulations to clear
+    the internal effective-actuator memory.
     """
 
     def __init__(
@@ -112,6 +134,56 @@ class GreenhouseTransitionModel:
         self.params = params or GreenhouseModelParams()
         self.dt_minutes = dt_minutes
         self._rng = np.random.default_rng()
+        # Effective actuator outputs (for lag filter).  None = uninitialised.
+        self._effective_actuators: dict[str, float] | None = None
+
+    def reset_actuator_state(self) -> None:
+        """Clear stored effective-actuator memory (call between runs)."""
+        self._effective_actuators = None
+
+    def _apply_actuator_lag(self, actuators: ActuatorState) -> ActuatorState:
+        """Apply first-order response lag to each actuator channel.
+
+        Returns a *new* ``ActuatorState`` with effective (lagged) values.
+        If all lag parameters are zero, returns the original unchanged.
+        """
+        p = self.params
+        lag_map = {
+            "fan_speed":      p.lag_fan_minutes,
+            "vent_opening":   p.lag_vent_minutes,
+            "heater_output":  p.lag_heater_minutes,
+            "fogger_duty":    p.lag_fogger_minutes,
+            "co2_valve_pct":  p.lag_co2_valve_minutes,
+            "led_intensity":  p.lag_led_minutes,
+            "irrigation_qty": p.lag_irrigation_minutes,
+        }
+
+        # Fast path: no lag configured at all.
+        if all(tau <= 0.0 for tau in lag_map.values()):
+            return actuators
+
+        # Initialise effective state on first call.
+        if self._effective_actuators is None:
+            self._effective_actuators = {
+                fld: getattr(actuators, fld, 0.0) or 0.0
+                for fld in lag_map
+            }
+
+        dt = float(self.dt_minutes)
+        effective = {}
+        for fld, tau in lag_map.items():
+            cmd = getattr(actuators, fld, 0.0) or 0.0
+            prev = self._effective_actuators.get(fld, cmd)
+            if tau > 0.0:
+                alpha = 1.0 - math.exp(-dt / tau)
+                eff = prev + alpha * (cmd - prev)
+            else:
+                eff = cmd
+            effective[fld] = eff
+
+        self._effective_actuators = effective
+
+        return ActuatorState(**effective)
 
     # ── Single-step update ────────────────────────────────────────────
 
@@ -134,6 +206,9 @@ class GreenhouseTransitionModel:
             ``temp_external``, ``humidity_external``, ``solar_radiation``.
         """
         p = self.params
+
+        # ── Apply actuator response lag (if configured) ───────────────
+        actuators = self._apply_actuator_lag(actuators)
 
         # Unpack weather (accept both WeatherState and dict)
         if isinstance(weather, dict):
@@ -240,11 +315,18 @@ class GreenhouseTransitionModel:
                 f"Weather sequence length ({len(weather_sequence)}) must be "
                 f">= actuator sequence length ({n})."
             )
+        # Reset lag state so each rollout starts from commanded values.
+        saved = self._effective_actuators
+        self._effective_actuators = None
+
         trajectory: list[GreenhouseState] = []
         state = initial_state
         for k in range(n):
             state = self.step(state, actuator_sequence[k], weather_sequence[k])
             trajectory.append(state)
+
+        # Restore previous effective-actuator memory.
+        self._effective_actuators = saved
         return trajectory
 
     # ── Placeholder for future system-identification ──────────────────

@@ -125,26 +125,44 @@ class MPCInputPreparation:
 
         records = [
             {
+                # Metadata (not used as features)
                 "timestamp": r.timestamp,
                 "cycle_id": r.cycle_id,
                 "stage_name": r.stage_name,
+                # Calendar features (stored in DB)
+                "year": r.year,
+                "month": r.month,
+                "day_of_year": r.day_of_year,
+                "week_of_year": r.week_of_year,
+                "hour": r.hour,
+                # Stage / progression features
                 "stage_index": r.stage_index,
                 "hours_in_current_stage": r.hours_in_current_stage,
+                "days_in_current_stage": r.days_in_current_stage,
+                "stage_duration_hours": r.stage_duration_hours,
+                "stage_duration_days": r.stage_duration_days,
+                "stage_progress_pct": r.stage_progress_pct,
+                "total_cycle_progress_pct": r.total_cycle_progress_pct,
+                "estimated_days_to_next_stage": r.estimated_days_to_next_stage,
                 "estimated_hours_to_next_stage": r.estimated_hours_to_next_stage,
+                "is_stage_transition": r.is_stage_transition,
+                "days_from_cycle_start": r.days_from_cycle_start,
+                # Environment features
                 "indoor_temp": r.indoor_temp,
                 "indoor_humidity": r.indoor_humidity,
+                "indoor_air_velocity": r.indoor_air_velocity,
                 "indoor_co2": r.indoor_co2,
                 "solarradiation": r.solarradiation,
+                "day_night_flag": r.day_night_flag,
                 "vpd": r.vpd,
                 "dew_point": r.dew_point,
                 "leaf_wetness_proxy": r.leaf_wetness_proxy,
+                # Pre-engineered features stored in DB
                 "temperature_rolling_mean_24h": r.temperature_rolling_mean_24h,
                 "humidity_rolling_mean_24h": r.humidity_rolling_mean_24h,
                 "vpd_proxy": r.vpd_proxy,
+                "light_period_flag": r.light_period_flag,
                 "cumulative_gdd_like_index": r.cumulative_gdd_like_index,
-                "stage_progress_pct": r.stage_progress_pct,
-                "total_cycle_progress_pct": r.total_cycle_progress_pct,
-                "days_from_cycle_start": r.days_from_cycle_start,
             }
             for r in rows
         ]
@@ -182,22 +200,45 @@ class MPCInputPreparation:
 
         records = [
             {
+                # ── Identity / time ───────────────────────────────────
                 "timestamp": r.timestamp,
                 "cycle_id": r.cycle_id,
+                "cycle_label": r.cycle_label,
+                "season_label": r.season_label,
                 "stage_name": r.stage_name,
+                "stage_index": r.stage_index,
+                "days_from_cycle_start": r.days_from_cycle_start,
+                "day_of_year": r.day_of_year,
+                "week_of_year": r.week_of_year,
+                "hour": r.hour,
+                "hours_in_current_stage": r.hours_in_current_stage,
+                "stage_progress_pct": r.stage_progress_pct,
+                "total_cycle_progress_pct": r.total_cycle_progress_pct,
+                "is_stage_transition": r.is_stage_transition,
+                # ── Environment ───────────────────────────────────────
+                "indoor_temp": r.indoor_temp,
+                "indoor_humidity": r.indoor_humidity,
+                "indoor_air_velocity": r.indoor_air_velocity,
+                "indoor_co2": r.indoor_co2,
+                "solarradiation": r.solarradiation,
+                "day_night_flag": r.day_night_flag,
+                "vpd": r.vpd,
+                "dew_point": r.dew_point,
+                "leaf_wetness_proxy": r.leaf_wetness_proxy,
+                "temperature_rolling_mean_24h": r.temperature_rolling_mean_24h,
+                "humidity_rolling_mean_24h": r.humidity_rolling_mean_24h,
+                "vpd_proxy": r.vpd_proxy,
+                "cumulative_gdd_like_index": r.cumulative_gdd_like_index,
+                # ── Disease-specific ──────────────────────────────────
                 "disease_name": r.disease_name,
                 "disease_present_flag": r.disease_present_flag,
                 "disease_risk_score": r.disease_risk_score,
                 "current_infection_pct": r.current_infection_pct,
                 "infection_growth_rate_hourly": r.infection_growth_rate_hourly,
-                "indoor_temp": r.indoor_temp,
-                "indoor_humidity": r.indoor_humidity,
-                "vpd": r.vpd,
-                "leaf_wetness_proxy": r.leaf_wetness_proxy,
-                "temperature_rolling_mean_24h": r.temperature_rolling_mean_24h,
-                "humidity_rolling_mean_24h": r.humidity_rolling_mean_24h,
-                "hours_since_disease_onset": r.hours_since_disease_onset,
                 "stage_susceptibility_score": r.stage_susceptibility_score,
+                "outbreak_trigger_flag": r.outbreak_trigger_flag,
+                "control_action_flag": r.control_action_flag,
+                "control_action_type": r.control_action_type,
             }
             for r in rows
         ]

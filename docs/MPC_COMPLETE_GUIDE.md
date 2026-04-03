@@ -2606,16 +2606,17 @@ with Session(engine) as session:
 
 ## 11. Test Scripts
 
-> **Current status**: Formal pytest unit test files (`test_state.py`, `test_greenhouse_model.py`, etc.) are **not yet implemented** — they are planned for a future phase. The three smoke test scripts listed below are the tests that actually exist and pass right now. Each covers a major subsystem end-to-end without a live database.
+> **Current status**: Formal pytest unit test files (`test_state.py`, `test_greenhouse_model.py`, etc.) are **not yet implemented** — they are planned for a future phase. The four smoke test scripts listed below are the tests that actually exist and pass right now. Three cover individual subsystems end-to-end without a live database; the fourth (`test_db_ai_mpc_pipeline.py`) verifies the full DB → AI models → MPC data flow end-to-end.
 
 ### How to run the smoke tests
 
 ```powershell
-# Set PYTHONPATH and run all three
+# Set PYTHONPATH and run all four
 $env:PYTHONPATH = "e:\AgriTwin-GH\src"
 python tests/smoke_intelligent_mpc.py
 python tests/smoke_test_dt_handoff.py
 python tests/test_evaluation_smoke.py
+uv run python tests/test_db_ai_mpc_pipeline.py
 ```
 
 ---
@@ -2771,6 +2772,84 @@ python tests/test_evaluation_smoke.py
 
 === ALL SMOKE TESTS PASSED ===
 ```
+
+---
+
+### `tests/test_db_ai_mpc_pipeline.py` — End-to-End DB → AI Models → MPC Pipeline
+
+**What it tests:**
+
+Verifies the full documented data flow from database queries through every AI model layer to a converged `MPCSolution`:
+
+| Step | Subsystem | Verified |
+|------|-----------|---------|
+| 1 | DB connection (`SQLAlchemy` / `psycopg2`) | Live or graceful skip |
+| 2 | `MPCInputPreparation` — four DB query methods | Row counts, column presence |
+| 3 | `WeatherDisturbanceForecast.get_forecast()` | 576 5-min steps, expected keys, Chronos + XGBoost + LSTM ensemble |
+| 4 | `DiseaseRiskPenalty.predict_all_diseases()` | Returns `DiseaseProgressionOutput` (Keras LSTM, 5 diseases) |
+| 5 | `GrowthStageWeights.predict_from_dataframe()` | Returns `GrowthProgressionOutput` (Keras LSTM, multi-task) |
+| 6 | `StateFusion.fuse()` | Assembles `FusedState` from all AI model outputs + DB row |
+| 7 | `MPCSolver.solve()` | Returns converged `MPCSolution` with `first_action` actuators |
+
+**Design:**
+
+- DB unavailability is handled gracefully — each AI model step runs with synthetic / empty fallback data so the pipeline checks complete even without a live PostgreSQL connection.
+- No results are saved anywhere.
+- Steps are individually try/except'd with `[PASS]` / `[FAIL]` / `[SKIP]` / `[INFO]` markers for easy diagnosis.
+
+**Run command:**
+
+```powershell
+uv run python tests/test_db_ai_mpc_pipeline.py
+```
+
+**Expected output (DB offline):**
+
+```
+STEP 1 — DB Connection
+[ SKIP ] DB unavailable — AI model checks will use synthetic / empty fallback
+
+STEP 2 — MPCInputPreparation (DB → raw DataFrames)
+[ SKIP ] All MPCInputPreparation checks skipped (no DB)
+
+STEP 3 — WeatherDisturbanceForecast  (DB weather → disturbance steps)
+[ PASS ] get_forecast → 576 5-min steps | keys: ['humidity', 'offset_hours', 'solarradiation', 'temp', 'windspeed']
+[ PASS ] All expected forecast keys present in each step
+
+STEP 4 — DiseaseRiskPenalty  (DB disease context → severity dicts)
+[ SKIP ] No disease DB data — testing graceful empty-DataFrame path
+[ PASS ] predict_all_diseases returned DiseaseProgressionOutput
+
+STEP 5 — GrowthStageWeights  (DB growth context → GrowthProgressionOutput)
+[ SKIP ] No growth DB data — testing graceful empty-DataFrame path
+[ PASS ] predict_from_dataframe returned GrowthProgressionOutput
+
+STEP 6 — StateFusion.fuse()  (AI model outputs → FusedState)
+[ PASS ] StateFusion.fuse() returned valid FusedState
+         growth_stage = 'seedling' | disease_risk_score = 0.015
+[ PASS ] FusedState.growth_stage resolved (from GrowthStageWeights or fallback)
+
+STEP 7 — MPCSolver.solve()  (FusedState → MPCSolution)
+[ PASS ] MPCSolver.solve() returned MPCSolution
+         converged = True | total_cost = 769.1505
+         first_action -> fan=0.00  vent=0.00  irr=5.00  heat=0.25  led=0.20
+[ PASS ] Solver converged → MPC solution is usable
+
+PIPELINE CHECK COMPLETE
+DB was OFFLINE — AI model checks ran with synthetic / empty fallback data.
+No results saved.
+```
+
+**Bugs discovered and fixed while writing this test:**
+
+| Component | Bug | Fix applied |
+|-----------|-----|-------------|
+| `environment_forecast_loader.py` | `torch.load` blocked sklearn objects (PyTorch 2.6 changed `weights_only` default) | `weights_only=False` |
+| `environment_forecast_loader.py` | LSTM instantiated with global `pred_len=2` but each bundled model has `pred_len=1` | Infer from `state["head.weight"].shape[0]` |
+| `environment_forecast_loader.py` | LSTM state-dict keys are `('col', horizon_int)` tuples; loader stored/looked up by string | Preserve tuple keys throughout load + predict |
+| `environment_forecast_loader.py` | `predict()` passed all 140 features to scaler expecting 132 | Split: scale 132 base features; concatenate 8 Chronos meta-features unscaled |
+| `environment_forecast_loader.py` | `predict()` received raw DB columns and failed (no feature engineering) | Added `_engineer_features()` method; called automatically when raw data is detected |
+| `growth_weights.py` | `_engineer_features()` called on empty DataFrame → `KeyError('timestamp')` | Early-exit guard before feature engineering |
 
 ---
 

@@ -159,6 +159,70 @@ class GrowthStageWeights:
 
     # ── Transition prediction ──────────────────────────────────────────
 
+    # Base columns that receive rolling/lag engineering (mirrors training notebook
+    # Section 6). Order matches training — is_stage_transition gets rolling only,
+    # no lag features.
+    _RAW_COLS_FOR_ENGINEERING: list[str] = [
+        "year", "month", "day_of_year", "week_of_year", "hour",
+        "days_from_cycle_start", "stage_index", "hours_in_current_stage",
+        "days_in_current_stage", "stage_duration_hours", "stage_duration_days",
+        "stage_progress_pct", "total_cycle_progress_pct",
+        "estimated_days_to_next_stage", "estimated_hours_to_next_stage",
+        "is_stage_transition",
+        "indoor_temp", "indoor_humidity", "indoor_air_velocity", "indoor_co2",
+        "solarradiation", "day_night_flag", "vpd", "dew_point", "leaf_wetness_proxy",
+        "temperature_rolling_mean_24h", "humidity_rolling_mean_24h",
+        "vpd_proxy", "light_period_flag", "cumulative_gdd_like_index",
+    ]
+    _LAG_SKIP_COLS: frozenset[str] = frozenset({"is_stage_transition"})
+
+    def _engineer_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Apply the same feature engineering as the training notebook (Section 6).
+
+        Input: raw DB context with base columns
+        Output: DataFrame with all 358 model-ready features
+        """
+        df = df.copy().sort_values("timestamp").reset_index(drop=True)
+
+        # ── Derived time features from timestamp ──────────────────────
+        t0 = df["timestamp"].iloc[0]
+        df["elapsed_hours"] = (df["timestamp"] - t0).dt.total_seconds() / 3600.0
+        df["hour_of_day"]   = df["timestamp"].dt.hour
+        df["day_of_cycle"]  = (df["elapsed_hours"] / 24).astype(int)
+
+        # ── Coerce is_stage_transition to numeric ─────────────────────
+        if "is_stage_transition" in df.columns:
+            df["is_stage_transition"] = (
+                df["is_stage_transition"].fillna(False).astype(float)
+            )
+
+        # ── Fill any missing base columns with 0 ──────────────────────
+        for col in self._RAW_COLS_FOR_ENGINEERING:
+            if col not in df.columns:
+                df[col] = 0.0
+
+        # ── Rolling means/stds and lags — batch via pd.concat to avoid
+        # DataFrame fragmentation (matches notebook ROLLING_WINDOWS / LAG_STEPS)
+        rolling_windows = [6, 12, 24]
+        lag_steps       = [1, 2, 3, 6, 12]
+        derived: dict[str, pd.Series] = {}
+
+        for col in self._RAW_COLS_FOR_ENGINEERING:
+            ser = df[col]
+            for w in rolling_windows:
+                derived[f"{col}_roll_mean_{w}h"] = (
+                    ser.rolling(w, min_periods=1).mean()
+                )
+                derived[f"{col}_roll_std_{w}h"] = (
+                    ser.rolling(w, min_periods=1).std().fillna(0)
+                )
+            if col not in self._LAG_SKIP_COLS:
+                for lag in lag_steps:
+                    derived[f"{col}_lag_{lag}"] = ser.shift(lag)
+
+        df = pd.concat([df, pd.DataFrame(derived, index=df.index)], axis=1)
+        return df
+
     @property
     def seq_len(self) -> int:
         return int(self._inference_cfg.get("seq_len", 24))
@@ -212,21 +276,42 @@ class GrowthStageWeights:
         self,
         df_growth_context: pd.DataFrame,
     ) -> GrowthProgressionOutput:
-        """Build a sequence from a DB-sourced DataFrame and predict.
+        """Apply feature engineering then run the LSTM.
 
         Parameters
         ----------
         df_growth_context:
             DataFrame from ``MPCInputPreparation.get_growth_progression_context()``,
             sorted ascending by timestamp, with at least ``seq_len`` rows.
+            The raw ~30 base columns are enough — rolling/lag features are
+            computed here to exactly match the training notebook (Section 6).
         """
         self._ensure_loaded()
+
+        if df_growth_context.empty:
+            logger.warning("Empty growth context — returning defaults.")
+            return GrowthProgressionOutput()
+
+        # ── Apply inline feature engineering (mirrors training notebook) ──
+        df_growth_context = self._engineer_features(df_growth_context)
 
         feat_cols = self.feature_cols
         if not feat_cols:
             # Fallback: use all numeric columns except metadata
-            meta = {"timestamp", "cycle_id", "stage_name", "stage_index"}
-            feat_cols = [c for c in df_growth_context.columns if c not in meta]
+            meta = {"timestamp", "cycle_id", "stage_name"}
+            feat_cols = [c for c in df_growth_context.columns if c not in meta
+                         and pd.api.types.is_numeric_dtype(df_growth_context[c])]
+
+        # After engineering, any remaining missing column is a real problem
+        missing = set(feat_cols) - set(df_growth_context.columns)
+        if missing:
+            logger.warning(
+                "Growth model still missing %d features after engineering "
+                "(e.g. %s). Returning defaults.",
+                len(missing),
+                ", ".join(sorted(missing)[:3]),
+            )
+            return GrowthProgressionOutput()
 
         if len(df_growth_context) < self.seq_len:
             logger.warning(
@@ -238,16 +323,7 @@ class GrowthStageWeights:
 
         raw = df_growth_context[feat_cols].values[-self.seq_len:]
 
-        # Handle missing columns gracefully
-        if raw.shape[1] < len(feat_cols):
-            logger.warning(
-                "Feature count mismatch: expected %d, got %d — padding with zeros.",
-                len(feat_cols), raw.shape[1],
-            )
-            pad = np.zeros((raw.shape[0], len(feat_cols) - raw.shape[1]))
-            raw = np.hstack([raw, pad])
-
-        # Replace NaN before scaling
+        # Replace NaN before scaling (lags at start of sequence will be NaN)
         raw = np.nan_to_num(raw, nan=0.0)
 
         if self._scaler is not None:

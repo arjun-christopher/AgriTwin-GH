@@ -15,7 +15,7 @@
 
 4\. [Full Data Flow Diagram](#4-full-data-flow-diagram)
 
-5\. [File Tree — All 11 Source Files](#5-file-tree--all-11-source-files)
+5\. [File Tree — All 12 Source Files](#5-file-tree--all-12-source-files)
 
 6\. [File-by-File Reference](#6-file-by-file-reference)
 
@@ -75,7 +75,9 @@
 
 &emsp;&emsp;6.7.2\. [`SyntheticInputProvider`](#syntheticinputprovider)
 
-&emsp;&emsp;6.7.3\. [`ImageObservation`](#imageobservation)
+&emsp;&emsp;6.7.3\. [`DatabaseInputProvider`](#databaseinputprovider)
+
+&emsp;&emsp;6.7.4\. [`ImageObservation`](#imageobservation)
 
 &emsp;6.8\. [`dt_image_observer.py`](#68-dt_image_observerpy)
 
@@ -83,7 +85,9 @@
 
 &emsp;6.10\. [`dt_artifact_manager.py`](#610-dt_artifact_managerpy)
 
-&emsp;6.11\. [`run_dt_loop.py` (CLI)](#611-run_dt_looppy-cli)
+&emsp;6.11\. [`realtime_core.py` (core engine)](#611-realtime_corepy-core-engine)
+
+&emsp;6.12\. [`run_realtime_loop.py` (CLI)](#612-run_realtime_looppy-cli)
 
 7\. [Key Data Structures](#7-key-data-structures)
 
@@ -123,7 +127,7 @@
 
 &emsp;12.4\. [Non-interactive mode](#124-non-interactive-mode)
 
-&emsp;12.5\. [Quick validation mode](#125-quick-validation-mode)
+&emsp;12.5\. [Cleanup after a run](#125-cleanup-after-a-run)
 
 &emsp;12.6\. [Full CLI flag reference](#126-full-cli-flag-reference)
 
@@ -145,7 +149,7 @@
 
 17\. [Recommended Next Extensions](#17-recommended-next-extensions)
 
-18\. [Production Migration Path](#18-production-migration-path)
+18\. [Production Closed-Loop — Implemented](#18-production-closed-loop--implemented)
 
 19\. [References](#19-references)
 
@@ -207,7 +211,7 @@ loop itself does not change at all.
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                      AGRITWIN-GH DT CLOSED-LOOP LAYER                    │
-│              src/agritwin_gh/mpc/  (11 DT-specific files)                │
+│              src/agritwin_gh/mpc/  (12 DT-specific files)                │
 │                                                                          │
 │   INPUT                 SIMULATION CORE              OUTPUT              │
 │   ─────                 ───────────────              ──────              │
@@ -247,8 +251,8 @@ loop itself does not change at all.
 │  │   • get_initial_state()     │  │  • observe(growth_stage, state,  │  │
 │  │     (time-of-day GreenhouseState)   step_index, timestamp)        │  │
 │  │   • get_weather_sequence()  │  │    → ImageObservation            │  │
-│  │     (diurnal WeatherState[])│  │  (future: MinIOImageObserver)    │  │
-│  │   (future: DatabaseInputProvider)   │  │                          │  │
+│  │     (diurnal WeatherState[])│  │  (MinIOImageObserver ✅)         │  │
+│  │   DatabaseInputProvider ✅ implemented  │                          │  │
 │  └────────────┬────────────────┘  └─────────────────┬────────────────┘  │
 └───────────────┼─────────────────────────────────────┼───────────────────┘
                 │                                      │ (every 30 min)
@@ -317,7 +321,7 @@ loop itself does not change at all.
 
 ---
 
-## 5. File Tree — All 11 Source Files
+## 5. File Tree — All 12 Source Files
 
 ```
 src/agritwin_gh/mpc/
@@ -344,6 +348,7 @@ src/agritwin_gh/mpc/
 │
 │── DT input abstraction ─────────────────────────────────────────
 ├── dt_input_provider.py     # DTInputProvider (Protocol) + SyntheticInputProvider
+│                            # + DatabaseInputProvider (live PostgreSQL feed)
 │                            # ImageObservation dataclass
 │
 │── DT image hook ────────────────────────────────────────────────
@@ -356,8 +361,17 @@ src/agritwin_gh/mpc/
 │── DT run folder management ─────────────────────────────────────
 ├── dt_artifact_manager.py   # DTArtifactManager — timestamped run folder
 │
+│── Realtime closed-loop core ────────────────────────────────────
+├── realtime_core.py          # RealtimeLoop, RealtimeLoopConfig — importable engine
+│                             # RealtimeMPCInputPreparation, RealtimeStepResult
+│                             # RealtimeRunSummary, seed_initial_state()
+│                             # write_step_to_stream(), ensure_stream_table()
+│                             # estimate_energy(), diurnal helpers
+│
 scripts/
-└── run_dt_loop.py           # CLI entry point
+└── run_realtime_loop.py      # Thin CLI / test harness — imports from realtime_core
+                              # (console display, artifact saving, signal handling,
+                              #  interactive prompts, argparse)
 ```
 
 ---
@@ -962,6 +976,9 @@ step k
 | `weather_diurnal_amp` | 8.0 | Half-range of daily temperature swing (°C) |
 | `input_provider` | `SyntheticInputProvider` | Plug in `DatabaseInputProvider` here |
 | `image_observer` | `SyntheticImageObserver` | Plug in `MinIOImageObserver` here |
+| `auto_advance_stage` | `False` | Auto-advance growth stage when `STAGE_DURATION_HOURS` elapses |
+| `days_elapsed` | `0.0` | Hours already spent in the current stage (sets initial offset) |
+| `session` | `None` | SQLAlchemy `Session` — when provided, auto-selects `DatabaseInputProvider` + `MinIOImageObserver` |
 
 **Validation** (raises `ValueError` immediately in `__init__` if violated):
 - `growth_stage` must be one of the 6 canonical labels
@@ -1032,7 +1049,7 @@ class DTLoopLogger:
     def save(self, path: str | Path) -> Path: ...
 ```
 
-**`log_step()`**: Called once per step from `run_dt_loop.py`. Accumulates
+**`log_step()`**: Called once per step by the DT loop runner. Accumulates
 into running totals, stores a compact per-step dict, and optionally prints
 to stdout.
 
@@ -1085,10 +1102,11 @@ Every printed step follows this format:
 
 ### 6.7 `dt_input_provider.py`
 
-**Purpose**: Defines the `DTInputProvider` protocol (interface) and the
-concrete `SyntheticInputProvider`. The protocol is what makes the DT layer
-*pluggable* — swap in a database-backed provider by implementing the same
-interface.
+**Purpose**: Defines the `DTInputProvider` protocol (interface) and two
+concrete implementations: `SyntheticInputProvider` (offline/evaluation)
+and `DatabaseInputProvider` (production, backed by PostgreSQL + AI models).
+The protocol is what makes the DT layer *pluggable* — swap implementations
+by changing a single constructor argument.
 
 Also defines `ImageObservation` (the value object returned by image
 refresh cycles).
@@ -1143,13 +1161,44 @@ class SyntheticInputProvider:
 Validates `growth_stage` against `GROWTH_STAGES` on construction and
 raises `ValueError` immediately if the stage is unknown.
 
-**The future migration path**: Create `DatabaseInputProvider` that:
-1. Gets growth stage from `StateFusion.fuse()` step 5
-2. Gets initial state from `MPCInputPreparation.get_latest_greenhouse_row()` → `GreenhouseState.from_db_row()`
-3. Gets weather from `WeatherDisturbanceForecast.get_forecast()`
-4. Passes it to `DTLoop` as the `input_provider` argument
+---
 
-Zero changes to `DTLoop` itself.
+#### `DatabaseInputProvider`
+
+Production implementation — reads live greenhouse state and uses the
+AI weather-forecast model:
+
+```python
+class DatabaseInputProvider:
+    def __init__(
+        self,
+        session: Session,
+        growth_stage: str,
+        weather_run_id: str | None = None,
+        device: str = "cpu",
+    ) -> None: ...
+```
+
+| Method | What it does |
+|--------|-------------|
+| `get_initial_state()` | Queries `greenhouse_data` via `MPCInputPreparation.get_latest_greenhouse_row()` → `GreenhouseState.from_db_row()`. Falls back to synthetic if table empty. |
+| `get_weather_sequence()` | Queries 30 days of `weather_data` → runs `WeatherDisturbanceForecast` AI model for a 48-hour hourly forecast → expands to per-step `WeatherState` list. Falls back to sinusoidal model if DB is empty or model fails. |
+| `start_time` property | Returns timestamp of the most recent `greenhouse_data` row, or `datetime.now()` as fallback. |
+
+**Usage:**
+
+```python
+from sqlalchemy.orm import Session
+from agritwin_gh.mpc import DTLoop, DatabaseInputProvider
+
+provider = DatabaseInputProvider(session, growth_stage="flowering")
+loop = DTLoop(growth_stage="flowering", input_provider=provider)
+for result in loop.run(n_steps=288):
+    ...
+```
+
+Exported from `agritwin_gh.mpc.__init__` so it is importable at the
+package top level.
 
 ---
 
@@ -1206,13 +1255,39 @@ class ImageObserver(Protocol):
    - risk ≥ 0.5 → `"late blight"`
 3. Returns an `ImageObservation` with `source = "synthetic"`.
 
-**Future `MinIOImageObserver`** (not yet implemented):
+**`MinIOImageObserver`** — production implementation (DB + MinIO):
 
-1. Create `MinIOImageObserver(ImageObserver)` holding an `ImageStreamer` instance.
-2. On `observe()`, call `ImageStreamer.get_random_growth_stage_image()` and
-   `ImageStreamer.get_random_disease_image()`.
-3. Pass it to `DTLoop(image_observer=MinIOImageObserver(...))`.
-   Zero changes to the loop.
+```python
+class MinIOImageObserver:
+    def __init__(
+        self,
+        session: Session,
+        cache_ttl_sec: float = 300.0,
+    ) -> None: ...
+```
+
+1. Wraps `ImageStreamer(session, cache_ttl_sec=...)` — the existing
+   DB-backed image service with per-category TTL caching.
+2. On `observe()`, derives the disease label from the current risk score
+   (same thresholds as `SyntheticImageObserver`), then calls
+   `ImageStreamer.get_random_growth_stage_image(growth_stage)` and
+   `ImageStreamer.get_random_disease_image(disease_label)`.
+3. If either image is missing (empty table, unknown category),
+   falls back transparently to `SyntheticImageObserver` for that step
+   and logs the fallback.
+4. Returns `ImageObservation(source="minio")`.
+
+**Usage:**
+
+```python
+# Explicit observer:
+loop = DTLoop(growth_stage="flowering",
+              image_observer=MinIOImageObserver(session))
+
+# Or let DTLoop auto-select when a session is provided:
+loop = DTLoop(growth_stage="flowering", session=db_session)
+#  → auto-creates MinIOImageObserver(session) internally
+```
 
 **Inputs**: Growth stage label, current state, step index, timestamp.  
 **Outputs**: `ImageObservation` value object.
@@ -1333,42 +1408,114 @@ the whole repository.
 
 ---
 
-### 6.11 `run_dt_loop.py` (CLI)
+### 6.11 `realtime_core.py` (core engine)
 
-**Purpose**: The single command you run to start a DT simulation.
-Located in `scripts/` rather than `src/` because it is an executable
-script, not a library module.
+**Purpose**: All reusable closed-loop DT + MPC orchestration logic in one
+importable module. Lives in `src/agritwin_gh/mpc/` so it can be consumed
+by production services, web backends, notebooks, or evaluation harnesses
+without any CLI / console / signal dependencies.
 
-**What it does:**
+**Design principle**: No `argparse`, no `print`, no `signal` — pure
+business logic only.
 
-1. Parses CLI arguments
-2. Resolves the growth stage (flag or interactive prompt)
-3. Starts `DTArtifactManager` and creates the run folder
-4. Creates `SyntheticInputProvider` and `DTLoop`
-5. Runs `DTLoop.run()` in a `for` loop, calling `DTLoopLogger.log_step()`
-   and `fanout_step_to_writer()` on each step
-6. Prints the run summary to the console
-7. Calls `writer.flush()` and `manager.save_summary()` to finalise artifacts
-8. Writes the combined backward-compatible `dt_loop_*.json` via `logger.save()`
+**Key exports:**
 
-**`ask_growth_stage()`**: Interactive prompt used when `--stage` is not
-given. Accepts both a number (1–6) and a partial name match
-(case-insensitive). Loops until a valid, unambiguous choice is entered.
+| Name | Kind | Role |
+|------|------|------|
+| `RealtimeLoopConfig` | `@dataclass` | All parameters for one session: `growth_stage`, `days_elapsed`, `total_steps`, `mpc_every`, `device`, `no_images`, `dry_run`, `run_id`, `start_ts`, `auto_advance_stage` |
+| `RealtimeLoop` | class | Orchestrator — call `setup()`, then `run()` or individual `step(i)` calls |
+| `RealtimeStepResult` | `@dataclass` | Output of each `step()` call: payload, hours, energy, wall time |
+| `RealtimeRunSummary` | `@dataclass` | Returned by `run()` / `finish()`: totals over all steps |
+| `RealtimeMPCInputPreparation` | class | `MPCInputPreparation` subclass that reads `realtime_greenhouse_stream` |
+| `ensure_stream_table()` | function | Creates `realtime_greenhouse_stream` if absent |
+| `seed_initial_state()` | function | Writes step-0 bootstrap row from `greenhouse_data` (or diurnal defaults) |
+| `write_step_to_stream()` | function | Persists one `DigitalTwinStepPayload` as a DB row |
+| `estimate_energy()` | function | kWh estimate for one DT step from actuator duty cycles |
+| `STAGE_DURATION_HOURS` | dict | Canonical stage durations (hours) |
+| `PRIOR_STAGE_HOURS` | dict | Cumulative hours before each stage |
+| `RunRegistry` | class | Persistent JSON index of all runs in `logs/realtime/registry.json` |
 
-**`_run_validation(stage, start_time, base_temp)`**: Called when
-`--validate` is passed. Runs 7 checks in sequence (no artifacts saved):
+**`RealtimeLoop` API:**
 
-| Check | What it verifies |
-|-------|----------------|
-| 1/7 | Stage accepted by `SyntheticInputProvider` |
-| 2/7 | `get_initial_state()` returns a valid state (T > 0) |
-| 3/7 | `DTLoop` constructs without error |
-| 4/7 | Loop runs 6 steps without raising any exception |
-| 5/7 | At least one MPC solution was produced |
-| 6/7 | State changed between first and last step (T₀ ≠ T₅) |
-| 7/7 | `JsonFileOutputWriter.flush()` returns 4 file paths |
+```python
+from agritwin_gh.mpc.realtime_core import RealtimeLoop, RealtimeLoopConfig
 
-Exits with code 0 if all 7 pass, code 1 on any failure.
+cfg = RealtimeLoopConfig(
+    growth_stage="flowering",
+    days_elapsed=5.0,
+    total_steps=288,     # 24 h
+    mpc_every=3,
+)
+loop = RealtimeLoop(cfg, session=db_session)
+loop.setup()             # seeds bootstrap DB row
+summary = loop.run(
+    on_step=my_callback,         # called after each step
+    should_stop=lambda: flag,    # Ctrl-C / cancel support
+)
+```
+
+Or step-by-step:
+
+```python
+loop.setup()
+for i in range(1, cfg.total_steps + 1):
+    result: RealtimeStepResult = loop.step(i)
+    # result.payload, result.wall_time_ms, result.cumulative_energy_kwh …
+summary = loop.finish()
+```
+
+**Data flow per step (inside `RealtimeLoop.step()`):**
+
+```
+realtime_greenhouse_stream (DB)
+  → RealtimeMPCInputPreparation.get_latest_greenhouse_row()
+  → StateFusion.fuse()          [9-step AI pipeline]
+  → MPCSolver.solve()           → ActuatorState
+  → DigitalTwinEngine.step()    → DTStepOutput
+  → current_state updated
+  → write_step_to_stream()      → realtime_greenhouse_stream (DB)
+```
+
+---
+
+### 6.12 `run_realtime_loop.py` (CLI)
+
+**Purpose**: Thin CLI / test-evaluation harness that wraps `RealtimeLoop`.
+Located in `scripts/` because it is an executable, not a library.
+Contains **only** console / filesystem concerns — all domain logic is
+imported from `realtime_core`.
+
+**What lives here** (and only here):
+
+| Responsibility | Functions |
+|---|---|
+| Interactive prompts | `prompt_growth_stage()`, `prompt_days_elapsed()`, `prompt_steps()` |
+| Console display | `print_banner()`, `print_step_line()`, `print_run_summary()` |
+| Artifact saving | `setup_artifact_dir()`, `save_step_artifact()`, `save_run_manifest()` |
+| Signal handling | `_handle_signal()`, `_stop_requested` flag |
+| CLI wiring | `build_parser()`, `run_from_cli()`, `main()` |
+
+**CLI → core wiring (inside `run_from_cli()`):**
+
+```python
+config = RealtimeLoopConfig(growth_stage=..., days_elapsed=..., ...)
+loop   = RealtimeLoop(config, session, disease_classifier=..., growth_classifier=...)
+loop.setup()
+summary = loop.run(on_step=on_step, should_stop=should_stop)
+```
+
+**Requires**: A running PostgreSQL instance with `agritwin_db` reachable
+and populated `greenhouse_data` / `weather_data` tables (see
+[Section 18](#18-production-closed-loop--implemented) and
+`docs/POSTGRESQL_QUICKSTART.md`).
+
+**Run identity**: `run_id = f"rt_{now:%Y%m%d_%H%M%S}"` — e.g. `rt_20260402_185434`
+
+**Graceful shutdown**: Handles `SIGINT` / `SIGTERM` via `_stop_requested` flag
+passed as `should_stop` callback to `loop.run()`.
+
+**`--show-delete-query`**: Prints SQL `DELETE` / `TRUNCATE` statements for
+`realtime_greenhouse_stream` and exits.
 
 ---
 
@@ -1765,7 +1912,15 @@ mold (*Fulvia fulva*).<sup>[[6]](#ref-6)</sup>
 
 - Python 3.10+
 - All packages from `requirements.txt` installed
-- No database or MinIO connection required
+- PostgreSQL `agritwin_db` running and reachable (see `docs/POSTGRESQL_QUICKSTART.md`)
+- Schema applied:
+
+```powershell
+psql -U <user> -d agritwin_db -f database/schema/timeseries_data.sql
+psql -U <user> -d agritwin_db -f database/schema/image_metadata.sql
+```
+
+- `.env` file at the repo root with `DATABASE_URL` set (see `config/settings.local.example.yaml`)
 
 Install dependencies:
 
@@ -1785,92 +1940,96 @@ $env:PYTHONPATH = "src"
 export PYTHONPATH=src
 ```
 
-Alternatively, `run_dt_loop.py` automatically adds `src/` to `sys.path`
-when run from the `scripts/` directory, so explicit `PYTHONPATH` setting
-is only required for the smoke test.
+`run_realtime_loop.py` automatically adds `src/` to `sys.path` when run
+from the `scripts/` directory, so explicit `PYTHONPATH` setting is only
+required for the smoke test.
 
 ### 12.3 Interactive Mode
 
-Launches a menu to select the growth stage and runs a 2-hour simulation:
+Launches a menu to select the growth stage and prompts for days elapsed
+and number of steps:
 
 ```bash
-python scripts/run_dt_loop.py
+python scripts/run_realtime_loop.py
 ```
 
 Output:
 ```
-╔══════════════════════════════════════════════╗
-║   AgriTwin-GH  DT + MPC Closed Loop          ║
-╚══════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════╗
+║          AgriTwin-GH  Real-Time Closed-Loop MPC          ║
+╚══════════════════════════════════════════════════════════╝
 
-Available growth stages:
-  1. seedling
-  2. early vegetative
-  3. flowering initiation
-  4. flowering
-  5. unripe
-  6. ripe
+── Current Growth Stage ───────────────────────────────
+  1. Seedling
+  2. Early Vegetative
+  3. Flowering Initiation
+  4. Flowering
+  5. Unripe
+  6. Ripe
 
-Enter stage number or name: 4
-  → Selected: flowering
+  Enter stage number (1–6): 4
 ```
 
 ### 12.4 Non-Interactive Mode
 
 ```bash
-# 2-hour run, flowering stage, default weather
-python scripts/run_dt_loop.py --stage flowering --hours 2
+# 24-hour run (288 steps × 5 min), flowering stage, MPC every 15 min
+python scripts/run_realtime_loop.py --stage flowering --steps 288
 
-# 6-hour run, early vegetative, warm weather, quiet output
-python scripts/run_dt_loop.py --stage "early vegetative" --hours 6 --base-temp 28 --quiet
+# 7-day run with GPU weather model
+python scripts/run_realtime_loop.py --stage unripe --steps 2016 --device cuda
 
-# 24-hour run, unripe, save to specific folder
-python scripts/run_dt_loop.py --stage unripe --hours 24 --output logs/my_run
+# MPC every step (aggressive, 5-minute re-solve)
+python scripts/run_realtime_loop.py --stage flowering --steps 72 --mpc-every 1
 
-# Run with DEBUG logging to see MPC details
-python scripts/run_dt_loop.py --stage flowering --hours 1 --log-level DEBUG
+# Dry run — simulate without writing to DB or saving artifacts
+python scripts/run_realtime_loop.py --stage flowering --steps 12 --dry-run
 
-# Smoke test (requires PYTHONPATH=src)
+# Skip image classifiers (faster, no MinIO required)
+python scripts/run_realtime_loop.py --stage ripe --steps 144 --no-images
+
+# Show DELETE queries for stream table cleanup, then exit
+python scripts/run_realtime_loop.py --show-delete-query
+
+# Smoke test (synthetic, no DB required)
+$env:PYTHONPATH = "src"
 python tests/smoke_test_dt_loop.py
 ```
 
-### 12.5 Quick Validation Mode
+### 12.5 Cleanup After a Run
 
-Runs 7 checks in ~3 seconds without saving any artifacts:
+After testing, remove accumulated rows from the stream table:
+
+```sql
+-- Delete a specific run
+DELETE FROM realtime_greenhouse_stream WHERE run_id = 'rt_20260402_185434';
+
+-- Delete all rows older than 7 days
+DELETE FROM realtime_greenhouse_stream
+WHERE created_at < NOW() - INTERVAL '7 days';
+
+-- Full table reset
+TRUNCATE TABLE realtime_greenhouse_stream RESTART IDENTITY;
+```
+
+Or use the built-in helper to print these queries:
 
 ```bash
-python scripts/run_dt_loop.py --stage flowering --validate
-```
-
-Expected output:
-```
-==================================================
-  DT Loop — Quick Validation
-==================================================
-  [PASS] 1/7  Growth stage accepted: flowering
-  [PASS] 2/7  Initial state OK (T=19.5°C, RH=65.0%)
-  [PASS] 3/7  DTLoop constructed (6 steps)
-  [PASS] 4/7  Loop ran 6 steps without error
-  [PASS] 5/7  MPC action generated (cost=49.45)
-  [PASS] 6/7  State updated (T: 19.5 → 16.9°C)
-  [PASS] 7/7  Artifact writer flushed 4 files
---------------------------------------------------
-  Validation: 7/7 checks passed
-  STATUS: ALL CLEAR
-==================================================
+python scripts/run_realtime_loop.py --show-delete-query
 ```
 
 ### 12.6 Full CLI Flag Reference
 
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
+| `--steps` | `int` | `0` (interactive) | Number of 5-minute simulation steps. 288 = 24 h, 2016 = 7 days |
 | `--stage` | `str` | *(interactive)* | Growth stage. Options: `seedling`, `early vegetative`, `flowering initiation`, `flowering`, `unripe`, `ripe` |
-| `--hours` | `float` | `2.0` | Simulation duration in hours |
-| `--base-temp` | `float` | `20.0` | Mean outdoor temperature for synthetic weather (°C) |
-| `--quiet` | `flag` | off | Print only every 3rd step |
-| `--output` | `str` | `""` | Override artifact output directory |
-| `--validate` | `flag` | off | Run 7-check validation only, no artifacts |
-| `--log-level` | `str` | `WARNING` | Python logging level: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `--days-elapsed` | `float` | *(interactive)* | Days already elapsed in the current stage (used to compute stage progress) |
+| `--mpc-every` | `int` | `3` | Solve MPC every N steps. Default 3 = every 15 min. Set 1 for every 5 min. |
+| `--device` | `str` | `cpu` | PyTorch device for weather-forecast ensemble: `cpu`, `cuda`, or `mps` |
+| `--no-images` | flag | off | Disable image-classification step (skips MinIO, faster) |
+| `--dry-run` | flag | off | Run without writing to DB or saving artifacts (safe for testing) |
+| `--show-delete-query` | flag | off | Print SQL DELETE queries for the stream table and exit |
 
 ---
 
@@ -1878,7 +2037,23 @@ Expected output:
 
 ### 13.1 Run Folder Structure
 
-Every run creates a uniquely named folder:
+Every production run creates a uniquely named folder and a corresponding
+set of rows in the PostgreSQL stream table:
+
+```
+logs/
+└── realtime/
+    └── rt_20260402_185434/
+        ├── manifest.json             ← run configuration and summary
+        └── steps.ndjson              ← one compact JSON record per step (NDJSON)
+
+PostgreSQL:
+└── realtime_greenhouse_stream
+    └── rows with run_id = 'rt_20260402_185434'   ← full state + actuators + diagnostics
+```
+
+The synthetic DT loop (`DTLoop` + `JsonFileOutputWriter`) continues to
+produce the original four-file layout under `logs/dt_runs/`:
 
 ```
 logs/
@@ -2054,18 +2229,27 @@ cares about energy usage only needs to open `dt_diagnostics_run.json`.
 
 ### 15.2 Assumptions
 
-1. **Constant growth stage** — the simulation runs an entire session at a
-   fixed growth stage. In reality, tomato plants transition through stages
-   over weeks. The DT is designed to be restarted when the operator
-   observes a stage change.
+1. **Constant growth stage** *(now optional)* — by default the simulation
+   runs an entire session at a fixed growth stage.  Set
+   `auto_advance_stage=True` (on `DTLoop` or `RealtimeLoopConfig`) to
+   enable automatic stage transitions.  The loop tracks cumulative hours
+   and advances to the next canonical stage when `STAGE_DURATION_HOURS`
+   elapses.  `days_elapsed` sets the initial offset.
 
 2. **Synthetic weather is representative** — the sinusoidal diurnal model
    is reasonable for a clear day in Tamil Nadu. Multi-day cloud cover,
    monsoon conditions, or step-change weather events are not modelled.
 
-3. **No actuator delays** — the model assumes actuators respond
-   instantaneously to commands. Real fans, vents, and heaters have
-   response lags of 30 seconds to several minutes.
+3. **Actuator delays** *(now configurable)* — by default actuators
+   respond instantaneously (backward compatible).  Set the
+   `lag_*_minutes` parameters on `GreenhouseModelParams` to enable
+   first-order response lag per actuator channel:
+   `lag_fan_minutes`, `lag_vent_minutes`, `lag_heater_minutes`,
+   `lag_fogger_minutes`, `lag_co2_valve_minutes`, `lag_led_minutes`,
+   `lag_irrigation_minutes`.  Each positive value introduces
+   `alpha = 1 - exp(-dt / tau)` smoothing.  Call
+   `GreenhouseTransitionModel.reset_actuator_state()` between
+   independent simulations.
 
 4. **Linear ARX model** — the greenhouse physics are approximated by a
    linear discrete-time model. Real greenhouses are nonlinear (e.g.
@@ -2080,82 +2264,66 @@ cares about energy usage only needs to open `dt_diagnostics_run.json`.
 
 ## 16. Known Limitations
 
-1. **No database dependency** — the synthetic path generates weather and
-   initial state from simple diurnal models. Real sensor data requires
-   the `DatabaseInputProvider` (not yet implemented). See
-   [Section 18](#18-production-migration-path) for the migration path.
+> **Scope note**: The DT layer is the *physics simulation + loop
+> orchestration* wrapper around the MPC pipeline.  Features like the LSTM
+> disease model, AI weather forecasts, growth-stage weights, and image
+> classifiers live in the **MPC layer** (`StateFusion.fuse()`).
+> The production loop (`run_realtime_loop.py`) already invokes all of
+> those AI models via `StateFusion`.  Limitations listed here are
+> specific to the DT engine or the loop orchestration itself.
 
-2. **Growth stage is constant** — the loop does not transition between
-   stages mid-run. Wire `GrowthStageWeights.predict_transition()` for
-   dynamic stage transitions responsive to plant age.
+1. **Single-threaded loop** — `DigitalTwinEngine.step()` and
+   `MPCSolver.solve()` run synchronously in the same thread.  The
+   MPC solve blocks for ~20–50 ms per cadence step.  For strict
+   real-time scheduling, consider an `asyncio` coroutine or a
+   background-thread solver.
 
-3. **Disease risk is recomputed analytically** — the LSTM severity model
-   from `disease_penalty.py` is not invoked. Disease classification uses
-   a simple threshold on the analytical risk score. Real disease progression
-   has time-history dependence (inoculum build-up) that the sigmoid model
-   does not capture.
-
-4. **Single-threaded** — MPC solve is synchronous. During a 15-minute
-   cadence solve, the loop "blocks" for ~20–50 ms. For real-time
-   integration consider moving the solver to a background thread or
-   `asyncio` coroutine.
-
-5. **Weather look-ahead is synthetic** — replace with
-   `WeatherDisturbanceForecast.get_forecast()` for real 24-hour forecasts
-   anchored to the local meteorological station.
-
-6. **MPCSolver re-derives setpoints** — the solver reads `growth_stage`
-   and calls `get_setpoint(stage)` internally, rather than consuming
-   `fused.setpoint` directly. This is a minor inefficiency (not a bug)
-   and is documented for future refactoring.
+2. **DT engine recomputes disease risk analytically** — after the ARX
+   physics step, `DigitalTwinEngine` recalculates disease risk using
+   the sigmoid formula (`compute_disease_risk_score`).  This is a
+   *diagnostic-only* cross-check — the authoritative risk score comes
+   from the MPC pipeline (`DiseaseRiskPenalty` LSTM via `StateFusion`).
+   The DT engine does not override the MPC's risk estimate.
 
 ---
 
 ## 17. Recommended Next Extensions
 
-1. **`DatabaseInputProvider`** — bridge to `MPCInputPreparation` +
-   `StateFusion` for live greenhouse data (see [Section 18](#18-production-migration-path)).
+> **What is already done in the MPC layer** (not repeated here):
+> AI weather forecasts, LSTM disease severity, growth-stage weights
+> and transition prediction, image classification (disease +
+> growth stage), cost-weight adaptation, and `DigitalTwinOutput`
+> formatting are all implemented and consumed by the production
+> loop via `StateFusion.fuse()`.  See
+> [`MPC_COMPLETE_GUIDE.md`](MPC_COMPLETE_GUIDE.md) for details.
 
-2. **`MinIOImageObserver`** — wrap `ImageStreamer` with TTL cache for
-   real tomato crop images retrieved from MinIO.
+The extensions below are **DT-layer / infrastructure** improvements:
 
-3. **Dashboard integration** — pipe `DTLoopStepResult` through
-   `DigitalTwinOutput.format_step()` to produce `DigitalTwinStepPayload`
-   for live dashboard visualisation.
+1. **Grafana / live dashboard export** — stream per-step dicts
+   to a Grafana dashboard via InfluxDB or a WebSocket endpoint.
 
-4. **Dynamic growth-stage transitions** — integrate
-   `GrowthStageWeights.predict_transition()` to advance the stage
-   mid-run as plant age increases.
-
-5. **Disease progression model** — integrate the LSTM severity model
-   from `disease_penalty.py` to replace the analytical risk score with
-   a time-history-aware multi-hour forecast.
-
-6. **Persistent run registry** — index all run folders in a
-   `logs/dt_runs/registry.json` for cross-run comparison and trend
-   analysis.
-
-7. **Grafana / dashboard export** — stream `DTLoopStepResult` per-step
-   dicts to a live Grafana dashboard via InfluxDB or a WebSocket endpoint.
-
-8. **Multi-zone model** — extend `GreenhouseTransitionModel` to handle
-   $N$ spatially distinct zones with heat and moisture exchange between
-   them.
+2. **Multi-zone physics model** — extend `GreenhouseTransitionModel`
+   to handle $N$ spatially distinct zones with heat and moisture
+   exchange between them.
 
 ---
 
-## 18. Production Migration Path
+## 18. Production Closed-Loop — Implemented
 
-Switching from synthetic to live database data requires **zero changes to
-the loop**. Only the objects passed in the `DTLoop` constructor change.
+The production closed-loop is fully implemented across two layers:
+
+- **`src/agritwin_gh/mpc/realtime_core.py`** — importable core engine (`RealtimeLoop`, `RealtimeLoopConfig`, DB helpers, diurnal defaults). No CLI dependencies — safe to import from any context.
+- **`scripts/run_realtime_loop.py`** — thin CLI / test harness. Wraps `RealtimeLoop` with interactive prompts, console display, artifact saving, and signal handling.
+
+This section documents the implemented architecture.
 
 ### 18.0 Database Schema Prerequisites
 
-Before connecting to a live PostgreSQL database, ensure the schema has been applied:
+Before running the production loop, ensure the schema has been applied:
 
 | Schema file | Tables created | Used by |
 |---|---|---|
-| `database/schema/timeseries_data.sql` | `greenhouse_data`, `weather_data`, `disease_progression`, `growth_progression_hourly`, … | `DatabaseInputProvider` → `MPCInputPreparation` |
+| `database/schema/timeseries_data.sql` | `greenhouse_data`, `weather_data`, `disease_progression`, `growth_progression_hourly`, `realtime_greenhouse_stream`, … | `RealtimeMPCInputPreparation` → `StateFusion` → `write_step_to_stream()` |
 | `database/schema/image_metadata.sql` | `image_metadata`, `image_annotations` | `MinIOImageObserver` → `ImageStreamer` |
 
 ```powershell
@@ -2163,57 +2331,144 @@ psql -U <user> -d agritwin_db -f database/schema/timeseries_data.sql
 psql -U <user> -d agritwin_db -f database/schema/image_metadata.sql
 ```
 
-Both files use `CREATE TABLE IF NOT EXISTS` — safe to re-run. See `docs/POSTGRESQL_QUICKSTART.md` for full setup instructions.
+Both files use `CREATE TABLE IF NOT EXISTS` — safe to re-run. See
+`docs/POSTGRESQL_QUICKSTART.md` for full setup instructions.
 
 ---
 
-**Step 1: Implement `DatabaseInputProvider`**
+### 18.1 Implemented System Architecture
 
-```python
-class DatabaseInputProvider(DTInputProvider):
-    """Live data from PostgreSQL via MPCInputPreparation + StateFusion."""
+**Data flow (per step):**
 
-    def __init__(self, session: Session, growth_stage: str): ...
-
-    def get_initial_state(self) -> GreenhouseState:
-        row = MPCInputPreparation(session).get_latest_greenhouse_row()
-        return GreenhouseState.from_db_row(row)
-
-    def get_weather_sequence(self, ...) -> list[WeatherState]:
-        df = MPCInputPreparation(session).get_weather_context_df()
-        return WeatherDisturbanceForecast(df).get_forecast(n_steps)
+```
+realtime_greenhouse_stream  (PostgreSQL)
+  │
+  │  RealtimeMPCInputPreparation.get_latest_greenhouse_row()
+  ▼
+StateFusion.fuse()           ← 9-step AI pipeline
+  │                             (weather forecast, disease risk, growth weights,
+  │                              image classification, state fusion)
+  ▼
+MPCSolver.solve(fused)       ← SLSQP optimisation over 1-hour horizon
+  │
+  ▼
+DigitalTwinEngine.step()     ← 8-phase ARX physics + diagnostics
+  │                             (effect attribution, energy/water, disease flags)
+  ▼
+write_step_to_stream()       → realtime_greenhouse_stream  (PostgreSQL)
+  │
+  ▼
+save_step_artifact()         → logs/realtime/<run_id>/steps.ndjson
+  │
+  ▼  next iteration …
 ```
 
-**Step 2: Implement `MinIOImageObserver`**
+**Key components:**
+
+| Class / function | File | Role |
+|-----------------|------|------|
+| `RealtimeMPCInputPreparation` | `mpc/realtime_core.py` | Reads from `realtime_greenhouse_stream` instead of `greenhouse_data`; all other tables unchanged |
+| `DatabaseInputProvider` | `mpc/dt_input_provider.py` | Full `DTInputProvider` for the synthetic `DTLoop` backed by PostgreSQL |
+| `RealtimeGreenhouseStream` | `models/timeseries.py` | SQLAlchemy ORM for `realtime_greenhouse_stream` |
+| `seed_initial_state()` | `mpc/realtime_core.py` | Bootstraps stream row 0 from real `greenhouse_data` (or synthetic defaults) |
+| `write_step_to_stream()` | `mpc/realtime_core.py` | Persists each `DigitalTwinStepPayload` as a new DB row |
+| `RealtimeLoop` | `mpc/realtime_core.py` | Orchestrator — `setup()` → `run()` / `step(i)` — importable by any integration |
+| `DigitalTwinEngine` | `mpc/dt_engine.py` | Called on every step (MPC + non-MPC) — full physics + diagnostics |
+
+### 18.2 `MinIOImageObserver` — Implemented
+
+`MinIOImageObserver` is now fully implemented in `dt_image_observer.py`.
+See [Section 6.8](#68-dt_image_observerpy) for the full API.
 
 ```python
-class MinIOImageObserver(ImageObserver):
-    """Real crop images from MinIO via ImageStreamer (TTL-cached)."""
+from agritwin_gh.mpc import DTLoop, MinIOImageObserver
 
-    def __init__(self, session: Session): ...
-
-    def observe(self, growth_stage, state, step_index, timestamp):
-        gs_img = ImageStreamer(session).get_random_growth_stage_image(growth_stage)
-        dis_img = ImageStreamer(session).get_random_disease_image(...)
-        return ImageObservation(
-            growth_stage_image_key=gs_img["object_key"],
-            disease_image_key=dis_img["object_key"],
-            source="minio",
-        )
-```
-
-**Step 3: Pass to `DTLoop`**
-
-```python
+# Explicit observer:
 loop = DTLoop(
-    growth_stage=stage,
-    input_provider=DatabaseInputProvider(session, stage),
-    image_observer=MinIOImageObserver(session),
+    growth_stage="flowering",
+    image_observer=MinIOImageObserver(session, cache_ttl_sec=300.0),
+)
+
+# Or auto-select via session:
+loop = DTLoop(growth_stage="flowering", session=db_session)
+```
+
+Falls back to `SyntheticImageObserver` when a MinIO image category is
+empty — logged at `INFO` level.
+
+### 18.3 `RunRegistry` — Implemented
+
+`RunRegistry` (in `realtime_core.py`) indexes all completed runs in
+`logs/realtime/registry.json`.  Automatically wired into the CLI
+harness (`save_run_manifest()` in `run_realtime_loop.py`).
+
+```python
+from agritwin_gh.mpc import RunRegistry
+
+reg = RunRegistry()
+all_runs  = reg.load()                         # full registry
+flowering = reg.list_runs("flowering", limit=5) # filtered, newest first
+entry     = reg.get_run("rt_20260402_185434")   # single lookup
+```
+
+Each entry stores: `run_id`, `growth_stage`, `days_elapsed_at_start`,
+`planned_steps`, `steps_run`, `start_ts`, `end_ts`, `simulated_hours`,
+`total_energy_kwh`, `total_water_litres`, `total_mpc_cost`,
+`mpc_every_steps`, `auto_advance_stage`, `images_enabled`, `device`,
+`artifact_dir`.
+
+### 18.4 Auto-Advancing Growth Stage — Implemented
+
+Both `DTLoop` and `RealtimeLoop` support automatic growth-stage transitions.
+
+```python
+# Offline DTLoop:
+loop = DTLoop(
+    growth_stage="seedling",
+    auto_advance_stage=True,
+    days_elapsed=13.5,     # 13.5 days into seedling (336 h total)
+    n_steps=576,           # 48 hours — will cross into early vegetative
+)
+
+# Production RealtimeLoop:
+cfg = RealtimeLoopConfig(
+    growth_stage="flowering",
+    days_elapsed=5.0,
+    total_steps=288,
+    auto_advance_stage=True,
 )
 ```
 
-Everything else — the DT engine, the MPC solver, the logger, the output
-writer — runs exactly as before.
+When `hours_in_stage >= STAGE_DURATION_HOURS[stage]`, the loop advances
+to the next entry in `GROWTH_STAGES` and resets the hour counter.
+Transitions are logged at `INFO` level.
+
+### 18.5 Actuator Response Lag — Implemented
+
+`GreenhouseModelParams` now exposes 7 per-channel first-order lag time
+constants (all default 0.0 — instantaneous, backward compatible):
+
+| Parameter | Actuator | Typical real-world lag |
+|---|---|---|
+| `lag_fan_minutes` | Fan | 0.5–2 min (motor spool) |
+| `lag_vent_minutes` | Vent | 1–3 min (motor travel) |
+| `lag_heater_minutes` | Heater | 2–5 min (element warm-up) |
+| `lag_fogger_minutes` | Fogger | 0.5–1 min (pressure build) |
+| `lag_co2_valve_minutes` | CO₂ valve | 0.5–1 min (valve travel) |
+| `lag_led_minutes` | LED | ~0 (electronic) |
+| `lag_irrigation_minutes` | Irrigation | 0.5–2 min (pump/valve) |
+
+When `tau > 0`, the effective actuator output follows:
+
+$$
+u_{eff}(k) = u_{eff}(k{-}1) + \alpha \cdot \bigl(u_{cmd}(k) - u_{eff}(k{-}1)\bigr),
+\quad \alpha = 1 - e^{-\Delta t / \tau}
+$$
+
+Call `GreenhouseTransitionModel.reset_actuator_state()` between
+independent simulations to clear the lag memory.  `simulate()` saves and
+restores the effective-actuator state automatically so each MPC rollout
+is independent.
 
 ---
 

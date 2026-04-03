@@ -180,8 +180,8 @@ class StateFusion:
                 )
             else:
                 logger.warning("Empty weather context — no forecast produced.")
-        except Exception:
-            logger.exception("Weather forecast failed — continuing without it.")
+        except Exception as _exc:
+            logger.warning("Weather forecast failed — continuing without it. (%s)", _exc)
 
         # ── Step 3: Image classification ────────────────────────────────
         disease_clf_out = DiseaseClassificationOutput()
@@ -202,8 +202,8 @@ class StateFusion:
             )
             if not df_disease.empty:
                 disease_out = self._disease.predict_all_diseases(df_disease)
-        except Exception:
-            logger.exception("Disease progression prediction failed.")
+        except Exception as _exc:
+            logger.warning("Disease progression prediction failed. (%s)", _exc)
 
         fused.current_severity = disease_out.current_severity
         fused.severity_24h = disease_out.severity_24h
@@ -217,8 +217,8 @@ class StateFusion:
             )
             if not df_growth.empty:
                 growth_out = self._growth.predict_from_dataframe(df_growth)
-        except Exception:
-            logger.exception("Growth progression prediction failed.")
+        except Exception as _exc:
+            logger.warning("Growth progression prediction failed. (%s)", _exc)
 
         fused.next_stage = growth_out.next_stage
         fused.hours_to_transition = growth_out.hours_to_transition

@@ -149,9 +149,11 @@ from .dt_input_provider import (
     DTInputProvider,
     ImageObservation,
     SyntheticInputProvider,
+    DatabaseInputProvider,
 )
 from .dt_image_observer import (
     ImageObserver,
+    MinIOImageObserver,
     SyntheticImageObserver,
 )
 from .dt_output_writer import (
@@ -162,6 +164,26 @@ from .dt_output_writer import (
 
 # ── DT artifact manager ──────────────────────────────────────────────────────
 from .dt_artifact_manager import DTArtifactManager
+
+# ── Realtime closed-loop core ─────────────────────────────────────────────────
+from .realtime_core import (
+    RealtimeLoop,
+    RealtimeLoopConfig,
+    RealtimeMPCInputPreparation,
+    RealtimeRunSummary,
+    RealtimeStepResult,
+    RunRegistry,
+    STAGE_DURATION_HOURS,
+    PRIOR_STAGE_HOURS,
+    ensure_stream_table,
+    seed_initial_state,
+    write_step_to_stream,
+    estimate_energy,
+    diurnal_temp,
+    diurnal_humidity,
+    diurnal_solar,
+    default_soil_moisture,
+)
 
 # ── Yield proxy ───────────────────────────────────────────────────────────────
 from .yield_proxy import (
@@ -333,11 +355,32 @@ __all__ = [
     "DTInputProvider",
     "ImageObservation",
     "SyntheticInputProvider",
+    "DatabaseInputProvider",
     "ImageObserver",
+    "MinIOImageObserver",
     "SyntheticImageObserver",
     "DTOutputWriter",
     "JsonFileOutputWriter",
     "fanout_step_to_writer",
     # dt artifact manager
     "DTArtifactManager",
+    # realtime closed-loop core
+    "RealtimeLoop",
+    "RealtimeLoopConfig",
+    "RealtimeMPCInputPreparation",
+    "RealtimeRunSummary",
+    "RealtimeStepResult",
+    "RunRegistry",
+    "STAGE_DURATION_HOURS",
+    "PRIOR_STAGE_HOURS",
+    "ensure_stream_table",
+    "seed_initial_state",
+    "write_step_to_stream",
+    "estimate_energy",
+    "diurnal_temp",
+    "diurnal_humidity",
+    "diurnal_solar",
+    "default_soil_moisture",
+    # minio image observer
+    "MinIOImageObserver",
 ]

@@ -54,7 +54,9 @@ from typing import Any, Generator
 from .config import MPCConfig
 from .constants import (
     DT_MINUTES,
+    GROWTH_STAGES,
     compute_disease_risk_score,
+    stage_label_to_index,
 )
 from .dt_engine import DigitalTwinEngine
 from .dt_state import DTDiagnostics, DTSnapshot, DTStepInput, DTStepOutput
@@ -71,6 +73,7 @@ from .dt_runtime_prep import (
     prepare_initial_state,
     prepare_weather_sequence,
 )
+from .realtime_core import STAGE_DURATION_HOURS
 
 logger = logging.getLogger(__name__)
 
@@ -227,6 +230,9 @@ class DTLoop:
         weather_diurnal_amp: float = 8.0,
         input_provider: DTInputProvider | None = None,
         image_observer: ImageObserver | None = None,
+        auto_advance_stage: bool = False,
+        days_elapsed: float = 0.0,
+        session: object | None = None,
     ) -> None:
         # ── Validate inputs ───────────────────────────────────────
         from .constants import GROWTH_STAGES
@@ -252,16 +258,40 @@ class DTLoop:
         self._mpc_cadence = mpc_cadence_steps
         self._image_cadence = image_cadence_steps
 
-        # ── Input provider (optional — falls back to synthetic) ───
-        self._input_provider: DTInputProvider = input_provider or SyntheticInputProvider(
-            growth_stage=growth_stage,
-            start_time=self._start_time,
-            base_temp=weather_base_temp,
-            diurnal_amp=weather_diurnal_amp,
-        )
+        # ── Input provider ────────────────────────────────────────
+        # When a session is provided and no explicit provider is given,
+        # default to DatabaseInputProvider (real DB + AI forecast).
+        # Falls back to SyntheticInputProvider only if no session is available.
+        if input_provider is not None:
+            self._input_provider: DTInputProvider = input_provider
+        elif session is not None:
+            self._input_provider = DatabaseInputProvider(
+                session=session,
+                growth_stage=growth_stage,
+            )
+        else:
+            self._input_provider = SyntheticInputProvider(
+                growth_stage=growth_stage,
+                start_time=self._start_time,
+                base_temp=weather_base_temp,
+                diurnal_amp=weather_diurnal_amp,
+            )
 
-        # ── Image observer (optional — falls back to synthetic) ───
-        self._image_observer: ImageObserver = image_observer or SyntheticImageObserver()
+        # ── Image observer ────────────────────────────────────────
+        # When a session is provided, default to MinIOImageObserver
+        # (real crop images from the image_metadata table, TTL-cached).
+        from .dt_image_observer import MinIOImageObserver
+        if image_observer is not None:
+            self._image_observer: ImageObserver = image_observer
+        elif session is not None:
+            self._image_observer = MinIOImageObserver(session=session)  # type: ignore[arg-type]
+        else:
+            self._image_observer = SyntheticImageObserver()
+
+        # ── Auto-advance growth stage tracking ────────────────────
+        self._auto_advance_stage = auto_advance_stage
+        self._hours_in_stage = days_elapsed * 24.0
+        self._active_growth_stage = growth_stage
 
         # ── Build sub-systems ─────────────────────────────────────
         self._engine = DigitalTwinEngine(
@@ -352,7 +382,24 @@ class DTLoop:
                 minutes=step * self._dt_minutes,
             )
             weather = self._weather_seq[step]
-            stage = self._stages[step] if step < len(self._stages) else self._growth_stage
+
+            # ── Auto-advance growth stage if enabled ──────────────
+            if self._auto_advance_stage:
+                self._hours_in_stage += self._dt_minutes / 60.0
+                dur = STAGE_DURATION_HOURS.get(self._active_growth_stage)
+                if dur and self._hours_in_stage >= dur:
+                    idx = GROWTH_STAGES.index(self._active_growth_stage)
+                    if idx + 1 < len(GROWTH_STAGES):
+                        old_stage = self._active_growth_stage
+                        self._active_growth_stage = GROWTH_STAGES[idx + 1]
+                        self._hours_in_stage = 0.0
+                        logger.info(
+                            "Step %d: growth stage advanced %s -> %s",
+                            step, old_stage, self._active_growth_stage,
+                        )
+                stage = self._active_growth_stage
+            else:
+                stage = self._stages[step] if step < len(self._stages) else self._growth_stage
 
             # Cadence flags
             mpc_due = (step % self._mpc_cadence == 0)
@@ -449,6 +496,8 @@ class DTLoop:
             # ── Advance state ─────────────────────────────────────
             self._prev_action = self._current_action
             state = dt_out.next_state
+            if self._auto_advance_stage:
+                state.growth_stage_index = stage_label_to_index(self._active_growth_stage)
 
     # ── Private helpers ───────────────────────────────────────────────
 

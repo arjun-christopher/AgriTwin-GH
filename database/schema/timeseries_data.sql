@@ -8,6 +8,7 @@
 --   • growth_progression_stage_summary
 --   • growth_progression_cycle_summary
 --   • growth_progression_metadata
+--   • realtime_greenhouse_stream
 --
 -- Apply with:
 --   psql -U <user> -d agritwin_db -f database/schema/timeseries_data.sql
@@ -269,3 +270,89 @@ CREATE TABLE IF NOT EXISTS growth_progression_metadata (
     metadata_json       JSONB,          -- Full raw metadata JSON
     loaded_at           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+-- ─── Real-Time Closed-Loop Stream ───────────────────────────
+-- Written by:   scripts/run_realtime_loop.py
+-- Read by:      RealtimeMPCInputPreparation.get_latest_greenhouse_row()
+--
+-- One row per 5-minute DT simulation step in a real-time MPC run.
+-- Column names deliberately mirror greenhouse_data so that
+-- MPCInputPreparation can read from either table via a single dict schema.
+--
+-- Source values:
+--   "bootstrap"  — initial sensor values seeded from greenhouse_data
+--   "dt_sim"     — state produced by DigitalTwinEngine.step() (ARX physics)
+
+CREATE TABLE IF NOT EXISTS realtime_greenhouse_stream (
+    id                      SERIAL PRIMARY KEY,
+
+    -- Run identity
+    run_id                  VARCHAR(64)    NOT NULL,   -- rt_YYYYMMDD_HHMMSS
+    step_index              INTEGER        NOT NULL,   -- step counter within run
+    source                  VARCHAR(20)    NOT NULL DEFAULT 'dt_sim',
+                                                       -- bootstrap | dt_sim
+
+    -- Timestamps
+    datetime                TIMESTAMP      NOT NULL,   -- logical simulation time (UTC)
+    created_at              TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- Indoor climate (mirrors greenhouse_data columns)
+    indoor_temp             FLOAT,                     -- °C
+    indoor_humidity         FLOAT,                     -- %
+    indoor_air_velocity     FLOAT,                     -- m/s
+    indoor_co2              FLOAT,                     -- ppm
+    solarradiation          FLOAT,                     -- W/m²
+    day_night_flag          INTEGER,                   -- 1=day, 0=night
+    vpd                     FLOAT,                     -- kPa
+    dew_point               FLOAT,                     -- °C
+    leaf_wetness_proxy      FLOAT,                     -- 0–1
+
+    -- Derived state
+    soil_moisture           FLOAT,                     -- % (0–100)
+    disease_risk_score      FLOAT,                     -- 0–1
+    growth_stage            VARCHAR(50),               -- canonical label
+    growth_stage_index      INTEGER,                   -- 0–5
+    disease_classification  VARCHAR(100),              -- top disease class
+
+    -- Applied actuators (outputs of MPCSolver.solve())
+    fan_speed               FLOAT,                     -- duty 0–1
+    vent_opening            FLOAT,                     -- fraction 0–1
+    heater_output           FLOAT,                     -- duty 0–1
+    led_intensity           FLOAT,                     -- duty 0–1
+    fogger_duty             FLOAT,                     -- duty 0–1
+    co2_valve_pct           FLOAT,                     -- 0–1
+    irrigation_qty          FLOAT,                     -- L/step
+
+    -- MPC decision metadata
+    mpc_ran                 BOOLEAN        DEFAULT FALSE,
+    mpc_converged           BOOLEAN        DEFAULT FALSE,
+    mpc_fallback_used       BOOLEAN        DEFAULT FALSE,
+    step_cost               FLOAT,                     -- MPC objective value
+    solve_time_ms           FLOAT,                     -- solver wall time ms
+
+    -- Crop progression context
+    hours_in_current_stage  FLOAT,                     -- elapsed h in stage
+    stage_progress_pct      FLOAT,                     -- 0–100
+    hours_to_stage_transition FLOAT,                   -- LSTM-estimated hours
+
+    -- Resource accounting
+    step_energy_kwh         FLOAT,                     -- kWh this step
+    cumulative_energy_kwh   FLOAT,                     -- kWh since run start
+    cumulative_water_litres FLOAT,                     -- L since run start
+
+    -- Alert level
+    alert_level             VARCHAR(10)    DEFAULT 'GREEN'  -- GREEN|YELLOW|RED
+);
+
+CREATE INDEX IF NOT EXISTS idx_rt_stream_run_step
+    ON realtime_greenhouse_stream (run_id, step_index);
+
+CREATE INDEX IF NOT EXISTS idx_rt_stream_datetime
+    ON realtime_greenhouse_stream (datetime DESC);
+
+-- TimescaleDB hypertable (run only if TimescaleDB is installed)
+-- SELECT create_hypertable('realtime_greenhouse_stream', 'datetime',
+--     if_not_exists => TRUE,
+--     chunk_time_interval => INTERVAL '1 day');
+

@@ -57,9 +57,13 @@ class WeatherDisturbanceForecast:
     def _ensure_model(self) -> None:
         if self._model is not None:
             return
+        if self._model is False:
+            # Already failed permanently — don't retry every step
+            raise FileNotFoundError("Weather forecast model artifacts are incomplete.")
 
         loader_path = self._art_dir / "environment_forecast_loader.py"
         if not loader_path.exists():
+            self._model = False
             raise FileNotFoundError(
                 f"Missing loader script: {loader_path}"
             )
@@ -71,15 +75,23 @@ class WeatherDisturbanceForecast:
         mod = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
         spec.loader.exec_module(mod)  # type: ignore[union-attr]
 
-        # Locate the main .pt bundle
-        pt_files = sorted(self._art_dir.glob("*.pt"))
-        main_model_path = pt_files[0] if pt_files else None
+        # Locate the main LSTM bundle: saved in models/ (parent of artifacts/)
+        # with the same name as the artifact directory.
+        bundle_path = self._art_dir.parent.parent / f"{self._art_dir.name}.pt"
+        main_model_path = bundle_path if bundle_path.exists() else None
 
-        self._model = mod.EnvironmentForecastModel(
-            artifacts_dir=str(self._art_dir),
-            main_model_path=str(main_model_path) if main_model_path else None,
-            device=self._device,
-        )
+        try:
+            self._model = mod.EnvironmentForecastModel(
+                artifacts_dir=str(self._art_dir),
+                main_model_path=str(main_model_path) if main_model_path else None,
+                device=self._device,
+            )
+        except (FileNotFoundError, Exception) as exc:
+            self._model = False  # sentinel — don't retry on every step
+            raise FileNotFoundError(
+                f"Weather forecast model artifacts incomplete in "
+                f"{self._art_dir.name}: {exc}"
+            ) from exc
         logger.info(
             "Loaded EnvironmentForecastModel from %s", self._art_dir.name
         )

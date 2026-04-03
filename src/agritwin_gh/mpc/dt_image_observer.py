@@ -5,10 +5,12 @@ This module provides an ``ImageObserver`` protocol and two implementations:
 
 * ``SyntheticImageObserver`` — generates placeholder image metadata from
   the canonical ``IMAGE_SUBCATEGORY_MAP`` without touching MinIO or a
-  database.  Used in the current simulation path.
+  database.  Used for quick offline evaluation runs.
 
-* (Future) A ``MinIOImageObserver`` that wraps the existing
-  ``ImageStreamer`` (DB-backed TTL cache) and runs classifiers.
+* ``MinIOImageObserver`` — wraps ``ImageStreamer`` (DB-backed, TTL-cached)
+  to pull real crop images from the MinIO ``image_metadata`` table.
+  Pass to ``DTLoop(image_observer=MinIOImageObserver(session))`` — zero
+  changes to the loop itself.
 
 The observer is designed to be called at image-refresh cadence (every
 30–60 minutes) from the ``DTLoop``.  It takes the current growth stage
@@ -20,16 +22,6 @@ Design principle
 Image logic is fully decoupled from the DT engine (physics).  The
 observer does *not* modify greenhouse state — it only *observes* and
 produces metadata that the output layer persists.
-
-Future DB / MinIO migration
-----------------------------
-1. Create ``MinIOImageObserver(ImageObserver)`` that holds an
-   ``ImageStreamer`` instance (already accepts ``Session``).
-2. On ``observe()``, call ``ImageStreamer.get_random_growth_stage_image()``
-   and ``ImageStreamer.get_random_disease_image()`` with the supplied
-   growth stage and a disease label derived from classifier output.
-3. Replace ``SyntheticImageObserver`` with ``MinIOImageObserver`` in the
-   ``DTLoop`` constructor — zero changes to loop orchestration.
 """
 
 from __future__ import annotations
@@ -38,11 +30,14 @@ import datetime as _dt
 import logging
 from typing import Protocol, runtime_checkable
 
+from sqlalchemy.orm import Session
+
 from .constants import (
     DISEASE_IMAGE_SUBCATEGORY,
     GROWTH_STAGE_IMAGE_SUBCATEGORY,
 )
 from .dt_input_provider import ImageObservation
+from .image_streamer import ImageStreamer
 from .state import GreenhouseState
 
 logger = logging.getLogger(__name__)
@@ -126,6 +121,82 @@ class SyntheticImageObserver:
         )
         logger.debug(
             "Step %d image observation: stage=%s disease=%s",
+            step_index,
+            growth_stage,
+            disease_label,
+        )
+        return obs
+
+
+# ── MinIO-backed implementation (real images, TTL-cached) ─────────────────────
+
+
+class MinIOImageObserver:
+    """Real crop images from MinIO via ``ImageStreamer`` (TTL-cached).
+
+    Pulls random growth-stage and disease images from the
+    ``image_metadata`` table.  ``ImageStreamer`` already applies a TTL
+    cache, so repeated calls within the cache window are free.
+
+    Falls back to a synthetic observation when no matching image is
+    found in the database (e.g. missing category, empty table).
+
+    Parameters
+    ----------
+    session:
+        A live SQLAlchemy ``Session``.
+    cache_ttl_sec:
+        TTL for ``ImageStreamer``'s internal per-category cache (seconds).
+        Defaults to 300 s (5 minutes).
+    """
+
+    def __init__(
+        self,
+        session: Session,
+        cache_ttl_sec: float = 300.0,
+    ) -> None:
+        self._streamer = ImageStreamer(session, cache_ttl_sec=cache_ttl_sec)
+        self._fallback = SyntheticImageObserver()
+
+    def observe(
+        self,
+        growth_stage: str,
+        state: GreenhouseState,
+        step_index: int,
+        timestamp: _dt.datetime,
+    ) -> ImageObservation:
+        # ── Disease label from current risk score ─────────────────
+        risk = state.disease_risk_score
+        if risk < 0.3:
+            disease_label = "healthy leaves"
+        elif risk < 0.5:
+            disease_label = "early blight"
+        else:
+            disease_label = "late blight"
+
+        # ── Fetch from MinIO (TTL-cached) ─────────────────────────
+        gs_payload = self._streamer.get_random_growth_stage_image(growth_stage)
+        dis_payload = self._streamer.get_random_disease_image(disease_label)
+
+        if gs_payload is None or dis_payload is None:
+            logger.info(
+                "Step %d: MinIO image miss (gs=%s, dis=%s) — falling back to synthetic.",
+                step_index,
+                gs_payload is not None,
+                dis_payload is not None,
+            )
+            return self._fallback.observe(growth_stage, state, step_index, timestamp)
+
+        obs = ImageObservation(
+            growth_stage_image_key=gs_payload.image_key,
+            growth_stage_label=growth_stage,
+            disease_image_key=dis_payload.image_key,
+            disease_label=disease_label,
+            timestamp=timestamp,
+            source="minio",
+        )
+        logger.debug(
+            "Step %d MinIO observation: stage=%s disease=%s",
             step_index,
             growth_stage,
             disease_label,

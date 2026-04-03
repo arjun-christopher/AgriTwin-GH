@@ -573,20 +573,20 @@ The optimised weights show distinct patterns per variable and horizon:
 
 | Target | Horizon | Chronos | XGBoost | LSTM | Pattern |
 |--------|---------|---------|---------|------|----------|
-| Temperature | 24h | 0.163 | **0.780** | 0.057 | XGBoost dominant (tabular features work well) |
-| Temperature | 48h | 0.093 | 0.225 | **0.682** | LSTM dominant (temporal structure matters for distant forecast) |
-| Humidity | 24h | 0.405 | 0.411 | 0.184 | Balanced Chronos + XGBoost (volatile variable) |
-| Humidity | 48h | 0.479 | 0.000 | **0.521** | LSTM dominant (48h adds uncertainty; XGBoost muted) |
-| Windspeed | 24h | 0.457 | 0.374 | 0.169 | Chronos + XGBoost balanced (sparse data) |
-| Windspeed | 48h | 0.420 | **0.579** | 0.000 | XGBoost dominant (regularised XGBoost depth=1 works better for 48h) |
-| Solar Radiation | 24h | 0.052 | 0.000 | **0.948** | LSTM dominant (complex intra-day variations) |
-| Solar Radiation | 48h | 0.000 | 0.000 | **1.000** | LSTM only (pure LSTM for very uncertain distant solar) |
+| Temperature | 24h | 0.178 | **0.714** | 0.108 | XGBoost dominant (tabular features work well) |
+| Temperature | 48h | ~0.000 | 0.485 | **0.515** | LSTM dominant (temporal structure matters for distant forecast) |
+| Humidity | 24h | 0.380 | **0.620** | ~0.000 | XGBoost dominant (tabular features capture volatile swings) |
+| Humidity | 48h | **0.620** | ~0.000 | 0.380 | Chronos dominant (pretrained model best for uncertain 48h) |
+| Windspeed | 24h | 0.449 | **0.501** | 0.050 | Balanced Chronos/XGBoost (sparse data) |
+| Windspeed | 48h | 0.420 | **0.580** | ~0.000 | XGBoost dominant (regularised depth=1 robustness) |
+| Solar Radiation | 24h | ~0.000 | ~0.000 | **1.000** | LSTM only (complex temporal patterns) |
+| Solar Radiation | 48h | 0.097 | ~0.000 | **0.903** | LSTM dominant (sequence model best for distant solar) |
 
 **Key Observations:**
-- **Temperature 48h is LSTM-heavy** (0.682): temporal patterns matter for distant forecasts
-- **Solar 48h is LSTM-only** (1.000): distant solar is too uncertain for tree or pretrained models
-- **Windspeed 48h is XGB-heavy** (0.579): aggressive regularisation (depth=1) forces robustness
-- **Humidity 48h LSTM-dominant** (0.521): volatile variable benefits from horizon-specific tuning
+- **Temperature 48h is LSTM-heavy** (0.515): temporal patterns matter for distant forecasts
+- **Solar 24h & 48h are LSTM-dominant** (1.000 and 0.903): complex solar patterns captured best by sequence models
+- **Windspeed 48h is XGB-heavy** (0.580): aggressive regularisation (depth=1) forces robustness
+- **Humidity 48h is Chronos-dominant** (0.620): pretrained time-series knowledge best handles highly uncertain 48h humidity
 
 This data-driven, **per-horizon-per-variable approach** often produces more robust predictions than any single component, and adapts the blend to variable difficulty.
 
@@ -623,17 +623,18 @@ After the notebook finishes, you will have a directory structure like:
 ```
 src/agritwin_gh/models/
 ├── environment_forecast_<run_id>.pt
-│   └── Primary LSTM bundle (all targets, scalers, configs)
+│   └── Primary LSTM bundle — all per-target state dicts + target scalers, bundled
+│       Keys: run_id, target_cols, lstm_config, lstm_states, target_scalers
 │
 └── artifacts/environment_forecast_<run_id>/
-    ├── feature_config.json
-    │   └── All feature names, target cols, context length, season map, condition classes
-    │
     ├── scalers.pkl
-    │   └── RobustScaler for the engineered feature matrix (fit on train only)
+    │   └── RobustScaler for the full engineered feature matrix (fit on train only)
     │
     ├── label_encoder.pkl
     │   └── LabelEncoder for sky condition labels (e.g. "Sunny" → 0, "Cloudy" → 1)
+    │
+    ├── feature_config.json
+    │   └── All feature names, target cols, context length, season map, condition classes
     │
     ├── climate_normals.json
     │   └── Monthly and weekly climatological means for each target variable
@@ -660,7 +661,7 @@ src/agritwin_gh/models/
     │
     ├── chronos_finetuned/
     │   ├── t5_finetuned_state_dict.pt
-    │   │   └── Fine-tuned Chronos model weights
+    │   │   └── Fine-tuned Chronos T5 model weights
     │   └── chronos_finetune_config.json
     │       └── Training hyperparameters and loss history
     │
@@ -678,7 +679,7 @@ src/agritwin_gh/models/
         └── (other visualisations)
 ```
 
-> **Important Cleanup Policy:** The notebook deletes all intermediate model files and logs. Only the **final realtime bundle** (`environment_forecast_<run_id>.pt`) and necessary artefacts remain on disk, keeping the deployment footprint small.
+> **Cleanup Policy:** After training, per-target individual LSTM `.pt` state dict files and individual scaler `.pkl` files are removed from the artifact directory — they are redundant because the primary bundle (`environment_forecast_<run_id>.pt`) already contains all LSTM states and target scalers. All other inference-required artifacts (scalers, XGBoost, conditions classifiers, Chronos fine-tuned weights, feature config) are retained.
 
 ---
 
@@ -769,33 +770,35 @@ All metrics are saved in `evaluation_metrics.json`.
 
 ### 11.5 Final Test Performance (Post-Optimization)
 
-After implementing per-column XGBoost regularization, separate per-horizon LSTM models, and 1200-trial ensemble optimization, all R² values are now **≥ 0** (a major improvement from early negative R² values on volatile variables):
+Results after per-column XGBoost regularization, separate per-horizon LSTM models, and 1200-trial ensemble optimization:
 
 | Target | Horizon | MAPE (%) | Accuracy (%) | RMSE | MAE | R² | Status |
 |--------|---------|----------|----------|------|-----|-----|--------|
-| Temperature | 24h | 3.11 | 96.89 | 1.086 | 0.824 | **0.6983** | ✅ Excellent |
-| Temperature | 48h | 3.37 | 96.63 | 1.175 | 0.890 | **0.6486** | ✅ Excellent |
-| Humidity | 24h | 8.56 | 91.44 | 7.226 | 6.092 | **0.3402** | ✅ Good |
-| **Humidity | 48h** | **9.75** | **90.25** | **8.886** | **7.135** | **0.0024** | ✅ Fixed (was -0.1716) |
-| **Windspeed | 24h** | **26.34** | **73.66** | **5.709** | **4.647** | **0.0294** | ✅ Fixed (was -0.0231) |
-| **Windspeed | 48h** | **26.86** | **73.14** | **5.733** | **4.676** | **0.0128** | ✅ Fixed (was -0.2574) |
-| Solar Radiation | 24h | 42.84 | 57.16 | 54.562 | 42.776 | **0.2383** | ⚠️ Challenging |
-| Solar Radiation | 48h | 41.03 | 58.97 | 52.440 | 43.993 | **0.2965** | ⚠️ Challenging |
-| Skill (Conditions) | 24h | — | 55.77 | — | — | — | ⚠️ Fair |
-| Skill (Conditions) | 48h | — | 50.00 | — | — | — | ⚠️ Fair |
+| Temperature | 24h | 3.17 | 96.83 | 1.100 | 0.841 | **0.6903** | ✅ Excellent |
+| Temperature | 48h | 3.69 | 96.31 | 1.295 | 0.975 | **0.5732** | ✅ Good |
+| Humidity | 24h | 8.56 | 91.44 | 7.219 | 6.087 | **0.3415** | ✅ Good |
+| Humidity | 48h | 11.40 | 88.60 | 9.919 | 7.985 | **-0.2430** | ⚠️ Challenging |
+| Windspeed | 24h | 26.65 | 73.35 | 5.750 | 4.688 | **0.0156** | ⚠️ Volatile |
+| Windspeed | 48h | 26.85 | 73.15 | 5.732 | 4.675 | **0.0131** | ⚠️ Volatile |
+| Solar Radiation | 24h | 31.72 | 68.28 | 42.615 | 35.136 | **0.5354** | ✅ Good |
+| Solar Radiation | 48h | 35.24 | 64.76 | 47.435 | 38.115 | **0.4244** | ✅ Good |
+| Conditions | 24h | — | 55.77 | — | — | — | ⚠️ Fair |
+| Conditions | 48h | — | 50.00 | — | — | — | ⚠️ Fair |
 
-**Success Criteria Met:**
-- ✅ **All R² values > 0** (humidity 48h and windspeed 48h recovered from negative to positive)
-- ✅ **Temperature predictions robust** (R² > 0.64 for both horizons)
-- ✅ **Humidity predictions good** (R² > 0.30)
-- ⚠️ Solar radiation challenging (R² 0.24–0.30); inherent data scarcity and multi-modal patterns
+**Results Summary:**
+- ✅ **Temperature robust** (R² > 0.57 for both horizons; MAPE < 4%)
+- ✅ **Humidity 24h good** (R² = 0.34; 91.4% accuracy)
+- ✅ **Solar radiation strong** (R² = 0.54 at 24h, 0.42 at 48h — significant improvement)
+- ✅ **Windspeed positive R²** (both horizons; inherently sparse variable)
+- ⚠️ **Humidity 48h challenging** (R² = -0.24); 2-day humidity forecasting remains inherently uncertain at this data density
+- ⚠️ **Windspeed accuracy limited** (MAPE ~27%); daily aggregations mask sub-daily variability
 
-**What Drove the Improvements:**
+**Key Drivers:**
 
-1. **Per-column XGBoost regularization:** Windspeed/humidity benefit from aggressive depth=1 and λ=20–6.0
-2. **Per-horizon LSTM models:** 48h can now be heavily regularised (+0.15 dropout) without hurting 24h
-3. **1200-trial Optuna:** Better weight optimization found superior model blends (e.g., windspeed 48h prefers XGB, humidity 48h prefers LSTM)
-4. **Volatility-aware features:** Momentum, regime detection help volatile variables
+1. **Per-column XGBoost regularization:** Windspeed uses depth=1, λ=20.0 to prevent overfitting on sparse data
+2. **Per-horizon LSTM models:** Each horizon tuned independently; solar radiation 48h benefits from LSTM's temporal memory
+3. **1200-trial Optuna:** Discovery of variable-specific blends (e.g., humidity 48h → Chronos-dominant, solar → LSTM-only)
+4. **Volatility-aware features:** Momentum and regime indicators help distinguish predictable patterns from noise
 
 ---
 
@@ -821,15 +824,16 @@ Single model for both horizons creates a **compromise**:
 - 24h model: light regularisation for precision (dropout=0.05-0.10 base)
 - 48h model: aggressive regularisation to fight uncertainty (dropout adds +0.15)
 
-Result: humidity 48h R² improved from **-0.1716 → +0.0024**, windspeed 48h from **-0.2574 → +0.0128**.
+Result: solar radiation 48h R² improved from **0.30 → 0.42**, windspeed 48h recovered to positive R² (**+0.013**). Humidity 48h remains challenging (R² = -0.24) due to inherent 2-day volatility in daily aggregated data.
 
 ### Why 1200 Trials for Ensemble Weights?
 
 After model improvements, ensemble weight optimization became crucial:
 - Initial 300 trials found local optima
 - 1200 trials enabled discovery of better blends
-- Example: windspeed 48h found XGB-dominant (0.579) better than LSTM-heavy
-- Example: solar 48h found pure LSTM (1.000) optimal
+- Example: windspeed 48h confirmed XGB-dominant (0.580) for robustness
+- Example: solar 24h found pure LSTM (1.000) optimal; solar 48h is LSTM-dominant (0.903)
+- Example: humidity 48h switched to Chronos-dominant (0.620), outperforming LSTM for uncertain distant humidity
 
 ### Why LSTM Over Temporal Fusion Transformer?
 
