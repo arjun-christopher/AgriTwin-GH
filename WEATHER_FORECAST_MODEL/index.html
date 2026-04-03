@@ -15,6 +15,10 @@
         <link rel="canonical" href="https://arjun-christopher.github.io/AgriTwin-GH/WEATHER_FORECAST_MODEL/">
       
       
+        <link rel="prev" href="../TOMATO_GROWTH_PROGRESSION_MODEL/">
+      
+      
+        <link rel="next" href="../MPC_COMPLETE_GUIDE/">
       
       
         
@@ -25,7 +29,7 @@
     
     
       
-        <title>Greenhouse Weather Forecast Model (Chronos + XGBoost + LSTM Ensemble) - AgriTwin-GH Documentation</title>
+        <title>Weather Forecast Model - AgriTwin-GH Documentation</title>
       
     
     
@@ -110,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Greenhouse Weather Forecast Model (Chronos + XGBoost + LSTM Ensemble)
+              Weather Forecast Model
             
           </span>
         </div>
@@ -280,15 +284,37 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../TOMATO_DISEASE_CLASSIFICATION/" class="md-tabs__link">
           
   
   
   ML Models
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../MPC_COMPLETE_GUIDE/" class="md-tabs__link">
+          
+  
+  
+  Control & Simulation
 
         </a>
       </li>
@@ -681,28 +707,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -720,7 +749,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -766,14 +795,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../TOMATO_DISEASE_PROGRESSION_NOTEBOOK_DETAILED_GUIDE.md" class="md-nav__link">
+      <a href="../TOMATO_DISEASE_PROGRESSION_MODEL/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Disease Progression Notebook (Detailed)
+    Disease Progression Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DISEASE_PROGRESSION_SYNTHETIC_DOCUMENTATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Progression Synthetic Data
   
 
     
@@ -802,6 +859,674 @@
     
   
     Growth Stage Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_GROWTH_PROGRESSION_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Growth Progression Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Weather Forecast Model
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Weather Forecast Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-big-picture-what-problem-are-we-solving" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Big Picture: What Problem Are We Solving?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-what-exactly-does-the-model-predict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. What Exactly Does the Model Predict?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-where-does-the-data-come-from" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Where Does the Data Come From?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-step-by-step-pipeline-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Step-by-Step Pipeline Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-feature-engineering-turning-raw-weather-into-inputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Feature Engineering (Turning Raw Weather Into Inputs)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Feature Engineering (Turning Raw Weather Into Inputs)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-cyclical-time-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Cyclical Time Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-dindigul-seasonal-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Dindigul Seasonal Flags
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-lag-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Lag Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-rolling-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Rolling Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-climate-normals-and-anomalies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Climate Normals and Anomalies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-solar-geometry-chronos-meta-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 Solar Geometry &amp; Chronos Meta-Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#57-volatility-features-new-for-sparseerratic-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.7 Volatility Features (NEW - For Sparse/Erratic Variables)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-the-three-model-families" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. The Three Model Families
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. The Three Model Families">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-chronos-t5-small-pretrained-time-series-foundation-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Chronos-T5-Small: Pretrained Time-Series Foundation Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-xgboost-gradient-boosted-direct-multi-step-forecaster-per-column-regularization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 XGBoost: Gradient-Boosted Direct Multi-Step Forecaster (Per-Column Regularization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-lstm-recurrent-sequential-regressor-per-horizon-separate-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 LSTM: Recurrent Sequential Regressor (Per-Horizon Separate Models)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-how-we-train-all-models-together" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 How We Train All Models Together
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-ensemble-optuna-optimised-weight-blending-1200-trials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Ensemble: Optuna-Optimised Weight Blending (1200 Trials)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-conditions-classifier-sky-condition-labels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Conditions Classifier (Sky Condition Labels)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-what-gets-saved-after-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. What Gets Saved After Training?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-how-to-use-the-final-model-for-inference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. How to Use the Final Model for Inference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. How to Use the Final Model for Inference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-minimal-usage-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Minimal Usage Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-what-features-must-df_context-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 What Features Must df_context Have?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-key-metrics-and-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Key Metrics and Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Key Metrics and Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-error-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Error Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-correlationexplanation-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Correlation/Explanation Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-accuracy-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Accuracy Proxy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-conditions-classifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Conditions Classifier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#115-final-test-performance-post-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.5 Final Test Performance (Post-Optimization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-architecture-summary-design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Architecture Summary &amp; Design Decisions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Architecture Summary &amp; Design Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-per-column-hyperparameters-for-xgboost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Per-Column Hyperparameters for XGBoost?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-per-horizon-lstm-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Per-Horizon LSTM Models?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-1200-trials-for-ensemble-weights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why 1200 Trials for Ensemble Weights?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-lstm-over-temporal-fusion-transformer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why LSTM Over Temporal Fusion Transformer?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-chronos-meta-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Chronos Meta-Features?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#realtime-inference-footprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Realtime Inference Footprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-glossary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Glossary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control & Simulation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Control & Simulation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MPC_COMPLETE_GUIDE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MPC Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DT_LOOP_GUIDE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Digital Twin Closed-Loop
   
 
     

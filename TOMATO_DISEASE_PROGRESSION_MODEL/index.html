@@ -15,6 +15,10 @@
         <link rel="canonical" href="https://arjun-christopher.github.io/AgriTwin-GH/TOMATO_DISEASE_PROGRESSION_MODEL/">
       
       
+        <link rel="prev" href="../TOMATO_DISEASE_CLASSIFICATION/">
+      
+      
+        <link rel="next" href="../DISEASE_PROGRESSION_SYNTHETIC_DOCUMENTATION/">
       
       
         
@@ -25,7 +29,7 @@
     
     
       
-        <title>Tomato Disease Progression Model - AgriTwin-GH Documentation</title>
+        <title>Disease Progression Model - AgriTwin-GH Documentation</title>
       
     
     
@@ -110,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Tomato Disease Progression Model
+              Disease Progression Model
             
           </span>
         </div>
@@ -280,15 +284,37 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../TOMATO_DISEASE_CLASSIFICATION/" class="md-tabs__link">
           
   
   
   ML Models
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../MPC_COMPLETE_GUIDE/" class="md-tabs__link">
+          
+  
+  
+  Control & Simulation
 
         </a>
       </li>
@@ -681,28 +707,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -720,7 +749,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -763,17 +792,888 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../TOMATO_DISEASE_PROGRESSION_NOTEBOOK_DETAILED_GUIDE.md" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Progression Model
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    Disease Progression Notebook (Detailed)
+    Disease Progression Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-why-does-this-matter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Why Does This Matter?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-what-does-this-model-actually-predict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. What Does This Model Actually Predict?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-which-diseases-are-included" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Which Diseases Are Included?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-the-dataset-what-data-goes-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. The Dataset - What Data Goes In?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. The Dataset - What Data Goes In?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#long-format-input-idea" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Long format (input idea)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wide-format-model-ready-idea" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wide format (model-ready idea)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-how-does-the-notebook-work-a-plain-english-walkthrough" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. How Does the Notebook Work? - A Plain-English Walkthrough
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. How Does the Notebook Work? - A Plain-English Walkthrough">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#section-0-run-id-and-path-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 0 - Run ID and Path Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-1-setup-and-imports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 1 - Setup and Imports
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-2-load-hourly-dataset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 2 - Load Hourly Dataset
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-3-sanity-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 3 - Sanity Checks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-4-long-to-wide-transformation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 4 - Long to Wide Transformation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-5-future-target-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 5 - Future Target Construction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-6-feature-encoding-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 6 - Feature Encoding Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-7-encoded-feature-integrity-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 7 - Encoded Feature Integrity Check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-8-time-based-trainvaltest-split" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 8 - Time-Based Train/Val/Test Split
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-9-baseline-lag-feature-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 9 - Baseline Lag Feature Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-10-baseline-presence-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 10 - Baseline Presence Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-11-baseline-future-severity-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 11 - Baseline Future Severity Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-12-baseline-trend-derivation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 12 - Baseline Trend Derivation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-13-evaluation-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 13 - Evaluation Utilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sections-14-and-15-baseline-validationtest-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sections 14 and 15 - Baseline Validation/Test Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-16-sequence-window-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 16 - Sequence Window Construction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-17-sequence-feature-scaling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 17 - Sequence Feature Scaling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-18-lstmgru-model-builder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 18 - LSTM/GRU Model Builder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-19-train-lstm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 19 - Train LSTM
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-20-train-gru-and-select-global-best" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 20 - Train GRU and Select Global Best
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-21-training-curves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 21 - Training Curves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-22-evaluate-deep-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 22 - Evaluate Deep Models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-23-additional-diagnostic-plots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 23 - Additional Diagnostic Plots
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-24-model-comparison-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 24 - Model Comparison Table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-25-real-time-inference-demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 25 - Real-Time Inference Demo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-26-artifact-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 26 - Artifact Export
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#section-27-practical-scenario-simulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Section 27 - Practical Scenario Simulation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-how-the-models-work-under-the-hood" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. How the Models Work Under the Hood
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. How the Models Work Under the Hood">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-baseline-models-histgradientboosting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Baseline models (HistGradientBoosting)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-sequence-models-lstm-and-gru" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Sequence models (LSTM and GRU)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-losses-and-optimizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Losses and optimizer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-callbacks-and-training-safety" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Callbacks and training safety
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-trend-logic-and-severity-floor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Trend Logic and Severity Floor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-how-we-measure-success" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. How We Measure Success
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. How We Measure Success">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#presence-metrics-multi-label" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Presence metrics (multi-label)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#future-severity-metrics-regression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Future severity metrics (regression)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trend-metric" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trend metric
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-why-future-r2-was-negative-and-how-it-was-improved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Why Future R2 Was Negative and How It Was Improved
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-all-output-files-what-gets-saved-and-where" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. All Output Files - What Gets Saved and Where
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. All Output Files - What Gets Saved and Where">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-files-in-artifact-folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core files in artifact folder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plots-commonly-exported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plots commonly exported
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#primary-saved-model-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Primary saved model path
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-running-the-notebook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Running the Notebook
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Running the Notebook">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-end-to-end-flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. End-to-End Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-common-questions-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Common Questions (FAQ)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-glossary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Glossary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-recommended-learning-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Recommended Learning Path
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="15. Recommended Learning Path">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#track-a-non-technical-reader-farmer-manager-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Track A: Non-technical reader (farmer, manager, operations)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#track-b-beginner-ml-learner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Track B: Beginner ML learner
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#track-c-developer-and-maintainer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Track C: Developer and maintainer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-concept-dependency-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Concept Dependency Map
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-how-to-read-one-prediction-row" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. How to Read One Prediction Row
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-self-check-exercises" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Self-Check Exercises
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="18. Self-Check Exercises">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exercise-1-trend-rule-practice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exercise 1: Trend rule practice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-2-metric-interpretation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exercise 2: Metric interpretation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-3-operational-interpretation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exercise 3: Operational interpretation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#19-visual-concept-diagram-mermaid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        19. Visual Concept Diagram (Mermaid)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#20-quick-concept-snapshot-text-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        20. Quick Concept Snapshot (Text Diagram)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DISEASE_PROGRESSION_SYNTHETIC_DOCUMENTATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Progression Synthetic Data
   
 
     
@@ -802,6 +1702,179 @@
     
   
     Growth Stage Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_GROWTH_PROGRESSION_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Growth Progression Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../WEATHER_FORECAST_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Weather Forecast Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control & Simulation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Control & Simulation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MPC_COMPLETE_GUIDE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MPC Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DT_LOOP_GUIDE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Digital Twin Closed-Loop
   
 
     
