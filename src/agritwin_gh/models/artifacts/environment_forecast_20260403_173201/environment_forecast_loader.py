@@ -1,0 +1,276 @@
+
+"""
+Inference loader for environment_forecast_20260403_173201
+Usage:
+    from environment_forecast_loader import EnvironmentForecastModel
+    model = EnvironmentForecastModel("<artifacts_dir>", main_model_path="<path>.pt")
+    preds = model.predict(df_last_30_days)    # Returns dict: col -> {"24h": val, "48h": val}
+"""
+import joblib, json, torch, torch.nn as nn, numpy as np
+from pathlib import Path
+from sklearn.preprocessing import StandardScaler
+from chronos import ChronosPipeline
+
+
+# ─ Inline LSTM definition (must match training architecture) ──────────────────
+class WeatherLSTM(nn.Module):
+    def __init__(self, input_size, hidden_size=128, n_layers=2,
+                 dropout=0.3, pred_len=2):
+        super().__init__()
+        self.lstm    = nn.LSTM(input_size, hidden_size, n_layers,
+                               batch_first=True,
+                               dropout=(dropout if n_layers > 1 else 0.0))
+        self.norm    = nn.LayerNorm(hidden_size)
+        self.dropout = nn.Dropout(dropout)
+        self.head    = nn.Linear(hidden_size, pred_len)
+
+    def forward(self, x):
+        out, _ = self.lstm(x)
+        return self.head(self.dropout(self.norm(out[:, -1])))
+
+
+class EnvironmentForecastModel:
+    def __init__(self, artifacts_dir, main_model_path=None, device="cpu"):
+        self.art    = Path(artifacts_dir)
+        self.device = device
+
+        # ── Scalers / encoders ────────────────────────────────────────────────
+        self.feat_scaler   = joblib.load(self.art / "scalers.pkl")
+        self.label_encoder = joblib.load(self.art / "label_encoder.pkl")
+
+        # ── Config ────────────────────────────────────────────────────────────
+        with open(self.art / "feature_config.json") as f:
+            self.feat_cfg = json.load(f)
+        with open(self.art / "ensemble_weights.json") as f:
+            self.ens_weights = json.load(f)
+
+        # ── XGBoost models ────────────────────────────────────────────────────
+        self.xgb_models = {}
+        for col in self.feat_cfg["target_cols"]:
+            for h in ["24h", "48h"]:
+                p = self.art / f"xgb_{col}_{h}.pkl"
+                if p.exists():
+                    self.xgb_models[(col, h)] = joblib.load(p)
+
+        # ── Conditions classifiers ─────────────────────────────────────────────
+        self.cond_models = {}
+        for h in ["24h", "48h"]:
+            p = self.art / f"conditions_classifier_{h}.pkl"
+            if p.exists():
+                self.cond_models[h] = joblib.load(p)
+
+        # ── LSTM bundle ───────────────────────────────────────────────────────
+        self.lstm_models         = {}
+        self.lstm_target_scalers = {}
+        if main_model_path and Path(main_model_path).exists():
+            bundle = torch.load(main_model_path, map_location=device, weights_only=False)
+            cfg    = bundle["lstm_config"]
+            for key, state in bundle["lstm_states"].items():
+                # Each key is a (col_name, horizon_day) tuple; pred_len=1 per model
+                actual_pred_len = state["head.weight"].shape[0]
+                m = WeatherLSTM(
+                    cfg["input_size"], cfg["hidden_size"],
+                    cfg["n_layers"],   cfg["dropout"], actual_pred_len
+                ).to(device)
+                m.load_state_dict(state)
+                m.eval()
+                self.lstm_models[key] = m
+            for key, sc in bundle["target_scalers"].items():
+                self.lstm_target_scalers[key] = sc
+
+        # ── Chronos ───────────────────────────────────────────────────────────
+        self.chronos = ChronosPipeline.from_pretrained(
+            "amazon/chronos-t5-small", device_map=device, dtype=torch.float32)
+        chron_sd = self.art / "chronos_finetuned" / "t5_finetuned_state_dict.pt"
+        if chron_sd.exists():
+            self.chronos.model.model.load_state_dict(
+                torch.load(chron_sd, map_location=device))
+        self.chronos.model.eval()
+
+    def _engineer_features(self, df: "pd.DataFrame") -> "pd.DataFrame":
+        """Derive all model input features from raw weather columns.
+
+        Requires columns: datetime, temp, humidity, windspeed, solarradiation.
+        Optional: sunriseEpoch, sunsetEpoch (used for solar geometry).
+        Returns a new DataFrame with all feature columns appended.
+        """
+        import pandas as pd  # noqa: F811
+        df = df.copy()
+        dt = pd.to_datetime(df["datetime"])
+
+        # ── Date/time scalars ───────────────────────────────────────────────
+        df["year"]       = dt.dt.year
+        df["month"]      = dt.dt.month
+        df["day"]        = dt.dt.day
+        df["dayofyear"]  = dt.dt.dayofyear
+        df["dayofweek"]  = dt.dt.dayofweek
+        df["weekofyear"] = dt.dt.isocalendar().week.astype(int)
+        df["season"]     = ((df["month"] % 12) // 3).astype(int)
+
+        # ── Cyclical encodings ──────────────────────────────────────────────
+        df["day_sin"] = np.sin(2 * np.pi * df["dayofyear"] / 365.25)
+        df["day_cos"] = np.cos(2 * np.pi * df["dayofyear"] / 365.25)
+        df["mon_sin"] = np.sin(2 * np.pi * df["month"] / 12)
+        df["mon_cos"] = np.cos(2 * np.pi * df["month"] / 12)
+        df["dow_sin"] = np.sin(2 * np.pi * df["dayofweek"] / 7)
+        df["dow_cos"] = np.cos(2 * np.pi * df["dayofweek"] / 7)
+
+        # ── Season one-hot ──────────────────────────────────────────────────
+        for s in range(4):
+            df[f"season_{s}"] = (df["season"] == s).astype(float)
+
+        target_cols = self.feat_cfg["target_cols"]
+        lag_days    = self.feat_cfg.get("lag_days", [1, 2, 3, 7, 14, 30])
+        windows     = self.feat_cfg.get("rolling_windows", [7, 14, 30])
+
+        # ── Lag features ────────────────────────────────────────────────────
+        for col in target_cols:
+            if col in df.columns:
+                for lag in lag_days:
+                    df[f"{col}_lag{lag}"] = df[col].shift(lag)
+
+        # ── Rolling statistics ──────────────────────────────────────────────
+        for col in target_cols:
+            if col in df.columns:
+                for w in windows:
+                    base = df[col].shift(1)
+                    df[f"{col}_rmean{w}"] = base.rolling(w, min_periods=max(w // 2, 1)).mean()
+                    df[f"{col}_rstd{w}"]  = base.rolling(w, min_periods=max(w // 2, 1)).std()
+                    df[f"{col}_rmin{w}"]  = base.rolling(w, min_periods=max(w // 2, 1)).min()
+                    df[f"{col}_rmax{w}"]  = base.rolling(w, min_periods=max(w // 2, 1)).max()
+
+        # ── Climate normals ─────────────────────────────────────────────────
+        for col in target_cols:
+            if col in df.columns:
+                m_norm = df.groupby("month")[col].transform("mean")
+                w_norm = df.groupby("weekofyear")[col].transform("mean")
+                df[f"{col}_mon_norm"]    = m_norm
+                df[f"{col}_wk_norm"]     = w_norm
+                df[f"{col}_mon_anomaly"] = df[col] - m_norm
+                df[f"{col}_wk_anomaly"]  = df[col] - w_norm
+
+        # ── Solar features ──────────────────────────────────────────────────
+        if "sunriseEpoch" in df.columns and "sunsetEpoch" in df.columns:
+            sr = pd.to_numeric(df["sunriseEpoch"], errors="coerce")
+            ss = pd.to_numeric(df["sunsetEpoch"],  errors="coerce")
+            df["day_length_h"]     = (ss - sr) / 3600.0
+            df["solar_noon_epoch"] = (sr + ss) / 2
+        else:
+            df["day_length_h"]     = 12.0
+            df["solar_noon_epoch"] = 0.0
+        sol_rad = df["solarradiation"] if "solarradiation" in df.columns else 0.0
+        df["solar_norm"] = sol_rad / (df["day_length_h"].clip(lower=0.1) * 75)
+
+        # ── Interaction features ────────────────────────────────────────────
+        tmp = df["temp"]       if "temp"          in df.columns else 0.0
+        hum = df["humidity"]   if "humidity"      in df.columns else 50.0
+        ws  = df["windspeed"]  if "windspeed"     in df.columns else 0.0
+        sol = df["solarradiation"] if "solarradiation" in df.columns else 0.0
+        df["heat_index_proxy"] = tmp * (1 + 0.033 * hum / 100)
+        df["wind_chill_proxy"] = tmp - 0.4 * ws / 3.6
+        df["evap_potential"]   = sol * (1 - hum / 100)
+        df["temp_x_humidity"]  = tmp * hum
+
+        # ── Volatility / autocorrelation (humidity, windspeed) ──────────────
+        for col in ["humidity", "windspeed"]:
+            if col not in df.columns:
+                continue
+            df[f"{col}_roc1"] = df[col].shift(1) - df[col].shift(2)
+            df[f"{col}_roc3"] = df[col].shift(1) - df[col].shift(4)
+            df[f"{col}_roc7"] = df[col].shift(1) - df[col].shift(8)
+            df[f"{col}_vol5"]  = df[col].shift(1).rolling(5,  min_periods=2).std()
+            df[f"{col}_vol10"] = df[col].shift(1).rolling(10, min_periods=5).std()
+            df[f"{col}_vol_ratio"] = (
+                (df[f"{col}_vol5"] + 1e-6) / (df[f"{col}_vol10"] + 1e-6)
+            )
+            vol_thr = df[f"{col}_vol10"].quantile(0.6)
+            df[f"{col}_high_vol_regime"] = (
+                (df[f"{col}_vol10"] > vol_thr).astype(float)
+            )
+            for lag in [1, 7, 14]:
+                lag_s = df[col].shift(lag)
+                corr  = df[col].shift(1).rolling(30, min_periods=10).corr(lag_s)
+                df[f"{col}_acf_lag{lag}"] = corr.bfill().fillna(0.0)
+
+        # ── Chronos meta-features ───────────────────────────────────────────
+        for col in target_cols:
+            if col in df.columns and df[col].dropna().shape[0] >= 2:
+                chron = self._chronos_predict(df[col].dropna().values)
+                df[f"chronos_{col}_24h"] = float(chron[0])
+                df[f"chronos_{col}_48h"] = float(chron[1])
+            else:
+                df[f"chronos_{col}_24h"] = 0.0
+                df[f"chronos_{col}_48h"] = 0.0
+
+        return df
+
+    def _chronos_predict(self, series_np):
+        """Return [2] array: [24h, 48h] Chronos median forecasts."""
+        ctx = torch.tensor(series_np[-30:], dtype=torch.float32).unsqueeze(0)
+        with torch.no_grad():
+            fc = self.chronos.predict(ctx, prediction_length=2, num_samples=50)
+        return torch.quantile(fc.squeeze(0), 0.5, dim=0).cpu().numpy()
+
+    def predict(self, df_context):
+        """
+        df_context: DataFrame with raw weather columns (datetime, temp,
+                    humidity, windspeed, solarradiation) or a pre-engineered
+                    DataFrame.  Feature engineering is applied automatically
+                    when the expected feature columns are absent.
+        Returns dict: col -> {"24h": float, "48h": float}
+        """
+        import pandas as pd  # noqa: F811
+        feat_cols      = self.feat_cfg["all_feature_names"]   # 140 (for LSTM)
+        base_feat_cols = self.feat_cfg["feature_cols"]         # 132 (scaler + XGBoost)
+        chron_cols     = self.feat_cfg["chronos_meta_cols"]    # 8  (unscaled)
+        # Auto-engineer if raw data was supplied
+        if feat_cols[0] not in df_context.columns:
+            df_context = self._engineer_features(df_context)
+        target_cols = self.feat_cfg["target_cols"]
+        ctx_len     = self.feat_cfg["context_length"]
+        result      = {}
+
+        # Scale the 132 base features; leave the 8 Chronos cols unscaled
+        Xbase  = df_context[base_feat_cols].fillna(0).values[-ctx_len:]   # [ctx_len, 132]
+        Xsc    = self.feat_scaler.transform(Xbase)                         # [ctx_len, 132]
+        Xchron = df_context[chron_cols].fillna(0).values[-ctx_len:]        # [ctx_len, 8]
+        Xall   = np.concatenate([Xsc, Xchron], axis=1)                     # [ctx_len, 140]
+        Xt     = torch.tensor(Xall[np.newaxis], dtype=torch.float32).to(self.device)
+
+        for col in target_cols:
+            w_key_24 = f"{col}_24h"
+            w_key_48 = f"{col}_48h"
+            w24 = self.ens_weights.get(w_key_24, {"chronos": 0.33, "xgb": 0.33, "lstm": 0.34})
+            w48 = self.ens_weights.get(w_key_48, {"chronos": 0.33, "xgb": 0.33, "lstm": 0.34})
+
+            # Chronos
+            chron = self._chronos_predict(df_context[col].values)
+
+            # XGBoost
+            xgb_24 = float(self.xgb_models[(col, "24h")].predict(Xall[-1:])[0])                      if (col, "24h") in self.xgb_models else chron[0]
+            xgb_48 = float(self.xgb_models[(col, "48h")].predict(Xall[-1:])[0])                      if (col, "48h") in self.xgb_models else chron[1]
+
+            # LSTM — each (col, horizon_day) is a separate pred_len=1 model
+            m24 = self.lstm_models.get((col, 1))
+            m48 = self.lstm_models.get((col, 2))
+            if m24 is not None and m48 is not None:
+                with torch.no_grad():
+                    raw24 = m24(Xt).cpu().numpy()[0]  # [1]
+                    raw48 = m48(Xt).cpu().numpy()[0]  # [1]
+                sc24 = self.lstm_target_scalers.get((col, 1))
+                sc48 = self.lstm_target_scalers.get((col, 2))
+                lstm_24 = float(sc24.inverse_transform(raw24.reshape(-1, 1)).ravel()[0]) if sc24 else float(raw24[0])
+                lstm_48 = float(sc48.inverse_transform(raw48.reshape(-1, 1)).ravel()[0]) if sc48 else float(raw48[0])
+            else:
+                lstm_24, lstm_48 = chron[0], chron[1]
+
+            pred_24 = (w24["chronos"] * float(chron[0])
+                     + w24["xgb"]     * xgb_24
+                     + w24["lstm"]    * lstm_24)
+            pred_48 = (w48["chronos"] * float(chron[1])
+                     + w48["xgb"]     * xgb_48
+                     + w48["lstm"]    * lstm_48)
+
+            result[col] = {"24h": round(pred_24, 4), "48h": round(pred_48, 4)}
+
+        return result

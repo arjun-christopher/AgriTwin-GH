@@ -1,6 +1,6 @@
 {
-  "run_id": "full_eval_scenario_2_disease_20260402_205301",
-  "generated_at": "2026-04-02T20:51:08.539080",
+  "run_id": "full_eval_scenario_2_disease_20260403_114644",
+  "generated_at": "2026-04-03T11:44:16.398990",
   "summary_table": {
     "baseline": {
       "n_steps": 288,

@@ -1,6 +1,6 @@
 {
-  "run_id": "full_eval_scenario_1_flowering_20260402_205301",
-  "generated_at": "2026-04-02T20:47:26.205849",
+  "run_id": "full_eval_scenario_1_flowering_20260403_114644",
+  "generated_at": "2026-04-03T11:40:05.001214",
   "summary_table": {
     "baseline": {
       "n_steps": 144,

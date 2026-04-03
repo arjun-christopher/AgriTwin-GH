@@ -27,13 +27,6 @@ build/
 .ipynb_checkpoints
 *.ipynb_checkpoints/
 
-# Model artifacts (large files that shouldn't be in git)
-src/agritwin_gh/models/artifacts/
-src/agritwin_gh/mpc/mpc_results/
-*.pt
-*.pth
-*.h5
-
 # IDE
 .vscode/
 .idea/
