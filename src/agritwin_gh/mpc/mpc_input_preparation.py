@@ -306,7 +306,7 @@ class MPCInputPreparation:
                 "file_name": str,
             }
         """
-        logger.warning(
+        logger.debug(
             "get_random_image_for_category is a placeholder; "
             "image_metadata ORM model not yet wired."
         )

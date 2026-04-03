@@ -94,6 +94,12 @@ nav:
     - Data Directory: DATA.md
   - ML Models:
     - Disease Classification: TOMATO_DISEASE_CLASSIFICATION.md
-    - Disease Progression Notebook (Detailed): TOMATO_DISEASE_PROGRESSION_NOTEBOOK_DETAILED_GUIDE.md
+    - Disease Progression Model: TOMATO_DISEASE_PROGRESSION_MODEL.md
+    - Disease Progression Synthetic Data: DISEASE_PROGRESSION_SYNTHETIC_DOCUMENTATION.md
     - Growth Stage Classification: TOMATO_GROWTH_STAGE_CLASSIFICATION.md
+    - Growth Progression Model: TOMATO_GROWTH_PROGRESSION_MODEL.md
+    - Weather Forecast Model: WEATHER_FORECAST_MODEL.md
+  - Control & Simulation:
+    - MPC Complete Guide: MPC_COMPLETE_GUIDE.md
+    - Digital Twin Closed-Loop: DT_LOOP_GUIDE.md
   - Deployment Guide: DOCS_DEPLOYMENT.md

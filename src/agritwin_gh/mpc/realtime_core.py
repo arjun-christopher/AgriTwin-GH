@@ -32,6 +32,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
+import pandas as pd
 from sqlalchemy.orm import Session
 
 from agritwin_gh.models.timeseries import Base, RealtimeGreenhouseStream
@@ -151,6 +152,24 @@ def estimate_energy(actuators: ActuatorState) -> float:
 
 
 # ═════════════════════════════════════════════════════════════════════════════
+# In-memory context buffers (one per AI model input type)
+# ═════════════════════════════════════════════════════════════════════════════
+
+@dataclass
+class _ContextBuffers:
+    """Per-run rolling DataFrames fed to the three AI context methods.
+
+    Initialised from historical DB tables at ``RealtimeLoop.setup()`` then
+    grown with one row (or one row per disease) after every DT step so that
+    the AI models see a growing simulated trajectory rather than static
+    historical data.
+    """
+    weather: pd.DataFrame = field(default_factory=pd.DataFrame)
+    disease: pd.DataFrame = field(default_factory=pd.DataFrame)
+    growth: pd.DataFrame = field(default_factory=pd.DataFrame)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
 # Realtime-aware MPCInputPreparation override
 # ═════════════════════════════════════════════════════════════════════════════
 
@@ -167,10 +186,12 @@ class RealtimeMPCInputPreparation(MPCInputPreparation):
         session: Session,
         run_id: str,
         filter_by_run: bool = True,
+        buffers: _ContextBuffers | None = None,
     ) -> None:
         super().__init__(session)
         self._run_id = run_id
         self._filter_by_run = filter_by_run
+        self._buffers: _ContextBuffers | None = buffers
 
     def get_latest_greenhouse_row(self) -> dict[str, Any] | None:
         q = self._session.query(RealtimeGreenhouseStream)
@@ -195,6 +216,30 @@ class RealtimeMPCInputPreparation(MPCInputPreparation):
                 row.growth_stage or "seedling", "seedling"
             ),
         }
+
+    # ── Context method overrides (read from in-memory buffers) ────────
+
+    def get_weather_context(self, lookback_days: int = 30) -> pd.DataFrame:
+        """Return weather rows from the in-memory buffer or fall back to DB."""
+        if self._buffers is not None and not self._buffers.weather.empty:
+            return self._buffers.weather.tail(lookback_days * 24).reset_index(drop=True)
+        return super().get_weather_context(lookback_days)
+
+    def get_disease_progression_context(
+        self, sequence_length: int = 48
+    ) -> pd.DataFrame:
+        """Return disease rows from the in-memory buffer or fall back to DB."""
+        if self._buffers is not None and not self._buffers.disease.empty:
+            return self._buffers.disease.tail(sequence_length).reset_index(drop=True)
+        return super().get_disease_progression_context(sequence_length)
+
+    def get_growth_progression_context(
+        self, sequence_length: int = 48
+    ) -> pd.DataFrame:
+        """Return growth rows from the in-memory buffer or fall back to DB."""
+        if self._buffers is not None and not self._buffers.growth.empty:
+            return self._buffers.growth.tail(sequence_length).reset_index(drop=True)
+        return super().get_growth_progression_context(sequence_length)
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -589,6 +634,14 @@ class RealtimeLoop:
 
         self._hours_in_stage = self._hours_in_stage_0
         self._stage_progress = self._stage_progress_0
+
+        # Bootstrap in-memory context buffers from historical DB tables
+        self._buffers = _ContextBuffers()
+        self._bootstrap_context_buffers()
+        # Wire the live buffer reference into the input-prep so context method
+        # overrides transparently serve the AI models from the buffer.
+        self._rt_input_prep._buffers = self._buffers
+
         self._setup_done = True
         return self.current_state
 
@@ -644,6 +697,9 @@ class RealtimeLoop:
             payload = self._mpc_step(step_i, growth_stage)
         else:
             payload = self._hold_step(step_i, growth_stage)
+
+        # ── Append step to in-memory context buffers ────────────────────────────
+        self._append_step_to_buffers(step_i, payload, growth_stage)
 
         # ── Write step to PostgreSQL ──────────────────────────────────
         if not self.config.dry_run:
@@ -739,6 +795,7 @@ class RealtimeLoop:
 
         # 1. Fuse state
         fused: FusedState = self._fusion.fuse(timestamp=self._current_ts)
+        self._last_fused = fused  # save so hold steps can reference it
 
         if fused.weather_forecast:
             self._last_weather_step = fused.weather_forecast[0]
@@ -905,6 +962,343 @@ class RealtimeLoop:
             windspeed=self._last_weather_step.get("windspeed", 0.0),
             conditions="forecast",
         )
+
+    # ─────────────────────────────────────────────────────────────────
+    # Internal: context buffer bootstrap
+    # ─────────────────────────────────────────────────────────────────
+
+    def _bootstrap_context_buffers(self) -> None:
+        """Seed the three in-memory context buffers from the historical DB tables.
+
+        Called once from ``setup()``.  After this the buffers grow as each DT
+        step appends one row (or one row per disease).  The AI models will
+        then read from the growing simulated trajectory rather than always
+        re-querying static historical tables.
+        """
+        if self._buffers is None:
+            return
+
+        base = MPCInputPreparation(self.session)
+        disease_seq = getattr(self._disease_penalty, "history_window", 24) * 2
+        growth_seq = getattr(self._growth_weights, "seq_len", 48) * 2
+
+        try:
+            self._buffers.weather = base.get_weather_context(lookback_days=30)
+        except Exception as exc:
+            logger.warning("Weather context bootstrap failed — starting empty. (%s)", exc)
+            self._buffers.weather = pd.DataFrame()
+
+        try:
+            self._buffers.disease = base.get_disease_progression_context(
+                sequence_length=disease_seq
+            )
+        except Exception as exc:
+            logger.warning("Disease context bootstrap failed — starting empty. (%s)", exc)
+            self._buffers.disease = pd.DataFrame()
+
+        try:
+            self._buffers.growth = base.get_growth_progression_context(
+                sequence_length=growth_seq
+            )
+        except Exception as exc:
+            logger.warning("Growth context bootstrap failed — starting empty. (%s)", exc)
+            self._buffers.growth = pd.DataFrame()
+
+        # ── Normalize stage columns to match the configured starting stage ─
+        # Historical tables carry whatever the last cycle's stage was (often
+        # 'ripe').  Overwriting stage identity columns here makes the LSTM
+        # models see consistent stage context instead of predicting the wrong
+        # stage on every MPC step.
+        cfg_stage = self.config.growth_stage
+        stage_idx = (
+            GROWTH_STAGES.index(cfg_stage) if cfg_stage in GROWTH_STAGES else 0
+        )
+        stage_db = GROWTH_STAGE_TO_DB.get(cfg_stage, cfg_stage)
+        stage_dur_h = float(STAGE_DURATION_HOURS.get(cfg_stage, 240))
+        init_h = self._hours_in_stage_0
+        step_h = DT_MINUTES / 60.0
+
+        if not self._buffers.growth.empty:
+            n = len(self._buffers.growth)
+            prior_h = float(PRIOR_STAGE_HOURS.get(cfg_stage, 0))
+            total_cycle_h = float(sum(STAGE_DURATION_HOURS.values()))
+            hours_series = [
+                max(0.0, init_h - (n - 1 - i) * step_h) for i in range(n)
+            ]
+            total_h_elapsed = [prior_h + h for h in hours_series]
+
+            # Reconstruct cumulative GDD-like using actual temp column
+            if "indoor_temp" in self._buffers.growth.columns:
+                temps = list(self._buffers.growth["indoor_temp"].fillna(22.0))
+            else:
+                temps = [22.0] * n
+            gdd_vals: list[float] = []
+            running_gdd = max(0.0, float(temps[0]) - 10.0) * hours_series[0] / 24.0
+            gdd_vals.append(running_gdd)
+            for i in range(1, n):
+                running_gdd += max(0.0, float(temps[i]) - 10.0) * step_h / 24.0
+                gdd_vals.append(running_gdd)
+
+            self._buffers.growth["stage_name"] = stage_db
+            self._buffers.growth["stage_index"] = stage_idx
+            self._buffers.growth["stage_duration_hours"] = stage_dur_h
+            self._buffers.growth["stage_duration_days"] = stage_dur_h / 24.0
+            self._buffers.growth["hours_in_current_stage"] = hours_series
+            self._buffers.growth["days_in_current_stage"] = [
+                h / 24.0 for h in hours_series
+            ]
+            self._buffers.growth["stage_progress_pct"] = [
+                min(100.0, 100.0 * h / stage_dur_h) for h in hours_series
+            ]
+            self._buffers.growth["total_cycle_progress_pct"] = [
+                min(100.0, 100.0 * th / total_cycle_h) for th in total_h_elapsed
+            ]
+            self._buffers.growth["days_from_cycle_start"] = [
+                th / 24.0 for th in total_h_elapsed
+            ]
+            self._buffers.growth["estimated_hours_to_next_stage"] = [
+                max(0.0, stage_dur_h - h) for h in hours_series
+            ]
+            self._buffers.growth["estimated_days_to_next_stage"] = [
+                max(0.0, (stage_dur_h - h) / 24.0) for h in hours_series
+            ]
+            self._buffers.growth["is_stage_transition"] = 0
+            self._buffers.growth["cumulative_gdd_like_index"] = gdd_vals
+
+        if not self._buffers.disease.empty:
+            prior_h = float(PRIOR_STAGE_HOURS.get(cfg_stage, 0))
+            total_cycle_h = float(sum(STAGE_DURATION_HOURS.values()))
+            total_h_elap = prior_h + init_h
+            self._buffers.disease["stage_name"] = stage_db
+            self._buffers.disease["stage_index"] = stage_idx
+            if "stage_progress_pct" in self._buffers.disease.columns:
+                self._buffers.disease["stage_progress_pct"] = self._stage_progress_0
+            if "total_cycle_progress_pct" in self._buffers.disease.columns:
+                self._buffers.disease["total_cycle_progress_pct"] = min(
+                    100.0, 100.0 * total_h_elap / total_cycle_h
+                )
+            if "hours_in_current_stage" in self._buffers.disease.columns:
+                self._buffers.disease["hours_in_current_stage"] = init_h
+            if "days_from_cycle_start" in self._buffers.disease.columns:
+                self._buffers.disease["days_from_cycle_start"] = total_h_elap / 24.0
+            if "is_stage_transition" in self._buffers.disease.columns:
+                self._buffers.disease["is_stage_transition"] = 0
+
+        logger.info(
+            "Context buffers bootstrapped from historical tables: "
+            "weather=%d rows, disease=%d rows, growth=%d rows.",
+            len(self._buffers.weather),
+            len(self._buffers.disease),
+            len(self._buffers.growth),
+        )
+
+    # ─────────────────────────────────────────────────────────────────
+    # Internal: append one step to all context buffers
+    # ─────────────────────────────────────────────────────────────────
+
+    def _append_step_to_buffers(
+        self,
+        step_i: int,
+        payload: DigitalTwinStepPayload,
+        growth_stage: str,
+    ) -> None:
+        """Append one DT step's data to all three in-memory context buffers.
+
+        Weather, indoor environment and stage-accounting are all available from
+        the payload and current loop state.  Disease severity comes from the
+        most recent ``FusedState`` (``self._last_fused``), which is set by
+        every MPC step and re-used for interleaved hold steps.
+        """
+        if self._buffers is None:
+            return
+
+        ts = payload.timestamp or self._current_ts
+        obs: dict = payload.observed_state or {}
+        hour = ts.hour
+
+        # ── Derived scalars ──────────────────────────────────────────
+        temp = float(obs.get("indoor_temp") or 22.0)
+        humidity = float(obs.get("indoor_humidity") or 65.0)
+        co2 = float(obs.get("co2") or 800.0)
+        solar = float(obs.get("light_intensity") or 0.0)
+        vpd_val = float(obs.get("vpd") or compute_vpd(temp, humidity))
+        dew_pt = float(obs.get("dew_point") or compute_dew_point(temp, humidity))
+        lw = float(
+            obs.get("leaf_wetness_proxy")
+            or compute_leaf_wetness_proxy(humidity, temp, dew_pt)
+        )
+        dnf = int(6 <= hour < 20)
+
+        # 24-h rolling means derived from the existing growth buffer
+        if not self._buffers.growth.empty and "indoor_temp" in self._buffers.growth.columns:
+            t_tail = list(self._buffers.growth["indoor_temp"].tail(23)) + [temp]
+            h_tail = list(self._buffers.growth["indoor_humidity"].tail(23)) + [humidity]
+        else:
+            t_tail, h_tail = [temp], [humidity]
+        t_mean_24 = float(sum(t_tail) / len(t_tail))
+        h_mean_24 = float(sum(h_tail) / len(h_tail))
+        vpd_proxy = (1.0 - humidity / 100.0) * 0.6108 * math.exp(
+            17.27 * temp / (temp + 237.3)
+        )
+
+        # Calendar
+        day_of_year = ts.timetuple().tm_yday
+        week_of_year = ts.isocalendar()[1]
+        stage_db_name = GROWTH_STAGE_TO_DB.get(growth_stage, growth_stage)
+
+        # Stage accounting
+        stage_idx = (
+            GROWTH_STAGES.index(growth_stage) if growth_stage in GROWTH_STAGES else 0
+        )
+        stage_duration_h = float(STAGE_DURATION_HOURS.get(growth_stage, 240))
+        days_from_start = (
+            PRIOR_STAGE_HOURS.get(growth_stage, 0) / 24.0
+            + self._hours_in_stage / 24.0
+        )
+        total_cycle_h = float(sum(STAGE_DURATION_HOURS.values()))
+        total_h_elapsed = PRIOR_STAGE_HOURS.get(growth_stage, 0) + self._hours_in_stage
+        total_cycle_pct = min(100.0, 100.0 * total_h_elapsed / total_cycle_h)
+        hours_to_next = max(0.0, stage_duration_h - self._hours_in_stage)
+
+        # GDD-like index — carry forward from last growth buffer row
+        if (
+            not self._buffers.growth.empty
+            and "cumulative_gdd_like_index" in self._buffers.growth.columns
+        ):
+            last_gdd = float(self._buffers.growth["cumulative_gdd_like_index"].iloc[-1])
+        else:
+            last_gdd = 0.0
+        gdd_step = max(0.0, temp - 10.0) * (DT_MINUTES / 60.0) / 24.0
+
+        # Cycle IDs — inherit from bootstrap buffer or default to 1
+        growth_cycle_id = (
+            int(self._buffers.growth["cycle_id"].iloc[-1])
+            if not self._buffers.growth.empty and "cycle_id" in self._buffers.growth.columns
+            else 1
+        )
+        disease_cycle_id = (
+            int(self._buffers.disease["cycle_id"].iloc[-1])
+            if not self._buffers.disease.empty and "cycle_id" in self._buffers.disease.columns
+            else growth_cycle_id
+        )
+
+        # ── Weather buffer ────────────────────────────────────────────
+        w_row = {
+            "datetime": ts,
+            "temp": float(self._last_weather_step.get("temp", 20.0)),
+            "humidity": float(self._last_weather_step.get("humidity", 65.0)),
+            "windspeed": float(self._last_weather_step.get("windspeed", 0.0)),
+            "solarradiation": solar,
+            "conditions": self._last_weather_step.get("conditions", "forecast"),
+        }
+        self._buffers.weather = pd.concat(
+            [self._buffers.weather, pd.DataFrame([w_row])], ignore_index=True
+        )
+
+        # ── Growth buffer ─────────────────────────────────────────────
+        g_row = {
+            "timestamp": ts,
+            "cycle_id": growth_cycle_id,
+            "stage_name": stage_db_name,
+            "year": ts.year,
+            "month": ts.month,
+            "day_of_year": day_of_year,
+            "week_of_year": week_of_year,
+            "hour": hour,
+            "stage_index": stage_idx,
+            "hours_in_current_stage": self._hours_in_stage,
+            "days_in_current_stage": self._hours_in_stage / 24.0,
+            "stage_duration_hours": stage_duration_h,
+            "stage_duration_days": stage_duration_h / 24.0,
+            "stage_progress_pct": self._stage_progress,
+            "total_cycle_progress_pct": total_cycle_pct,
+            "estimated_days_to_next_stage": hours_to_next / 24.0,
+            "estimated_hours_to_next_stage": hours_to_next,
+            "is_stage_transition": int(hours_to_next < 1.0),
+            "days_from_cycle_start": days_from_start,
+            "indoor_temp": temp,
+            "indoor_humidity": humidity,
+            "indoor_air_velocity": 0.5,
+            "indoor_co2": co2,
+            "solarradiation": solar,
+            "day_night_flag": dnf,
+            "vpd": vpd_val,
+            "dew_point": dew_pt,
+            "leaf_wetness_proxy": lw,
+            "temperature_rolling_mean_24h": t_mean_24,
+            "humidity_rolling_mean_24h": h_mean_24,
+            "vpd_proxy": vpd_proxy,
+            "light_period_flag": dnf,
+            "cumulative_gdd_like_index": last_gdd + gdd_step,
+        }
+        self._buffers.growth = pd.concat(
+            [self._buffers.growth, pd.DataFrame([g_row])], ignore_index=True
+        )
+
+        # ── Disease buffer ────────────────────────────────────────────
+        risk = float(payload.disease_risk_score or 0.0)
+        severity: dict[str, float] = {}
+        fused_ref = self._last_fused
+        if fused_ref is not None and fused_ref.current_severity:
+            severity = {k: float(v) for k, v in fused_ref.current_severity.items()}
+
+        # Preserve disease names established at bootstrap; fall back to fused
+        if (
+            not self._buffers.disease.empty
+            and "disease_name" in self._buffers.disease.columns
+        ):
+            disease_names = list(self._buffers.disease["disease_name"].unique())
+        else:
+            disease_names = list(severity.keys())
+
+        if disease_names:
+            d_common = {
+                "timestamp": ts,
+                "cycle_id": disease_cycle_id,
+                "cycle_label": f"cycle_{disease_cycle_id}",
+                "season_label": "simulated",
+                "stage_name": stage_db_name,
+                "stage_index": stage_idx,
+                "days_from_cycle_start": days_from_start,
+                "day_of_year": day_of_year,
+                "week_of_year": week_of_year,
+                "hour": hour,
+                "hours_in_current_stage": self._hours_in_stage,
+                "stage_progress_pct": self._stage_progress,
+                "total_cycle_progress_pct": total_cycle_pct,
+                "is_stage_transition": int(hours_to_next < 1.0),
+                "indoor_temp": temp,
+                "indoor_humidity": humidity,
+                "indoor_air_velocity": 0.5,
+                "indoor_co2": co2,
+                "solarradiation": solar,
+                "day_night_flag": dnf,
+                "vpd": vpd_val,
+                "dew_point": dew_pt,
+                "leaf_wetness_proxy": lw,
+                "temperature_rolling_mean_24h": t_mean_24,
+                "humidity_rolling_mean_24h": h_mean_24,
+                "vpd_proxy": vpd_proxy,
+                "cumulative_gdd_like_index": last_gdd + gdd_step,
+            }
+            d_rows = []
+            for dname in disease_names:
+                infection_pct = severity.get(dname, 0.0)
+                d_rows.append({
+                    **d_common,
+                    "disease_name": dname,
+                    "disease_present_flag": int(infection_pct > 0.0),
+                    "disease_risk_score": risk,
+                    "current_infection_pct": infection_pct,
+                    "infection_growth_rate_hourly": 0.0,
+                    "stage_susceptibility_score": 0.5,
+                    "outbreak_trigger_flag": int(risk > 0.7),
+                    "control_action_flag": 0,
+                    "control_action_type": None,
+                })
+            self._buffers.disease = pd.concat(
+                [self._buffers.disease, pd.DataFrame(d_rows)], ignore_index=True
+            )
 
 
 # ═════════════════════════════════════════════════════════════════════════════

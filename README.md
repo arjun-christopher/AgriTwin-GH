@@ -31,6 +31,7 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 | **Greenhouse Weather Forecast Model** | Chronos + XGBoost + LSTM ensemble forecasting 24h/48h indoor climate conditions for digital twin and control | ✅ Complete |
 | **Digital Twin Simulator** | Physics-based greenhouse model for scenario simulation | ✅ Complete |
 | **MPC-Like Control Policy** | Model predictive control for actuator management | ✅ Complete |
+| **Real-Time Closed-Loop** | DB→AI→MPC→DB autonomous control cycle with in-memory context buffers | ✅ Complete |
 | **What-If Analysis** | Comparative scenario evaluation and decision support | ✅ Complete |
 | **Non-Verbal Alerts** | Visual operator notifications for critical events | ✅ Complete |
 | **Dashboard Visualizations** | Interactive monitoring and performance comparison | ✅ Complete |
@@ -89,6 +90,15 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 - **Cost Function** — Nine-term objective balancing setpoint tracking, disease suppression, humidity exposure, energy costs, water costs, and actuator efficiency
 - **Comparison Framework** — Evaluated against a rule-based baseline controller; all three scenarios (standard, disease-pressure, stage-transition) show positive yield improvement and reduced resource costs → [MPC Complete Guide](docs/MPC_COMPLETE_GUIDE.md)
 
+## 🔄 Digital Twin Closed-Loop
+
+A production-grade real-time closed-loop layer (`realtime_core.py`) that connects the PostgreSQL database, all AI inference pipelines, and the MPC solver into a single autonomous control cycle:
+
+- **DB → AI → MPC → DB** — Each 5-minute step reads live sensor rows, runs weather forecast (Chronos/XGBoost/LSTM ensemble), disease progression (LSTM/GRU), and growth stage progression (multi-task LSTM), feeds results into the MPC solver, advances the digital twin physics model, and writes the output back to `realtime_greenhouse_stream`
+- **In-Memory Context Buffers** — Bootstrapped from historical hypertables at startup; grown with each step so all AI models always have a full look-back window without repeated DB queries
+- **Multi-Rate Cadence** — DT physics every 5 min · MPC solve every 15 min (configurable) · hold steps carry forward last actuator trajectory between solves
+- **CLI Runner** — `scripts/run_realtime_loop.py` (`--steps`, `--stage`, `--days-elapsed`, `--mpc-every`, `--no-images`, `--dry-run`) with per-step console output and NDJSON artifact logs → [DT Closed-Loop Guide](docs/DT_LOOP_GUIDE.md)
+
 ## 🛠️ Technology Stack
 
 - **Python 3.8+** · **UV** (package manager)
@@ -131,6 +141,7 @@ jupyter notebook feature_demos/
 | [Disease Progression Model](docs/TOMATO_DISEASE_PROGRESSION_MODEL.md) | Baseline + LSTM/GRU disease progression forecasting for per-disease presence, 24h severity, and 24h trend labels |
 | [Weather Forecast Model](docs/WEATHER_FORECAST_MODEL.md) | Chronos + XGBoost + LSTM ensemble for 24h/48h greenhouse climate forecasting |
 | [MPC Complete Guide](docs/MPC_COMPLETE_GUIDE.md) | Model predictive control module: solver tuning, constraint strategy, cost function design, and end-to-end evaluation |
+| [DT Closed-Loop Guide](docs/DT_LOOP_GUIDE.md) | Real-time DB→AI→MPC→DB closed-loop layer: architecture, data flow, cadence, and CLI runner reference |
 | [Deployment Guide](docs/DOCS_DEPLOYMENT.md) | MkDocs documentation site setup |
 
 **[📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)**
