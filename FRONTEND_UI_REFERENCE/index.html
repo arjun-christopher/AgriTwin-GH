@@ -1,0 +1,3168 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AgriTwin Greenhouse Digital Twin - Documentation and Feature Demos">
+      
+      
+        <meta name="author" content="AgriTwin Team">
+      
+      
+        <link rel="canonical" href="https://arjun-christopher.github.io/AgriTwin-GH/FRONTEND_UI_REFERENCE/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Frontend UI Reference — AgriTwin-GH - AgriTwin-GH Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#frontend-ui-reference-agritwin-gh" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="AgriTwin-GH Documentation" class="md-header__button md-logo" aria-label="AgriTwin-GH Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AgriTwin-GH Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Frontend UI Reference — AgriTwin-GH
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/arjun-christopher/AgriTwin-GH" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AgriTwin-GH
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../FEATURE_DEMOS_GUIDE/" class="md-tabs__link">
+          
+  
+  
+  Feature Demos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../DATABASE_REFERENCE/" class="md-tabs__link">
+          
+  
+  
+  Data & Database
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../TOMATO_DISEASE_CLASSIFICATION/" class="md-tabs__link">
+          
+  
+  
+  ML Models
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../MPC_COMPLETE_GUIDE/" class="md-tabs__link">
+          
+  
+  
+  Control & Simulation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../DOCS_DEPLOYMENT/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Deployment Guide
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="AgriTwin-GH Documentation" class="md-nav__button md-logo" aria-label="AgriTwin-GH Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AgriTwin-GH Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/arjun-christopher/AgriTwin-GH" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AgriTwin-GH
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature Demos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Feature Demos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FEATURE_DEMOS_GUIDE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data & Database
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data & Database
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DATABASE_REFERENCE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../POSTGRESQL_QUICKSTART/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PostgreSQL Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../IMAGE_STORAGE_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Image Storage Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../INDOOR_GREENHOUSE_DATASET/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Indoor Greenhouse Dataset
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DATA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Directory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ML Models
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ML Models
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_DISEASE_CLASSIFICATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_DISEASE_PROGRESSION_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Progression Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DISEASE_PROGRESSION_SYNTHETIC_DOCUMENTATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Progression Synthetic Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_GROWTH_STAGE_CLASSIFICATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Growth Stage Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_GROWTH_PROGRESSION_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Growth Progression Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../WEATHER_FORECAST_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Weather Forecast Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control & Simulation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Control & Simulation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MPC_COMPLETE_GUIDE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MPC Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DT_LOOP_GUIDE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Digital Twin Closed-Loop
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOCS_DEPLOYMENT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-tech-stack-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Tech Stack &amp; Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Tech Stack &amp; Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-points-for-contributors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key points for contributors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install &amp; run
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-project-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Project Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-routing-shell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Routing &amp; Shell
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-design-system-theming" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Design System &amp; Theming
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Design System &amp; Theming">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#colour-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Colour tokens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typography-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Typography tokens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#theme-switching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Theme switching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tailwind-class-construction-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tailwind class construction rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-shared-services-layer-srcservicesapijs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Shared Services Layer — src/services/api.js
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Shared Services Layer — src/services/api.js">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integration-steps-per-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration steps (per function)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-api-function-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full API function inventory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-body-shapes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POST body shapes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-centralised-mock-data-srcdatamockdatajs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Centralised Mock Data — src/data/mockData.js
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Centralised Mock Data — src/data/mockData.js">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-constants-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data constants inventory
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data constants inventory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#crop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CROP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crop_health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CROP_HEALTH
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weather_status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WEATHER_STATUS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outdoor_current" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OUTDOOR_CURRENT
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outdoor_forecast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OUTDOOR_FORECAST
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#actuator_state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ACTUATOR_STATE
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monthly_resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MONTHLY_RESOURCES
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monthly_cost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MONTHLY_COST
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crop_images" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CROP_IMAGES
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sensor_metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SENSOR_METRICS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#health_rows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HEALTH_ROWS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#growth_intel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GROWTH_INTEL
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disease_risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DISEASE_RISKS
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Pages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Pages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-splashscreen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 SplashScreen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-homedashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 HomeDashboard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.2 HomeDashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mock-data-constants-defined-inline-not-from-mockdatajs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mock data constants (defined inline, not from mockData.js)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sub-components-file-local-not-shared" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sub-components (file-local, not shared)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#actuator-ids-7-matches-mpc-control_variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actuator IDs (7, matches MPC CONTROL_VARIABLES)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-progression-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage progression constants
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-detailedinsights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 DetailedInsights
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.3 DetailedInsights">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layout_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mock-data-constants-all-defined-inline-in-the-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mock data constants (ALL defined inline in the file)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disease-list-canonical-from-constantspy-disease_categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disease list (canonical, from constants.py DISEASE_CATEGORIES)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#indoor-sensor-list-from-mpc-state_variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Indoor sensor list (from MPC STATE_VARIABLES)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sub-components-file-local" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sub-components (file-local)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#risk_theme-map-drives-disease-bar-colours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RISK_THEME map (drives disease bar colours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-manualoverride" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 ManualOverride
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.4 ManualOverride">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layout_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Layout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mock-data-constants-all-file-local" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mock data / constants (all file-local)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component-state-react-usestate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component state (React useState)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#override-interactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Override interactions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sub-components-file-local_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sub-components (file-local)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#actuator-ids-and-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Actuator IDs and defaults
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-shared-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Shared Components
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Shared Components">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#statuscard-srccomponentsuistatuscardjsx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        StatusCard — src/components/ui/StatusCard.jsx
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#panelcard-srccomponentsuipanelcardjsx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PanelCard — src/components/ui/PanelCard.jsx
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#glasspanel-srccomponentsuiglasspaneljsx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GlassPanel — src/components/ui/GlassPanel.jsx
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-api-integration-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. API Integration Checklist
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. API Integration Checklist">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#global-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#srcservicesapijs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        src/services/api.js
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#homedashboardjsx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HomeDashboard.jsx
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detailedinsightsjsx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DetailedInsights.jsx
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manualoverridejsx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ManualOverride.jsx
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-build-dev-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Build &amp; Dev Commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Build &amp; Dev Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#serving-the-built-frontend-from-fastapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Serving the built frontend from FastAPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="frontend-ui-reference-agritwin-gh">Frontend UI Reference — AgriTwin-GH<a class="headerlink" href="#frontend-ui-reference-agritwin-gh" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>Purpose:</strong> Complete reference for the React dashboard UI — pages, components, mock data locations, and the exact API calls needed to swap each piece of static data for live backend data. Use this document when integrating the FastAPI backend.</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#1-tech-stack--setup">Tech Stack &amp; Setup</a></li>
+<li><a href="#2-project-structure">Project Structure</a></li>
+<li><a href="#3-routing--shell">Routing &amp; Shell</a></li>
+<li><a href="#4-design-system--theming">Design System &amp; Theming</a></li>
+<li><a href="#5-shared-services-layer--srcservicesapijs">Shared Services Layer</a></li>
+<li><a href="#6-centralised-mock-data--srcdatamockdatajs">Centralised Mock Data</a></li>
+<li><a href="#7-pages">Pages</a></li>
+<li><a href="#71-splashscreen">SplashScreen</a></li>
+<li><a href="#72-homedashboard">HomeDashboard</a></li>
+<li><a href="#73-detailedinsights">DetailedInsights</a></li>
+<li><a href="#74-manualoverride">ManualOverride</a></li>
+<li><a href="#8-shared-components">Shared Components</a></li>
+<li><a href="#9-api-integration-checklist">API Integration Checklist</a></li>
+<li><a href="#10-environment-variables">Environment Variables</a></li>
+<li><a href="#11-build--dev-commands">Build &amp; Dev Commands</a></li>
+</ol>
+<hr />
+<h2 id="1-tech-stack-setup">1. Tech Stack &amp; Setup<a class="headerlink" href="#1-tech-stack-setup" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Version</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>React</td>
+<td>19</td>
+<td>UI framework</td>
+</tr>
+<tr>
+<td>Vite</td>
+<td>6.4.x</td>
+<td>Dev server + bundler</td>
+</tr>
+<tr>
+<td>Tailwind CSS</td>
+<td>v4</td>
+<td>Utility CSS — <strong>no config file</strong>, tokens declared in <code>src/index.css</code> via <code>@theme {}</code></td>
+</tr>
+<tr>
+<td>lucide-react</td>
+<td>0.511.x</td>
+<td>Icon library — tree-shaken, no extra config</td>
+</tr>
+<tr>
+<td><code>@tailwindcss/vite</code></td>
+<td>4.x</td>
+<td>Tailwind v4 Vite plugin (replaces PostCSS)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-points-for-contributors">Key points for contributors<a class="headerlink" href="#key-points-for-contributors" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>No <code>tailwind.config.js</code></strong> — Tailwind v4 reads design tokens directly from CSS <code>@theme {}</code> block in <code>src/index.css</code>. Do not create a config file.</li>
+<li><strong>No React Router</strong> — navigation is a simple <code>useState('page')</code> in <code>App.jsx</code>. There are no URL routes; pages are conditionally rendered.</li>
+<li><strong>No Redux / Zustand</strong> — global state consists of a single <code>ThemeContext</code> for dark/light mode only. All other state is local per-page.</li>
+<li><strong>Module type</strong> — <code>package.json</code> sets <code>"type": "module"</code>, so all JS files use ES module syntax (<code>import</code>/<code>export</code>).</li>
+<li><strong>Icon rule</strong> — <code>src/data/mockData.js</code> stores icon identifiers as strings (e.g., <code>'Fan'</code>, <code>'Droplets'</code>) because that file has no React imports. Each page that consumes these icons defines its own <code>ICON_MAP = { Fan, Droplets, … }</code> lookup and resolves them at render time.</li>
+</ul>
+<h3 id="install-run">Install &amp; run<a class="headerlink" href="#install-run" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c"># From project root</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd </span><span class="n">src</span><span class="p">/</span><span class="n">agritwin_gh</span><span class="p">/</span><span class="n">frontend</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">npm</span> <span class="n">install</span>          <span class="c"># install dependencies</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>          <span class="c"># dev server → http://localhost:5173</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">build</span>        <span class="c"># production build → dist/</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">preview</span>      <span class="c"># serve the production build locally</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">lint</span>         <span class="c"># ESLint</span>
+</code></pre></div>
+<blockquote>
+<p>Set <code>VITE_API_BASE_URL</code> in <code>.env.local</code> before running dev/build to point at the FastAPI server (default falls back to <code>http://localhost:8000</code>).</p>
+</blockquote>
+<hr />
+<h2 id="2-project-structure">2. Project Structure<a class="headerlink" href="#2-project-structure" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>src/agritwin_gh/frontend/
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── package.json
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── index.html                   # HTML entry — mounts &lt;div id=&quot;root&quot;&gt;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>└── src/
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    ├── main.jsx                 # ReactDOM.createRoot → &lt;App /&gt;
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    ├── App.jsx                  # Root: ThemeProvider + AppRouter (page state)
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    ├── index.css                # @theme tokens + font imports + light-theme overrides
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    ├── theme.js                 # (currently unused helper — reserved for future use)
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    │
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    ├── context/
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    │   └── ThemeContext.jsx     # useTheme() → { isDark, toggleTheme }
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    │                            # Writes data-theme=&quot;light&quot; on &lt;html&gt; for CSS vars
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    │
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    ├── data/
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    │   └── mockData.js          # SINGLE SOURCE of all static data (exported constants)
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    │                            # See §6 for full inventory
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    │
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    ├── services/
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    │   └── api.js               # FastAPI stub layer — every function returns mock data now
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    │                            # See §5 for full API map
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>    │
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    ├── components/
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>    │   ├── layout/
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    │   │   ├── AppShell.jsx     # Persistent scroll wrapper — renders Header + Navbar + &lt;main&gt;
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>    │   │   ├── Header.jsx       # Fixed top bar: brand, live UTC clock, theme toggle
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>    │   │   ├── Navbar.jsx       # Fixed nav below header: Dashboard / Insights / Override links
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    │   │   └── Sidebar.jsx      # (file exists, not currently wired into AppShell)
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>    │   └── ui/
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>    │       ├── GlassPanel.jsx   # Frosted-glass card container
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>    │       ├── PanelCard.jsx    # Standard content card with optional header slot
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    │       └── StatusCard.jsx   # Crop Health / Weather status tile (Healthy/Warning/Risk)
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>    │
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>    └── pages/
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>        ├── SplashScreen.jsx     # Animated intro — auto-advances to HomeDashboard
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>        ├── HomeDashboard.jsx    # Main overview page (route key: &#39;dashboard&#39;)
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>        ├── DetailedInsights.jsx # Deep-dive analysis page (route key: &#39;insights&#39;)
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>        └── ManualOverride.jsx   # Manual simulation control page (route key: &#39;override&#39;)
+</code></pre></div>
+<hr />
+<h2 id="3-routing-shell">3. Routing &amp; Shell<a class="headerlink" href="#3-routing-shell" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/App.jsx</code></p>
+<p>Navigation is handled by a single <code>useState</code> in <code>AppRouter</code>. There is no URL router.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">page</span><span class="p">,</span><span class="w"> </span><span class="nx">setPage</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="s1">&#39;splash&#39;</span><span class="p">);</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1">// valid values: &#39;splash&#39; | &#39;dashboard&#39; | &#39;insights&#39; | &#39;override&#39;</span>
+</code></pre></div>
+<ul>
+<li><code>SplashScreen</code> renders when <code>page === 'splash'</code> and fires <code>onComplete</code> after 4.2 s, setting page to <code>'dashboard'</code>.</li>
+<li>All other pages are looked up via <code>PAGE_MAP</code> and rendered inside <code>AppShell</code>.</li>
+<li><code>navigate</code> is passed down as a prop so any page can call <code>navigate('insights')</code> etc.</li>
+</ul>
+<p><strong>AppShell layout (<code>AppShell.jsx</code>):</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>┌──────────────────────────────────────────┐  ← fixed, z-50, h-14 (56px)
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>│  Header (brand + clock + theme toggle)   │
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>├──────────────────────────────────────────┤  ← fixed, z-40, h-11 (44px), top-14
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>│  Navbar (Dashboard / Insights / Override)│
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>├──────────────────────────────────────────┤
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>│                                          │
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>│  &lt;main&gt;  pt-25 px-6 md:px-8 pb-16        │  ← scrollable page content
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>│  (page component renders here)          │
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>│                                          │
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>└──────────────────────────────────────────┘
+</code></pre></div>
+<p><strong>Header (<code>Header.jsx</code>):</strong>
+- Left: Sprout icon + "AgriTwin-GH" wordmark (clicking it calls <code>navigate('dashboard')</code>)
+- Right: live UTC date/time (ticks every second via <code>setInterval</code>) + dark/light toggle button
+- No API data — fully static/local</p>
+<p><strong>Navbar (<code>Navbar.jsx</code>):</strong>
+- Three nav buttons: Dashboard, Detailed Insights, Manual Override
+- Active page shown with primary-colour underline
+- No API data — fully static</p>
+<hr />
+<h2 id="4-design-system-theming">4. Design System &amp; Theming<a class="headerlink" href="#4-design-system-theming" title="Permanent link">&para;</a></h2>
+<p><strong>File:</strong> <code>src/index.css</code></p>
+<p>All design tokens are CSS custom properties declared in the <code>@theme {}</code> block. Tailwind v4 converts these into utility classes automatically.</p>
+<h3 id="colour-tokens">Colour tokens<a class="headerlink" href="#colour-tokens" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Dark value</th>
+<th>Light value</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--color-background</code></td>
+<td><code>#0b1326</code></td>
+<td><code>#eef4ea</code></td>
+<td>Page/body background</td>
+</tr>
+<tr>
+<td><code>--color-surface</code></td>
+<td><code>#171f33</code></td>
+<td><code>#e5ece0</code></td>
+<td>Panel backgrounds</td>
+</tr>
+<tr>
+<td><code>--color-surface-low</code></td>
+<td><code>#131b2e</code></td>
+<td><code>#e9f0e5</code></td>
+<td>Recessed areas</td>
+</tr>
+<tr>
+<td><code>--color-surface-deep</code></td>
+<td><code>#060e20</code></td>
+<td><code>#f5f9f3</code></td>
+<td>Header bar</td>
+</tr>
+<tr>
+<td><code>--color-surface-high</code></td>
+<td><code>#222a3d</code></td>
+<td><code>#d5e0ca</code></td>
+<td>Elevated cards, hover states</td>
+</tr>
+<tr>
+<td><code>--color-surface-highest</code></td>
+<td><code>#2d3449</code></td>
+<td><code>#c5d4b8</code></td>
+<td>Badges, tooltips</td>
+</tr>
+<tr>
+<td><code>--color-primary</code></td>
+<td><code>#4be277</code></td>
+<td><code>#22c55e</code></td>
+<td>Brand green — active states</td>
+</tr>
+<tr>
+<td><code>--color-secondary</code></td>
+<td><code>#89ceff</code></td>
+<td><code>#5db8f5</code></td>
+<td>Accent blue</td>
+</tr>
+<tr>
+<td><code>--color-danger</code></td>
+<td><code>#f87171</code></td>
+<td>—</td>
+<td>Error / risk</td>
+</tr>
+<tr>
+<td><code>--color-warning</code></td>
+<td><code>#fbbf24</code></td>
+<td>—</td>
+<td>Caution / override mode</td>
+</tr>
+<tr>
+<td><code>--color-on-surface</code></td>
+<td><code>#dae2fd</code></td>
+<td>—</td>
+<td>Primary text</td>
+</tr>
+<tr>
+<td><code>--color-on-surface-variant</code></td>
+<td><code>#bccbb9</code></td>
+<td>—</td>
+<td>Secondary/muted text</td>
+</tr>
+<tr>
+<td><code>--color-on-primary</code></td>
+<td><code>#003915</code></td>
+<td>—</td>
+<td>Text on primary buttons</td>
+</tr>
+</tbody>
+</table>
+<h3 id="typography-tokens">Typography tokens<a class="headerlink" href="#typography-tokens" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--font-sans</code></td>
+<td>Inter (loaded from Google Fonts)</td>
+</tr>
+<tr>
+<td><code>--font-headline</code></td>
+<td>Space Grotesk (Google Fonts)</td>
+</tr>
+<tr>
+<td><code>--font-mono</code></td>
+<td>JetBrains Mono / Fira Code</td>
+</tr>
+</tbody>
+</table>
+<h3 id="theme-switching">Theme switching<a class="headerlink" href="#theme-switching" title="Permanent link">&para;</a></h3>
+<p><code>ThemeContext.jsx</code> toggles <code>data-theme="light"</code> on <code>&lt;html&gt;</code>. The CSS in <code>index.css</code> overrides surface tokens under <code>[data-theme="light"]</code>. Dark mode is the default.</p>
+<h3 id="tailwind-class-construction-rule">Tailwind class construction rule<a class="headerlink" href="#tailwind-class-construction-rule" title="Permanent link">&para;</a></h3>
+<p><strong>All Tailwind utility classes must be literal strings in source code.</strong> Because Tailwind v4 scans source files at build time, never build class strings dynamically (e.g., <code>'text-' + color</code>). Instead, use conditional maps:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// CORRECT — both classes appear as literals:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">pill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">active</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s1">&#39;bg-primary/10 text-primary&#39;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;bg-surface-highest text-on-surface-variant&#39;</span><span class="p">;</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1">// WRONG — class strings won&#39;t be detected:</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="kd">const</span><span class="w"> </span><span class="nx">pill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`bg-</span><span class="si">${</span><span class="nx">color</span><span class="si">}</span><span class="sb">/10 text-</span><span class="si">${</span><span class="nx">color</span><span class="si">}</span><span class="sb">`</span><span class="p">;</span>
+</code></pre></div>
+<hr />
+<h2 id="5-shared-services-layer-srcservicesapijs">5. Shared Services Layer — <code>src/services/api.js</code><a class="headerlink" href="#5-shared-services-layer-srcservicesapijs" title="Permanent link">&para;</a></h2>
+<p>This file is the <strong>integration boundary</strong> between the frontend and backend. Currently every function returns mock data. When the backend is ready, swap in the <code>fetch()</code> call.</p>
+<p><strong>Base URL:</strong> reads <code>VITE_API_BASE_URL</code> from <code>.env.local</code>, defaults to <code>http://localhost:8000</code>.</p>
+<h3 id="integration-steps-per-function">Integration steps (per function)<a class="headerlink" href="#integration-steps-per-function" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Set <code>VITE_API_BASE_URL=http://your-fastapi-host</code> in <code>.env.local</code></li>
+<li>Remove the <code>import * as mock from '../data/mockData.js'</code> import once all functions are live</li>
+<li>For each function, uncomment the <code>const data = await get(...)</code> line and delete the <code>return Promise.resolve(mock.XXX)</code> line</li>
+<li>Add error handling (401 → re-authenticate, 503 → show toast/banner)</li>
+</ol>
+<h3 id="full-api-function-inventory">Full API function inventory<a class="headerlink" href="#full-api-function-inventory" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>HTTP</th>
+<th>Endpoint</th>
+<th>Returns mock</th>
+<th>Backend source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getDtState()</code></td>
+<td>GET</td>
+<td><code>/api/dt/state</code></td>
+<td><code>CROP</code>, <code>CROP_HEALTH</code>, <code>SENSOR_METRICS</code>, <code>GROWTH_INTEL</code></td>
+<td><code>dt_core.py</code></td>
+</tr>
+<tr>
+<td><code>postDtOverride(params)</code></td>
+<td>POST</td>
+<td><code>/api/dt/override</code></td>
+<td><code>{ ok: true }</code></td>
+<td><code>dt_core.py</code></td>
+</tr>
+<tr>
+<td><code>postDtPreset(presetId)</code></td>
+<td>POST</td>
+<td><code>/api/dt/preset/:id</code></td>
+<td><code>{ ok: true, preset }</code></td>
+<td><code>dt_core.py</code></td>
+</tr>
+<tr>
+<td><code>getActuatorState()</code></td>
+<td>GET</td>
+<td><code>/api/actuators/state</code></td>
+<td><code>ACTUATOR_STATE</code></td>
+<td><code>mpc_controller.py</code></td>
+</tr>
+<tr>
+<td><code>postActuatorSet(actuators)</code></td>
+<td>POST</td>
+<td><code>/api/actuators/set</code></td>
+<td><code>{ ok: true }</code></td>
+<td><code>mpc_controller.py</code></td>
+</tr>
+<tr>
+<td><code>getWeather()</code></td>
+<td>GET</td>
+<td><code>/api/weather/current</code></td>
+<td><code>WEATHER_STATUS</code>, <code>OUTDOOR_CURRENT</code>, <code>OUTDOOR_FORECAST</code></td>
+<td>weather forecast model</td>
+</tr>
+<tr>
+<td><code>getDiseaseRisks()</code></td>
+<td>GET</td>
+<td><code>/api/intelligence/disease</code></td>
+<td><code>DISEASE_RISKS</code></td>
+<td>disease progression model</td>
+</tr>
+<tr>
+<td><code>getGrowthIntel()</code></td>
+<td>GET</td>
+<td><code>/api/intelligence/growth</code></td>
+<td><code>GROWTH_INTEL</code></td>
+<td>growth progression model</td>
+</tr>
+<tr>
+<td><code>getMonthlyResources()</code></td>
+<td>GET</td>
+<td><code>/api/resources/monthly</code></td>
+<td><code>MONTHLY_RESOURCES</code>, <code>MONTHLY_COST</code></td>
+<td>resource tracking</td>
+</tr>
+<tr>
+<td><code>getLatestMedia()</code></td>
+<td>GET</td>
+<td><code>/api/media/latest</code></td>
+<td><code>CROP_IMAGES</code></td>
+<td>MinIO + PostgreSQL metadata</td>
+</tr>
+<tr>
+<td><code>getStageImages()</code></td>
+<td>GET</td>
+<td><code>/api/media/stage-images</code></td>
+<td><code>GROWTH_STAGE_IMAGES</code></td>
+<td>MinIO</td>
+</tr>
+<tr>
+<td><code>getDiseaseImages()</code></td>
+<td>GET</td>
+<td><code>/api/media/disease-scans</code></td>
+<td><code>DISEASE_IMAGES</code></td>
+<td>MinIO</td>
+</tr>
+<tr>
+<td><code>getSystemHealth()</code></td>
+<td>GET</td>
+<td><code>/api/system/health</code></td>
+<td><code>HEALTH_ROWS</code></td>
+<td>system diagnostics</td>
+</tr>
+</tbody>
+</table>
+<h3 id="post-body-shapes">POST body shapes<a class="headerlink" href="#post-body-shapes" title="Permanent link">&para;</a></h3>
+<p><strong><code>postDtOverride</code></strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span><span class="w"> </span><span class="nt">&quot;param&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;temperature_setpoint&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">25.0</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div></p>
+<p><strong><code>postActuatorSet</code></strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span><span class="w"> </span><span class="nt">&quot;actuators&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fan&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">80</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;heater&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">}]</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div></p>
+<p><strong><code>postDtPreset</code></strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>POST /api/dt/preset/day-cycle
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>POST /api/dt/preset/night-cycle
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>POST /api/dt/preset/emergency-flush
+</code></pre></div></p>
+<hr />
+<h2 id="6-centralised-mock-data-srcdatamockdatajs">6. Centralised Mock Data — <code>src/data/mockData.js</code><a class="headerlink" href="#6-centralised-mock-data-srcdatamockdatajs" title="Permanent link">&para;</a></h2>
+<p>All static data used across pages lives here as named exports. Pages import from this file directly, or consume it indirectly via <code>api.js</code>. The comments in the file already list the target API endpoint for each constant.</p>
+<h3 id="data-constants-inventory">Data constants inventory<a class="headerlink" href="#data-constants-inventory" title="Permanent link">&para;</a></h3>
+<h4 id="crop"><code>CROP</code><a class="headerlink" href="#crop" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nx">current</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Flowering&#39;</span><span class="p">,</span><span class="w">      </span><span class="c1">// string — current growth stage name</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nx">currentIndex</span><span class="o">:</span><span class="w"> </span><span class="mf">3</span><span class="p">,</span><span class="w">           </span><span class="c1">// 0-based index into stages[]</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nx">currentPct</span><span class="o">:</span><span class="w"> </span><span class="mf">95</span><span class="p">,</span><span class="w">            </span><span class="c1">// % completion of current stage</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nx">daysInStage</span><span class="o">:</span><span class="w"> </span><span class="mf">12</span><span class="p">,</span><span class="w">           </span><span class="c1">// days elapsed in current stage</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="nx">stageDuration</span><span class="o">:</span><span class="w"> </span><span class="mf">14</span><span class="p">,</span><span class="w">         </span><span class="c1">// total days expected for this stage</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="nx">next</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Fruiting&#39;</span><span class="p">,</span><span class="w">          </span><span class="c1">// next stage name</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">  </span><span class="nx">nextInDays</span><span class="o">:</span><span class="w"> </span><span class="mf">2</span><span class="p">,</span><span class="w">             </span><span class="c1">// estimated days until transition</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">  </span><span class="nx">stages</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;Germination&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Seedling&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Vegetative&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Flowering&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Fruiting&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Harvest&#39;</span><span class="p">],</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p>⚠️ <strong>Note:</strong> <code>mockData.js</code> uses an older 6-stage list. <code>HomeDashboard.jsx</code> and <code>DetailedInsights.jsx</code> define their own local <code>CROP</code> constants with the canonical 6 stages (<code>Seedling / Early Veg. / Flw. Init. / Flowering / Unripe / Ripe</code>). When integrating, the API response should use the canonical stage names from <code>constants.py</code>.</p>
+</blockquote>
+<p><strong>→ API:</strong> <code>GET /api/dt/state</code> → <code>.crop</code></p>
+<hr />
+<h4 id="crop_health"><code>CROP_HEALTH</code><a class="headerlink" href="#crop_health" title="Permanent link">&para;</a></h4>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Healthy&#39;</span><span class="p">,</span><span class="w">        </span><span class="c1">// &#39;Healthy&#39; | &#39;Warning&#39; | &#39;Risk&#39;</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nx">confidence</span><span class="o">:</span><span class="w"> </span><span class="mf">99.5</span><span class="p">,</span><span class="w">         </span><span class="c1">// classifier confidence % (not shown in current UI)</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="nx">detail</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;...&#39;</span><span class="p">,</span><span class="w">            </span><span class="c1">// one-sentence description</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span><span class="nx">scannedAgo</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;2 mins ago&#39;</span><span class="p">,</span><span class="w"> </span><span class="c1">// human-readable &quot;X ago&quot; string</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="p">}</span>
+</code></pre></div>
+<strong>→ API:</strong> <code>GET /api/dt/state</code> → <code>.health</code></p>
+<hr />
+<h4 id="weather_status"><code>WEATHER_STATUS</code><a class="headerlink" href="#weather_status" title="Permanent link">&para;</a></h4>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Warning&#39;</span><span class="p">,</span><span class="w">              </span><span class="c1">// &#39;Healthy&#39; | &#39;Warning&#39; | &#39;Risk&#39;</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="nx">condition</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;High External Humidity&#39;</span><span class="p">,</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span><span class="nx">detail</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;...&#39;</span><span class="p">,</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">  </span><span class="nx">forecast</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Expected to clear in ~3 hrs&#39;</span><span class="p">,</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="p">}</span>
+</code></pre></div>
+<strong>→ API:</strong> <code>GET /api/weather/current</code> → <code>.status</code></p>
+<hr />
+<h4 id="outdoor_current"><code>OUTDOOR_CURRENT</code><a class="headerlink" href="#outdoor_current" title="Permanent link">&para;</a></h4>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nx">temp</span><span class="o">:</span><span class="w"> </span><span class="mf">18.4</span><span class="p">,</span><span class="w"> </span><span class="nx">humidity</span><span class="o">:</span><span class="w"> </span><span class="mf">89</span><span class="p">,</span><span class="w"> </span><span class="nx">windSpeed</span><span class="o">:</span><span class="w"> </span><span class="mf">12</span><span class="p">,</span><span class="w"> </span><span class="nx">windDir</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;NNE&#39;</span><span class="p">,</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="nx">pressure</span><span class="o">:</span><span class="w"> </span><span class="mf">1013</span><span class="p">,</span><span class="w"> </span><span class="nx">uvIndex</span><span class="o">:</span><span class="w"> </span><span class="mf">3</span><span class="p">,</span><span class="w"> </span><span class="nx">dewPoint</span><span class="o">:</span><span class="w"> </span><span class="mf">16.8</span><span class="p">,</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span><span class="nx">condition</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Overcast&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">visibility</span><span class="o">:</span><span class="w"> </span><span class="mf">8.2</span><span class="p">,</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="p">}</span>
+</code></pre></div>
+<strong>→ API:</strong> <code>GET /api/weather/current</code> → <code>.current</code></p>
+<hr />
+<h4 id="outdoor_forecast"><code>OUTDOOR_FORECAST</code><a class="headerlink" href="#outdoor_forecast" title="Permanent link">&para;</a></h4>
+<p>Array of 6 hourly entries:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;12:00&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">high</span><span class="o">:</span><span class="w"> </span><span class="mf">22</span><span class="p">,</span><span class="w"> </span><span class="nx">low</span><span class="o">:</span><span class="w"> </span><span class="mf">19</span><span class="p">,</span><span class="w"> </span><span class="nx">humidity</span><span class="o">:</span><span class="w"> </span><span class="mf">74</span><span class="p">,</span><span class="w"> </span><span class="nx">condition</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Partly Cloudy&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">iconKey</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;CloudSun&#39;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div></p>
+<blockquote>
+<p><code>iconKey</code> is a lucide icon name. DetailedInsights resolves it via its local <code>ICON_MAP</code>.</p>
+</blockquote>
+<p><strong>→ API:</strong> <code>GET /api/weather/current</code> → <code>.forecast</code> (array of N entries)</p>
+<hr />
+<h4 id="actuator_state"><code>ACTUATOR_STATE</code><a class="headerlink" href="#actuator_state" title="Permanent link">&para;</a></h4>
+<p>Array of 6 items (older list — pages define their own updated 7-actuator lists inline):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;fan&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">iconKey</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Fan&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Ventilation Fan&#39;</span><span class="p">,</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;ON&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">active</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">level</span><span class="o">:</span><span class="w"> </span><span class="mf">75</span><span class="p">,</span><span class="w"> </span><span class="nx">color</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;primary&#39;</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="p">}</span>
+</code></pre></div></p>
+<blockquote>
+<p><strong>Per-page actuator IDs:</strong> <code>fan | vent | irrigation | heater | led | co2 | fogger</code> (7 actuators reflecting MPC <code>CONTROL_VARIABLES</code>)</p>
+</blockquote>
+<p><strong>→ API:</strong> <code>GET /api/actuators/state</code></p>
+<hr />
+<h4 id="monthly_resources"><code>MONTHLY_RESOURCES</code><a class="headerlink" href="#monthly_resources" title="Permanent link">&para;</a></h4>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">[</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Water&#39;</span><span class="p">,</span><span class="w">  </span><span class="nx">used</span><span class="o">:</span><span class="w"> </span><span class="mf">1840</span><span class="p">,</span><span class="w"> </span><span class="nx">unit</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;L&#39;</span><span class="w">   </span><span class="p">},</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Energy&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">used</span><span class="o">:</span><span class="w"> </span><span class="mf">312</span><span class="p">,</span><span class="w">  </span><span class="nx">unit</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;kWh&#39;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="p">]</span>
+</code></pre></div>
+<strong>→ API:</strong> <code>GET /api/resources/monthly</code> → <code>.resources</code></p>
+<hr />
+<h4 id="monthly_cost"><code>MONTHLY_COST</code><a class="headerlink" href="#monthly_cost" title="Permanent link">&para;</a></h4>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{</span><span class="w"> </span><span class="nx">month</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;April 2026&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">energy</span><span class="o">:</span><span class="w"> </span><span class="mf">43.68</span><span class="p">,</span><span class="w"> </span><span class="nx">water</span><span class="o">:</span><span class="w"> </span><span class="mf">7.36</span><span class="p">,</span><span class="w"> </span><span class="nx">total</span><span class="o">:</span><span class="w"> </span><span class="mf">51.04</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<strong>→ API:</strong> <code>GET /api/resources/monthly</code> → <code>.cost</code></p>
+<hr />
+<h4 id="crop_images"><code>CROP_IMAGES</code><a class="headerlink" href="#crop_images" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="p">{</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">  </span><span class="nx">stage</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">src</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;https://...&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">alt</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;...&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">badge</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Day 12&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">location</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;GH-04 · Camera 2&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">captured</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;1 hr ago&#39;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">  </span><span class="nx">leaf</span><span class="o">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">src</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;https://...&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">alt</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;...&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">badge</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;99.5% Conf.&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">location</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Sector B · Leaf #7&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">captured</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;2 mins ago&#39;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p>Images are currently from <code>https://picsum.photos</code> (random placeholder). Replace <code>src</code> with MinIO pre-signed URLs.</p>
+</blockquote>
+<p><strong>→ API:</strong> <code>GET /api/media/latest</code></p>
+<hr />
+<h4 id="sensor_metrics"><code>SENSOR_METRICS</code><a class="headerlink" href="#sensor_metrics" title="Permanent link">&para;</a></h4>
+<p>Array of 4 summary chips (temp, humidity, CO₂, light):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="p">{</span><span class="w"> </span><span class="nx">iconKey</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Thermometer&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Temperature&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">value</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;24.2&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">unit</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;°C&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">trend</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;up&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">trendLabel</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;+0.4°&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">trendColor</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;text-warning&#39;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div></p>
+<blockquote>
+<p><code>value</code> is a pre-formatted string. The API should return raw numbers; formatting happens in the component.</p>
+</blockquote>
+<p><strong>→ API:</strong> <code>GET /api/sensors/summary</code></p>
+<hr />
+<h4 id="health_rows"><code>HEALTH_ROWS</code><a class="headerlink" href="#health_rows" title="Permanent link">&para;</a></h4>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">[</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Sensor Array&#39;</span><span class="p">,</span><span class="w">  </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Nominal&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Network Link&#39;</span><span class="p">,</span><span class="w">  </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Strong&#39;</span><span class="p">,</span><span class="w">  </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Data Pipeline&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Active&#39;</span><span class="p">,</span><span class="w">  </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">label</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Calibration&#39;</span><span class="p">,</span><span class="w">   </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Due: 6d&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="p">]</span>
+</code></pre></div>
+<strong>→ API:</strong> <code>GET /api/system/health</code></p>
+<hr />
+<h4 id="growth_intel"><code>GROWTH_INTEL</code><a class="headerlink" href="#growth_intel" title="Permanent link">&para;</a></h4>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="p">{</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span><span class="nx">hoursToNextStage</span><span class="o">:</span><span class="w"> </span><span class="mf">47</span><span class="p">,</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">  </span><span class="nx">transitionProb24h</span><span class="o">:</span><span class="w"> </span><span class="mf">18</span><span class="p">,</span><span class="w">    </span><span class="c1">// % probability of transitioning within 24h</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">  </span><span class="nx">stageHistory</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">stage</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Seedling&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">daysUsed</span><span class="o">:</span><span class="w"> </span><span class="mf">14</span><span class="p">,</span><span class="w"> </span><span class="nx">daysTarget</span><span class="o">:</span><span class="w"> </span><span class="mf">14</span><span class="p">,</span><span class="w"> </span><span class="nx">complete</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">    </span><span class="p">...</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">  </span><span class="p">],</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="p">}</span>
+</code></pre></div>
+<strong>→ API:</strong> <code>GET /api/intelligence/growth</code></p>
+<hr />
+<h4 id="disease_risks"><code>DISEASE_RISKS</code><a class="headerlink" href="#disease_risks" title="Permanent link">&para;</a></h4>
+<p>Array of 5 disease entries (canonical <code>DISEASE_CATEGORIES</code> from <code>constants.py</code>):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="p">{</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Late Blight&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">pathogen</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;P. infestans&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">risk24h</span><span class="o">:</span><span class="w"> </span><span class="mf">31</span><span class="p">,</span><span class="w"> </span><span class="nx">severity</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;High&#39;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+- <code>severity</code>: <code>'Low' | 'Medium' | 'High'</code>
+- <code>risk24h</code>: 0–100 percentage risk score</p>
+<p><strong>→ API:</strong> <code>GET /api/intelligence/disease</code></p>
+<hr />
+<h2 id="7-pages">7. Pages<a class="headerlink" href="#7-pages" title="Permanent link">&para;</a></h2>
+<hr />
+<h3 id="71-splashscreen">7.1 SplashScreen<a class="headerlink" href="#71-splashscreen" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/pages/SplashScreen.jsx</code><br />
+<strong>Route key:</strong> <code>'splash'</code> (internal only — never reachable after first load)</p>
+<p><strong>Purpose:</strong> Animated brand introduction that plays once on app open, then auto-advances to HomeDashboard.</p>
+<p><strong>Mock data:</strong> None — fully static.</p>
+<p><strong>Behaviour:</strong>
+- Plays for <code>4200ms</code> total (<code>TIMING.introDuration</code>)
+- Begins fade-out at <code>3700ms</code>, fires <code>onComplete</code> at <code>4200ms</code>
+- Content stagger: background glows at 0ms → logo at 280ms → title at 820ms → tagline at 1260ms
+- Shows logo, "AgriTwin-GH" headline, and tagline "Precision Greenhouse Intelligence"</p>
+<p><strong>No API integration needed.</strong></p>
+<hr />
+<h3 id="72-homedashboard">7.2 HomeDashboard<a class="headerlink" href="#72-homedashboard" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/pages/HomeDashboard.jsx</code><br />
+<strong>Route key:</strong> <code>'dashboard'</code></p>
+<p><strong>Purpose:</strong> Real-time monitoring overview — one-glance status for operators. Three-column layout.</p>
+<h4 id="layout">Layout<a class="headerlink" href="#layout" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>┌─────────────────────────────────────────────────────────────┐
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>│  [Metric chips row: Temp · Humidity · CO₂ · Light]         │
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>├───────────────┬──────────────────────┬──────────────────────┤
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>│  LEFT PANEL   │   CENTRE PANEL        │   RIGHT PANEL        │
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>│  Growth Stage │   Crop Images         │   Actuator Status    │
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>│  Stage bars   │   Leaf Scan Image     │   Resource Usage     │
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>│  System Health│                       │   Cost Summary       │
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>└───────────────┴──────────────────────┴──────────────────────┘
+</code></pre></div>
+<h4 id="mock-data-constants-defined-inline-not-from-mockdatajs">Mock data constants (defined inline, not from mockData.js)<a class="headerlink" href="#mock-data-constants-defined-inline-not-from-mockdatajs" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Description</th>
+<th>Target API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CROP</code></td>
+<td>Current growth stage: name, index (0–5), % through stage, days in stage, stage duration, next stage, days to next. <code>stages[]</code> array used by <code>CropStageTrack</code> component.</td>
+<td><code>GET /api/dt/state</code> → <code>.crop</code></td>
+</tr>
+<tr>
+<td><code>CROP_HEALTH</code></td>
+<td>Health status card: <code>status</code> ('Healthy'/'Warning'/'Risk'), <code>detail</code> text, <code>scannedAgo</code> string.</td>
+<td><code>GET /api/dt/state</code> → <code>.health</code></td>
+</tr>
+<tr>
+<td><code>WEATHER</code></td>
+<td>Weather status card: <code>status</code>, <code>condition</code>, <code>detail</code>, <code>forecast</code>.</td>
+<td><code>GET /api/weather/current</code> → <code>.status</code></td>
+</tr>
+<tr>
+<td><code>ACTUATORS</code></td>
+<td>Array of 7 actuator objects: <code>{ icon, label, status, active, color }</code>. State-only — no level values shown.</td>
+<td><code>GET /api/actuators/state</code></td>
+</tr>
+<tr>
+<td><code>MONTHLY_RESOURCES</code></td>
+<td><code>[{ label, used, unit }]</code> — Water and Energy.</td>
+<td><code>GET /api/resources/monthly</code> → <code>.resources</code></td>
+</tr>
+<tr>
+<td><code>MONTHLY_COST</code></td>
+<td><code>{ month, energy, water, total }</code> — cost breakdown.</td>
+<td><code>GET /api/resources/monthly</code> → <code>.cost</code></td>
+</tr>
+<tr>
+<td><code>CROP_IMAGES</code></td>
+<td>Two images (stage + leaf): <code>{ src, alt, badge, location, captured }</code>. Images are picsum.photos placeholders.</td>
+<td><code>GET /api/media/latest</code></td>
+</tr>
+<tr>
+<td><code>GROWTH_INTEL</code></td>
+<td>Stage history bars in left panel: <code>stageHistory[]</code> array. Uses abbreviated names for space (e.g., <code>'Seedl.'</code>, <code>'E.Veg.'</code>).</td>
+<td><code>GET /api/intelligence/growth</code></td>
+</tr>
+<tr>
+<td><code>METRICS</code></td>
+<td>4 large sensor metric cards in the top strip: Temp, Humidity, CO₂, Light. Each has <code>trend</code> direction + <code>trendLabel</code>.</td>
+<td><code>GET /api/sensors/summary</code></td>
+</tr>
+<tr>
+<td><code>HEALTH_ROWS</code></td>
+<td>4 system status rows (Sensor Array, Network Link, Data Pipeline, Calibration).</td>
+<td><code>GET /api/system/health</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="sub-components-file-local-not-shared">Sub-components (file-local, not shared)<a class="headerlink" href="#sub-components-file-local-not-shared" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MetricCard</code></td>
+<td>Large number + icon + trend arrow. Used in top sensor strip.</td>
+</tr>
+<tr>
+<td><code>CropStageTrack</code></td>
+<td>Horizontal stage bubble track with connecting line. Filled bubbles for past stages, pulsing ring for current, muted for future.</td>
+</tr>
+<tr>
+<td><code>ActuatorTile</code></td>
+<td>Compact coloured tile for actuator status. Shows icon + label + ON/OFF pill. 2×4 grid layout.</td>
+</tr>
+<tr>
+<td><code>ActuatorRow</code></td>
+<td>Slim row variant of actuator status — used in narrower layout contexts.</td>
+</tr>
+<tr>
+<td><code>PlaceholderBlock</code></td>
+<td>Shimmer-style grey box for sections not yet implemented.</td>
+</tr>
+<tr>
+<td><code>TrendIcon</code></td>
+<td>Arrow up / arrow down / trend icon based on <code>trend</code> string.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="actuator-ids-7-matches-mpc-control_variables">Actuator IDs (7, matches MPC <code>CONTROL_VARIABLES</code>)<a class="headerlink" href="#actuator-ids-7-matches-mpc-control_variables" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>fan | vent | irrigation | heater | led | co2 | fogger
+</code></pre></div>
+<h4 id="stage-progression-constants">Stage progression constants<a class="headerlink" href="#stage-progression-constants" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1">// 6 canonical stages:</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="nx">stages</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;Seedling&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Early Veg.&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Flw. Init.&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Flowering&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Unripe&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Ripe&#39;</span><span class="p">]</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="c1">// Note: HomeDashboard uses abbreviated labels for display space</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="c1">// ManualOverride uses full names; align API response to full names</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="c1">// Stage durations (days):</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="nx">Seedling</span><span class="o">:</span><span class="w"> </span><span class="mf">14</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">Early</span><span class="w"> </span><span class="nx">Vegetative</span><span class="o">:</span><span class="w"> </span><span class="mf">21</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">Flowering</span><span class="w"> </span><span class="nx">Initiation</span><span class="o">:</span><span class="w"> </span><span class="mf">15</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">Flowering</span><span class="o">:</span><span class="w"> </span><span class="mf">15</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">Unripe</span><span class="o">:</span><span class="w"> </span><span class="mf">14</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">Ripe</span><span class="o">:</span><span class="w"> </span><span class="mf">14</span>
+</code></pre></div>
+<hr />
+<h3 id="73-detailedinsights">7.3 DetailedInsights<a class="headerlink" href="#73-detailedinsights" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/pages/DetailedInsights.jsx</code><br />
+<strong>Route key:</strong> <code>'insights'</code></p>
+<p><strong>Purpose:</strong> In-depth analytical view. Full sensor readings, disease risk scores per pathogen, outdoor weather detail, image galleries, and growth intelligence spotlight.</p>
+<h4 id="layout_1">Layout<a class="headerlink" href="#layout_1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>┌──────────────────────────────────────────────────────────┐
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>│  Section: Key Greenhouse Metrics (8 metric chips)        │
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>│  Section: Actuator Status (7 pill chips)                 │
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>│  Section: Growth Intelligence (stage track + spotlight)  │
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>├───────────────────────┬──────────────────────────────────┤
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>│  Disease Risk Panel   │  Indoor Sensor Detail            │
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>│  (5 diseases, bars)   │  (9 sensors, optimal ranges)     │
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>├───────────────────────┴──────────────────────────────────┤
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>│  Outdoor Weather (current + 6-slot forecast)             │
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>├───────────────────────┬──────────────────────────────────┤
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>│  Stage Camera Gallery │  Leaf Scan Gallery               │
+<a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a>│  (5 recent frames)    │  (5 recent frames + risk label)  │
+<a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a>└───────────────────────┴──────────────────────────────────┘
+</code></pre></div>
+<h4 id="mock-data-constants-all-defined-inline-in-the-file">Mock data constants (ALL defined inline in the file)<a class="headerlink" href="#mock-data-constants-all-defined-inline-in-the-file" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>What it holds</th>
+<th>Target API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CROP</code></td>
+<td>Same structure as HomeDashboard <code>CROP</code>. <code>stages[]</code> uses abbreviated names. <code>currentPct: 80</code>, <code>daysInStage: 12</code>, <code>stageDuration: 15</code>.</td>
+<td><code>GET /api/dt/state</code> → <code>.crop</code></td>
+</tr>
+<tr>
+<td><code>GROWTH_INTEL</code></td>
+<td><code>hoursToNextStage: 47</code>, <code>transitionProb24h: 18</code>, full <code>stageHistory[]</code> with complete stage names. Drives the spotlight stats and history bars.</td>
+<td><code>GET /api/intelligence/growth</code></td>
+</tr>
+<tr>
+<td><code>CROP_HEALTH</code></td>
+<td>Same structure, <code>status: 'Healthy'</code>, <code>scannedAgo: '2 mins ago'</code>.</td>
+<td><code>GET /api/dt/state</code> → <code>.health</code></td>
+</tr>
+<tr>
+<td><code>ACTUATORS</code></td>
+<td>7 actuators with <code>value</code> field (e.g., <code>'75%'</code>, <code>'45 L'</code>, <code>'0%'</code>). Shown as pill chips with level values.</td>
+<td><code>GET /api/actuators/state</code></td>
+</tr>
+<tr>
+<td><code>SUMMARY_METRICS</code></td>
+<td>8 <code>MetricChip</code> entries: Indoor Temp, Humidity, Soil Moisture, CO₂, Light Intensity, VPD, Leaf Wetness, Disease Risk. All from MPC <code>STATE_VARIABLES</code>.</td>
+<td><code>GET /api/sensors/summary</code> or <code>GET /api/dt/state</code> → <code>.sensors</code></td>
+</tr>
+<tr>
+<td><code>DISEASE_RISKS</code></td>
+<td>5 disease entries: <code>{ name, pathogen, risk24h (0–100), severity ('Low'/'Medium'/'High') }</code>.</td>
+<td><code>GET /api/intelligence/disease</code></td>
+</tr>
+<tr>
+<td><code>OUTDOOR_CURRENT</code></td>
+<td>Nested: <code>temp.now</code>, <code>humidity.now</code>, <code>windspeed.now</code>, <code>solarradiation.now</code>, <code>conditions.now</code>, each with <code>.forecast</code> counterpart for 24h prediction.</td>
+<td><code>GET /api/weather/current</code> → <code>.current</code> and <code>.forecast</code></td>
+</tr>
+<tr>
+<td><code>INDOOR_SENSORS</code></td>
+<td>9 sensors with full detail: <code>value</code>, <code>unit</code>, <code>status</code>, <code>rangeMin</code>, <code>rangeMax</code>, <code>optimal</code> string (shown as a range label).</td>
+<td><code>GET /api/sensors/detail</code></td>
+</tr>
+<tr>
+<td><code>RECENT_CROP_IMAGES</code></td>
+<td>Array of 5: <code>{ src, alt, capturedAgo, stage, confidence }</code>. Rolling 30-min cadence images from MinIO.</td>
+<td><code>GET /api/media/stage-images</code></td>
+</tr>
+<tr>
+<td><code>RECENT_LEAF_IMAGES</code></td>
+<td>Array of 5: <code>{ src, alt, capturedAgo, classification, risk, confidence }</code>. <code>classification</code> from disease classifier.</td>
+<td><code>GET /api/media/disease-scans</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="disease-list-canonical-from-constantspy-disease_categories">Disease list (canonical, from <code>constants.py DISEASE_CATEGORIES</code>)<a class="headerlink" href="#disease-list-canonical-from-constantspy-disease_categories" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>Late Blight (P. infestans)
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>Early Blight (A. solani)
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>Powdery Mildew (L. taurica)
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>Spider Mites (T. urticae)
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>Leaf Mold (P. fulva)
+</code></pre></div>
+<h4 id="indoor-sensor-list-from-mpc-state_variables">Indoor sensor list (from MPC <code>STATE_VARIABLES</code>)<a class="headerlink" href="#indoor-sensor-list-from-mpc-state_variables" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Unit</th>
+<th>Optimal range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Indoor Temp</td>
+<td>°C</td>
+<td>22 – 26</td>
+</tr>
+<tr>
+<td>Humidity</td>
+<td>%</td>
+<td>60 – 70</td>
+</tr>
+<tr>
+<td>Soil Moisture</td>
+<td>%</td>
+<td>50 – 75</td>
+</tr>
+<tr>
+<td>CO₂</td>
+<td>ppm</td>
+<td>800 – 1000</td>
+</tr>
+<tr>
+<td>Light Intensity</td>
+<td>lux</td>
+<td>10,000 – 15,000</td>
+</tr>
+<tr>
+<td>VPD</td>
+<td>kPa</td>
+<td>0.8 – 1.2</td>
+</tr>
+<tr>
+<td>Dew Point</td>
+<td>°C</td>
+<td>14 – 18</td>
+</tr>
+<tr>
+<td>Leaf Wetness</td>
+<td>proxy</td>
+<td>0.0 – 0.3</td>
+</tr>
+<tr>
+<td>Disease Risk</td>
+<td>score</td>
+<td>&lt; 0.3</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sub-components-file-local">Sub-components (file-local)<a class="headerlink" href="#sub-components-file-local" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SectionHeader</code></td>
+<td>Section heading with icon badge, eyebrow text, title, and optional subtitle.</td>
+</tr>
+<tr>
+<td><code>MetricChip</code></td>
+<td>Small stat tile: icon + label + large value + unit. Used in the 8-chip summary row.</td>
+</tr>
+<tr>
+<td><code>ActuatorChip</code></td>
+<td>Pill chip: icon + label + level value + ON/OFF status. Used in actuator row.</td>
+</tr>
+<tr>
+<td><code>CropStageTrack</code></td>
+<td>Same as HomeDashboard version (duplicated for independence).</td>
+</tr>
+<tr>
+<td><code>SpotlightStat</code></td>
+<td>Large spotlight number (hours-to-next / transition %). Two sizes: primary (large) and secondary.</td>
+</tr>
+<tr>
+<td><code>DiseaseBar</code></td>
+<td>Disease risk row: name + pathogen + percentage bar + severity pill.</td>
+</tr>
+<tr>
+<td><code>SensorRow</code></td>
+<td>Indoor sensor detail row: icon + label + value + unit + optimal range + status dot.</td>
+</tr>
+<tr>
+<td><code>OutdoorCell</code></td>
+<td>Weather detail cell: icon + metric label + now value + forecast value.</td>
+</tr>
+<tr>
+<td><code>ForecastSlot</code></td>
+<td>Hourly forecast column in the weather strip.</td>
+</tr>
+<tr>
+<td><code>ImageFrame</code></td>
+<td>Camera/scan image frame with overlay badges (time, stage, confidence).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="risk_theme-map-drives-disease-bar-colours">RISK_THEME map (drives disease bar colours)<a class="headerlink" href="#risk_theme-map-drives-disease-bar-colours" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="nx">Low</span><span class="w">    </span><span class="err">→</span><span class="w"> </span><span class="nx">bg</span><span class="o">-</span><span class="nx">primary</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">text</span><span class="o">-</span><span class="nx">primary</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nx">Medium</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">bg</span><span class="o">-</span><span class="nx">warning</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nx">text</span><span class="o">-</span><span class="nx">warning</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="nx">High</span><span class="w">   </span><span class="err">→</span><span class="w"> </span><span class="nx">bg</span><span class="o">-</span><span class="nx">danger</span><span class="w">  </span><span class="o">/</span><span class="w"> </span><span class="nx">text</span><span class="o">-</span><span class="nx">danger</span>
+</code></pre></div>
+<hr />
+<h3 id="74-manualoverride">7.4 ManualOverride<a class="headerlink" href="#74-manualoverride" title="Permanent link">&para;</a></h3>
+<p><strong>File:</strong> <code>src/pages/ManualOverride.jsx</code><br />
+<strong>Route key:</strong> <code>'override'</code></p>
+<p><strong>Purpose:</strong> Manual simulation control panel. Operators switch between "Live / Current" mode (read-only display of live state) and "Manual Override" mode (editable inputs). In override mode, all parameters are editable and changes are sent to the DT loop.</p>
+<h4 id="layout_2">Layout<a class="headerlink" href="#layout_2" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>┌──────────────────────────────────────────────────────────┐
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>│  Mode pill: [Live / Current]  [Manual Override]          │
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>│  Unsaved-changes banner (appears when override is dirty) │
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>├─────────────────────────┬────────────────────────────────┤
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>│  SIMULATION PARAMETERS  │  ACTUATOR CONTROL              │
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>│  Growth Stage (select)  │  7 actuator toggle cards       │
+<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a>│  Day in Stage (number)  │                                │
+<a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a>│  Start Date (text)      │                                │
+<a id="__codelineno-27-9" name="__codelineno-27-9" href="#__codelineno-27-9"></a>│  Start Hour (grid pick) │                                │
+<a id="__codelineno-27-10" name="__codelineno-27-10" href="#__codelineno-27-10"></a>│  Apply button           │  Reset all → OFF button        │
+<a id="__codelineno-27-11" name="__codelineno-27-11" href="#__codelineno-27-11"></a>└─────────────────────────┴────────────────────────────────┘
+</code></pre></div>
+<h4 id="mock-data-constants-all-file-local">Mock data / constants (all file-local)<a class="headerlink" href="#mock-data-constants-all-file-local" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Description</th>
+<th>Target API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GROWTH_STAGES</code></td>
+<td><code>['Seedling', 'Early Vegetative', 'Flowering Initiation', 'Flowering', 'Unripe', 'Ripe']</code> — full names, 6 canonical stages.</td>
+<td><code>GET /api/dt/state</code> → <code>.crop.stage</code> (to populate current selection)</td>
+</tr>
+<tr>
+<td><code>STAGE_MAX_DAYS</code></td>
+<td><code>{ 'Seedling': 14, 'Early Vegetative': 21, 'Flowering Initiation': 15, 'Flowering': 15, 'Unripe': 14, 'Ripe': 14 }</code> — clamps the day-in-stage number input.</td>
+<td>static — from <code>TOMATO_GROWTH_STAGE_CLASSIFICATION.md</code></td>
+</tr>
+<tr>
+<td><code>ACTUATOR_DEFS</code></td>
+<td>Static definition of 7 actuators: <code>{ id, icon, label, accent: { text, bg, ring } }</code>. Layout and styling only — not the state.</td>
+<td>static</td>
+</tr>
+<tr>
+<td><code>INITIAL_ACTUATORS</code></td>
+<td>Initial state per actuator: <code>{ active: bool, level: number }</code>. Mirrors live readings from DetailedInsights.</td>
+<td><code>GET /api/actuators/state</code> (to seed initial state on load)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="component-state-react-usestate">Component state (React <code>useState</code>)<a class="headerlink" href="#component-state-react-usestate" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>State var</th>
+<th>Initial value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mode</code></td>
+<td><code>'live'</code></td>
+<td><code>'live'</code> = read-only / <code>'override'</code> = editable</td>
+</tr>
+<tr>
+<td><code>stage</code></td>
+<td><code>'Flowering'</code></td>
+<td>Selected growth stage in override form</td>
+</tr>
+<tr>
+<td><code>dayInStage</code></td>
+<td><code>12</code></td>
+<td>Day number input</td>
+</tr>
+<tr>
+<td><code>startDate</code></td>
+<td><code>getLiveDate()</code></td>
+<td>ISO date string <code>YYYY-MM-DD</code></td>
+</tr>
+<tr>
+<td><code>startHour</code></td>
+<td><code>getLiveHour()</code></td>
+<td>0–23 hour integer</td>
+</tr>
+<tr>
+<td><code>actuators</code></td>
+<td><code>INITIAL_ACTUATORS</code></td>
+<td>Map of <code>{ [id]: { active, level } }</code></td>
+</tr>
+<tr>
+<td><code>saved</code></td>
+<td><code>false</code></td>
+<td>Drives the "Applied" success banner</td>
+</tr>
+<tr>
+<td><code>confirmReset</code></td>
+<td><code>false</code></td>
+<td>Drives the "Confirm → Reset all OFF" two-step</td>
+</tr>
+</tbody>
+</table>
+<h4 id="override-interactions">Override interactions<a class="headerlink" href="#override-interactions" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>What happens</th>
+<th>Target API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Switching to "Manual Override" mode</td>
+<td>All inputs become enabled</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Changing growth stage</td>
+<td><code>dayInStage</code> max clamps to <code>STAGE_MAX_DAYS[stage]</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Toggling an actuator</td>
+<td><code>actuators[id].active</code> flips</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Clicking "Apply Changes"</td>
+<td>Shows 3s "Applied ✓" banner</td>
+<td><code>POST /api/dt/override</code> (send <code>{ stage, dayInStage, startDate, startHour }</code>) + <code>POST /api/actuators/set</code> (send actuator states)</td>
+</tr>
+<tr>
+<td>Clicking "Reset" → "Confirm Reset"</td>
+<td>All actuators set <code>active: false, level: 0</code></td>
+<td><code>POST /api/actuators/set</code> with all OFF</td>
+</tr>
+<tr>
+<td>Switching back to "Live / Current"</td>
+<td>Inputs disabled (read-only display continues)</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sub-components-file-local_1">Sub-components (file-local)<a class="headerlink" href="#sub-components-file-local_1" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Toggle</code></td>
+<td>Pill-style on/off toggle switch. Props: <code>active</code>, <code>onToggle</code>, <code>disabled</code>.</td>
+</tr>
+<tr>
+<td><code>ModePill</code></td>
+<td>Two-segment pill selector: Live / Override. Active segment changes colour (primary for live, warning for override).</td>
+</tr>
+<tr>
+<td><code>Field</code></td>
+<td>Form field wrapper: label (uppercase, small) + hint text below.</td>
+</tr>
+<tr>
+<td><code>Select</code></td>
+<td>Styled <code>&lt;select&gt;</code> dropdown with chevron icon overlay.</td>
+</tr>
+<tr>
+<td><code>NumberInput</code></td>
+<td>Number <code>&lt;input&gt;</code> with optional <code>suffix</code> label. Clamps to <code>min</code>/<code>max</code>.</td>
+</tr>
+<tr>
+<td><code>HourPicker</code></td>
+<td>24-button grid (0–23) for selecting the simulation start hour.</td>
+</tr>
+<tr>
+<td><code>ActuatorCard</code></td>
+<td>Actuator control tile: icon + label + active status dot + <code>Toggle</code>. No slider — toggle only.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="actuator-ids-and-defaults">Actuator IDs and defaults<a class="headerlink" href="#actuator-ids-and-defaults" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="nx">fan</span><span class="o">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nx">active</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">  </span><span class="nx">level</span><span class="o">:</span><span class="w"> </span><span class="mf">75</span><span class="w"> </span><span class="p">}</span><span class="w">   </span><span class="c1">// Fan Speed</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="nx">vent</span><span class="o">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nx">active</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">  </span><span class="nx">level</span><span class="o">:</span><span class="w"> </span><span class="mf">45</span><span class="w"> </span><span class="p">}</span><span class="w">   </span><span class="c1">// Vent Opening</span>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="nx">irrigation</span><span class="o">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">active</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">  </span><span class="nx">level</span><span class="o">:</span><span class="w"> </span><span class="mf">45</span><span class="w"> </span><span class="p">}</span><span class="w">   </span><span class="c1">// Irrigation</span>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="nx">heater</span><span class="o">:</span><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">active</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">  </span><span class="nx">level</span><span class="o">:</span><span class="w"> </span><span class="mf">60</span><span class="w"> </span><span class="p">}</span><span class="w">   </span><span class="c1">// Heater</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="nx">led</span><span class="o">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nx">active</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nx">level</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span><span class="w">  </span><span class="p">}</span><span class="w">   </span><span class="c1">// LED Intensity</span>
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="nx">co2</span><span class="o">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nx">active</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">  </span><span class="nx">level</span><span class="o">:</span><span class="w"> </span><span class="mf">55</span><span class="w"> </span><span class="p">}</span><span class="w">   </span><span class="c1">// CO₂ Valve</span>
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="nx">fogger</span><span class="o">:</span><span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nx">active</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nx">level</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span><span class="w">  </span><span class="p">}</span><span class="w">   </span><span class="c1">// Fogger</span>
+</code></pre></div>
+<hr />
+<h2 id="8-shared-components">8. Shared Components<a class="headerlink" href="#8-shared-components" title="Permanent link">&para;</a></h2>
+<h3 id="statuscard-srccomponentsuistatuscardjsx"><code>StatusCard</code> — <code>src/components/ui/StatusCard.jsx</code><a class="headerlink" href="#statuscard-srccomponentsuistatuscardjsx" title="Permanent link">&para;</a></h3>
+<p>Used in HomeDashboard for Crop Health and Weather Status tiles.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="p">&lt;</span><span class="nt">StatusCard</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="w">  </span><span class="na">label</span><span class="o">=</span><span class="s">&quot;Crop Health&quot;</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="w">  </span><span class="na">status</span><span class="o">=</span><span class="s">&quot;Healthy&quot;</span><span class="w">       </span><span class="err">//</span><span class="w"> </span><span class="err">&#39;</span><span class="na">Healthy</span><span class="err">&#39;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">&#39;</span><span class="na">Warning</span><span class="err">&#39;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">&#39;</span><span class="na">Risk</span><span class="err">&#39;</span>
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="w">  </span><span class="na">condition</span><span class="o">=</span><span class="s">&quot;...&quot;</span><span class="w">        </span><span class="err">//</span><span class="w"> </span><span class="na">optional</span><span class="w"> </span><span class="na">short</span><span class="w"> </span><span class="na">line</span>
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="w">  </span><span class="na">detail</span><span class="o">=</span><span class="s">&quot;...&quot;</span><span class="w">           </span><span class="err">//</span><span class="w"> </span><span class="na">one</span><span class="err">-</span><span class="na">sentence</span><span class="w"> </span><span class="na">description</span>
+<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a><span class="w">  </span><span class="na">meta</span><span class="o">=</span><span class="s">&quot;2 mins ago&quot;</span><span class="w">      </span><span class="err">//</span><span class="w"> </span><span class="na">footer</span><span class="w"> </span><span class="na">text</span><span class="w"> </span><span class="err">(</span><span class="na">scanned</span><span class="w"> </span><span class="na">time</span><span class="err">,</span><span class="w"> </span><span class="na">forecast</span><span class="err">,</span><span class="w"> </span><span class="na">etc.</span><span class="err">)</span>
+<a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a><span class="w">  </span><span class="na">variant</span><span class="o">=</span><span class="s">&quot;crop&quot;</span><span class="w">         </span><span class="err">//</span><span class="w"> </span><span class="err">&#39;</span><span class="na">crop</span><span class="err">&#39;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">&#39;</span><span class="na">weather</span><span class="err">&#39;</span><span class="w"> </span><span class="err">—</span><span class="w"> </span><span class="na">picks</span><span class="w"> </span><span class="na">domain</span><span class="w"> </span><span class="na">icons</span>
+<a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a><span class="p">/&gt;</span>
+</code></pre></div>
+<p>Status drives the entire card appearance: background colour, border colour, icon, and pulse dot. All classes are literal strings in the <code>THEME</code> map inside the component.</p>
+<hr />
+<h3 id="panelcard-srccomponentsuipanelcardjsx"><code>PanelCard</code> — <code>src/components/ui/PanelCard.jsx</code><a class="headerlink" href="#panelcard-srccomponentsuipanelcardjsx" title="Permanent link">&para;</a></h3>
+<p>Standard content card used throughout HomeDashboard and DetailedInsights.</p>
+<hr />
+<h3 id="glasspanel-srccomponentsuiglasspaneljsx"><code>GlassPanel</code> — <code>src/components/ui/GlassPanel.jsx</code><a class="headerlink" href="#glasspanel-srccomponentsuiglasspaneljsx" title="Permanent link">&para;</a></h3>
+<p>Frosted-glass card container — primarily used for modal-like panel overlays.</p>
+<hr />
+<h2 id="9-api-integration-checklist">9. API Integration Checklist<a class="headerlink" href="#9-api-integration-checklist" title="Permanent link">&para;</a></h2>
+<p>When the FastAPI backend is running, use this checklist page by page.</p>
+<h3 id="global-setup">Global setup<a class="headerlink" href="#global-setup" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] Create <code>src/agritwin_gh/frontend/.env.local</code> with <code>VITE_API_BASE_URL=http://your-host:8000</code></li>
+<li>[ ] Verify CORS is enabled in the FastAPI app for the frontend origin</li>
+</ul>
+<h3 id="srcservicesapijs"><code>src/services/api.js</code><a class="headerlink" href="#srcservicesapijs" title="Permanent link">&para;</a></h3>
+<p>For each function listed in §5:
+- [ ] Uncomment the <code>const data = await get(...)</code> line
+- [ ] Delete the <code>return Promise.resolve(mock.XXX)</code> fallback
+- [ ] Add error handling (<code>try/catch</code>, user-facing toast/banner)
+- [ ] Remove the top-level <code>import * as mock from '../data/mockData.js'</code> once all functions are wired</p>
+<h3 id="homedashboardjsx"><code>HomeDashboard.jsx</code><a class="headerlink" href="#homedashboardjsx" title="Permanent link">&para;</a></h3>
+<p>Replace each inline constant with a <code>useEffect</code> + API call:
+- [ ] <code>CROP</code> → <code>getDtState().then(d =&gt; setCrop(d.crop))</code>
+- [ ] <code>CROP_HEALTH</code> → <code>getDtState().then(d =&gt; setHealth(d.health))</code>
+- [ ] <code>WEATHER</code> → <code>getWeather().then(d =&gt; setWeather(d.status))</code>
+- [ ] <code>ACTUATORS</code> → <code>getActuatorState().then(setActuators)</code> — note: API returns 7 actuators, map <code>id</code> field to find icon from local <code>ACTUATOR_DEF</code> lookup
+- [ ] <code>MONTHLY_RESOURCES</code> + <code>MONTHLY_COST</code> → <code>getMonthlyResources().then(d =&gt; { setResources(d.resources); setCost(d.cost) })</code>
+- [ ] <code>CROP_IMAGES</code> → <code>getLatestMedia().then(setImages)</code> — API returns MinIO pre-signed URLs in the <code>src</code> field
+- [ ] <code>GROWTH_INTEL.stageHistory</code> → <code>getGrowthIntel().then(d =&gt; setGrowthIntel(d))</code>
+- [ ] <code>METRICS</code> (Temp/Humidity/CO₂/Light) → <code>getDtState().then(d =&gt; setMetrics(d.sensors))</code>
+- [ ] <code>HEALTH_ROWS</code> → <code>getSystemHealth().then(setHealthRows)</code></p>
+<h3 id="detailedinsightsjsx"><code>DetailedInsights.jsx</code><a class="headerlink" href="#detailedinsightsjsx" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] <code>CROP</code> → <code>getDtState().then(d =&gt; setCrop(d.crop))</code></li>
+<li>[ ] <code>GROWTH_INTEL</code> → <code>getGrowthIntel().then(setGrowthIntel)</code></li>
+<li>[ ] <code>CROP_HEALTH</code> → <code>getDtState().then(d =&gt; setHealth(d.health))</code></li>
+<li>[ ] <code>ACTUATORS</code> → <code>getActuatorState().then(setActuators)</code> — API must include <code>value</code> field (e.g., <code>'75%'</code>, <code>'45 L'</code>)</li>
+<li>[ ] <code>SUMMARY_METRICS</code> → <code>getDtState().then(d =&gt; setMetrics(d.sensors))</code> — 8 STATE_VARIABLES</li>
+<li>[ ] <code>DISEASE_RISKS</code> → <code>getDiseaseRisks().then(setDiseaseRisks)</code></li>
+<li>[ ] <code>OUTDOOR_CURRENT</code> → <code>getWeather().then(d =&gt; setOutdoor(d.current))</code></li>
+<li>[ ] <code>INDOOR_SENSORS</code> → fetch from <code>GET /api/sensors/detail</code> (currently no dedicated stub function — add to <code>api.js</code>)</li>
+<li>[ ] <code>RECENT_CROP_IMAGES</code> → <code>getStageImages().then(setStageImages)</code> — API returns rolling 5 entries</li>
+<li>[ ] <code>RECENT_LEAF_IMAGES</code> → <code>getDiseaseImages().then(setLeafImages)</code> — API returns rolling 5 entries with <code>classification</code> and <code>risk</code></li>
+</ul>
+<h3 id="manualoverridejsx"><code>ManualOverride.jsx</code><a class="headerlink" href="#manualoverridejsx" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] On mount: <code>getActuatorState()</code> → seed <code>INITIAL_ACTUATORS</code> state from live values</li>
+<li>[ ] On mount: <code>getDtState()</code> → populate <code>stage</code>, <code>dayInStage</code> default to live values</li>
+<li>[ ] "Apply Changes" button: <code>postDtOverride({ stage, dayInStage, startDate, startHour })</code> then <code>postActuatorSet(actuatorPayload)</code></li>
+<li>[ ] "Reset" confirmation: <code>postActuatorSet(allOffPayload)</code> where every actuator has <code>active: false, level: 0</code></li>
+</ul>
+<hr />
+<h2 id="10-environment-variables">10. Environment Variables<a class="headerlink" href="#10-environment-variables" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Required</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VITE_API_BASE_URL</code></td>
+<td>No</td>
+<td><code>http://localhost:8000</code></td>
+<td>FastAPI backend base URL. Set in <code>.env.local</code>. Never commit to version control.</td>
+</tr>
+</tbody>
+</table>
+<p>Create <code>.env.local</code> in <code>src/agritwin_gh/frontend/</code>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>VITE_API_BASE_URL=http://localhost:8000
+</code></pre></div></p>
+<p>Vite exposes only variables prefixed with <code>VITE_</code> to the browser bundle. Do not put secrets here.</p>
+<hr />
+<h2 id="11-build-dev-commands">11. Build &amp; Dev Commands<a class="headerlink" href="#11-build-dev-commands" title="Permanent link">&para;</a></h2>
+<p>All commands run from <code>src/agritwin_gh/frontend/</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>        <span class="c"># Vite dev server with HMR → http://localhost:5173</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">build</span>      <span class="c"># Production build → dist/ (serves as static assets)</span>
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">preview</span>    <span class="c"># Serve dist/ locally for production verification</span>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">lint</span>       <span class="c"># ESLint (React + React Hooks + React Refresh rules)</span>
+</code></pre></div>
+<h3 id="serving-the-built-frontend-from-fastapi">Serving the built frontend from FastAPI<a class="headerlink" href="#serving-the-built-frontend-from-fastapi" title="Permanent link">&para;</a></h3>
+<p>After <code>npm run build</code>, the <code>dist/</code> directory contains the SPA. Serve it as static files from FastAPI:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.staticfiles</span><span class="w"> </span><span class="kn">import</span> <span class="n">StaticFiles</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileResponse</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="n">app</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">StaticFiles</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="s2">&quot;src/agritwin_gh/frontend/dist&quot;</span><span class="p">,</span> <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;frontend&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Or use a reverse proxy (nginx, Caddy) pointing to <code>dist/</code> in production.</p>
+<hr />
+<p><em>This document covers the frontend as of the build on </em><em>April 4, 2026</em><em>. All 1639 Vite-transformed modules build cleanly with no errors or warnings.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/arjun-christopher" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

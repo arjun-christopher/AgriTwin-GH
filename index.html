@@ -561,6 +561,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#frontend-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        �️ Frontend Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#repository-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1401,6 +1412,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#frontend-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        �️ Frontend Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#repository-structure" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1561,6 +1583,11 @@
 <td>MinIO (S3-compatible) with PostgreSQL metadata indexing</td>
 <td>✅ Complete</td>
 </tr>
+<tr>
+<td><strong>Frontend Dashboard</strong></td>
+<td>React 19 + Tailwind v4 SPA — HomeDashboard, Detailed Insights, Manual Override</td>
+<td>✅ Complete</td>
+</tr>
 </tbody>
 </table>
 <h2 id="system-architecture">📊 System Architecture<a class="headerlink" href="#system-architecture" title="Permanent link">&para;</a></h2>
@@ -1703,19 +1730,36 @@
 <td><a href="docs/DOCS_DEPLOYMENT.md">Deployment Guide</a></td>
 <td>MkDocs documentation site setup</td>
 </tr>
+<tr>
+<td><a href="docs/FRONTEND_UI_REFERENCE.md">Frontend UI Reference</a></td>
+<td>React dashboard — pages, components, all mock data, and API integration points</td>
+</tr>
 </tbody>
 </table>
 <p><strong><a href="https://arjun-christopher.github.io/AgriTwin-GH/">📖 View Full Documentation →</a></strong></p>
+<h2 id="frontend-dashboard">�️ Frontend Dashboard<a class="headerlink" href="#frontend-dashboard" title="Permanent link">&para;</a></h2>
+<p>A React 19 + Tailwind v4 single-page application providing a real-time operator interface for the greenhouse digital twin.</p>
+<ul>
+<li><strong>HomeDashboard</strong> — live sensor metrics strip, crop stage progression track, actuator status grid, camera frames, resource usage and cost summary</li>
+<li><strong>Detailed Insights</strong> — full indoor sensor readings with optimal ranges, per-pathogen disease risk bars, outdoor weather + 24h forecast, rolling stage and leaf-scan image galleries, growth stage transition spotlight</li>
+<li><strong>Manual Override</strong> — live/override mode toggle, editable growth stage + day-in-stage + start time, per-actuator on/off toggles, apply and reset-all actions</li>
+</ul>
+<p>All displayed values are currently static mock data. The service layer (<code>src/agritwin_gh/frontend/src/services/api.js</code>) is a fully documented stub — replace each stub with the corresponding FastAPI call. See <a href="docs/FRONTEND_UI_REFERENCE.md">Frontend UI Reference</a> for the complete page-by-page integration guide.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">cd </span><span class="n">src</span><span class="p">/</span><span class="n">agritwin_gh</span><span class="p">/</span><span class="n">frontend</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">npm</span> <span class="n">install</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>      <span class="c"># → http://localhost:5173</span>
+</code></pre></div>
 <h2 id="repository-structure">📂 Repository Structure<a class="headerlink" href="#repository-structure" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>AgriTwin-GH/
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>├── setup.py                # Interactive setup — uv install, venv, deps, Kaggle dataset
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>├── feature_demos/          # Interactive Jupyter notebook demonstrations (01–06)
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>├── notebooks/              # ML training notebooks (disease &amp; growth stage classifiers)
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>├── scripts/                # Data loading, upload, and classification scripts
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>├── src/agritwin_gh/        # Core library — API, models, services, utils
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>├── data/                   # Raw, processed, and external datasets
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>├── database/               # PostgreSQL schema files
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>└── docs/                   # Documentation source files
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>AgriTwin-GH/
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>├── setup.py                # Interactive setup — uv install, venv, deps, Kaggle dataset
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>├── feature_demos/          # Interactive Jupyter notebook demonstrations (01–06)
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>├── notebooks/              # ML training notebooks (disease &amp; growth stage classifiers)
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>├── scripts/                # Data loading, upload, and classification scripts
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>├── src/agritwin_gh/        # Core library — API, models, services, utils
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>│   └── frontend/           # React 19 + Tailwind v4 dashboard SPA
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>├── data/                   # Raw, processed, and external datasets
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>├── database/               # PostgreSQL schema files
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>└── docs/                   # Documentation source files
 </code></pre></div>
 <h2 id="research-areas">🔬 Research Areas<a class="headerlink" href="#research-areas" title="Permanent link">&para;</a></h2>
 <ul>
