@@ -1,30 +1,53 @@
-function App() {
+import { useState } from 'react';
+
+import { ThemeProvider } from './context/ThemeContext';
+import AppShell from './components/layout/AppShell';
+import SplashScreen from './pages/SplashScreen';
+import HomeDashboard from './pages/HomeDashboard';
+import DetailedInsights from './pages/DetailedInsights';
+import ManualOverride from './pages/ManualOverride';
+
+/** Map page keys to their components. */
+const PAGE_MAP = {
+  dashboard: HomeDashboard,
+  insights:  DetailedInsights,
+  override:  ManualOverride,
+};
+
+function AppRouter() {
+  const [page, setPage] = useState('splash');
+
+  // Splash intro — sits above everything, auto-advances.
+  if (page === 'splash') {
+    return <SplashScreen onComplete={() => setPage('dashboard')} />;
+  }
+
+  const PageComponent = PAGE_MAP[page] ?? HomeDashboard;
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
-      <div className="max-w-2xl w-full px-6 text-center">
-        <h1 className="text-4xl font-bold text-green-700 mb-4">
-          AgriTwin-GH
-        </h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Digital Twin System for Precision Greenhouse Horticulture
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <h2 className="font-semibold text-green-600 mb-1">Crop Health</h2>
-            <p className="text-sm text-gray-500">Monitor disease risk and growth stages in real time.</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <h2 className="font-semibold text-green-600 mb-1">Digital Twin</h2>
-            <p className="text-sm text-gray-500">Simulate and predict greenhouse conditions.</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <h2 className="font-semibold text-green-600 mb-1">MPC Control</h2>
-            <p className="text-sm text-gray-500">Automated predictive control for resource optimisation.</p>
-          </div>
-        </div>
-      </div>
+    // animate-app-enter fades the shell in after the splash exits.
+    <div className="animate-app-enter">
+      <AppShell currentPage={page} navigate={setPage}>
+        <PageComponent navigate={setPage} />
+      </AppShell>
     </div>
-  )
+  );
 }
 
-export default App
+/**
+ * App — root component.
+ * ThemeProvider wraps the entire tree so Header (and any future component)
+ * can call useTheme() to read or toggle the current theme.
+ */
+function App() {
+  return (
+    <ThemeProvider>
+      <AppRouter />
+    </ThemeProvider>
+  );
+}
+
+export default App;
+
+
+

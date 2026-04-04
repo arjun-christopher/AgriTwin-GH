@@ -38,6 +38,7 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 | **Resource Tracking** | Energy and water usage optimization and reporting | ✅ Complete |
 | **Time-Series Database** | PostgreSQL + TimescaleDB hypertables for sensor data | ✅ Complete |
 | **Image Storage** | MinIO (S3-compatible) with PostgreSQL metadata indexing | ✅ Complete |
+| **Frontend Dashboard** | React 19 + Tailwind v4 SPA — HomeDashboard, Detailed Insights, Manual Override | ✅ Complete |
 
 ## 📊 System Architecture
 
@@ -143,8 +144,25 @@ jupyter notebook feature_demos/
 | [MPC Complete Guide](docs/MPC_COMPLETE_GUIDE.md) | Model predictive control module: solver tuning, constraint strategy, cost function design, and end-to-end evaluation |
 | [DT Closed-Loop Guide](docs/DT_LOOP_GUIDE.md) | Real-time DB→AI→MPC→DB closed-loop layer: architecture, data flow, cadence, and CLI runner reference |
 | [Deployment Guide](docs/DOCS_DEPLOYMENT.md) | MkDocs documentation site setup |
+| [Frontend UI Reference](docs/FRONTEND_UI_REFERENCE.md) | React dashboard — pages, components, all mock data, and API integration points |
 
 **[📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)**
+
+## �️ Frontend Dashboard
+
+A React 19 + Tailwind v4 single-page application providing a real-time operator interface for the greenhouse digital twin.
+
+- **HomeDashboard** — live sensor metrics strip, crop stage progression track, actuator status grid, camera frames, resource usage and cost summary
+- **Detailed Insights** — full indoor sensor readings with optimal ranges, per-pathogen disease risk bars, outdoor weather + 24h forecast, rolling stage and leaf-scan image galleries, growth stage transition spotlight
+- **Manual Override** — live/override mode toggle, editable growth stage + day-in-stage + start time, per-actuator on/off toggles, apply and reset-all actions
+
+All displayed values are currently static mock data. The service layer (`src/agritwin_gh/frontend/src/services/api.js`) is a fully documented stub — replace each stub with the corresponding FastAPI call. See [Frontend UI Reference](docs/FRONTEND_UI_REFERENCE.md) for the complete page-by-page integration guide.
+
+```powershell
+cd src/agritwin_gh/frontend
+npm install
+npm run dev      # → http://localhost:5173
+```
 
 ## 📂 Repository Structure
 
@@ -155,6 +173,7 @@ AgriTwin-GH/
 ├── notebooks/              # ML training notebooks (disease & growth stage classifiers)
 ├── scripts/                # Data loading, upload, and classification scripts
 ├── src/agritwin_gh/        # Core library — API, models, services, utils
+│   └── frontend/           # React 19 + Tailwind v4 dashboard SPA
 ├── data/                   # Raw, processed, and external datasets
 ├── database/               # PostgreSQL schema files
 └── docs/                   # Documentation source files

@@ -1,1 +1,300 @@
+/* ─── Fonts ──────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
+
+/* ─── Design Tokens (Tailwind v4 custom properties) ─────────────────────── */
+@theme {
+  /* Typography */
+  --font-sans:     "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-headline: "Space Grotesk", sans-serif;
+  --font-mono:     "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+
+  /* Surface scale – deep → high */
+  --color-background:       #0b1326;
+  --color-surface:          #171f33;
+  --color-surface-low:      #131b2e;
+  --color-surface-deep:     #060e20;
+  --color-surface-high:     #222a3d;
+  --color-surface-highest:  #2d3449;
+
+  /* Brand */
+  --color-primary:           #4be277;
+  --color-primary-container: #22c55e;
+  --color-secondary:         #89ceff;
+  --color-secondary-dim:     #5db8f5;
+
+  /* Semantic */
+  --color-danger:   #f87171;
+  --color-warning:  #fbbf24;
+  --color-success:  #4be277;
+
+  /* Text */
+  --color-on-surface:         #dae2fd;
+  --color-on-surface-variant: #bccbb9;
+  --color-on-primary:         #003915;
+
+  /* Border */
+  --color-outline-variant: #3d4a3d;
+}
+
+/* ─── Light Theme Overrides ──────────────────────────────────────────────────
+   Applied when <html data-theme="light"> via ThemeContext.
+   Derived from the dark theme — same component structure, spacing, radii,
+   and interaction behaviour. Only colours, surfaces, and shadows adapt.
+
+   Surface hierarchy (light):
+     surface-deep   → near-white (#f5f9f3) — header bar, clearly lifted
+     background     → warm canvas (#eef4ea) — page base
+     surface        → panels (#e5ece0)
+     surface-low    → sidebar (#e9f0e5, slightly receded)
+     surface-high   → elevated/hover (#d5e0ca)
+     surface-highest→ badges, tooltips (#c5d4b8, most visually distinct)
+────────────────────────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  /* Surfaces */
+  --color-background:      #eef4ea;
+  --color-surface:         #e5ece0;
+  --color-surface-low:     #e9f0e5;
+  --color-surface-deep:    #f5f9f3;
+  --color-surface-high:    #d5e0ca;
+  --color-surface-highest: #c5d4b8;
+
+  /* Brand — darkened for WCAG AA contrast on light surfaces */
+  --color-primary:           #1c9448;
+  --color-primary-container: #157336;
+  --color-secondary:         #1d5fa6;
+  --color-secondary-dim:     #1a4d8a;
+
+  /* Text */
+  --color-on-surface:         #111c10;
+  --color-on-surface-variant: #3a5035;
+  --color-on-primary:         #ffffff;
+
+  /* Border */
+  --color-outline-variant: #a8bfa2;
+
+  /* Semantic — red/amber read clearly on light surfaces, no changes needed */
+}
+
+[data-theme="light"] .glass-panel {
+  background: rgba(232, 244, 226, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(80, 135, 65, 0.12);
+}
+
+[data-theme="light"] .glow-primary {
+  box-shadow: 0 0 30px rgba(28, 148, 72, 0.15), 0 0 60px rgba(28, 148, 72, 0.06);
+}
+
+[data-theme="light"] .glow-secondary {
+  box-shadow: 0 0 30px rgba(29, 95, 166, 0.15), 0 0 60px rgba(29, 95, 166, 0.06);
+}
+
+[data-theme="light"] .shadow-card {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* Remap the splash glow-ring animation to a light-aware keyframe */
+[data-theme="light"] .splash-glow-ring {
+  animation: splash-glow-pulse-light 2s ease-in-out infinite;
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-on-surface font-sans antialiased;
+  }
+
+  ::selection {
+    @apply bg-primary text-on-primary;
+  }
+
+  input[type="range"] {
+    @apply accent-primary cursor-pointer;
+  }
+}
+
+/* ─── Utility: Glass Panel ───────────────────────────────────────────────── */
+.glass-panel {
+  background: rgba(45, 52, 73, 0.40);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(61, 74, 61, 0.15);
+  transition: background 250ms ease, border-color 250ms ease;
+}
+
+/* ─── Utility: Glow accents ──────────────────────────────────────────────── */
+.glow-primary {
+  box-shadow: 0 0 40px rgba(75, 226, 119, 0.20), 0 0 80px rgba(75, 226, 119, 0.08);
+}
+
+.glow-secondary {
+  box-shadow: 0 0 40px rgba(137, 206, 255, 0.20), 0 0 80px rgba(137, 206, 255, 0.08);
+}
+
+/* ─── Utility: Surface elevation shadow ─────────────────────────────────── */
+.shadow-card {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+
+/* Generic page utility animations */
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-fade-up-delay {
+  opacity: 0;
+  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.18s forwards;
+}
+
+.animate-fade-up-delay-2 {
+  opacity: 0;
+  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.34s forwards;
+}
+
+/* App shell entrance after splash exit */
+.animate-app-enter {
+  animation: app-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ── Splash intro-specific animations ─────────────────────────────────────── */
+
+/* Ambient background glows blooming in */
+.splash-bg {
+  animation: splash-bg-bloom 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Logo mark: scale up from 80% + fade */
+.splash-logo {
+  opacity: 0;
+  animation: splash-logo-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Scan line sweeps through the logo box once */
+.splash-scan-line {
+  animation: splash-scan 1.0s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+
+/* Main title: letter-spacing collapses as it fades in */
+.splash-title {
+  opacity: 0;
+  animation: splash-title-in 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Tagline / secondary text: soft fade up */
+.splash-tagline {
+  opacity: 0;
+  animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Metric chips: slide up from 14px */
+.splash-metrics {
+  opacity: 0;
+  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Skip button: gentle fade in */
+.splash-skip {
+  opacity: 0;
+  animation: fade-in-only 0.4s ease forwards;
+}
+
+/* Glow pulse on logo ring while intro plays */
+.splash-glow-ring {
+  animation: splash-glow-pulse 2s ease-in-out infinite;
+}
+
+/* ── Keyframes ────────────────────────────────────────────────────────────── */
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-only {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes app-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes splash-bg-bloom {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes splash-logo-in {
+  from { opacity: 0; transform: scale(0.82); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes splash-scan {
+  0%   { top: -4px; opacity: 0.9; }
+  40%  { opacity: 0.7; }
+  100% { top: calc(100% + 4px); opacity: 0; }
+}
+
+/* Title converges from wide tracking → tight */
+@keyframes splash-title-in {
+  from {
+    opacity: 0;
+    letter-spacing: 0.22em;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    letter-spacing: -0.04em;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splash-glow-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 30px rgba(75, 226, 119, 0.15),
+      0 0 60px rgba(75, 226, 119, 0.06);
+  }
+  50% {
+    box-shadow:
+      0 0 50px rgba(75, 226, 119, 0.35),
+      0 0 100px rgba(75, 226, 119, 0.14);
+  }
+}
+
+@keyframes progress-fill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* Light-mode variant of the splash logo glow ring — uses the light primary colour */
+@keyframes splash-glow-pulse-light {
+  0%, 100% {
+    box-shadow:
+      0 0 20px rgba(28, 148, 72, 0.12),
+      0 0 40px rgba(28, 148, 72, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 0 35px rgba(28, 148, 72, 0.28),
+      0 0 70px rgba(28, 148, 72, 0.11);
+  }
+}

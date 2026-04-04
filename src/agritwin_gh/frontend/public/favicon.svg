@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Background pill -->
+  <rect width="32" height="32" rx="8" fill="#0b1326"/>
+  <!-- Sprout stem -->
+  <line x1="16" y1="26" x2="16" y2="14" stroke="#4be277" stroke-width="2" stroke-linecap="round"/>
+  <!-- Left leaf -->
+  <path d="M16 18 C16 18 9 15 9 9 C9 9 15 9 16 18Z" fill="#4be277" opacity="0.85"/>
+  <!-- Right leaf -->
+  <path d="M16 14 C16 14 23 11 23 5 C23 5 17 6 16 14Z" fill="#4be277"/>
+</svg>
