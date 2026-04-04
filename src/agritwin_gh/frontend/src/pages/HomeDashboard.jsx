@@ -1,8 +1,12 @@
+import { useState, useEffect } from 'react';
 import {
   Thermometer,
   Droplets,
   Wind,
   Sun,
+  Flame,
+  Leaf,
+  CloudDrizzle,
   ArrowUp,
   ArrowDown,
   TrendingUp,
@@ -19,6 +23,23 @@ import {
 
 import PanelCard   from '../components/ui/PanelCard';
 import StatusCard  from '../components/ui/StatusCard';
+import {
+  getDtState,
+  getActuatorState,
+  getMonthlyResources,
+  getLatestMedia,
+} from '../services/api.js';
+
+const ACTUATOR_ICON_MAP = {
+  Fan,
+  Wind,
+  Droplets,
+  Flame,
+  Sun,
+  Leaf,
+  CloudDrizzle,
+  Thermometer,
+};
 
 /* ══════════════════════════════════════════════════════════════════════════
    MOCK DATA
@@ -318,6 +339,43 @@ function CostRow({ label, amount, emphasis = false }) {
  * Accepts `navigate` prop from AppRouter for panel CTAs.
  */
 function HomeDashboard({ navigate }) {
+  const [crop, setCrop]               = useState(CROP);
+  const [health, setHealth]           = useState(CROP_HEALTH);
+  const [actuators, setActuators]     = useState(ACTUATORS);
+  const [resources, setResources]     = useState(MONTHLY_RESOURCES);
+  const [cost, setCost]               = useState(MONTHLY_COST);
+  const [images, setImages]           = useState(CROP_IMAGES);
+  const [growthIntel, setGrowthIntel] = useState(GROWTH_INTEL);
+
+  useEffect(() => {
+    getDtState()
+      .then(d => {
+        if (d?.crop)    setCrop(d.crop);
+        if (d?.health)  setHealth(d.health);
+        if (d?.growth)  setGrowthIntel(d.growth);
+      })
+      .catch(() => {});
+
+    getActuatorState()
+      .then(acts => {
+        if (acts?.length) {
+          setActuators(acts.map(a => ({ ...a, icon: ACTUATOR_ICON_MAP[a.iconKey] ?? Wind })));
+        }
+      })
+      .catch(() => {});
+
+    getMonthlyResources()
+      .then(d => {
+        if (d?.resources) setResources(d.resources);
+        if (d?.cost)      setCost(d.cost);
+      })
+      .catch(() => {});
+
+    getLatestMedia()
+      .then(d => { if (d) setImages(d); })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="py-6">
 
@@ -338,7 +396,7 @@ function HomeDashboard({ navigate }) {
               <p className="text-[9px] uppercase tracking-widest text-on-surface-variant mb-0.5">
                 Growth Stage
               </p>
-              <p className="text-lg font-headline font-bold text-primary leading-none">Flowering</p>
+              <p className="text-lg font-headline font-bold text-primary leading-none">{crop.current}</p>
             </div>
             <div className="relative w-10 h-10 shrink-0">
               <div className="w-10 h-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin-slow" />
@@ -351,7 +409,7 @@ function HomeDashboard({ navigate }) {
           {/* Health badge */}
           <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 border border-primary/20">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            <span className="text-[9px] font-bold uppercase tracking-widest text-primary">Healthy</span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-primary">{health.status}</span>
           </div>
         </div>
       </div>
@@ -383,7 +441,7 @@ function HomeDashboard({ navigate }) {
                 Growth Progression
               </p>
               <div className="flex gap-1.5">
-                {GROWTH_INTEL.stageHistory.map(({ stage, daysUsed, daysTarget, complete }) => {
+                {growthIntel.stageHistory.map(({ stage, daysUsed, daysTarget, complete }) => {
                   const pct = Math.round((daysUsed / daysTarget) * 100);
                   return (
                   <div key={stage} className="flex-1 flex flex-col gap-1">
@@ -451,10 +509,10 @@ function HomeDashboard({ navigate }) {
                   </p>
                   <div className="flex items-baseline gap-3">
                     <span className="text-3xl font-headline font-bold text-primary leading-none">
-                      {CROP.current}
+                      {crop.current}
                     </span>
                     <span className="text-xs font-light text-on-surface-variant">
-                      Day {CROP.daysInStage} of {CROP.stageDuration}
+                      Day {crop.daysInStage} of {crop.stageDuration}
                     </span>
                   </div>
                 </div>
@@ -465,10 +523,10 @@ function HomeDashboard({ navigate }) {
                     Next Stage
                   </p>
                   <p className="text-xl font-headline font-bold text-on-surface leading-none">
-                    {CROP.next}
+                    {crop.next}
                   </p>
                   <p className="text-[9px] text-on-surface-variant opacity-70 mt-0.5">
-                    in {CROP.nextInDays} days
+                    in {crop.nextInDays} days
                   </p>
                 </div>
               </div>
@@ -476,9 +534,9 @@ function HomeDashboard({ navigate }) {
               {/* Stage progress track */}
               <div className="px-2">
                 <CropStageTrack
-                  stages={CROP.stages}
-                  currentIndex={CROP.currentIndex}
-                  currentPct={CROP.currentPct}
+                  stages={crop.stages}
+                  currentIndex={crop.currentIndex}
+                  currentPct={crop.currentPct}
                 />
               </div>
 
@@ -486,12 +544,12 @@ function HomeDashboard({ navigate }) {
               <div className="mt-6 pt-4 border-t border-outline-variant/10">
                 <div className="flex justify-between text-[9px] uppercase tracking-widest opacity-55 mb-2">
                   <span>Stage completion</span>
-                  <span>{CROP.currentPct}%</span>
+                  <span>{crop.currentPct}%</span>
                 </div>
                 <div className="h-1.5 bg-surface-highest rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full transition-all duration-700"
-                    style={{ width: `${CROP.currentPct}%` }}
+                    style={{ width: `${crop.currentPct}%` }}
                   />
                 </div>
               </div>
@@ -501,9 +559,9 @@ function HomeDashboard({ navigate }) {
           {/* ── ② CROP HEALTH ─────────────────────────────────── */}
           <StatusCard
             label="Crop Health"
-            status={CROP_HEALTH.status}
-            detail={CROP_HEALTH.detail}
-            meta={CROP_HEALTH.scannedAgo}
+            status={health.status}
+            detail={health.detail}
+            meta={health.scannedAgo}
             variant="crop"
           />
 
@@ -524,7 +582,7 @@ function HomeDashboard({ navigate }) {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {ACTUATORS.map((a) => (
+              {actuators.map((a) => (
                 <ActuatorTile key={a.label} {...a} />
               ))}
             </div>
@@ -543,12 +601,12 @@ function HomeDashboard({ navigate }) {
                   <p className="text-[9px] text-on-surface-variant mt-0.5">Monthly consumption</p>
                 </div>
                 <span className="text-[9px] text-on-surface-variant opacity-55 shrink-0">
-                  {MONTHLY_COST.month}
+                  {cost.month}
                 </span>
               </div>
 
               <div className="flex flex-col gap-3.5">
-                {MONTHLY_RESOURCES.map(({ label, used, unit }) => (
+                {resources.map(({ label, used, unit }) => (
                   <div key={label} className="flex items-center justify-between">
                     <span className="text-[9px] uppercase tracking-widest text-on-surface-variant opacity-70">
                       {label}
@@ -571,14 +629,14 @@ function HomeDashboard({ navigate }) {
                   <p className="text-[9px] text-on-surface-variant mt-0.5">Operational expenditure</p>
                 </div>
                 <span className="text-[9px] text-on-surface-variant opacity-55 shrink-0">
-                  {MONTHLY_COST.month}
+                  {cost.month}
                 </span>
               </div>
 
               <div className="flex flex-col gap-2 flex-1">
-                <CostRow label="Energy" amount={MONTHLY_COST.energy} />
-                <CostRow label="Water"  amount={MONTHLY_COST.water}  />
-                <CostRow label="Total"  amount={MONTHLY_COST.total}  emphasis />
+                <CostRow label="Energy" amount={cost.energy} />
+                <CostRow label="Water"  amount={cost.water}  />
+                <CostRow label="Total"  amount={cost.total}  emphasis />
               </div>
 
               {/* Daily average */}
@@ -587,7 +645,7 @@ function HomeDashboard({ navigate }) {
                   Daily avg. cost
                 </span>
                 <span className="text-sm font-headline font-bold text-on-surface">
-                  ₹{(MONTHLY_COST.total / new Date(2026, 3, 0).getDate()).toFixed(2)}
+                  ₹{(cost.total / new Date(2026, 3, 0).getDate()).toFixed(2)}
                 </span>
               </div>
             </div>
@@ -607,24 +665,24 @@ function HomeDashboard({ navigate }) {
                   </span>
                 </div>
                 <span className="text-[9px] text-on-surface-variant opacity-60">
-                  {CROP_IMAGES.stage.captured}
+                  {images.stage.captured}
                 </span>
               </div>
               <div className="relative overflow-hidden">
                 <img
-                  src={CROP_IMAGES.stage.src}
-                  alt={CROP_IMAGES.stage.alt}
+                  src={images.stage.src}
+                  alt={images.stage.alt}
                   className="w-full aspect-video object-cover"
                   loading="lazy"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/70 to-transparent px-4 py-3">
                   <p className="text-[10px] font-bold text-white leading-none">
-                    {CROP.current} Stage
+                    {crop.current} Stage
                   </p>
-                  <p className="text-[8px] text-white/70 mt-0.5">{CROP_IMAGES.stage.location}</p>
+                  <p className="text-[8px] text-white/70 mt-0.5">{images.stage.location}</p>
                 </div>
                 <span className="absolute top-3 right-3 text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-primary/20 text-primary border border-primary/25">
-                  {CROP_IMAGES.stage.badge}
+                  {images.stage.badge}
                 </span>
               </div>
             </div>
@@ -639,22 +697,22 @@ function HomeDashboard({ navigate }) {
                   </span>
                 </div>
                 <span className="text-[9px] text-on-surface-variant opacity-60">
-                  {CROP_IMAGES.leaf.captured}
+                  {images.leaf.captured}
                 </span>
               </div>
               <div className="relative overflow-hidden">
                 <img
-                  src={CROP_IMAGES.leaf.src}
-                  alt={CROP_IMAGES.leaf.alt}
+                  src={images.leaf.src}
+                  alt={images.leaf.alt}
                   className="w-full aspect-video object-cover"
                   loading="lazy"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/70 to-transparent px-4 py-3">
                   <p className="text-[10px] font-bold text-white leading-none">No Anomalies Detected</p>
-                  <p className="text-[8px] text-white/70 mt-0.5">{CROP_IMAGES.leaf.location}</p>
+                  <p className="text-[8px] text-white/70 mt-0.5">{images.leaf.location}</p>
                 </div>
                 <span className="absolute top-3 right-3 text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-primary/20 text-primary border border-primary/25">
-                  {CROP_IMAGES.leaf.badge}
+                  {images.leaf.badge}
                 </span>
               </div>
             </div>
@@ -678,7 +736,7 @@ function HomeDashboard({ navigate }) {
             navLabel="Open Full Config"
           >
             <div className="flex flex-col gap-3">
-              {ACTUATORS.map((a) => (
+              {actuators.map((a) => (
                 <ActuatorRow key={a.label} {...a} />
               ))}
             </div>

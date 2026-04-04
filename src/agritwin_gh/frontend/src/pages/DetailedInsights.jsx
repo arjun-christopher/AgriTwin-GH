@@ -1,8 +1,11 @@
+import { useState, useEffect } from 'react';
 import {
   Thermometer,
   Droplets,
   Wind,
   Sun,
+  Flame,
+  CloudDrizzle,
   ShieldCheck,
   AlertTriangle,
   CheckCircle2,
@@ -19,6 +22,30 @@ import {
 } from 'lucide-react';
 
 import StatusCard from '../components/ui/StatusCard';
+import {
+  getDtState,
+  getActuatorState,
+  getDiseaseRisks,
+  getWeather,
+  getStageImages,
+  getDiseaseImages,
+} from '../services/api.js';
+
+const SENSOR_ICON_MAP = {
+  Thermometer, Droplets, Wind, Sun, Gauge, Leaf, ShieldCheck, FlaskConical,
+};
+
+const ACTUATOR_ICON_MAP = {
+  Fan, Wind, Droplets, Flame, Sun, Leaf, CloudDrizzle, Thermometer,
+};
+
+const SENSOR_2DP_KEYS = new Set(['vpd', 'leaf_wetness', 'disease_risk_score']);
+
+function fmtSensorVal(key, v) {
+  if (key === 'light_intensity') return v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${Math.round(v)}`;
+  if (key === 'co2') return `${Math.round(v)}`;
+  return v.toFixed(SENSOR_2DP_KEYS.has(key) ? 2 : 1);
+}
 
 /* ════════════════════════════════════════════════════════════════════════
    STATIC THEME MAPS  — all values are literal class strings so Tailwind v4
@@ -396,6 +423,68 @@ function SensorCard({ icon: Icon, label, value, unit }) {
    PAGE
 ════════════════════════════════════════════════════════════════════════ */
 function DetailedInsights() {
+  const [crop, setCrop]               = useState(CROP);
+  const [health, setHealth]           = useState(CROP_HEALTH);
+  const [growthIntel, setGrowthIntel] = useState(GROWTH_INTEL);
+  const [actuators, setActuators]     = useState(ACTUATORS);
+  const [summaryMetrics, setSummaryMetrics] = useState(SUMMARY_METRICS);
+  const [diseaseRisks, setDiseaseRisks]     = useState(DISEASE_RISKS);
+  const [weather, setWeather]         = useState(null);
+  const [stageImages, setStageImages] = useState(RECENT_CROP_IMAGES);
+  const [leafImages, setLeafImages]   = useState(RECENT_LEAF_IMAGES);
+
+  useEffect(() => {
+    getDtState()
+      .then(d => {
+        if (d?.crop)   setCrop(d.crop);
+        if (d?.health) setHealth(d.health);
+        if (d?.growth) setGrowthIntel(d.growth);
+        if (d?.sensors?.length) {
+          setSummaryMetrics(d.sensors.map(s => ({
+            icon:  SENSOR_ICON_MAP[s.iconKey] ?? Thermometer,
+            label: s.label,
+            value: fmtSensorVal(s.key, s.value),
+            unit:  s.unit,
+            note:  'MPC state',
+          })));
+        }
+      })
+      .catch(() => {});
+
+    getActuatorState()
+      .then(acts => {
+        if (acts?.length) {
+          setActuators(acts.map(a => ({ ...a, icon: ACTUATOR_ICON_MAP[a.iconKey] ?? Wind })));
+        }
+      })
+      .catch(() => {});
+
+    getDiseaseRisks()
+      .then(d => { if (d?.length) setDiseaseRisks(d); })
+      .catch(() => {});
+
+    getWeather()
+      .then(d => { if (d) setWeather(d); })
+      .catch(() => {});
+
+    getStageImages()
+      .then(d => { if (d?.length) setStageImages(d); })
+      .catch(() => {});
+
+    getDiseaseImages()
+      .then(d => { if (d?.length) setLeafImages(d); })
+      .catch(() => {});
+  }, []);
+
+  // Construct nested {now, forecast} shape from flat weather API response
+  const outdoorMetrics = weather ? {
+    temp:          { now: weather.current.temp,      forecast: weather.forecast.at(-1)?.high      ?? weather.current.temp      },
+    humidity:      { now: weather.current.humidity,  forecast: weather.forecast.at(-1)?.humidity  ?? weather.current.humidity  },
+    windspeed:     { now: weather.current.windSpeed, forecast: weather.forecast.at(-1)?.low       ?? weather.current.windSpeed },
+    solarradiation:{ now: weather.current.solarRad,  forecast: weather.forecast.at(-1)?.high      ?? 0                         },
+    conditions:    { now: weather.current.condition, forecast: weather.forecast.at(-1)?.condition ?? ''                        },
+  } : OUTDOOR_CURRENT;
+
   return (
     <div className="py-6 flex flex-col gap-12">
 
@@ -422,23 +511,23 @@ function DetailedInsights() {
         <div className="mb-5">
           <StatusCard
             label="Crop Health"
-            status={CROP_HEALTH.status}
-            detail={CROP_HEALTH.detail}
-            meta={CROP_HEALTH.scannedAgo}
+            status={health.status}
+            detail={health.detail}
+            meta={health.scannedAgo}
             variant="crop"
           />
         </div>
 
         {/* Metric chips — all MPC GreenhouseState variables */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-          {SUMMARY_METRICS.map((m) => (
+          {summaryMetrics.map((m) => (
             <MetricChip key={m.label} icon={m.icon} label={m.label} value={m.value} unit={m.unit} note={m.note} />
           ))}
         </div>
 
         {/* Actuator chips — all 7 MPC ActuatorState variables */}
         <div className="flex flex-wrap gap-2">
-          {ACTUATORS.map((a) => (
+          {actuators.map((a) => (
             <ActuatorChip key={a.label} {...a} />
           ))}
         </div>
@@ -466,10 +555,10 @@ function DetailedInsights() {
                 </p>
                 <div className="flex items-baseline gap-3">
                   <span className="text-3xl font-headline font-bold text-primary leading-none">
-                    {CROP.current}
+                    {crop.current}
                   </span>
                   <span className="text-xs font-light text-on-surface-variant">
-                    Day {CROP.daysInStage} of {CROP.stageDuration}
+                    Day {crop.daysInStage} of {crop.stageDuration}
                   </span>
                 </div>
               </div>
@@ -477,28 +566,28 @@ function DetailedInsights() {
                 <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-0.5">
                   Next Stage
                 </p>
-                <p className="text-xl font-headline font-bold text-on-surface leading-none">{CROP.next}</p>
+                <p className="text-xl font-headline font-bold text-on-surface leading-none">{crop.next}</p>
                 <p className="text-[9px] text-on-surface-variant opacity-70 mt-0.5">
-                  in {CROP.nextInDays} days
+                  in {crop.nextInDays} days
                 </p>
               </div>
             </div>
             <div className="px-2">
               <CropStageTrack
-                stages={CROP.stages}
-                currentIndex={CROP.currentIndex}
-                currentPct={CROP.currentPct}
+                stages={crop.stages}
+                currentIndex={crop.currentIndex}
+                currentPct={crop.currentPct}
               />
             </div>
             <div className="mt-6 pt-4 border-t border-outline-variant/10">
               <div className="flex justify-between text-[9px] uppercase tracking-widest opacity-55 mb-2">
                 <span>Stage completion</span>
-                <span>{CROP.currentPct}%</span>
+                <span>{crop.currentPct}%</span>
               </div>
               <div className="h-1.5 bg-surface-highest rounded-full overflow-hidden">
                 <div
                   className="h-full bg-primary rounded-full transition-all duration-700"
-                  style={{ width: `${CROP.currentPct}%` }}
+                  style={{ width: `${crop.currentPct}%` }}
                 />
               </div>
             </div>
@@ -509,14 +598,14 @@ function DetailedInsights() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
           <GrowthSpotlight
             label="Estimated Time to Next Stage"
-            value={GROWTH_INTEL.hoursToNextStage}
+            value={growthIntel.hoursToNextStage}
             unit="hrs"
-            days={Math.ceil(GROWTH_INTEL.hoursToNextStage / 24)}
+            days={Math.ceil(growthIntel.hoursToNextStage / 24)}
             accent="primary"
           />
           <GrowthSpotlight
             label="Transition Probability (24hr)"
-            value={`${GROWTH_INTEL.transitionProb24h}%`}
+            value={`${growthIntel.transitionProb24h}%`}
             unit="likelihood"
             accent="secondary"
           />
@@ -533,7 +622,7 @@ function DetailedInsights() {
             </span>
           </div>
           <div className="flex flex-col gap-3.5">
-            {GROWTH_INTEL.stageHistory.map((row) => (
+            {growthIntel.stageHistory.map((row) => (
               <StageHistoryRow key={row.stage} {...row} />
             ))}
           </div>
@@ -552,7 +641,7 @@ function DetailedInsights() {
             <span className="ml-auto text-[9px] text-on-surface-variant opacity-50">5 captures</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {RECENT_CROP_IMAGES.map((img) => (
+            {stageImages.map((img) => (
               <GalleryFrame
                 key={img.capturedAgo}
                 src={img.src}
@@ -579,7 +668,7 @@ function DetailedInsights() {
 
         {/* Disease risk cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mb-5">
-          {DISEASE_RISKS.map((d) => (
+          {diseaseRisks.map((d) => (
             <DiseaseRiskCard key={d.name} {...d} />
           ))}
         </div>
@@ -594,7 +683,7 @@ function DetailedInsights() {
             <span className="ml-auto text-[9px] text-on-surface-variant opacity-50">5 captures</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {RECENT_LEAF_IMAGES.map((img) => (
+            {leafImages.map((img) => (
               <GalleryFrame
                 key={img.capturedAgo}
                 src={img.src}
@@ -621,11 +710,11 @@ function DetailedInsights() {
 
         {/* Current + 24hr forecast for each parameter */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          <OutdoorMetric icon={Thermometer} label="Temperature"     value={`${OUTDOOR_CURRENT.temp.now}°C`}                  forecast={`${OUTDOOR_CURRENT.temp.forecast}°C`}              />
-          <OutdoorMetric icon={Droplets}    label="Ext. Humidity"   value={`${OUTDOOR_CURRENT.humidity.now}%`}               forecast={`${OUTDOOR_CURRENT.humidity.forecast}%`}           />
-          <OutdoorMetric icon={Wind}        label="Wind Speed"      value={`${OUTDOOR_CURRENT.windspeed.now} km/h`}          forecast={`${OUTDOOR_CURRENT.windspeed.forecast} km/h`}      />
-          <OutdoorMetric icon={Sun}         label="Solar Radiation" value={`${OUTDOOR_CURRENT.solarradiation.now} W/m²`}     forecast={`${OUTDOOR_CURRENT.solarradiation.forecast} W/m²`} />
-          <OutdoorMetric icon={Cloud}       label="Conditions"      value={OUTDOOR_CURRENT.conditions.now}                    forecast={OUTDOOR_CURRENT.conditions.forecast}               />
+          <OutdoorMetric icon={Thermometer} label="Temperature"     value={`${outdoorMetrics.temp.now}°C`}                  forecast={`${outdoorMetrics.temp.forecast}°C`}              />
+          <OutdoorMetric icon={Droplets}    label="Ext. Humidity"   value={`${outdoorMetrics.humidity.now}%`}               forecast={`${outdoorMetrics.humidity.forecast}%`}           />
+          <OutdoorMetric icon={Wind}        label="Wind Speed"      value={`${outdoorMetrics.windspeed.now} km/h`}          forecast={`${outdoorMetrics.windspeed.forecast} km/h`}      />
+          <OutdoorMetric icon={Sun}         label="Solar Radiation" value={`${outdoorMetrics.solarradiation.now} W/m²`}     forecast={`${outdoorMetrics.solarradiation.forecast} W/m²`} />
+          <OutdoorMetric icon={Cloud}       label="Conditions"      value={outdoorMetrics.conditions.now}                    forecast={outdoorMetrics.conditions.forecast}               />
         </div>
       </section>
 

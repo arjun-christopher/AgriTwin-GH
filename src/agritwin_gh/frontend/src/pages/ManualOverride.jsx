@@ -20,6 +20,14 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
+import {
+  getDtState,
+  getActuatorState,
+  postActuatorSet,
+  postDtSimOverride,
+  deleteDtOverride,
+} from '../services/api.js';
+
 /* -----------------------------------------------------------------
    CONSTANTS
 ----------------------------------------------------------------- */
@@ -310,28 +318,80 @@ function ManualOverride() {
   const [overrideHour, setOverrideHour] = useState(getLiveHour);
   const [stage, setStage]               = useState('Flowering');
   const [daysInStage, setDaysInStage]   = useState(12);
+  const [liveStage, setLiveStage]       = useState('Flowering');
 
   const [actuators, setActuators] = useState(INITIAL_ACTUATORS);
   const [applied, setApplied]     = useState(false);
+  const [applyError, setApplyError] = useState(null);
   const [pendingReset, setPendingReset] = useState(false);
+
+  // Seed live values from API on mount
+  useEffect(() => {
+    getDtState()
+      .then(d => {
+        if (d?.crop?.current)    setLiveStage(d.crop.current);
+        if (d?.crop?.daysInStage != null) setDaysInStage(Math.round(d.crop.daysInStage));
+        // Sync mode pill with backend — if backend is already in override, reflect it.
+        if (d?.mode === 'override') setMode('override');
+      })
+      .catch(() => {});
+    getActuatorState()
+      .then(acts => {
+        if (!acts?.length) return;
+        const seeded = {};
+        acts.forEach(a => { seeded[a.id] = { active: a.active, level: Math.round(a.level ?? 0) }; });
+        setActuators(prev => ({ ...prev, ...seeded }));
+      })
+      .catch(() => {});
+  }, []);
 
   function toggleActuator(id) {
     setActuators((prev) => ({ ...prev, [id]: { ...prev[id], active: !prev[id].active } }));
     setApplied(false);
   }
-  function handleApply() { setApplied(true); }
-  function handleReset() {
+
+  async function handleApply() {
+    setApplyError(null);
+    try {
+      await postDtSimOverride({
+        stage:        stage.toLowerCase(),
+        day_in_stage: daysInStage,
+        start_date:   overrideDate,
+        start_hour:   overrideHour,
+      });
+      const actuatorPayload = ACTUATOR_DEFS.map(d => ({
+        id:    d.id,
+        level: actuators[d.id].active ? (actuators[d.id].level || 100) : 0,
+      }));
+      await postActuatorSet(actuatorPayload);
+      setApplied(true);
+    } catch (e) {
+      console.error('[api] handleApply:', e);
+      setApplyError(e.message || 'Override failed — check backend connection.');
+      setApplied(false);
+    }
+  }
+
+  async function handleReset() {
     const allOff = Object.fromEntries(
       Object.keys(INITIAL_ACTUATORS).map((id) => [id, { ...INITIAL_ACTUATORS[id], active: false }])
     );
     setActuators(allOff);
+    setApplyError(null);
+    try {
+      await postActuatorSet(ACTUATOR_DEFS.map(d => ({ id: d.id, level: 0 })));
+      await deleteDtOverride();   // clears OverrideConfig and sets backend mode → "live"
+    } catch (e) {
+      console.error('[api] handleReset:', e);
+    }
     setApplied(false);
     setPendingReset(false);
+    setMode('live');              // switch UI pill back to live immediately
   }
 
   const displayDate  = isOverride ? overrideDate : liveDate;
   const displayHour  = isOverride ? overrideHour : liveHour;
-  const displayStage = isOverride ? stage : 'Flowering';
+  const displayStage = isOverride ? stage : liveStage;
   const maxDays      = STAGE_MAX_DAYS[stage] ?? 30;
 
   return (
@@ -619,6 +679,14 @@ function ManualOverride() {
             </button>
           </div>
         </div>
+
+        {/* Apply error banner */}
+        {applyError && (
+          <div className="mt-3 flex items-center gap-3 bg-danger/10 border border-danger/25 rounded-xl px-5 py-3">
+            <AlertTriangle size={15} className="text-danger shrink-0" />
+            <p className="text-sm text-danger">{applyError}</p>
+          </div>
+        )}
 
         {/* Reset confirmation */}
         {pendingReset && (

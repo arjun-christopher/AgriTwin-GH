@@ -58,3 +58,11 @@ seaborn>=0.11.0         # Statistical data visualization
 diffusers>=0.10.0         # Hugging Face Diffusers for generative models
 transformers>=4.30.0      # Required by StableDiffusionPipeline
 accelerate>=0.20.0        # Required for fast model loading with diffusers
+
+# API Development
+pydantic>=2.0.0          # Data validation and settings management
+fastapi>=0.68.0         # FastAPI for building APIs
+uvicorn>=0.15.0         # ASGI server for FastAPI
+uvicorn[standard]>=0.29.0  # Standard dependencies for Uvicorn
+httpx>=0.24.0           # HTTP client for FastAPI TestClient and async requests
+pytest>=7.0.0           # Testing framework
