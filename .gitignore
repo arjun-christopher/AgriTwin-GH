@@ -60,3 +60,9 @@ config/*.local.yaml
 config/*.secret.yaml
 .env
 .env.local
+
+# Frontend (React + Vite)
+src/agritwin_gh/frontend/node_modules/
+src/agritwin_gh/frontend/dist/
+src/agritwin_gh/frontend/dist-ssr/
+src/agritwin_gh/frontend/.vite/
