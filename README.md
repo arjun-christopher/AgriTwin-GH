@@ -1,22 +1,63 @@
 # AgriTwin-GH 🌱
 
-[![Documentation](https://img.shields.io/badge/docs-online-brightgreen.svg)](https://arjun-christopher.github.io/AgriTwin-GH/)
-[![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<div align="center">
 
-> **An Advanced Digital Twin System for Precision Greenhouse Agriculture**
+[![Documentation](https://img.shields.io/badge/docs-online-brightgreen.svg)](https://arjun-christopher.github.io/AgriTwin-GH/)
+[![Python](https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.135+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Unity](https://img.shields.io/badge/Unity-WebGL-000000?logo=unity&logoColor=white)](https://unity.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Git LFS](https://img.shields.io/badge/Git_LFS-enabled-F05032?logo=git&logoColor=white)](https://git-lfs.com/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+**An Advanced Digital Twin System for Precision Greenhouse Agriculture**
+
+*Combining real-time sensor fusion, physics-based simulation, multi-model ML inference, and model predictive control into a unified cyber-physical platform for intelligent tomato cultivation.*
+
+[📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)
+
+</div>
+
+---
+
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [Components](#-components)
+- [System Architecture](#-system-architecture)
+- [Data Infrastructure](#️-data-infrastructure)
+- [ML Models](#-ml-models)
+- [Model Predictive Control](#-model-predictive-control-mpc)
+- [Digital Twin Closed-Loop](#-digital-twin-closed-loop)
+- [Technology Stack](#️-technology-stack)
+- [Quick Start](#-quick-start)
+- [Documentation](#-documentation)
+- [FastAPI Backend](#-fastapi-backend)
+- [3D Greenhouse Model](#-3d-greenhouse-model)
+- [Frontend Dashboard](#️-frontend-dashboard)
+- [Repository Structure](#-repository-structure)
+- [Research Areas](#-research-areas)
+- [License](#-license)
+
+---
 
 AgriTwin-GH is a comprehensive cyber-physical system combining real-time environmental monitoring, ML-based disease and growth stage detection, physics-based digital twin simulation, and model predictive control for intelligent greenhouse management.
 
 ## 🌟 Overview
 
-- **Predictive Disease Management** — Risk indexing from environmental sensor data to prevent fungal outbreaks before they occur
-- **Growth-Aware Control** — Adaptive MPC policies that respond to detected crop development stages
-- **Stage Transition Forecasting** — Multi-task LSTM predicts the next growth stage and hours to transition directly from sensor time-series, enabling proactive greenhouse interventions
-- **Digital Twin Simulation** — Physics-based virtual replica enabling what-if scenario analysis
-- **Image Intelligence** — EfficientNet classifiers for tomato leaf disease detection and growth stage classification
-- **Data Infrastructure** — PostgreSQL + TimescaleDB for time-series, MinIO for image object storage
-- **Operator Decision Support** — Visual dashboards and non-verbal alert systems
+| Capability | Description |
+|-----------|-------------|
+| 🦠 **Predictive Disease Management** | Risk indexing from environmental sensor data to prevent fungal outbreaks before they occur |
+| 🌱 **Growth-Aware Control** | Adaptive MPC policies that respond to detected crop development stages |
+| 🔮 **Stage Transition Forecasting** | Multi-task LSTM predicts next growth stage and hours to transition directly from sensor time-series, enabling proactive interventions |
+| 🤖 **Digital Twin Simulation** | Physics-based virtual replica enabling what-if scenario analysis |
+| 📸 **Image Intelligence** | EfficientNet classifiers for tomato leaf disease detection and growth stage classification |
+| 🗄️ **Data Infrastructure** | PostgreSQL + TimescaleDB for time-series, MinIO for image object storage |
+| 🧊 **3D Visualization** | Unity WebGL greenhouse scene driven live from the FastAPI state endpoint |
+| 👁️ **Operator Decision Support** | React dashboard, visual alerts, and non-verbal notification systems |
+
+---
 
 ## ✅ Components
 
@@ -40,7 +81,9 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 | **Image Storage** | MinIO (S3-compatible) with PostgreSQL metadata indexing | ✅ Complete |
 | **Monthly Snapshots** | Per-month aggregated sensor, resource, MPC, and disease summary stored to SQLite/PostgreSQL | ✅ Complete |
 | **Frontend Dashboard** | React 19 + Tailwind v4 SPA — HomeDashboard, Detailed Insights, Manual Override | ✅ Complete |
-| **3D Greenhouse Scene** | Unity-based 3D greenhouse with 10 actuator controllers, 15 crop plants (6-stage visual progression), time-of-day environment, and a central JSON-driven state applier for Python/FastAPI integration | ✅ Complete |
+| **3D Greenhouse Scene** | Unity WebGL greenhouse with 10 actuator controllers, 15 crop plants (6-stage visual progression), time-of-day environment, and a central JSON-driven state applier for Python/FastAPI integration | ✅ Complete |
+
+---
 
 ## 📊 System Architecture
 
@@ -65,11 +108,13 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
         │                     │                     │
         └─────────────────────┼─────────────────────┘
                               ▼
-                    ┌──────────────────┐
-                    │   Dashboard &    │
-                    │  Operator Panel  │
-                    └──────────────────┘
+                    ┌────────────────────────────────┐
+                    │   FastAPI  ·  React Dashboard   │
+                    │    Unity 3D Greenhouse Scene    │
+                    └────────────────────────────────┘
 ```
+
+---
 
 ## 🗄️ Data Infrastructure
 
@@ -113,20 +158,30 @@ python scripts/show_monthly_snapshots.py --detail  # full per-row breakdown
 
 See [Monthly Snapshot Reference](docs/MONTHLY_SNAPSHOT_REFERENCE.md) for the full schema, field reference, and API integration.
 
+---
+
 ## 🤖 ML Models
 
-- **Disease Classifier** — EfficientNetB0, 6 classes: Early Blight, Late Blight, Leaf Mold, Powdery Mildew, Septoria Leaf Spot, Spider Mites + Healthy → [Disease Classification](docs/TOMATO_DISEASE_CLASSIFICATION.md)
-- **Growth Stage Classifier** — EfficientNetB3, 6 stages: Seedling → Early Vegetative → Flowering Initiation → Flowering → Unripe → Ripe, with TTA support → [Growth Stage Classification](docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md)
-- **Growth Progression Model** — Multi-task LSTM trained on hourly sensor time-series; simultaneously predicts the current growth stage, next stage, hours until stage transition, and 24h/48h transition probability in a single forward pass → [Growth Progression Model](docs/TOMATO_GROWTH_PROGRESSION_MODEL.md)
-- **Disease Progression Model** — Baseline + LSTM/GRU progression workflow on hourly greenhouse sensor time-series; predicts per-disease current presence, 24h infection severity, and 24h trend labels (absent, emerging, reducing, stable, worsening) → [Disease Progression Model](docs/TOMATO_DISEASE_PROGRESSION_MODEL.md)
-- **Greenhouse Weather Forecast Model** — Chronos time-series foundation model + XGBoost + LSTM ensemble for 24h/48h indoor climate forecasting, feeding the digital twin and control policies → [Weather Forecast Model](docs/WEATHER_FORECAST_MODEL.md)
+| Model | Architecture | Task | Guide |
+|-------|-------------|------|-------|
+| **Disease Classifier** | EfficientNetB0 | 6-class leaf disease detection — Early Blight, Late Blight, Leaf Mold, Powdery Mildew, Septoria Leaf Spot, Spider Mites + Healthy | [→](docs/TOMATO_DISEASE_CLASSIFICATION.md) |
+| **Growth Stage Classifier** | EfficientNetB3 | 6-stage growth classification — Seedling → Early Vegetative → Flowering Initiation → Flowering → Unripe → Ripe, with TTA support | [→](docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md) |
+| **Growth Progression Model** | Multi-task LSTM | Simultaneously predicts current stage, next stage, hours until stage transition, and 24h/48h transition probability from hourly sensor time-series | [→](docs/TOMATO_GROWTH_PROGRESSION_MODEL.md) |
+| **Disease Progression Model** | Baseline + LSTM/GRU | Per-disease current presence, 24h infection severity, and 24h trend labels (absent, emerging, reducing, stable, worsening) from hourly sensor time-series | [→](docs/TOMATO_DISEASE_PROGRESSION_MODEL.md) |
+| **Greenhouse Weather Forecast** | Chronos + XGBoost + LSTM Ensemble | 24h/48h indoor climate forecasting feeding the digital twin and MPC control policies | [→](docs/WEATHER_FORECAST_MODEL.md) |
+
+---
 
 ## 🎮 Model Predictive Control (MPC)
 
 - **MPC Module** — Receding-horizon SLSQP optimisation over a 12-hour prediction window; integrates growth stage detection, disease risk scoring, and weather forecasts to compute optimal actuator actions every 5 minutes
 - **Stage-Aware Constraints** — Dynamically adjusts environmental bounds (temperature, humidity, CO₂) based on detected growth stage and disease risk, with soft penalty-based enforcement
 - **Cost Function** — Nine-term objective balancing setpoint tracking, disease suppression, humidity exposure, energy costs, water costs, and actuator efficiency
-- **Comparison Framework** — Evaluated against a rule-based baseline controller; all three scenarios (standard, disease-pressure, stage-transition) show positive yield improvement and reduced resource costs → [MPC Complete Guide](docs/MPC_COMPLETE_GUIDE.md)
+- **Comparison Framework** — Evaluated against a rule-based baseline controller; all three scenarios (standard, disease-pressure, stage-transition) show positive yield improvement and reduced resource costs
+
+→ [MPC Complete Guide](docs/MPC_COMPLETE_GUIDE.md)
+
+---
 
 ## 🔄 Digital Twin Closed-Loop
 
@@ -135,35 +190,75 @@ A production-grade real-time closed-loop layer (`realtime_core.py`) that connect
 - **DB → AI → MPC → DB** — Each 5-minute step reads live sensor rows, runs weather forecast (Chronos/XGBoost/LSTM ensemble), disease progression (LSTM/GRU), and growth stage progression (multi-task LSTM), feeds results into the MPC solver, advances the digital twin physics model, and writes the output back to `realtime_greenhouse_stream`
 - **In-Memory Context Buffers** — Bootstrapped from historical hypertables at startup; grown with each step so all AI models always have a full look-back window without repeated DB queries
 - **Multi-Rate Cadence** — DT physics every 5 min · MPC solve every 15 min (configurable) · hold steps carry forward last actuator trajectory between solves
-- **CLI Runner** — `scripts/run_realtime_loop.py` (`--steps`, `--stage`, `--days-elapsed`, `--mpc-every`, `--no-images`, `--dry-run`) with per-step console output and NDJSON artifact logs → [DT Closed-Loop Guide](docs/DT_LOOP_GUIDE.md)
+- **CLI Runner** — `scripts/run_realtime_loop.py` with flags `--steps`, `--stage`, `--days-elapsed`, `--mpc-every`, `--no-images`, `--dry-run` — per-step console output and NDJSON artifact logs
+
+→ [DT Closed-Loop Guide](docs/DT_LOOP_GUIDE.md) · [Streaming Guide](docs/DT_LOOP_STREAMING_GUIDE.md)
+
+---
 
 ## 🛠️ Technology Stack
 
-- **Python 3.8+** · **UV** (package manager)
-- **FastAPI + Uvicorn** — ASGI backend with 15 REST endpoints
-- **TensorFlow / Keras** — EfficientNet model training and inference
-- **NumPy · Pandas** — Data processing and analysis
-- **Matplotlib · Seaborn** — Visualization and dashboards
-- **PostgreSQL 15 + TimescaleDB** — Time-series database
-- **MinIO** — S3-compatible object storage
-- **Jupyter Notebooks** — Interactive demonstrations
-- **MkDocs Material** — Documentation website
+| Layer | Technologies |
+|-------|-------------|
+| **Language & Runtime** | Python 3.13 · UV (package manager & venv) |
+| **Backend** | FastAPI · Uvicorn (ASGI) · SQLAlchemy |
+| **ML / DL** | TensorFlow · Keras · PyTorch · Chronos · LightGBM · XGBoost · CatBoost · Scikit-learn |
+| **Data** | NumPy · Pandas · PyArrow · Statsmodels |
+| **Visualization** | Matplotlib · Seaborn |
+| **Database** | PostgreSQL 15 · TimescaleDB · SQLite |
+| **Object Storage** | MinIO (S3-compatible) |
+| **Frontend** | React 19 · Tailwind CSS v4 · Vite |
+| **3D Scene** | Unity (WebGL build) · C# |
+| **Infra / DevOps** | Git LFS · MkDocs Material · Docker (MinIO) |
+| **Notebooks** | Jupyter · Feature demo notebooks (01–06) |
+
+---
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+| Requirement | Purpose | Link |
+|-------------|---------|------|
+| Python 3.13 | Backend runtime | [python.org](https://www.python.org/downloads/) |
+| Node.js LTS | React frontend | [nodejs.org](https://nodejs.org/) |
+| Git LFS | Unity WebGL binary tracking | [git-lfs.com](https://git-lfs.com/) |
+| PostgreSQL 15+ *(optional)* | Production time-series storage | [postgresql.org](https://www.postgresql.org/) |
+| MinIO *(optional)* | Image object storage | [min.io](https://min.io/) |
+
+### Installation
+
 ```powershell
+git lfs install
 git clone https://github.com/arjun-christopher/AgriTwin-GH.git
 cd AgriTwin-GH
-python setup.py           # installs uv, sets up venv, syncs deps, and optionally downloads the dataset
+python setup.py
+```
+
+> **`setup.py`** automates 9 steps: installs uv, initialises the project, creates the virtual environment, syncs all Python dependencies, creates `.env` from `.env.example`, creates `config/settings.local.yaml`, ensures all required data and log directories exist, runs `npm install` for the React frontend, and optionally downloads the Kaggle dataset. A formatted manual-steps guide is printed at the end for everything that requires human action (PostgreSQL, MinIO, API keys, CUDA).
+
+Manual alternative:
+
+```powershell
+uv venv && uv sync
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # macOS / Linux
+```
+
+### Running the Application
+
+```powershell
+# Full stack — FastAPI backend + Vite dev server (auto-launched)
+python main.py
+
+# Backend only
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# Interactive notebook demos
 jupyter notebook feature_demos/
 ```
 
-> **`setup.py`** handles everything automatically across 9 steps: installs uv (if missing), initialises the project, creates the virtual environment, syncs dependencies, creates `.env` from `.env.example`, creates `config/settings.local.yaml`, ensures all required data and log directories exist, runs `npm install` for the React frontend, and optionally downloads the Kaggle dataset with an interactive token setup. A formatted manual-steps guide is printed at the end for anything that requires human action (PostgreSQL, MinIO, API keys, CUDA). You can also run the steps manually:
->
-> ```powershell
-> uv venv && uv sync
-> .venv\Scripts\activate   # Windows — or `source .venv/bin/activate` on macOS/Linux
-> ```
+---
 
 ## 📚 Documentation
 
@@ -191,54 +286,78 @@ jupyter notebook feature_demos/
 
 **[📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)**
 
+---
+
 ## 🌐 FastAPI Backend
 
-A FastAPI + Uvicorn server exposes 16 REST endpoints backed by the live DT loop and `RuntimeStore`:
+A FastAPI + Uvicorn server exposes 16 REST endpoints backed by the live DT loop and `RuntimeStore`. Interactive API docs at `http://localhost:8000/docs`.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/dt/state` | Full DT snapshot — sensors, crop, actuators, 3D scene context |
-| POST | `/api/dt/override` | Enter override mode with custom env/crop values |
-| POST | `/api/dt/override/sim` | Enter sim override mode (stage + start time) |
-| DELETE | `/api/dt/override` | Return to live DT data |
-| POST | `/api/dt/preset/{id}` | Apply a named preset (e.g. `high-growth`, `disease-alert`) |
-| GET | `/api/intelligence/disease` | Per-pathogen risk scores with confidence and trend |
-| GET | `/api/intelligence/growth` | Growth stage transition forecasts |
-| GET | `/api/weather/current` | Outdoor conditions + 24h forecast |
-| GET | `/api/actuators/state` | Current actuator levels |
-| POST | `/api/actuators/set` | Override individual actuator levels |
-| GET | `/api/resources/monthly` | Energy (kWh) + water (L) usage and INR cost |
-| GET | `/api/media/latest` | Latest disease scan and growth stage image |
-| GET | `/api/media/stage-images` | Rolling gallery of growth stage captures |
-| GET | `/api/media/disease-scans` | Rolling gallery of disease scan images |
-| GET | `/api/system/health` | 6-subsystem health check |
+| `GET` | `/api/dt/state` | Full DT snapshot — sensors, crop, actuators, 3D scene context |
+| `POST` | `/api/dt/override` | Enter override mode with custom env/crop values |
+| `POST` | `/api/dt/override/sim` | Enter sim override mode (stage + start time) |
+| `DELETE` | `/api/dt/override` | Return to live DT data |
+| `POST` | `/api/dt/preset/{id}` | Apply a named preset (e.g. `high-growth`, `disease-alert`) |
+| `GET` | `/api/intelligence/disease` | Per-pathogen risk scores with confidence and trend |
+| `GET` | `/api/intelligence/growth` | Growth stage transition forecasts |
+| `GET` | `/api/weather/current` | Outdoor conditions + 24h forecast |
+| `GET` | `/api/actuators/state` | Current actuator levels |
+| `POST` | `/api/actuators/set` | Override individual actuator levels |
+| `GET` | `/api/resources/monthly` | Energy (kWh) + water (L) usage and INR cost |
+| `GET` | `/api/media/latest` | Latest disease scan and growth stage image |
+| `GET` | `/api/media/stage-images` | Rolling gallery of growth stage captures |
+| `GET` | `/api/media/disease-scans` | Rolling gallery of disease scan images |
+| `GET` | `/api/system/health` | 6-subsystem health check |
 
-Interactive docs at `http://localhost:8000/docs`. See [FastAPI Backend & API Guide](docs/FASTAPI_API_GUIDE.md) for the full architecture, layer reference, and testing guide.
+→ [FastAPI Backend & API Guide](docs/FASTAPI_API_GUIDE.md)
 
 ```powershell
 .venv\Scripts\Activate.ps1
 python main.py   # → FastAPI on http://localhost:8000
 ```
+
+---
+
 ## 🌿 3D Greenhouse Model
 
-A Unity-based 3D greenhouse scene that mirrors the live digital twin state in real time via a JSON-driven central controller:
+A Unity-based 3D greenhouse scene that mirrors the live digital twin state in real time via a JSON-driven central controller. The compiled WebGL build lives in `src/agritwin_gh/build/` and is tracked in this repository via **Git LFS** (the Brotli-compressed binary bundles).
 
-- **GreenhouseStateApplier** — Central C# orchestrator that reads a JSON state file (or FastAPI response), detects changes, and dispatches to all sub-controllers automatically
-- **10 Actuator Controllers** — Fluorescent lights, heater, humidifier, window fan, vent, and water tank, each with status indicators, particle effects, and audio
-- **15 Crop Plants** — Each with a `CropStageController` (6-stage visual model swap: Seedling → Ripe) and a `CropHealthIndicator` (green / yellow / red RGB health lights with blinking)
-- **Environment System** — `TimeOfDayController` drives skybox, directional light, fog, and night lights; `CropHealthIndicator` maps disease risk scores to visual health states
-- **FastAPI Integration** — The scene is designed to consume the `/api/dt/state` JSON payload and apply the full greenhouse state without code changes
+| Component | Description |
+|-----------|-------------|
+| **GreenhouseStateApplier** | Central C# orchestrator — reads a JSON state file (or `/api/dt/state` FastAPI response), detects changes, and dispatches to all sub-controllers automatically |
+| **10 Actuator Controllers** | Fluorescent lights, heater, humidifier, window fan, vent, and water tank — each with status indicators, particle effects, and audio |
+| **15 Crop Plants** | Each with a `CropStageController` (6-stage visual model swap: Seedling → Ripe) and a `CropHealthIndicator` (green / yellow / red RGB health lights with blinking) |
+| **Environment System** | `TimeOfDayController` drives skybox, directional light, fog, and night lights; disease risk scores are mapped to visual health states |
 
-See [Greenhouse 3D Model Reference](docs/GREENHOUSE_3D_MODEL_REFERENCE.md) for the complete C# script reference, GameObject hierarchy, JSON schema, and integration guide.
+```
+src/agritwin_gh/build/
+├── Build/
+│   ├── build.data.br          # Scene + asset data      (~18 MB, Git LFS)
+│   ├── build.wasm.br          # Unity runtime (WASM)    (~ 6 MB, Git LFS)
+│   ├── build.framework.js.br  # JS framework loader     (Git LFS)
+│   └── build.loader.js        # Bootstrap loader
+├── StreamingAssets/
+│   └── greenhouse_state.json  # Default DT state payload consumed by the scene
+├── TemplateData/              # WebGL template assets (CSS, icons, logos)
+└── index.html                 # Entry point — open in browser or embed in FastAPI
+```
+
+→ [Greenhouse 3D Model Reference](docs/GREENHOUSE_3D_MODEL_REFERENCE.md)
+
+---
+
 ## �️ Frontend Dashboard
 
 A React 19 + Tailwind v4 single-page application providing a real-time operator interface for the greenhouse digital twin.
 
-- **HomeDashboard** — live sensor metrics strip, crop stage progression track, actuator status grid, camera frames, resource usage and cost summary
-- **Detailed Insights** — full indoor sensor readings with optimal ranges, per-pathogen disease risk bars, outdoor weather + 24h forecast, rolling stage and leaf-scan image galleries, growth stage transition spotlight
-- **Manual Override** — live/override mode toggle, editable growth stage + day-in-stage + start time, per-actuator on/off toggles, apply and reset-all actions
+| Page | Description |
+|------|-------------|
+| **HomeDashboard** | Live sensor metrics strip, crop stage progression track, actuator status grid, camera frames, resource usage and cost summary |
+| **Detailed Insights** | Full indoor sensor readings with optimal ranges, per-pathogen disease risk bars, outdoor weather + 24h forecast, rolling stage and leaf-scan image galleries, growth stage transition spotlight |
+| **Manual Override** | Live/override mode toggle, editable growth stage + day-in-stage + start time, per-actuator on/off toggles, apply and reset-all actions |
 
-All pages are wired to live FastAPI endpoints. The service layer (`src/agritwin_gh/frontend/src/services/api.js`) makes real `fetch()` calls to `http://localhost:8000/api/*`. Run `python main.py` to start the backend, then `npm run dev` for the dev server. See [FastAPI Backend & API Guide](docs/FASTAPI_API_GUIDE.md) for the full endpoint reference, override mode, and 3D integration fields.
+All pages make real `fetch()` calls to `http://localhost:8000/api/*` via `src/agritwin_gh/frontend/src/services/api.js`.
 
 ```powershell
 cd src/agritwin_gh/frontend
@@ -246,30 +365,50 @@ npm install
 npm run dev      # → http://localhost:5173
 ```
 
+→ [Frontend UI Reference](docs/FRONTEND_UI_REFERENCE.md)
+
+---
+
 ## 📂 Repository Structure
 
 ```
 AgriTwin-GH/
-├── setup.py                # Interactive setup — uv install, venv, deps, Kaggle dataset
-├── main.py                 # FastAPI entry point (Uvicorn + DT loop startup)
-├── feature_demos/          # Interactive Jupyter notebook demonstrations (01–06)
-├── notebooks/              # ML training notebooks (disease & growth stage classifiers)
-├── scripts/                # Utility scripts
-│   ├── seed_monthly_mock.py        # Seed 3 monthly snapshot rows for demo
-│   ├── show_monthly_snapshots.py   # Display monthly snapshot table (--detail, --cycle, --limit)
-│   ├── load_timeseries_to_postgres.py  # Load sensor data into PostgreSQL/TimescaleDB
-│   └── classify_input_leaf.py      # Run leaf disease classifier on an input image
+├── setup.py                    # 9-step interactive setup — uv, venv, deps, .env, npm, Kaggle
+├── main.py                     # FastAPI entry point (Uvicorn + DT loop + Vite dev server)
+├── config/                     # App configuration (settings.yaml, settings.local.yaml, MPC config)
+├── feature_demos/              # Interactive Jupyter notebook demonstrations (01–06)
+├── notebooks/                  # ML training notebooks (disease & growth stage classifiers)
+├── scripts/                    # Utility and data pipeline scripts
+│   ├── load_timeseries_to_postgres.py  # Load CSV sensor data into PostgreSQL / TimescaleDB
+│   ├── upload_images_to_minio.py       # Bulk image upload to MinIO buckets
+│   ├── seed_monthly_mock.py            # Seed 3 monthly snapshot rows for demo
+│   ├── show_monthly_snapshots.py       # Display monthly snapshot table (--detail, --cycle)
+│   ├── run_realtime_loop.py            # CLI runner for the DT closed-loop
+│   └── classify_input_leaf.py          # Run leaf disease classifier on an input image
 ├── database/
 │   └── schema/
-│       ├── timeseries_data.sql         # Sensor hypertables (weather + indoor)
+│       ├── timeseries_data.sql         # Sensor hypertables (weather + indoor conditions)
 │       ├── image_metadata.sql          # MinIO image metadata index
 │       └── monthly_snapshots.sql       # Monthly aggregation tables
-├── src/agritwin_gh/        # Core library — API, models, services, utils
-│   └── frontend/           # React 19 + Tailwind v4 dashboard SPA
-├── tests/                  # Unit and smoke tests
-├── data/                   # Raw, processed, and external datasets
-└── docs/                   # Documentation source files
+├── src/agritwin_gh/            # Core Python library — API, models, services, utils
+│   ├── api/                    # FastAPI routers and RuntimeStore
+│   ├── core/                   # Digital twin physics, MPC solver, realtime loop
+│   ├── models/                 # ML model wrappers and inference pipelines
+│   ├── services/               # Database, MinIO, and sensor service layers
+│   ├── frontend/               # React 19 + Tailwind v4 dashboard SPA
+│   └── build/                  # Unity WebGL greenhouse scene (Git LFS for .br binaries)
+│       ├── Build/              # Brotli-compressed WASM + data bundles (LFS-tracked)
+│       ├── StreamingAssets/    # greenhouse_state.json — default DT state for the 3D scene
+│       └── TemplateData/       # WebGL template CSS, icons, and Unity branding
+├── tests/                      # Unit and smoke tests
+├── data/                       # Raw, processed, and external datasets
+│   ├── raw/                    # Unprocessed source files
+│   ├── processed/              # Cleaned and feature-engineered outputs
+│   └── external/               # Kaggle dataset — disease images, growth stages, weather CSV
+└── docs/                       # MkDocs documentation source files
 ```
+
+---
 
 ## 🔬 Research Areas
 
@@ -279,10 +418,16 @@ AgriTwin-GH/
 - Model predictive control in greenhouse environments
 - Human-machine interface design for agricultural systems
 
+---
+
 ## 📄 License
 
 MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
+<div align="center">
+
 **[📖 View Live Documentation](https://arjun-christopher.github.io/AgriTwin-GH/)**
+
+</div>
