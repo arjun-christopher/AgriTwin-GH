@@ -91,7 +91,7 @@ FastAPI wraps them; it does not replace them.
 │  │                    ROUTE HANDLERS  (thin adapters)                 │  │
 │  │  agritwin_gh/api/routes/                                           │  │
 │  │    dt.py · actuators.py · weather.py · intelligence.py            │  │
-│  │    resources.py · media.py · system.py                            │  │
+│  │    resources.py · media.py · system.py · greenhouse_3d.py         │  │
 │  │                                                                    │  │
 │  │  All routes: validate input → call service → return schema        │  │
 │  │  Zero DB calls, zero MPC logic in route files                     │  │
@@ -170,7 +170,8 @@ src/agritwin_gh/
 │       ├── intelligence.py          GET /api/intelligence/disease, GET /api/intelligence/growth
 │       ├── resources.py             GET /api/resources/monthly
 │       ├── media.py                 GET /api/media/latest, /stage-images, /disease-scans
-│       └── system.py               GET /api/system/health
+│       ├── system.py               GET /api/system/health
+│       └── greenhouse_3d.py        GET /api/greenhouse-3d/state
 │
 ├── services/                        ← EXTENDED (was empty __init__.py only)
 │   ├── __init__.py                  (unchanged)
@@ -405,6 +406,8 @@ Interactive docs: `http://localhost:8000/docs`
 | Method | Path | Request | Response schema | Backend source |
 |--------|------|---------|-----------------|----------------|
 | `GET` | `/api/dt/state` | — | `DTStateResponse` | `RuntimeStore.as_dt_state_response()` |
+| `GET` | `/api/greenhouse-3d/state` | — | `GreenhouseState` (Unity format, returns last POSTed state if present, else live state) | Returns last POSTed state or `DashboardService.get_dt_state()` |
+| `POST` | `/api/greenhouse-3d/state` | `GreenhouseState` JSON | `{ok: true, received: ...}` | Stores payload for GET; used for 3D/Unity/manual override |
 | `POST` | `/api/dt/override` | `{"param": str, "value": any}` | `DtOverrideResponse` | `ControlService.set_override()` |
 | `POST` | `/api/dt/override/sim` | `{"stage": str, "day_in_stage": int, ...}` | `DtOverrideResponse` | `ControlService.simulate_override()` |
 | `DELETE` | `/api/dt/override` | — | `DtOverrideResponse` | `ControlService.clear_override()` |
@@ -539,53 +542,34 @@ without an extra `GET /api/dt/state` round-trip.
 
 ---
 
+
 ## 12. 3D Integration Fields
 
-Every `GET /api/dt/state` response already contains 3D scene metadata at zero
-extra compute cost. The current React dashboard does not consume it. A future
-Unity or WebGL layer can subscribe without any API change.
+The API provides 3D scene metadata for greenhouse environment integration in two ways:
 
-### Compact top-level fields
+- `GET /api/dt/state` returns the full digital-twin state, including 3D-ready fields and the full `scene_context` block for use by frontend dashboards or 3D clients.
+- `GET /api/greenhouse-3d/state` returns the last POSTed state (in Unity-compatible `GreenhouseState` format) if present, or falls back to the live state from the DT loop. This allows external tools (like Unity or smoke tests) to override the 3D greenhouse state for testing and integration. The POSTed state is stored in memory and is cleared on server restart.
 
-```json
-{
-  "time_of_day":           "morning",
-  "current_growth_stage":  "flowering",
-  "next_growth_stage":     "unripe",
-  "actuator_visual_state": {
-    "on_off":  {"fan": true,  "led": false, "co2": true, "heater": false, "vent": true, "fogger": false, "irrigation": false},
-    "levels":  {"fan": 75.0, "led": 0.0,  "co2": 55.0, "heater": 0.0,  "vent": 60.0, "fogger": 0.0,  "irrigation": 0.0},
-    "mode":    "auto"
-  }
-}
-```
+**Override behavior:**
+When a POST is made to `/api/greenhouse-3d/state`, the payload is stored in memory. Subsequent GET requests to this endpoint will return the last POSTed state (in the Unity-compatible `GreenhouseState` format) until the server restarts or a new POST is made. If no POSTed state exists, the endpoint falls back to the live state from the DT loop.
 
-### Full `scene_context` block
+Both endpoints provide all necessary metadata for real-time 3D visualization, including actuator states, growth stage, and time-of-day context.
+
+
+### Example GreenhouseState (Unity format)
 
 ```json
 {
-  "scene_context": {
-    "actuator_states_on_off":  {"fan": true, ...},
-    "actuator_levels":         {"fan": 75.0, ...},
-    "current_growth_stage":    "flowering",
-    "next_growth_stage":       "unripe",
-    "current_timestamp":       "2026-04-05T09:15:00",
-    "time_of_day":             "morning"
-  }
-}
-```
-
-### `ThreeDPayload` block
-
-```json
-{
-  "three_d": {
-    "plant_health_score":  0.84,
-    "disease_risk_score":  0.16,
-    "growth_stage_label":  "flowering",
-    "growth_stage_index":  3,
-    "alert_count":         0
-  }
+  "fluorescentLight": {"isOn": true},
+  "heater": {"isOn": false},
+  "energyCanister": {"isOn": true},
+  "humidifier": {"isOn": true},
+  "windowFan": {"isOn": true},
+  "vent": {"isOn": false},
+  "waterTankFloor": {"isOn": false},
+  "cropStage": {"stage": "Ripe"},
+  "timeOfDay": {"time": "Evening"},
+  "cropHealth": {"state": "Yellow"}
 }
 ```
 
@@ -734,6 +718,7 @@ python main.py
 
 ## 15. Testing & Verification
 
+
 ### Automated smoke tests (no running server required)
 
 ```powershell
@@ -759,6 +744,7 @@ so the lifespan skips the DB loop — no PostgreSQL needed.
 | `DELETE /api/dt/override` | HTTP 200, `mode = "live"` after clear |
 | `POST /api/actuators/set` | HTTP 200, unknown ID skipped, level clamped, `MANUAL` status |
 | `POST /api/dt/preset/{id}` | All 5 presets → 200; invalid preset → 422 |
+| `POST /api/greenhouse-3d/state` + `GET /api/greenhouse-3d/state` | All valid actuator/crop/time/health combinations, state override and reflection, Unity compatibility |
 
 ### Live endpoint sampler (requires running server)
 
@@ -836,6 +822,7 @@ Invoke-RestMethod http://localhost:8000/api/system/health | ConvertTo-Json -Dept
 | **Disease / growth ML** | `IntelligenceService` returns synthetic vectors until Keras model paths are set | Set paths in `config/settings.yaml`; train with `notebooks/tomato_disease_classifier_train.ipynb` |
 | **Weather forecast** | `GET /api/weather/current` returns a synthetic diurnal forecast until wired to a real weather API | Set `WEATHER_API_KEY` in `.env` |
 | **Override persistence** | `OverrideConfig` is RAM-only; server restart clears all overrides | Accepted by design for Phase 1; DB persistence is Phase 3+ |
+| **3D override persistence** | `/api/greenhouse-3d/state` POSTed state is RAM-only; server restart clears the override | Accepted by design for Phase 1; DB persistence is Phase 3+ |
 | **Frontend actuator sliders** | `ManualOverride` exposes on/off toggles only (no level sliders); level defaults to 100 when toggled on | UI iteration planned |
 | **CORS in production** | `_CORS_ORIGINS` in `api/app.py` is hardcoded to `localhost` | Add production domain before any public deployment |
 

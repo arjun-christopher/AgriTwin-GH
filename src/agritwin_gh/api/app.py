@@ -44,6 +44,7 @@ from agritwin_gh.api.routes import (
     resources,
     media,
     system,
+    greenhouse_3d,
 )
 
 # Origins allowed by CORS.  Add your production domain here when deploying.
@@ -87,5 +88,6 @@ def create_app() -> FastAPI:
     app.include_router(resources.router,    prefix=_prefix)
     app.include_router(media.router,        prefix=_prefix)
     app.include_router(system.router,       prefix=_prefix)
+    app.include_router(greenhouse_3d.router, prefix=_prefix)
 
     return app
