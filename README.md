@@ -38,6 +38,7 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 | **Resource Tracking** | Energy and water usage optimization and reporting | ✅ Complete |
 | **Time-Series Database** | PostgreSQL + TimescaleDB hypertables for sensor data | ✅ Complete |
 | **Image Storage** | MinIO (S3-compatible) with PostgreSQL metadata indexing | ✅ Complete |
+| **Monthly Snapshots** | Per-month aggregated sensor, resource, MPC, and disease summary stored to SQLite/PostgreSQL | ✅ Complete |
 | **Frontend Dashboard** | React 19 + Tailwind v4 SPA — HomeDashboard, Detailed Insights, Manual Override | ✅ Complete |
 
 ## 📊 System Architecture
@@ -73,8 +74,43 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 
 - **TimescaleDB** — Hypertable storage for weather and indoor greenhouse time-series (5-min and hourly) → [Database Reference](docs/DATABASE_REFERENCE.md)
 - **MinIO** — S3-compatible image object storage with PostgreSQL metadata indexing → [Image Storage Setup](docs/IMAGE_STORAGE_SETUP.md)
+- **Monthly Snapshots** — Per-month aggregated summaries (sensor averages, energy/water totals, per-actuator billing, MPC convergence rate, disease peaks, AI run counts) stored to SQLite (dev) or PostgreSQL (prod) → [Monthly Snapshot Reference](docs/MONTHLY_SNAPSHOT_REFERENCE.md)
 - **Indoor Dataset** — Passive greenhouse physics model deriving indoor conditions from outdoor weather data → [Dataset Guide](docs/INDOOR_GREENHOUSE_DATASET.md)
 - **Data Directory Guide** — Structure and management conventions → [Data Guide](docs/DATA.md)
+
+### Database Schemas
+
+| File | Description |
+|------|-------------|
+| `database/schema/timeseries_data.sql` | Sensor hypertables — weather and indoor greenhouse time-series |
+| `database/schema/image_metadata.sql` | Image object store metadata — disease scans and growth stage images |
+| `database/schema/monthly_snapshots.sql` | Monthly aggregation tables — `monthly_snapshots` and `monthly_actuator_energy` |
+
+### Monthly Snapshot Quick Enable
+
+```powershell
+# Windows PowerShell
+$env:AGRITWIN_MONTHLY_DB = "1"
+python main.py
+```
+```bash
+# Linux / macOS
+AGRITWIN_MONTHLY_DB=1 python main.py
+```
+
+Apply the schema first (SQLite auto-creates on first ingest; PostgreSQL requires explicit apply):
+```bash
+psql -d agritwin_db -f database/schema/monthly_snapshots.sql
+```
+
+Seed mock data and inspect:
+```bash
+python scripts/seed_monthly_mock.py       # inserts 3 rows across 2 crop cycles
+python scripts/show_monthly_snapshots.py  # compact table view
+python scripts/show_monthly_snapshots.py --detail  # full per-row breakdown
+```
+
+See [Monthly Snapshot Reference](docs/MONTHLY_SNAPSHOT_REFERENCE.md) for the full schema, field reference, and API integration.
 
 ## 🤖 ML Models
 
@@ -136,6 +172,7 @@ jupyter notebook feature_demos/
 | [Database Reference](docs/DATABASE_REFERENCE.md) | Schema, queries, and time-series data guide |
 | [PostgreSQL Quick Start](docs/POSTGRESQL_QUICKSTART.md) | Database setup and data loading |
 | [Image Storage Setup](docs/IMAGE_STORAGE_SETUP.md) | MinIO + PostgreSQL image pipeline |
+| [Monthly Snapshot Reference](docs/MONTHLY_SNAPSHOT_REFERENCE.md) | Per-month aggregated sensor, resource, MPC, and disease summary — schema, API, scripts |
 | [Indoor Greenhouse Dataset](docs/INDOOR_GREENHOUSE_DATASET.md) | Synthetic dataset generation methodology |
 | [Disease Classification](docs/TOMATO_DISEASE_CLASSIFICATION.md) | EfficientNetB0 leaf disease model |
 | [Growth Stage Classification](docs/TOMATO_GROWTH_STAGE_CLASSIFICATION.md) | EfficientNetB3 growth stage model |
@@ -153,12 +190,13 @@ jupyter notebook feature_demos/
 
 ## 🌐 FastAPI Backend
 
-A FastAPI + Uvicorn server exposes 15 REST endpoints backed by the live DT loop and `RuntimeStore`:
+A FastAPI + Uvicorn server exposes 16 REST endpoints backed by the live DT loop and `RuntimeStore`:
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/dt/state` | Full DT snapshot — sensors, crop, actuators, 3D scene context |
-| POST | `/api/dt/override/sim` | Enter override mode with custom env/crop values |
+| POST | `/api/dt/override` | Enter override mode with custom env/crop values |
+| POST | `/api/dt/override/sim` | Enter sim override mode (stage + start time) |
 | DELETE | `/api/dt/override` | Return to live DT data |
 | POST | `/api/dt/preset/{id}` | Apply a named preset (e.g. `high-growth`, `disease-alert`) |
 | GET | `/api/intelligence/disease` | Per-pathogen risk scores with confidence and trend |
@@ -167,6 +205,9 @@ A FastAPI + Uvicorn server exposes 15 REST endpoints backed by the live DT loop 
 | GET | `/api/actuators/state` | Current actuator levels |
 | POST | `/api/actuators/set` | Override individual actuator levels |
 | GET | `/api/resources/monthly` | Energy (kWh) + water (L) usage and INR cost |
+| GET | `/api/media/latest` | Latest disease scan and growth stage image |
+| GET | `/api/media/stage-images` | Rolling gallery of growth stage captures |
+| GET | `/api/media/disease-scans` | Rolling gallery of disease scan images |
 | GET | `/api/system/health` | 6-subsystem health check |
 
 Interactive docs at `http://localhost:8000/docs`. See [FastAPI Backend & API Guide](docs/FASTAPI_API_GUIDE.md) for the full architecture, layer reference, and testing guide.
@@ -197,13 +238,23 @@ npm run dev      # → http://localhost:5173
 ```
 AgriTwin-GH/
 ├── setup.py                # Interactive setup — uv install, venv, deps, Kaggle dataset
+├── main.py                 # FastAPI entry point (Uvicorn + DT loop startup)
 ├── feature_demos/          # Interactive Jupyter notebook demonstrations (01–06)
 ├── notebooks/              # ML training notebooks (disease & growth stage classifiers)
-├── scripts/                # Data loading, upload, and classification scripts
+├── scripts/                # Utility scripts
+│   ├── seed_monthly_mock.py        # Seed 3 monthly snapshot rows for demo
+│   ├── show_monthly_snapshots.py   # Display monthly snapshot table (--detail, --cycle, --limit)
+│   ├── load_timeseries_to_postgres.py  # Load sensor data into PostgreSQL/TimescaleDB
+│   └── classify_input_leaf.py      # Run leaf disease classifier on an input image
+├── database/
+│   └── schema/
+│       ├── timeseries_data.sql         # Sensor hypertables (weather + indoor)
+│       ├── image_metadata.sql          # MinIO image metadata index
+│       └── monthly_snapshots.sql       # Monthly aggregation tables
 ├── src/agritwin_gh/        # Core library — API, models, services, utils
 │   └── frontend/           # React 19 + Tailwind v4 dashboard SPA
+├── tests/                  # Unit and smoke tests
 ├── data/                   # Raw, processed, and external datasets
-├── database/               # PostgreSQL schema files
 └── docs/                   # Documentation source files
 ```
 

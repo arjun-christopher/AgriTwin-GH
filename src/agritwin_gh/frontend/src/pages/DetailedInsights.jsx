@@ -96,13 +96,14 @@ const CROP_HEALTH = {
 };
 
 // ── Actuators — from MPC ActuatorState (constants.py CONTROL_VARIABLES) ─────
+// All OFF until the API call in this component resolves.
 const ACTUATORS = [
-  { icon: Fan,         label: 'Fan Speed',    active: true  },
-  { icon: Wind,        label: 'Vent Opening', active: true  },
-  { icon: Droplets,    label: 'Irrigation',   active: true  },
-  { icon: Thermometer, label: 'Heater',       active: true  },
+  { icon: Fan,         label: 'Fan Speed',    active: false },
+  { icon: Wind,        label: 'Vent Opening', active: false },
+  { icon: Droplets,    label: 'Irrigation',   active: false },
+  { icon: Thermometer, label: 'Heater',       active: false },
   { icon: Sun,         label: 'LED Intensity',active: false },
-  { icon: FlaskConical,label: 'CO₂ Valve',    active: true  },
+  { icon: FlaskConical,label: 'CO₂ Valve',    active: false },
   { icon: Droplets,    label: 'Fogger',       active: false },
 ];
 

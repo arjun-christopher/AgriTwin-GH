@@ -1053,6 +1053,18 @@ class RuntimeStore:
         # ── CropHealth ────────────────────────────────────────────────────
         risk = cl.disease_risk_score
         health_status = "Healthy" if risk < 0.35 else ("Warning" if risk < 0.65 else "Risk")
+        # The environmental risk score can be elevated by pure conditions (high leaf
+        # wetness, humidity) even when no disease is actually detected.  If the CNN
+        # classified the leaf as healthy *and* the disease-progression model's
+        # per-pathogen scores are all below the Healthy threshold, trust the combined
+        # signal and report Healthy — matching what the user sees in the disease list.
+        _di = s.disease
+        if (
+            cl.disease_label.lower() == "healthy leaves"
+            and _di.pathogens                                          # model data exists
+            and all(p.get("risk_score", 0.0) < 0.35 for p in _di.pathogens)
+        ):
+            health_status = "Healthy"
         health = CropHealth(
             status=health_status,
             confidence=round(cl.disease_confidence * 100.0, 1),

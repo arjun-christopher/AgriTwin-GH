@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   Wind,
   Droplets,
@@ -89,14 +89,16 @@ const ACTUATOR_DEFS = [
   },
 ];
 
+// Initial actuator state — all OFF until the mount-time API call resolves.
+// (Do not hardcode ON states; they may not match the live DT loop.)
 const INITIAL_ACTUATORS = {
-  fan:       { active: true,  level: 75 },
-  vent:      { active: true,  level: 45 },
-  irrigation:{ active: true,  level: 45 },
-  heater:    { active: true,  level: 60 },
-  led:       { active: false, level: 0  },
-  co2:       { active: true,  level: 55 },
-  fogger:    { active: false, level: 0  },
+  fan:       { active: false, level: 0 },
+  vent:      { active: false, level: 0 },
+  irrigation:{ active: false, level: 0 },
+  heater:    { active: false, level: 0 },
+  led:       { active: false, level: 0 },
+  co2:       { active: false, level: 0 },
+  fogger:    { active: false, level: 0 },
 };
 
 // Practical static ON levels used when a toggled-ON actuator has no prior level
@@ -279,7 +281,9 @@ function HourPicker({ value, onChange, disabled }) {
 function ActuatorCard({ def, state, onToggle, disabled }) {
   const { icon: Icon, label, accent } = def;
   const { active } = state;
-  const isOff = !active || disabled;
+  // isOff tracks only the actuator on/off state — not the disabled/locked mode.
+  // A locked-but-active actuator should still look ON so the live view is readable.
+  const isOff = !active;
 
   return (
     <div
@@ -294,7 +298,7 @@ function ActuatorCard({ def, state, onToggle, disabled }) {
         <div>
           <p className="text-sm font-headline font-bold text-on-surface leading-tight">{label}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <span className={`w-1.5 h-1.5 rounded-full ${active && !disabled ? 'bg-primary animate-pulse' : 'bg-surface-highest'}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-primary animate-pulse' : 'bg-surface-highest'}`} />
             <span className="text-[9px] text-on-surface-variant">
               {disabled ? 'Locked - live mode' : active ? 'Active' : 'Inactive'}
             </span>
@@ -312,6 +316,10 @@ function ActuatorCard({ def, state, onToggle, disabled }) {
 function ManualOverride() {
   const [mode, setMode] = useState('live');
   const isOverride = mode === 'override';
+
+  // Ref keeps polling closure aware of current mode without re-creating the interval.
+  const modeRef = React.useRef(mode);
+  React.useEffect(() => { modeRef.current = mode; }, [mode]);
 
   const [liveDate, setLiveDate] = useState(getLiveDate);
   const [liveHour, setLiveHour] = useState(getLiveHour);
@@ -358,29 +366,38 @@ function ManualOverride() {
       .then(acts => {
         if (!acts?.length) return;
         const seeded = {};
-        acts.forEach(a => { seeded[a.id] = { active: a.active, level: Math.round(a.level ?? 0) }; });
+        // api.js already normalises level to 0–100, so no Math.round needed.
+        acts.forEach(a => { seeded[a.id] = { active: a.active, level: a.level }; });
         setActuators(prev => ({ ...prev, ...seeded }));
         setBaseActuators(prev => ({ ...prev, ...seeded })); // track live baseline
       })
       .catch(() => {});
   }, []);
 
-  // Poll actuator state every 20 s in BOTH modes so backend changes
-  // (e.g. MPC zeroing a manually overridden actuator) are reflected promptly.
+  // Poll actuator state every 20 s.
+  // In live mode:     update both actuators and the baseline reference.
+  // In override mode: only update the baseline — never overwrite the user's
+  //                   pending actuator changes with backend data.
   useEffect(() => {
     const id = setInterval(() => {
       getActuatorState()
         .then(acts => {
           if (!acts?.length) return;
           const updated = {};
-          acts.forEach(a => { updated[a.id] = { active: a.active, level: Math.round(a.level ?? 0) }; });
-          setActuators(prev => ({ ...prev, ...updated }));
+          acts.forEach(a => { updated[a.id] = { active: a.active, level: a.level }; });
+          // Always keep baseline in sync so handleModeChange can revert correctly.
           setBaseActuators(prev => ({ ...prev, ...updated }));
+          // Only push backend state into the editable actuators dict when the
+          // user is in live (read-only) mode.  In override mode the user owns
+          // the actuators state until they explicitly Apply or Cancel.
+          if (modeRef.current === 'live') {
+            setActuators(prev => ({ ...prev, ...updated }));
+          }
         })
         .catch(() => {});
     }, 20_000);
     return () => clearInterval(id);
-  }, []);
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggleActuator(id) {
     setActuators((prev) => ({ ...prev, [id]: { ...prev[id], active: !prev[id].active } }));

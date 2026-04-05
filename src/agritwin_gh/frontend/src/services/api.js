@@ -156,16 +156,31 @@ export async function deleteDtOverride() {
 export async function getActuatorState() {
   try {
     const d = await get('/api/actuators/state');
-    return (d.actuators ?? []).map(a => ({
-      id:      a.id,
-      iconKey: a.icon_key,
-      label:   a.label,
-      status:  a.status,
-      active:  a.active,
-      level:   a.level,
-      value:   a.value_display,
-      color:   a.color,
-    }));
+    return (d.actuators ?? []).map(a => {
+      // Backend stores MPC actuator values on a 0–1 scale (e.g. led=0.20 means
+      // 20 % intensity) while manual-override values are already on a 0–100
+      // scale.  irrigation_qty is in litres per step and cannot be normalised
+      // to a percentage, so it is kept as-is.
+      // Any raw value ≤ 1.0 that is non-zero is assumed to be a 0–1 MPC
+      // fraction → multiply by 100 to bring it to the 0–100 scale the UI expects.
+      const rawLevel = a.level ?? 0;
+      const level =
+        a.id === 'irrigation'
+          ? Math.round(rawLevel)                          // litres, keep raw
+          : rawLevel > 0 && rawLevel <= 1.0
+            ? Math.round(rawLevel * 100)                  // 0–1 MPC fraction → 0–100
+            : Math.round(rawLevel);                       // already 0–100 (override)
+      return {
+        id:      a.id,
+        iconKey: a.icon_key,
+        label:   a.label,
+        status:  a.status,
+        active:  a.active,
+        level,
+        value:   a.value_display,
+        color:   a.color,
+      };
+    });
   } catch (e) {
     console.error('[api] getActuatorState:', e);
     throw e;

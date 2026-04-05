@@ -761,12 +761,22 @@ class LoopService:
         for oid, attr in self._OVERRIDE_ID_TO_ACT_ATTR.items():
             if oid in new_overrides:
                 mpc_level = getattr(result.action_applied, attr, None)
-                if mpc_level is not None and mpc_level < 0.01:
+                override_val = override.actuator_overrides[oid]
+                # Clear the override when MPC and the stored override disagree
+                # on the on/off state:
+                #   • MPC=0  + override>0 → MPC wants it OFF, clear the ON-override
+                #   • MPC>0  + override=0 → MPC wants it ON,  clear the OFF-override
+                # In both cases MPC is the authority; the override entry would
+                # otherwise silently win when _apply_actuator_overrides_if_active
+                # merges it back into the actuator snapshot.
+                mpc_on  = mpc_level is not None and mpc_level >= 0.01
+                ovr_on  = override_val > 0.0
+                if mpc_level is not None and (mpc_on != ovr_on):
                     del new_overrides[oid]
                     changed = True
                     logger.info(
-                        "MPC cleared actuator override: %s (was %.0f%%) → MPC=0",
-                        oid, override.actuator_overrides[oid],
+                        "MPC cleared actuator override: %s (was %.0f%%) → MPC=%.2f",
+                        oid, override_val, mpc_level,
                     )
         if changed:
             from agritwin_gh.core.runtime_store import OverrideConfig as _OC  # noqa: PLC0415
@@ -800,7 +810,10 @@ class LoopService:
 
         override_snap = ActuatorSnapshot(
             levels=levels,
-            on_off={k: v > 0.0 for k, v in levels.items()},
+            # Match the rounding used in update_from_step_result: CVXPY solver
+            # residuals (e.g. 0.001) that display as "0.00" in the log must not
+            # show as ON.  Override values (0–100) are unaffected by this rounding.
+            on_off={k: round(v, 2) > 0.0 for k, v in levels.items()},
             mode="manual",
             mpc_ran_this_step=state.actuators.mpc_ran_this_step,
         )
