@@ -28,10 +28,12 @@ On **shutdown**:
 
 Environment variables
 ---------------------
-``AGRITWIN_BACKGROUND_LOOP``  — ``"1"`` to enable continuous mode (default: ``"0"``).
-``AGRITWIN_GROWTH_STAGE``     — starting growth stage (default: ``"flowering"``).
+``AGRITWIN_BACKGROUND_LOOP``  — ``"0"`` to disable continuous mode (default: ``"1"`` = enabled).
+``AGRITWIN_GROWTH_STAGE``     — starting growth stage (default: ``"seedling"``).
 ``AGRITWIN_DAYS_ELAPSED``     — elapsed days within the starting stage (default: ``"0.0"``).
-``AGRITWIN_TOTAL_STEPS``      — total 5-minute steps per loop run (default: ``"288"``).
+``AGRITWIN_TOTAL_STEPS``      — total 5-minute steps per loop run (default: ``"25632"`` = full
+                                89-day seedling→ripe cycle at 5-min resolution).
+``AGRITWIN_AUTO_ADVANCE_STAGE``— ``"0"`` to pin a single stage (default: ``"1"`` = advance).
 ``AGRITWIN_STEP_INTERVAL_SEC``— seconds between continuous-mode steps (default: ``"300"``).
 ``TESTING``                   — ``"1"`` to skip the loop entirely for unit tests.
 
@@ -128,7 +130,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # ── Step 2: LoopService  ─────────────────────────────────────────────────
     _testing = _env_bool("TESTING")
-    _continuous = _env_bool("AGRITWIN_BACKGROUND_LOOP")
+    _continuous = _env_bool("AGRITWIN_BACKGROUND_LOOP", default=True)
 
     if not _store_ok:
         logger.warning("  [loop  ] LoopService skipped  — RuntimeStore unavailable")
@@ -150,10 +152,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     else:
         with _STARTUP_LOCK:
-            _growth_stage = os.getenv("AGRITWIN_GROWTH_STAGE", "flowering")
+            _growth_stage = os.getenv("AGRITWIN_GROWTH_STAGE", "seedling")
             _days_elapsed = _env_float("AGRITWIN_DAYS_ELAPSED", 0.0)
-            _total_steps = _env_int("AGRITWIN_TOTAL_STEPS", 288)
+            _total_steps = _env_int("AGRITWIN_TOTAL_STEPS", 25632)  # 2136 h × 12 steps/h
             _interval_sec = _env_float("AGRITWIN_STEP_INTERVAL_SEC", 300.0)
+            _auto_advance = _env_bool("AGRITWIN_AUTO_ADVANCE_STAGE", default=True)
 
             # ── 2a: Instantiate and start the loop engine ────────────────
             try:
@@ -163,12 +166,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
                     growth_stage=_growth_stage,
                     days_elapsed=_days_elapsed,
                     total_steps=_total_steps,
+                    auto_advance_stage=_auto_advance,
                 )
                 _loop_ok = True
                 logger.info(
                     "  [loop  ] LoopService started     stage=%s  days_elapsed=%.1f"
-                    "  total_steps=%d",
-                    _growth_stage, _days_elapsed, _total_steps,
+                    "  total_steps=%d  auto_advance=%s",
+                    _growth_stage, _days_elapsed, _total_steps, _auto_advance,
                 )
             except Exception as exc:
                 logger.error(

@@ -201,7 +201,7 @@ function ActuatorRow({ icon: Icon, label, status, active, color }) {
         <span className="text-xs text-on-surface">{label}</span>
       </div>
       <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${pillClass}`}>
-        {status}
+        {active ? 'ON' : 'OFF'}
       </span>
     </div>
   );
@@ -221,11 +221,9 @@ function CropStageTrack({ stages, currentIndex, currentPct }) {
 
       {/* Filled connector up to current stage */}
       <div
-        className="absolute top-3.5 left-4 h-px bg-primary transition-all duration-700"
+        className="absolute top-3.5 left-4 right-4 h-px bg-primary transition-all duration-700 origin-left"
         style={{
-          width: currentIndex === 0
-            ? '0%'
-            : `${((currentIndex / (stages.length - 1)) * 100).toFixed(1)}%`,
+          transform: `scaleX(${currentIndex === 0 ? 0 : (currentIndex / (stages.length - 1)).toFixed(4)})`,
         }}
       />
 
@@ -288,7 +286,7 @@ function ActuatorTile({ icon: Icon, label, status, active, color }) {
           <Icon size={14} />
         </span>
         <span className={`text-[8px] font-black uppercase tracking-widest ${t.pill}`}>
-          {status}
+          {active ? 'ON' : 'OFF'}
         </span>
       </div>
       <span className="text-[10px] font-medium text-on-surface leading-tight">{label}</span>
@@ -380,38 +378,11 @@ function HomeDashboard({ navigate }) {
     <div className="py-6">
 
       {/* ── Compact page header ──────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-5xl font-headline font-bold tracking-tighter text-on-surface leading-tight">
-            Greenhouse{' '}
-            <span className="text-primary italic">Dashboard</span>
-          </h1>
-        </div>
-
-        {/* Status pills row */}
-        <div className="flex items-center gap-3 shrink-0">
-          {/* Growth stage */}
-          <div className="glass-panel flex items-center gap-4 px-5 py-3 rounded-xl">
-            <div className="text-right">
-              <p className="text-[9px] uppercase tracking-widest text-on-surface-variant mb-0.5">
-                Growth Stage
-              </p>
-              <p className="text-lg font-headline font-bold text-primary leading-none">{crop.current}</p>
-            </div>
-            <div className="relative w-10 h-10 shrink-0">
-              <div className="w-10 h-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin-slow" />
-              <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold">
-                95%
-              </span>
-            </div>
-          </div>
-
-          {/* Health badge */}
-          <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10 border border-primary/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            <span className="text-[9px] font-bold uppercase tracking-widest text-primary">{health.status}</span>
-          </div>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-5xl font-headline font-bold tracking-tighter text-on-surface leading-tight">
+          Greenhouse{' '}
+          <span className="text-primary italic">Dashboard</span>
+        </h1>
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════
@@ -517,17 +488,19 @@ function HomeDashboard({ navigate }) {
                   </div>
                 </div>
 
-                {/* Next stage */}
+                {/* Next stage / Harvest */}
                 <div className="shrink-0 text-right">
                   <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-0.5">
-                    Next Stage
+                    {crop.current === 'Ripe' ? 'Action' : 'Next Stage'}
                   </p>
                   <p className="text-xl font-headline font-bold text-on-surface leading-none">
-                    {crop.next}
+                    {crop.current === 'Ripe' ? 'Harvest' : (crop.next ?? '—')}
                   </p>
-                  <p className="text-[9px] text-on-surface-variant opacity-70 mt-0.5">
-                    in {crop.nextInDays} days
-                  </p>
+                  {crop.current !== 'Ripe' && (
+                    <p className="text-[9px] text-on-surface-variant opacity-70 mt-0.5">
+                      in {crop.nextInDays} days
+                    </p>
+                  )}
                 </div>
               </div>
 

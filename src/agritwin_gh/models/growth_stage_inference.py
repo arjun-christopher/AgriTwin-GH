@@ -178,10 +178,12 @@ def predict_growth_stage(
     HERE = Path(__file__).resolve().parent
 
     if model_path is None:
-        candidates = sorted(HERE.glob("growth_stage_*.keras"))
+        candidates = sorted(HERE.glob("growth_stage_[0-9]*_best.keras"))
+        if not candidates:
+            candidates = sorted(HERE.glob("growth_stage_[0-9]*.keras"))
         if not candidates:
             raise FileNotFoundError(
-                f"No growth_stage_*.keras found in {HERE}. "
+                f"No growth_stage_<date>*.keras found in {HERE}. "
                 "Supply model_path= explicitly."
             )
         model_path = candidates[-1]      # latest alphabetically == latest run
@@ -191,7 +193,7 @@ def predict_growth_stage(
         raise FileNotFoundError(f"Model file not found: {model_path}")
 
     if label_map_path is None:
-        run_id         = model_path.stem   # e.g. growth_stage_20260301_120000
+        run_id         = model_path.stem.removesuffix("_best")  # strip _best suffix
         label_map_path = HERE / "artifacts" / run_id / "label_map.json"
 
     label_map_path = Path(label_map_path)

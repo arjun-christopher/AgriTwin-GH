@@ -65,6 +65,86 @@ class MPCInputPreparation:
             "leaf_wetness_proxy": row.leaf_wetness_proxy,
         }
 
+    def get_greenhouse_row_at_datetime(
+        self, target_dt: "datetime"
+    ) -> dict[str, Any] | None:
+        """Return the ``greenhouse_data`` row closest to *target_dt*.
+
+        Searches within a ±2-hour window and picks the single closest row.
+        Returns ``None`` if no rows exist near that time.
+
+        Typical use: look up the same calendar date/hour from the previous
+        year so the DT loop can seed itself with real historical data even
+        when the current-year table is still empty.
+        """
+        import datetime as _dt_mod
+
+        window = _dt_mod.timedelta(hours=2)
+        rows = (
+            self._session.query(GreenhouseData)
+            .filter(
+                GreenhouseData.datetime >= target_dt - window,
+                GreenhouseData.datetime <= target_dt + window,
+            )
+            .all()
+        )
+        if not rows:
+            return None
+        closest = min(rows, key=lambda r: abs((r.datetime - target_dt).total_seconds()))
+        return {
+            "datetime":             closest.datetime,
+            "indoor_temp":          closest.indoor_temp,
+            "indoor_humidity":      closest.indoor_humidity,
+            "indoor_air_velocity":  closest.indoor_air_velocity,
+            "indoor_co2":           closest.indoor_co2,
+            "solarradiation":       closest.solarradiation,
+            "day_night_flag":       closest.day_night_flag,
+            "vpd":                  closest.vpd,
+            "dew_point":            closest.dew_point,
+            "leaf_wetness_proxy":   closest.leaf_wetness_proxy,
+        }
+
+    def get_weather_context_before(
+        self, before_dt: "datetime", lookback_days: int = 30
+    ) -> pd.DataFrame:
+        """Return *lookback_days* of ``weather_data`` ending at *before_dt*.
+
+        Rows are sorted ascending by datetime and formatted identically to
+        :meth:`get_weather_context` so the same AI forecast code can consume them.
+
+        Typical use: anchor the forecast to the same calendar date/hour from
+        the previous year so the AI weather model always has real historical
+        context rather than an empty current-year window.
+        """
+        import datetime as _dt_mod
+
+        since = before_dt - _dt_mod.timedelta(days=lookback_days)
+        rows = (
+            self._session.query(WeatherData)
+            .filter(
+                WeatherData.datetime >= since,
+                WeatherData.datetime <= before_dt,
+            )
+            .order_by(WeatherData.datetime.asc())
+            .all()
+        )
+        if not rows:
+            return pd.DataFrame()
+
+        records = [
+            {
+                "datetime":       r.datetime,
+                "temp":           r.temp,
+                "humidity":       r.humidity,
+                "windspeed":      r.windspeed,
+                "solarradiation": r.solarradiation,
+                "conditions":     r.conditions,
+            }
+            for r in rows
+        ]
+        df = pd.DataFrame(records).sort_values("datetime").reset_index(drop=True)
+        return df
+
     # ── Weather context ────────────────────────────────────────────────
 
     def get_weather_context(self, lookback_days: int = 30) -> pd.DataFrame:

@@ -28,19 +28,68 @@ from __future__ import annotations
 
 import datetime as _dt
 import logging
+import pathlib as _pl
+import random
 from typing import Protocol, runtime_checkable
 
 from sqlalchemy.orm import Session
 
-from .constants import (
-    DISEASE_IMAGE_SUBCATEGORY,
-    GROWTH_STAGE_IMAGE_SUBCATEGORY,
-)
 from .dt_input_provider import ImageObservation
 from .image_streamer import ImageStreamer
 from .state import GreenhouseState
 
 logger = logging.getLogger(__name__)
+
+
+# ── Repo-root navigation & image folder constants ─────────────────────────────
+
+_REPO_ROOT = _pl.Path(__file__).resolve().parents[3]  # …/src/agritwin_gh/mpc → repo root
+
+_GROWTH_STAGE_FOLDER: dict[str, str] = {
+    "seedling":               "Stage1_Seedling",
+    "early vegetative":       "Stage2_Early_Vegetative",
+    "flowering initiation":   "Stage3_Flowering_Initiation",
+    "flowering":              "Stage4_Flowering",
+    "unripe":                 "Stage5_Unripe",
+    "ripe":                   "Stage6_Ripe",
+}
+
+_DISEASE_FOLDER: dict[str, str] = {
+    "early_blight":   "Tomato_Early_Blight",
+    "late_blight":    "Tomato_Late_Blight",
+    "leaf_mold":      "Tomato_Leaf_Mold",
+    "powdery_mildew": "Tomato_Powdery_Mildew",
+    "spider_mites":   "Tomato_Spider_Mites",
+}
+
+_DISEASE_MODEL_CACHE: dict = {}
+
+
+def _pick_random_image(folder: _pl.Path) -> "_pl.Path | None":
+    """Return a random image file from *folder*, or None if none found."""
+    if not folder.is_dir():
+        return None
+    imgs = [f for f in folder.iterdir() if f.suffix.lower() in {".jpg", ".jpeg", ".png"}]
+    return random.choice(imgs) if imgs else None
+
+
+def _load_disease_model() -> tuple:
+    """Load the disease CNN once and cache it at the module level."""
+    if _DISEASE_MODEL_CACHE:
+        return _DISEASE_MODEL_CACHE["model"], _DISEASE_MODEL_CACHE["label_map"]
+    models_dir = _pl.Path(__file__).resolve().parents[1] / "models"
+    candidates = sorted(models_dir.glob("disease_*_best.keras"))
+    if not candidates:
+        candidates = sorted(models_dir.glob("disease_*.keras"))
+    model_path = candidates[-1]
+    run_id = model_path.stem          # e.g. "disease_20260226_141843_best"
+    artifact_id = run_id.removesuffix("_best")   # "disease_20260226_141843"
+    label_map_path = models_dir / "artifacts" / artifact_id / "label_map.json"
+    from agritwin_gh.models.disease_inference import load_inference_assets  # noqa: PLC0415
+    model, lmap = load_inference_assets(str(model_path), str(label_map_path))
+    _DISEASE_MODEL_CACHE["model"] = model
+    _DISEASE_MODEL_CACHE["label_map"] = lmap
+    return model, lmap
 
 
 # ── Protocol ──────────────────────────────────────────────────────────────────
@@ -56,19 +105,29 @@ class ImageObserver(Protocol):
         state: GreenhouseState,
         step_index: int,
         timestamp: _dt.datetime,
+        *,
+        model_growth_result: "dict | None" = None,
+        model_disease_result: "dict | None" = None,
     ) -> ImageObservation:
         """Produce an image observation for the current step.
 
         Parameters
         ----------
         growth_stage:
-            Canonical growth-stage label used to select the image class.
+            Canonical growth-stage label — fallback if model_growth_result
+            is unavailable.
         state:
-            Current greenhouse state — allows disease-risk-aware selection.
+            Current greenhouse state.
         step_index:
             Loop step number (for logging).
         timestamp:
             Logical simulation time.
+        model_growth_result:
+            Output dict from the growth-progression LSTM.  Its
+            ``current_stage`` key is used to select the image source folder.
+        model_disease_result:
+            Output dict from the disease-progression LSTM.  Used to choose
+            the disease image source folder and drive CNN selection.
         """
         ...
 
@@ -77,15 +136,23 @@ class ImageObserver(Protocol):
 
 
 class SyntheticImageObserver:
-    """Generates placeholder image observations from subcategory maps.
+    """Picks a real crop image from disk based on LSTM model outputs and
+    runs the appropriate CNN classifier.
 
-    For each refresh, builds synthetic image keys following the naming
-    convention ``<subcategory>_<step>.jpg``.  The disease label is
-    inferred from the current risk score:
+    Growth-stage image:
+        A random image is selected from the folder matching the current
+        growth stage reported by the growth-progression LSTM.  The
+        growth-stage CNN then classifies that image.
 
-    * risk < 0.3 → ``"healthy leaves"``
-    * risk < 0.5 → ``"early blight"``
-    * risk ≥ 0.5 → ``"late blight"``
+    Disease image:
+        Uses ``model_disease_result`` (from the disease-progression LSTM)
+        to choose the source folder:
+
+        * All diseases False  → ``Tomato Healthy Leaves/``
+        * Exactly one True    → ``Tomato Diseases/<disease_folder>/``
+        * Multiple True       → folder for disease with highest ``severity_24h``
+
+        The disease CNN classifies the selected image.
     """
 
     def observe(
@@ -94,38 +161,112 @@ class SyntheticImageObserver:
         state: GreenhouseState,
         step_index: int,
         timestamp: _dt.datetime,
+        *,
+        model_growth_result: dict | None = None,
+        model_disease_result: dict | None = None,
     ) -> ImageObservation:
-        # Growth-stage image key.
-        gs_sub = GROWTH_STAGE_IMAGE_SUBCATEGORY.get(growth_stage, growth_stage)
-        gs_key = f"{gs_sub}/synthetic_{step_index:04d}.jpg"
+        # ── Growth-stage image ────────────────────────────────────────────────
+        # Use the LSTM current_stage if available; fall back to the loop stage.
+        effective_stage = (
+            model_growth_result.get("current_stage") or growth_stage
+            if model_growth_result
+            else growth_stage
+        )
+        gs_folder_name = _GROWTH_STAGE_FOLDER.get(effective_stage, "Stage1_Seedling")
+        gs_folder = (
+            _REPO_ROOT / "data" / "external" / "Tomato Growth Stages" / gs_folder_name
+        )
+        gs_image_path = _pick_random_image(gs_folder)
 
-        # Disease label from risk score.
-        risk = state.disease_risk_score
-        if risk < 0.3:
-            disease_label = "healthy leaves"
-        elif risk < 0.5:
-            disease_label = "early blight"
+        # ── Disease image: pick source folder from LSTM result ────────────────
+        present: dict[str, float] = {}  # disease_key → severity_24h
+        if model_disease_result:
+            for d, v in model_disease_result.items():
+                if v.get("present", False):
+                    present[d] = float(v.get("severity_24h", 0.0))
+
+        if not present:
+            dis_folder = _REPO_ROOT / "data" / "external" / "Tomato Healthy Leaves"
         else:
-            disease_label = "late blight"
+            chosen = max(present, key=present.__getitem__)  # highest severity when >1
+            folder_name = _DISEASE_FOLDER.get(chosen, "Tomato_Early_Blight")
+            dis_folder = (
+                _REPO_ROOT / "data" / "external" / "Tomato Diseases" / folder_name
+            )
+        dis_image_path = _pick_random_image(dis_folder)
 
-        dis_sub = DISEASE_IMAGE_SUBCATEGORY.get(disease_label, disease_label)
-        dis_key = f"{dis_sub}/synthetic_{step_index:04d}.jpg"
+        # ── Growth-stage CNN + Disease CNN: run concurrently ──────────────────
+        # Pre-load the disease model cache on the main thread before forking,
+        # so both futures only do pure inference (no model-load race condition).
+        from concurrent.futures import ThreadPoolExecutor  # noqa: PLC0415
+        from agritwin_gh.models.growth_stage_inference import predict_growth_stage  # noqa: PLC0415
+        from agritwin_gh.models.disease_inference import predict_image  # noqa: PLC0415
 
-        obs = ImageObservation(
+        dis_model, dis_lmap = _load_disease_model()  # cached after first call
+
+        def _growth_cnn() -> dict:
+            return predict_growth_stage(str(gs_image_path))
+
+        def _disease_cnn() -> dict:
+            return predict_image(str(dis_image_path), dis_model, dis_lmap)
+
+        gs_label = growth_stage
+        gs_confidence = 0.0
+        dis_label = "tomato_leaf_healthy"
+        dis_confidence = 0.0
+
+        with ThreadPoolExecutor(max_workers=2, thread_name_prefix="cnn") as _pool:
+            _fgs = _pool.submit(_growth_cnn) if gs_image_path else None
+            _fdi = _pool.submit(_disease_cnn) if dis_image_path else None
+
+        if _fgs is not None:
+            try:
+                res = _fgs.result()
+                gs_label = res["class_name"]
+                gs_confidence = float(res["confidence"])
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Step %d: growth-stage CNN failed: %s", step_index, exc)
+
+        if _fdi is not None:
+            try:
+                res = _fdi.result()
+                dis_label = res["class_name"]
+                dis_confidence = float(res["confidence"])
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("Step %d: disease CNN failed: %s", step_index, exc)
+
+        # ── Build relative keys for logging ───────────────────────────────────
+        try:
+            gs_key = (
+                str(gs_image_path.relative_to(_REPO_ROOT)).replace("\\", "/")
+                if gs_image_path
+                else "—"
+            )
+        except ValueError:
+            gs_key = str(gs_image_path) if gs_image_path else "—"
+        try:
+            dis_key = (
+                str(dis_image_path.relative_to(_REPO_ROOT)).replace("\\", "/")
+                if dis_image_path
+                else "—"
+            )
+        except ValueError:
+            dis_key = str(dis_image_path) if dis_image_path else "—"
+
+        logger.debug(
+            "Step %d image: gs=%s [%s]  dis=%s [%s]",
+            step_index, gs_key, gs_label, dis_key, dis_label,
+        )
+        return ImageObservation(
             growth_stage_image_key=gs_key,
-            growth_stage_label=growth_stage,
+            growth_stage_label=gs_label,
+            growth_stage_confidence=gs_confidence,
             disease_image_key=dis_key,
-            disease_label=disease_label,
+            disease_label=dis_label,
+            disease_confidence=dis_confidence,
             timestamp=timestamp,
             source="synthetic",
         )
-        logger.debug(
-            "Step %d image observation: stage=%s disease=%s",
-            step_index,
-            growth_stage,
-            disease_label,
-        )
-        return obs
 
 
 # ── MinIO-backed implementation (real images, TTL-cached) ─────────────────────
@@ -164,6 +305,9 @@ class MinIOImageObserver:
         state: GreenhouseState,
         step_index: int,
         timestamp: _dt.datetime,
+        *,
+        model_growth_result: dict | None = None,
+        model_disease_result: dict | None = None,
     ) -> ImageObservation:
         # ── Disease label from current risk score ─────────────────
         risk = state.disease_risk_score
@@ -185,7 +329,14 @@ class MinIOImageObserver:
                 gs_payload is not None,
                 dis_payload is not None,
             )
-            return self._fallback.observe(growth_stage, state, step_index, timestamp)
+            return self._fallback.observe(
+                growth_stage,
+                state,
+                step_index,
+                timestamp,
+                model_growth_result=model_growth_result,
+                model_disease_result=model_disease_result,
+            )
 
         obs = ImageObservation(
             growth_stage_image_key=gs_payload.image_key,

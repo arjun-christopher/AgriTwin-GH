@@ -11,7 +11,7 @@
 import { LayoutDashboard, TrendingUp, SlidersHorizontal } from 'lucide-react';
 
 const NAV_LINKS = [
-  { label: 'Dashboard',        page: 'dashboard', icon: LayoutDashboard  },
+  { label: 'Greenhouse Dashboard',        page: 'dashboard', icon: LayoutDashboard  },
   { label: 'Detailed Insights',page: 'insights',  icon: TrendingUp       },
   { label: 'Manual Override',  page: 'override',  icon: SlidersHorizontal},
 ];
@@ -57,7 +57,6 @@ function Navbar({ currentPage, navigate }) {
           );
         })}
       </div>
-
 
     </nav>
   );

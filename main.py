@@ -18,8 +18,8 @@ Or run this file directly (starts both backend + frontend dev server)::
 Environment variables
 ---------------------
 AGRITWIN_BACKGROUND_LOOP
-    Set to ``1`` to enable the background DT simulation loop.
-    Default: ``0`` (disabled — steps driven manually or by tests).
+    Set to ``0`` to disable the background DT simulation loop.
+    Default: ``1`` (enabled — advances one step every 5 minutes).
 
 AGRITWIN_NO_FRONTEND
     Set to ``1`` to skip launching the Vite dev server (e.g. in CI or
@@ -74,12 +74,41 @@ def _start_vite() -> subprocess.Popen:
     return proc
 
 
+def _print_log_paths() -> None:
+    """Print paths to all log files that will be written for this run."""
+    from datetime import date
+    import os
+
+    logs_dir = Path(__file__).parent / "logs"
+    today = date.today().strftime("%Y%m%d")
+
+    log_files = {
+        "DT loop trace": logs_dir / f"dt_loop_{today}.log",
+        "Uvicorn access": logs_dir / "access.log",
+        "Uvicorn error":  logs_dir / "error.log",
+    }
+
+    print()
+    print("=" * 60)
+    print("  Log files for this run")
+    print("=" * 60)
+    for name, path in log_files.items():
+        abs_path = path.resolve()
+        # VS Code clickable URI — file:///... opens the file in the editor
+        print(f"  {name:<20} {abs_path}")
+        print(f"    Open in editor: {abs_path.as_uri()}")
+    print("=" * 60)
+    print()
+
+
 def main() -> None:
     """Start the Vite dev server and then the Uvicorn server.
 
     Ctrl-C shuts down both processes cleanly.
     """
     no_frontend = os.environ.get("AGRITWIN_NO_FRONTEND", "0").strip() == "1"
+
+    _print_log_paths()
 
     vite_proc: subprocess.Popen | None = None
 

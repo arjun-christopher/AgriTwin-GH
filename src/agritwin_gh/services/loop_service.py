@@ -52,12 +52,52 @@ from __future__ import annotations
 import asyncio
 import datetime as _dt
 import logging
+import logging.handlers
+import os
+import pathlib
 import threading
 from typing import Any, Generator
 
 from agritwin_gh.core.runtime_store import RuntimeStore, get_store
 
 logger = logging.getLogger("agritwin.services.loop")
+
+# ── Dedicated loop-trace file logger ─────────────────────────────────────────
+# Writes a structured phase log: DB → AI → MPC → DT → DB → AI → MPC → DT …
+# Stored at  logs/dt_loop_YYYYMMDD.log  (one file per day, 5 MB cap).
+
+_LOOP_LOG_DIR = pathlib.Path(__file__).resolve().parents[3] / "logs"
+_loop_file_logger: logging.Logger | None = None
+_loop_file_lock = threading.Lock()
+
+
+def _get_loop_file_logger() -> logging.Logger:
+    """Return (and lazily create) the dedicated DT-loop trace file logger."""
+    global _loop_file_logger
+    if _loop_file_logger is not None:
+        return _loop_file_logger
+    with _loop_file_lock:
+        if _loop_file_logger is not None:          # double-checked
+            return _loop_file_logger
+        _LOOP_LOG_DIR.mkdir(parents=True, exist_ok=True)
+        log_path = _LOOP_LOG_DIR / f"dt_loop_{_dt.date.today():%Y%m%d}.log"
+        handler = logging.handlers.RotatingFileHandler(
+            log_path, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"
+        )
+        handler.setFormatter(
+            logging.Formatter("%(asctime)s  %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+        )
+        flog = logging.getLogger("agritwin.loop_trace")
+        flog.setLevel(logging.DEBUG)
+        flog.addHandler(handler)
+        flog.propagate = False          # keep trace out of the main console
+        _loop_file_logger = flog
+    return _loop_file_logger
+
+
+def _phase(step: int, tag: str, msg: str) -> None:
+    """Write one phase-tagged line to the loop trace log."""
+    _get_loop_file_logger().info("STEP %04d | %-5s | %s", step, tag, msg)
 
 
 class LoopService:
@@ -115,10 +155,11 @@ class LoopService:
 
     def start_loop(
         self,
-        growth_stage: str = "flowering",
+        growth_stage: str = "seedling",
         days_elapsed: float = 0.0,
-        total_steps: int = 288,
+        total_steps: int = 25632,  # 2136 h × 12 steps/h = full seedling→ripe cycle
         weather_base_temp: float = 22.0,
+        auto_advance_stage: bool = True,
     ) -> None:
         """Initialise the DT loop engine and record the loop start time.
 
@@ -134,9 +175,17 @@ class LoopService:
             Elapsed days within the starting stage (for initial cadence info).
         total_steps:
             Total 5-minute steps to simulate in one loop run.
-            Default 288 = 24 hours.
+            Default 288 = 24 hours.  For a full crop cycle (all 6 stages)
+            use 25632 (2136 h × 12 steps/h).  For a single stage transition
+            from *seedling* to *early vegetative* use at least 9792 steps.
         weather_base_temp:
             Mean outdoor temperature for synthetic weather generation (°C).
+        auto_advance_stage:
+            When ``True`` the loop automatically advances to the next growth
+            stage once the current stage's configured duration (from
+            ``STAGE_DURATION_HOURS``) has elapsed.  Requires ``total_steps``
+            to cover the desired number of stage transitions.
+            Default ``False`` keeps a fixed stage across the run.
         """
         from agritwin_gh.mpc.constants import GROWTH_STAGES
         if growth_stage not in GROWTH_STAGES:
@@ -151,17 +200,21 @@ class LoopService:
 
         if self._synthetic:
             from agritwin_gh.mpc.dt_loop import DTLoop
+            from agritwin_gh.mpc.dt_input_provider import CSVInputProvider
+            csv_provider = CSVInputProvider(start_time=now)
             self._dt_loop = DTLoop(
                 growth_stage=growth_stage,
                 start_time=now,
                 n_steps=total_steps,
                 days_elapsed=days_elapsed,
-                weather_base_temp=weather_base_temp,
+                input_provider=csv_provider,
+                auto_advance_stage=auto_advance_stage,
             )
             self._gen = self._dt_loop.run(n_steps=total_steps)
             logger.info(
-                "LoopService: DTLoop started (stage=%s, steps=%d, synthetic=True)",
-                growth_stage, total_steps,
+                "LoopService: DTLoop started (stage=%s, steps=%d, "
+                "auto_advance=%s, synthetic=True)",
+                growth_stage, total_steps, auto_advance_stage,
             )
         else:
             # Phase 3: DB-backed RealtimeLoop
@@ -230,12 +283,202 @@ class LoopService:
 
             self._last_result = result
 
+            # ── Phase logging — DB → AI → MPC → DT ───────────────────────
+            step = int(result.step_index)
+            ci   = result.cadence_info or {}
+
+            # INPUT: greenhouse state at the START of this step (read from CSV)
+            cs = result.current_state
+            _phase(step, "INPUT",
+                   f"state in  — T={cs.indoor_temp:.1f}°C  RH={cs.indoor_humidity:.1f}%  "
+                   f"CO₂={cs.co2:.0f}ppm  soil={cs.soil_moisture:.1f}%  "
+                   f"light={cs.light_intensity:.0f}lux  VPD={cs.vpd:.2f}kPa  "
+                   f"leaf={cs.leaf_wetness_proxy:.2f}  risk={cs.disease_risk_score:.3f}  "
+                   f"stage={cs.growth_stage_label}({cs.growth_stage_index})")
+
+            # INPUT: weather disturbance applied this step
+            w = result.weather_used
+            _phase(step, "INPUT",
+                   f"weather in — T_ext={w.temp_external:.1f}°C  "
+                   f"RH_ext={w.humidity_external:.1f}%  "
+                   f"solar={w.solar_radiation:.0f}W/m²  wind={w.windspeed:.1f}km/h  "
+                   f"cond={w.conditions}")
+
+            # AI: growth-progression LSTM — current→next stage transition forecast
+            # Inputs: 24-h window of T, RH, CO₂, light (current reading = window endpoint)
+            gr = ci.get("model_growth_result") or {}
+            if gr:
+                htt = gr.get("hours_to_transition")
+                htt_str = f"{htt:.1f}h" if htt is not None else "—"
+                _phase(step, "AI",
+                       f"growth-progression LSTM  "
+                       f"in=[T={cs.indoor_temp:.1f}°C  RH={cs.indoor_humidity:.1f}%  "
+                       f"CO₂={cs.co2:.0f}ppm  light={cs.light_intensity:.0f}lux  "
+                       f"(24h window)] "
+                       f"→ stage={gr.get('current_stage') or cs.growth_stage_label}  "
+                       f"next={gr.get('next_stage') or '—'}  "
+                       f"h_to_transition={htt_str}  "
+                       f"within_24h={gr.get('within_24h', '—')}  "
+                       f"within_48h={gr.get('within_48h', '—')}")
+            elif result.mpc_ran_this_step:
+                htt = ci.get("hours_to_transition")
+                htt_str = f"{htt:.1f}h" if htt is not None else "—"
+                _phase(step, "AI",
+                       f"growth-progression LSTM  "
+                       f"in=[T={cs.indoor_temp:.1f}°C  RH={cs.indoor_humidity:.1f}%  "
+                       f"CO₂={cs.co2:.0f}ppm  light={cs.light_intensity:.0f}lux  "
+                       f"(24h window)] "
+                       f"→ stage={cs.growth_stage_label}  "
+                       f"next={ci.get('growth_next_stage') or '—'}  "
+                       f"h_to_transition={htt_str}  "
+                       f"within_24h={ci.get('transition_within_24h', '—')}  "
+                       f"within_48h={ci.get('transition_within_48h', '—')}")
+
+            # AI: disease-progression model — per-disease severity forecast
+            # Inputs: 24-h window of T, RH, VPD, leaf-wetness + disease history
+            dr = ci.get("model_disease_result") or {}
+            if dr:
+                rows = "  ".join(
+                    f"{d}=[sev_24h={v.get('severity_24h', 0):.3f}  "
+                    f"present={v.get('present', False)}  "
+                    f"trend={v.get('trend_24h', '—')}]"
+                    for d, v in dr.items()
+                )
+                _phase(step, "AI",
+                       f"disease-progression  "
+                       f"in=[T={cs.indoor_temp:.1f}°C  RH={cs.indoor_humidity:.1f}%  "
+                       f"VPD={cs.vpd:.2f}kPa  leaf={cs.leaf_wetness_proxy:.2f}  "
+                       f"(24h window)] "
+                       f"→ {rows}")
+            elif result.mpc_ran_this_step:
+                cur_sev  = ci.get("current_severity", {})
+                sev_24h  = ci.get("severity_24h", {})
+                sev_48h  = ci.get("severity_48h", {})
+                if cur_sev or sev_24h:
+                    diseases = sorted(set(cur_sev) | set(sev_24h) | set(sev_48h))
+                    rows = "  ".join(
+                        f"{d}=[now={cur_sev.get(d, 0):.3f}  24h={sev_24h.get(d, 0):.3f}  48h={sev_48h.get(d, 0):.3f}]"
+                        for d in diseases
+                    )
+                else:
+                    rows = f"risk={cs.disease_risk_score:.3f}  24h=—  48h=—"
+                _phase(step, "AI",
+                       f"disease-progression  "
+                       f"in=[T={cs.indoor_temp:.1f}°C  RH={cs.indoor_humidity:.1f}%  "
+                       f"VPD={cs.vpd:.2f}kPa  leaf={cs.leaf_wetness_proxy:.2f}  "
+                       f"(24h window)] "
+                       f"→ {rows}")
+
+            # AI: image classifiers — growth-stage CNN + disease CNN
+            # (run after both LSTMs; image folder selection uses LSTM current_stage
+            #  and disease present-flags as inputs)
+            if result.image_refresh_this_step and result.image_observation is not None:
+                obs = result.image_observation
+                _phase(step, "AI",
+                       f"growth-stage CNN  in=[img:{obs.growth_stage_image_key or '—'}] "
+                       f"→ {obs.growth_stage_label or '—'}  ({obs.growth_stage_confidence:.1%})")
+                _phase(step, "AI",
+                       f"disease CNN       in=[img:{obs.disease_image_key or '—'}] "
+                       f"→ {obs.disease_label or '—'}  ({obs.disease_confidence:.1%})")
+            else:
+                _phase(step, "AI",
+                       f"image classify — skipped  (image_due={ci.get('image_due', False)})")
+
+            # AI: weather-forecast model (Chronos+XGBoost+LSTM ensemble)
+            # Logs the 24h-ahead model prediction at every step (model runs once
+            # on startup; same point forecast is shown for all steps in a run).
+            w24 = ci.get("weather_24h_ahead", {})
+            if w24:
+                _phase(step, "AI",
+                       f"weather-forecast (24h ahead)  "
+                       f"T_ext={w24.get('temp_external', 0):.1f}°C  "
+                       f"RH={w24.get('humidity_external', 0):.1f}%  "
+                       f"solar={w24.get('solar_radiation', 0):.0f}W/m²  "
+                       f"wind={w24.get('windspeed', 0):.1f}km/h  "
+                       f"conditions={w24.get('conditions', '—')}")
+
+            # MPC: CVXPY solver — logs all 9 state inputs and all 7 actuator outputs
+            if result.mpc_ran_this_step:
+                reason = "event" if result.mpc_forced else "cadence"
+                act = result.action_applied
+                sol = result.mpc_solution
+                cost_str = f"{sol.total_cost:.4f}" if sol else "—"
+                conv_str = ("yes" if sol and sol.converged else
+                            "fallback" if sol and sol.fallback_used else "no")
+                _phase(step, "MPC",
+                       f"solve [{reason}] in=[T={cs.indoor_temp:.1f}  RH={cs.indoor_humidity:.1f}  "
+                       f"CO₂={cs.co2:.0f}  soil={cs.soil_moisture:.1f}  "
+                       f"light={cs.light_intensity:.0f}  VPD={cs.vpd:.2f}  "
+                       f"leaf={cs.leaf_wetness_proxy:.2f}  risk={cs.disease_risk_score:.3f}  "
+                       f"stage={cs.growth_stage_index}]  "
+                       f"→ fan={act.fan_speed:.2f}  vent={act.vent_opening:.2f}  "
+                       f"heat={act.heater_output:.2f}  led={act.led_intensity:.2f}  "
+                       f"co2v={act.co2_valve_pct:.2f}  fog={act.fogger_duty:.2f}  "
+                       f"irrig={act.irrigation_qty:.2f}  "
+                       f"cost={cost_str}  converged={conv_str}")
+            else:
+                _phase(step, "MPC",
+                       f"solve — skipped  (mpc_due={ci.get('mpc_due', False)}  "
+                       f"forced={result.mpc_forced})")
+
+            # DT: ARX physics engine — all 9 next-state variables produced
+            ns = result.next_state
+            _phase(step, "DT",
+                   f"physics → T={ns.indoor_temp:.1f}°C  RH={ns.indoor_humidity:.1f}%  "
+                   f"CO₂={ns.co2:.0f}ppm  soil={ns.soil_moisture:.1f}%  "
+                   f"light={ns.light_intensity:.0f}lux  VPD={ns.vpd:.2f}kPa  "
+                   f"leaf={ns.leaf_wetness_proxy:.2f}  risk={ns.disease_risk_score:.3f}  "
+                   f"stage={ns.growth_stage_label}({ns.growth_stage_index})")
+
+            # DT diagnostics: state delta, resource accounting, timing
+            diag = result.diagnostics
+            sd = diag.state_delta
+            _phase(step, "DT",
+                   f"Δstate    → ΔT={sd.get('indoor_temp', 0):+.3f}°C  "
+                   f"ΔRH={sd.get('indoor_humidity', 0):+.3f}%  "
+                   f"ΔCO₂={sd.get('co2', 0):+.1f}ppm  "
+                   f"Δsoil={sd.get('soil_moisture', 0):+.3f}%  "
+                   f"Δlight={sd.get('light_intensity', 0):+.1f}lux  "
+                   f"ΔVPD={sd.get('vpd', 0):+.4f}kPa  "
+                   f"Δleaf={sd.get('leaf_wetness_proxy', 0):+.4f}  "
+                   f"energy={diag.energy_kwh:.5f}kWh  water={diag.water_litres:.3f}L  "
+                   f"compute={diag.step_compute_ms:.1f}ms")
+
+            # DT diagnostics: signed setpoint error (actual − target) per variable
+            se = diag.setpoint_error
+            if se:
+                sp_parts = "  ".join(f"{k}={v:+.3f}" for k, v in se.items())
+                _phase(step, "DT", f"setpt_err → {sp_parts}")
+
+            # DT diagnostics: disease-favourable environment boolean flags
+            df = diag.disease_environment_flags
+            if df:
+                flags_active = [k for k, v in df.items() if v]
+                flags_str = (
+                    "  ".join(k for k in flags_active)
+                    if flags_active else "all_clear"
+                )
+                _phase(step, "DT",
+                       f"disease_env → {flags_str}  "
+                       f"(risk_post={diag.disease_risk_recomputed:.3f})")
+
+            # DT diagnostics: per-actuator effect attribution for T and RH
+            ea = diag.effect_attribution
+            for _var, _short in (("indoor_temp", "T"), ("indoor_humidity", "RH")):
+                attrs = ea.get(_var, {})
+                if attrs:
+                    attrs_str = "  ".join(f"{k}={v:+.4f}" for k, v in attrs.items())
+                    _phase(step, "DT", f"effects[{_short}] → {attrs_str}")
+
+            # DT diagnostics: bounds clamping (only logged when active)
+            if diag.bounds_clamped:
+                _phase(step, "DT", f"bounds_clamped → {diag.bounds_clamped}")
+
             # ── Enrich cadence_info with elapsed-day tracking ─────────────
             # DTLoop.run() sets mpc_due, image_due etc. but not days_elapsed /
             # days_in_stage.  Compute from step index.
             from agritwin_gh.mpc.constants import DT_MINUTES
             from agritwin_gh.mpc.realtime_core import STAGE_DURATION_HOURS, STAGE_DURATION_HOURS as _SDH
-            step = int(result.step_index)
             hours_elapsed: float = step * DT_MINUTES / 60.0
             days_elapsed: float = hours_elapsed / 24.0
             stage_dur_hours: float = float(STAGE_DURATION_HOURS.get(self._growth_stage, 336))

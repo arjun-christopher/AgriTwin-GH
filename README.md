@@ -103,6 +103,7 @@ A production-grade real-time closed-loop layer (`realtime_core.py`) that connect
 ## 🛠️ Technology Stack
 
 - **Python 3.8+** · **UV** (package manager)
+- **FastAPI + Uvicorn** — ASGI backend with 15 REST endpoints
 - **TensorFlow / Keras** — EfficientNet model training and inference
 - **NumPy · Pandas** — Data processing and analysis
 - **Matplotlib · Seaborn** — Visualization and dashboards
@@ -143,10 +144,37 @@ jupyter notebook feature_demos/
 | [Weather Forecast Model](docs/WEATHER_FORECAST_MODEL.md) | Chronos + XGBoost + LSTM ensemble for 24h/48h greenhouse climate forecasting |
 | [MPC Complete Guide](docs/MPC_COMPLETE_GUIDE.md) | Model predictive control module: solver tuning, constraint strategy, cost function design, and end-to-end evaluation |
 | [DT Closed-Loop Guide](docs/DT_LOOP_GUIDE.md) | Real-time DB→AI→MPC→DB closed-loop layer: architecture, data flow, cadence, and CLI runner reference |
+| [DT Loop Streaming Guide](docs/DT_LOOP_STREAMING_GUIDE.md) | Per-step data flow, log format walkthrough, cadence reference, AI model refresh, and FAQ |
+| [FastAPI Backend & API Guide](docs/FASTAPI_API_GUIDE.md) | All 15 REST endpoints, layer-by-layer architecture, runtime state, override mechanism, 3D fields, and testing |
+| [Frontend UI Reference](docs/FRONTEND_UI_REFERENCE.md) | React dashboard — pages, components, and live API data-binding contract |
 | [Deployment Guide](docs/DOCS_DEPLOYMENT.md) | MkDocs documentation site setup |
-| [Frontend UI Reference](docs/FRONTEND_UI_REFERENCE.md) | React dashboard — pages, components, all mock data, and API integration points |
 
 **[📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)**
+
+## 🌐 FastAPI Backend
+
+A FastAPI + Uvicorn server exposes 15 REST endpoints backed by the live DT loop and `RuntimeStore`:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/dt/state` | Full DT snapshot — sensors, crop, actuators, 3D scene context |
+| POST | `/api/dt/override/sim` | Enter override mode with custom env/crop values |
+| DELETE | `/api/dt/override` | Return to live DT data |
+| POST | `/api/dt/preset/{id}` | Apply a named preset (e.g. `high-growth`, `disease-alert`) |
+| GET | `/api/intelligence/disease` | Per-pathogen risk scores with confidence and trend |
+| GET | `/api/intelligence/growth` | Growth stage transition forecasts |
+| GET | `/api/weather/current` | Outdoor conditions + 24h forecast |
+| GET | `/api/actuators/state` | Current actuator levels |
+| POST | `/api/actuators/set` | Override individual actuator levels |
+| GET | `/api/resources/monthly` | Energy (kWh) + water (L) usage and INR cost |
+| GET | `/api/system/health` | 6-subsystem health check |
+
+Interactive docs at `http://localhost:8000/docs`. See [FastAPI Backend & API Guide](docs/FASTAPI_API_GUIDE.md) for the full architecture, layer reference, and testing guide.
+
+```powershell
+.venv\Scripts\Activate.ps1
+python main.py   # → FastAPI on http://localhost:8000
+```
 
 ## �️ Frontend Dashboard
 
@@ -156,7 +184,7 @@ A React 19 + Tailwind v4 single-page application providing a real-time operator 
 - **Detailed Insights** — full indoor sensor readings with optimal ranges, per-pathogen disease risk bars, outdoor weather + 24h forecast, rolling stage and leaf-scan image galleries, growth stage transition spotlight
 - **Manual Override** — live/override mode toggle, editable growth stage + day-in-stage + start time, per-actuator on/off toggles, apply and reset-all actions
 
-All displayed values are currently static mock data. The service layer (`src/agritwin_gh/frontend/src/services/api.js`) is a fully documented stub — replace each stub with the corresponding FastAPI call. See [Frontend UI Reference](docs/FRONTEND_UI_REFERENCE.md) for the complete page-by-page integration guide.
+All pages are wired to live FastAPI endpoints. The service layer (`src/agritwin_gh/frontend/src/services/api.js`) makes real `fetch()` calls to `http://localhost:8000/api/*`. Run `python main.py` to start the backend, then `npm run dev` for the dev server. See [FastAPI Backend & API Guide](docs/FASTAPI_API_GUIDE.md) for the full endpoint reference, override mode, and 3D integration fields.
 
 ```powershell
 cd src/agritwin_gh/frontend

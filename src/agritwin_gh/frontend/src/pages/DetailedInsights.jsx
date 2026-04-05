@@ -19,6 +19,7 @@ import {
   FlaskConical,
   Camera,
   ScanSearch,
+  Sprout,
 } from 'lucide-react';
 
 import StatusCard from '../components/ui/StatusCard';
@@ -33,6 +34,7 @@ import {
 
 const SENSOR_ICON_MAP = {
   Thermometer, Droplets, Wind, Sun, Gauge, Leaf, ShieldCheck, FlaskConical,
+  Activity, CloudDrizzle, AlertTriangle, Sprout,
 };
 
 const ACTUATOR_ICON_MAP = {
@@ -95,13 +97,13 @@ const CROP_HEALTH = {
 
 // ── Actuators — from MPC ActuatorState (constants.py CONTROL_VARIABLES) ─────
 const ACTUATORS = [
-  { icon: Fan,         label: 'Fan Speed',    status: 'ON',  active: true,  value: '75%'  },
-  { icon: Wind,        label: 'Vent Opening', status: 'ON',  active: true,  value: '45%'  },
-  { icon: Droplets,    label: 'Irrigation',   status: 'ON',  active: true,  value: '45 L' },
-  { icon: Thermometer, label: 'Heater',       status: 'ON',  active: true,  value: '60%'  },
-  { icon: Sun,         label: 'LED Intensity',status: 'OFF', active: false, value: '0%'   },
-  { icon: FlaskConical,label: 'CO₂ Valve',    status: 'ON',  active: true,  value: '55%'  },
-  { icon: Droplets,    label: 'Fogger',       status: 'OFF', active: false, value: '0%'   },
+  { icon: Fan,         label: 'Fan Speed',    active: true  },
+  { icon: Wind,        label: 'Vent Opening', active: true  },
+  { icon: Droplets,    label: 'Irrigation',   active: true  },
+  { icon: Thermometer, label: 'Heater',       active: true  },
+  { icon: Sun,         label: 'LED Intensity',active: false },
+  { icon: FlaskConical,label: 'CO₂ Valve',    active: true  },
+  { icon: Droplets,    label: 'Fogger',       active: false },
 ];
 
 // ── Key Indoor Metrics — from MPC GreenhouseState (STATE_VARIABLES) ────────
@@ -214,13 +216,12 @@ function MetricChip({ icon: Icon, label, value, unit, note }) {
 /** Actuator status pill chip — shows label, value, and ON/OFF status. */
 const CHIP_ON   = 'bg-primary/10 text-primary border-primary/20';
 const CHIP_OFF  = 'bg-surface-highest text-on-surface-variant border-outline-variant/20';
-function ActuatorChip({ icon: Icon, label, status, active, value }) {
+function ActuatorChip({ icon: Icon, label, active }) {
   return (
     <div className={`flex items-center gap-2 px-3.5 py-2 rounded-full border text-[10px] font-bold ${active ? CHIP_ON : CHIP_OFF}`}>
       <Icon size={11} />
       <span>{label}</span>
-      {value && <span className="font-mono font-normal opacity-80">{value}</span>}
-      <span className="opacity-50 font-normal">· {status}</span>
+      <span className="opacity-50 font-normal">· {active ? 'ON' : 'OFF'}</span>
     </div>
   );
 }
@@ -234,11 +235,9 @@ function CropStageTrack({ stages, currentIndex, currentPct }) {
     <div className="relative flex items-start justify-between w-full pt-1">
       <div className="absolute top-3.5 left-4 right-4 h-px bg-outline-variant/20" />
       <div
-        className="absolute top-3.5 left-4 h-px bg-primary transition-all duration-700"
+        className="absolute top-3.5 left-4 right-4 h-px bg-primary transition-all duration-700 origin-left"
         style={{
-          width: currentIndex === 0
-            ? '0%'
-            : `${((currentIndex / (stages.length - 1)) * 100).toFixed(1)}%`,
+          transform: `scaleX(${currentIndex === 0 ? 0 : (currentIndex / (stages.length - 1)).toFixed(4)})`,
         }}
       />
       {stages.map((stage, i) => {
@@ -427,38 +426,44 @@ function DetailedInsights() {
   const [health, setHealth]           = useState(CROP_HEALTH);
   const [growthIntel, setGrowthIntel] = useState(GROWTH_INTEL);
   const [actuators, setActuators]     = useState(ACTUATORS);
-  const [summaryMetrics, setSummaryMetrics] = useState(SUMMARY_METRICS);
   const [diseaseRisks, setDiseaseRisks]     = useState(DISEASE_RISKS);
   const [weather, setWeather]         = useState(null);
-  const [stageImages, setStageImages] = useState(RECENT_CROP_IMAGES);
-  const [leafImages, setLeafImages]   = useState(RECENT_LEAF_IMAGES);
+  const [stageImages, setStageImages]     = useState(RECENT_CROP_IMAGES);
+  const [leafImages, setLeafImages]       = useState(RECENT_LEAF_IMAGES);
+  const [indoorSensors, setIndoorSensors] = useState(INDOOR_SENSORS);
 
   useEffect(() => {
-    getDtState()
-      .then(d => {
-        if (d?.crop)   setCrop(d.crop);
-        if (d?.health) setHealth(d.health);
-        if (d?.growth) setGrowthIntel(d.growth);
-        if (d?.sensors?.length) {
-          setSummaryMetrics(d.sensors.map(s => ({
-            icon:  SENSOR_ICON_MAP[s.iconKey] ?? Thermometer,
-            label: s.label,
-            value: fmtSensorVal(s.key, s.value),
-            unit:  s.unit,
-            note:  'MPC state',
-          })));
-        }
-      })
-      .catch(() => {});
+    // Polled every 10 s — keeps indoor sensors and actuators live
+    function fetchDtLive() {
+      getDtState()
+        .then(d => {
+          if (d?.crop)   setCrop(d.crop);
+          if (d?.health) setHealth(d.health);
+          if (d?.growth) setGrowthIntel(d.growth);
+          if (d?.sensors?.length) {
+            setIndoorSensors(d.sensors.map(s => ({
+              icon:  SENSOR_ICON_MAP[s.icon_key] ?? Thermometer,
+              label: s.label,
+              value: s.value,
+              unit:  s.unit,
+            })));
+          }
+        })
+        .catch(() => {});
 
-    getActuatorState()
-      .then(acts => {
-        if (acts?.length) {
-          setActuators(acts.map(a => ({ ...a, icon: ACTUATOR_ICON_MAP[a.iconKey] ?? Wind })));
-        }
-      })
-      .catch(() => {});
+      getActuatorState()
+        .then(acts => {
+          if (acts?.length) {
+            setActuators(acts.map(a => ({ ...a, icon: ACTUATOR_ICON_MAP[a.iconKey] ?? Wind })));
+          }
+        })
+        .catch(() => {});
+    }
 
+    fetchDtLive();
+    const timer = setInterval(fetchDtLive, 10_000);
+
+    // One-time fetches (static / infrequently changing data)
     getDiseaseRisks()
       .then(d => { if (d?.length) setDiseaseRisks(d); })
       .catch(() => {});
@@ -474,6 +479,8 @@ function DetailedInsights() {
     getDiseaseImages()
       .then(d => { if (d?.length) setLeafImages(d); })
       .catch(() => {});
+
+    return () => clearInterval(timer);
   }, []);
 
   // Construct nested {now, forecast} shape from flat weather API response
@@ -497,44 +504,7 @@ function DetailedInsights() {
       </header>
 
       {/* ════════════════════════════════════════════════════════════════
-          § 1 — SUMMARY SNAPSHOT
-      ════════════════════════════════════════════════════════════════ */}
-      <section>
-        <SectionHeader
-          icon={Activity}
-          eyebrow="Real-time Overview"
-          title="Summary Snapshot"
-          subtitle="Current operational status across all subsystems"
-        />
-
-        {/* Crop health */}
-        <div className="mb-5">
-          <StatusCard
-            label="Crop Health"
-            status={health.status}
-            detail={health.detail}
-            meta={health.scannedAgo}
-            variant="crop"
-          />
-        </div>
-
-        {/* Metric chips — all MPC GreenhouseState variables */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-          {summaryMetrics.map((m) => (
-            <MetricChip key={m.label} icon={m.icon} label={m.label} value={m.value} unit={m.unit} note={m.note} />
-          ))}
-        </div>
-
-        {/* Actuator chips — all 7 MPC ActuatorState variables */}
-        <div className="flex flex-wrap gap-2">
-          {actuators.map((a) => (
-            <ActuatorChip key={a.label} {...a} />
-          ))}
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════════════
-          § 2 — GROWTH INTELLIGENCE
+          § 1 — GROWTH INTELLIGENCE
       ════════════════════════════════════════════════════════════════ */}
       <section>
         <SectionHeader
@@ -564,12 +534,16 @@ function DetailedInsights() {
               </div>
               <div className="shrink-0 text-right">
                 <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-0.5">
-                  Next Stage
+                  {crop.current === 'Ripe' ? 'Action' : 'Next Stage'}
                 </p>
-                <p className="text-xl font-headline font-bold text-on-surface leading-none">{crop.next}</p>
-                <p className="text-[9px] text-on-surface-variant opacity-70 mt-0.5">
-                  in {crop.nextInDays} days
+                <p className="text-xl font-headline font-bold text-on-surface leading-none">
+                  {crop.current === 'Ripe' ? 'Harvest' : (crop.next ?? '—')}
                 </p>
+                {crop.current !== 'Ripe' && (
+                  <p className="text-[9px] text-on-surface-variant opacity-70 mt-0.5">
+                    in {crop.nextInDays} days
+                  </p>
+                )}
               </div>
             </div>
             <div className="px-2">
@@ -611,26 +585,6 @@ function DetailedInsights() {
           />
         </div>
 
-        {/* Stage history comparison */}
-        <div className="bg-surface-high rounded-xl p-5 border border-outline-variant/10 mb-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface">
-              Stage History
-            </p>
-            <span className="text-[9px] text-on-surface-variant opacity-50">
-              Duration vs. target · days
-            </span>
-          </div>
-          <div className="flex flex-col gap-3.5">
-            {growthIntel.stageHistory.map((row) => (
-              <StageHistoryRow key={row.stage} {...row} />
-            ))}
-          </div>
-          <p className="mt-4 text-[8px] text-on-surface-variant opacity-50 leading-relaxed">
-            Green bars indicate on-schedule completion. Orange indicates overrun vs. target duration. Clock icon = in progress.
-          </p>
-        </div>
-
         {/* Recent crop image gallery — rolling 30-min captures, max 5 */}
         <div className="bg-surface-low rounded-xl p-5 border border-outline-variant/10">
           <div className="flex items-center gap-2 mb-4">
@@ -656,15 +610,26 @@ function DetailedInsights() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          § 3 — DISEASE INTELLIGENCE
+          § 2 — DISEASE INTELLIGENCE
       ════════════════════════════════════════════════════════════════ */}
       <section>
         <SectionHeader
-          icon={Leaf}
+          icon={ShieldCheck}
           eyebrow="Pathogen Monitoring"
           title="Disease Intelligence"
           subtitle="24-hour risk prediction across all monitored pathogens · current leaf scan"
         />
+
+        {/* Crop health banner — overall plant status */}
+        <div className="mb-5">
+          <StatusCard
+            label="Crop Health"
+            status={health.status}
+            detail={health.detail}
+            meta={health.scannedAgo}
+            variant="crop"
+          />
+        </div>
 
         {/* Disease risk cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mb-5">
@@ -698,7 +663,7 @@ function DetailedInsights() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          § 4 — OUTDOOR WEATHER
+          § 3 — OUTDOOR WEATHER
       ════════════════════════════════════════════════════════════════ */}
       <section>
         <SectionHeader
@@ -719,7 +684,7 @@ function DetailedInsights() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════
-          § 5 — INDOOR CONDITIONS
+          § 4 — INDOOR CONDITIONS
       ════════════════════════════════════════════════════════════════ */}
       <section>
         <SectionHeader
@@ -729,9 +694,28 @@ function DetailedInsights() {
           subtitle="Live readings from greenhouse sensors"
         />
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {INDOOR_SENSORS.map((s) => (
+          {indoorSensors.map((s) => (
             <SensorCard key={s.label} {...s} />
           ))}
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════
+          § 5 — ACTUATOR STATUS
+      ════════════════════════════════════════════════════════════════ */}
+      <section>
+        <SectionHeader
+          icon={Zap}
+          eyebrow="Control Systems"
+          title="Actuator Status"
+          subtitle="Current MPC-driven actuator states across all 7 control channels"
+        />
+        <div className="bg-surface-low rounded-xl p-5 border border-outline-variant/10">
+          <div className="flex flex-wrap gap-3">
+            {actuators.map((a) => (
+              <ActuatorChip key={a.label} {...a} />
+            ))}
+          </div>
         </div>
       </section>
 

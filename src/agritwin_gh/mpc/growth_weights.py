@@ -122,7 +122,8 @@ class GrowthStageWeights:
                 )
             model_path = model_glob[-1]
 
-        self._model = tf.keras.models.load_model(model_path, compile=False)
+        from .utils import load_keras_model  # noqa: PLC0415
+        self._model = load_keras_model(model_path)
         logger.info("Loaded growth-stage-progression LSTM from %s", model_path.name)
 
         # Feature scaler

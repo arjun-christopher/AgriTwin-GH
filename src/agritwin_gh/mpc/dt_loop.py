@@ -46,6 +46,7 @@ Usage
 
 from __future__ import annotations
 
+import collections
 import datetime as _dt
 import logging
 from dataclasses import dataclass, field
@@ -309,6 +310,21 @@ class DTLoop:
         )
         self._stages = prepare_growth_stages(n_steps, growth_stage)
 
+        # Cache weather-forecast model output (if provider ran the model).
+        # Used in cadence_info["weather_24h_ahead"] for every step.
+        self._model_weather_24h: "dict | None" = getattr(
+            self._input_provider, "_model_weather_24h", None
+        )
+        # Cache growth-progression and disease-progression model outputs.
+        # Both models run once on startup in CSVInputProvider; results are
+        # held constant for all steps in the same run.
+        self._model_growth_result: "dict | None" = getattr(
+            self._input_provider, "_model_growth_result", None
+        )
+        self._model_disease_result: "dict | None" = getattr(
+            self._input_provider, "_model_disease_result", None
+        )
+
         # ── Initial state (delegated to input provider) ───────────
         self._initial_state = self._input_provider.get_initial_state()
 
@@ -316,6 +332,23 @@ class DTLoop:
         self._prev_action: ActuatorState | None = None
         self._current_action = ActuatorState()
         self._last_mpc_solution: MPCSolution | None = None
+        # Most recent image observation — updated on every image-refresh step.
+        # Used to carry the latest CNN disease label into DTStepInput on
+        # non-image steps so the snapshot always has current crop context.
+        self._last_image_obs: "ImageObservation | None" = None
+
+        # ── Sliding state history for per-cycle AI model refresh ──────────
+        # Stores the DT output state after every 5-min step (newest at right).
+        # The buffer holds up to 288 entries = 24 hours at 5-min resolution.
+        # Before each MPC solve, every 12th entry is sampled to build a
+        # 24-hourly window, which is forwarded to the input provider's
+        # refresh_ai_models() hook so the LSTM forecasts stay coherent
+        # with the evolving simulated greenhouse state.
+        _init_snap = GreenhouseState(**self._initial_state.to_dict())
+        self._state_history: collections.deque = collections.deque(
+            [_init_snap] * 288,
+            maxlen=288,
+        )
 
     # ── Properties ────────────────────────────────────────────────────
 
@@ -408,11 +441,34 @@ class DTLoop:
             mpc_ran = False
             mpc_forced = False
             mpc_solution: MPCSolution | None = None
+            mpc_fused: "FusedState | None" = None
             image_obs: ImageObservation | None = None
 
             # ── MPC solve (if due) ───────────────────────────────
             if mpc_due:
-                mpc_solution = self._run_mpc(state, stage, weather, step, ts)
+                # Refresh AI LSTM forecasts with the current state history so
+                # growth/disease predictions reflect the evolving DT state,
+                # not just the initial CSV conditions.  Only fires when the
+                # input provider exposes refresh_ai_models() (CSVInputProvider
+                # does; SyntheticInputProvider does not — that's intentional).
+                if hasattr(self._input_provider, "refresh_ai_models") and step > 0:
+                    # Sub-sample every 12th state → 24 hourly snapshots.
+                    _hourly = list(self._state_history)[::12]  # 24 entries
+                    try:
+                        self._input_provider.refresh_ai_models(_hourly, stage, ts)  # type: ignore[attr-defined]
+                        self._model_growth_result = getattr(
+                            self._input_provider, "_model_growth_result",
+                            self._model_growth_result,
+                        )
+                        self._model_disease_result = getattr(
+                            self._input_provider, "_model_disease_result",
+                            self._model_disease_result,
+                        )
+                    except Exception as _ai_err:
+                        logger.warning(
+                            "Step %d: AI model refresh failed — %s", step, _ai_err
+                        )
+                mpc_solution, mpc_fused = self._run_mpc(state, stage, weather, step, ts)
                 self._current_action = mpc_solution.first_action
                 mpc_ran = True
                 self._last_mpc_solution = mpc_solution
@@ -424,19 +480,42 @@ class DTLoop:
                     state=state,
                     step_index=step,
                     timestamp=ts,
+                    model_growth_result=self._model_growth_result,
+                    model_disease_result=self._model_disease_result,
                 )
+                self._last_image_obs = image_obs
 
             # ── DT step ──────────────────────────────────────────
+            # Derive disease context for DTStepInput from AI model outputs.
+            # disease_classification: prefer the latest CNN disease label from
+            # the most recent image-refresh; fall back to extracting the most
+            # severe *present* disease from the LSTM result; default healthy.
+            _dis_clf_label = "healthy leaves"
+            if self._last_image_obs is not None and self._last_image_obs.disease_label:
+                _dis_clf_label = self._last_image_obs.disease_label
+            elif self._model_disease_result:
+                _present = {
+                    d: v.get("severity_24h", 0.0)
+                    for d, v in self._model_disease_result.items()
+                    if v.get("present", False)
+                }
+                if _present:
+                    _dis_clf_label = max(_present, key=_present.__getitem__)
+
+            # disease_severity: sev_24h per disease from the LSTM model.
+            _dis_severity: dict = (
+                {d: float(v.get("severity_24h", 0.0)) for d, v in self._model_disease_result.items()}
+                if self._model_disease_result else {}
+            )
+
             dt_input = DTStepInput(
                 current_state=state,
                 action=self._current_action,
                 weather=weather,
                 growth_stage=stage,
                 disease_risk_score=state.disease_risk_score,
-                disease_classification=(
-                    "healthy leaves" if state.disease_risk_score < 0.3
-                    else "early blight"
-                ),
+                disease_classification=_dis_clf_label,
+                disease_severity=_dis_severity,
                 dt_minutes=self._dt_minutes,
                 step_index=step,
                 timestamp=ts,
@@ -453,7 +532,7 @@ class DTLoop:
                     dt_out.next_state.indoor_humidity,
                     dt_out.next_state.disease_risk_score,
                 )
-                mpc_solution = self._run_mpc(
+                mpc_solution, mpc_fused = self._run_mpc(
                     state, stage, weather, step, ts,
                 )
                 self._current_action = mpc_solution.first_action
@@ -488,6 +567,32 @@ class DTLoop:
                     "mpc_forced": mpc_forced,
                     "image_due": image_due,
                     "step_in_mpc_cycle": step % self._mpc_cadence,
+                    # Growth-progression model outputs (available when MPC ran)
+                    "growth_next_stage": mpc_fused.next_stage if mpc_fused else "",
+                    "hours_to_transition": mpc_fused.hours_to_transition if mpc_fused else None,
+                    "transition_within_24h": mpc_fused.transition_within_24h if mpc_fused else None,
+                    "transition_within_48h": mpc_fused.transition_within_48h if mpc_fused else None,
+                    # Disease-progression model outputs
+                    "current_severity": dict(mpc_fused.current_severity) if mpc_fused else {},
+                    "severity_24h": dict(mpc_fused.severity_24h) if mpc_fused else {},
+                    "severity_48h": dict(mpc_fused.severity_48h) if mpc_fused else {},
+                    # Startup model results (CSVInputProvider runs both models once
+                    # on init; same prediction held for all steps in a run).
+                    "model_growth_result":  self._model_growth_result,
+                    "model_disease_result": self._model_disease_result,
+                    # Weather-forecast look-ahead (next 12 steps = ~1 h horizon)
+                    "weather_forecast_steps": list(mpc_fused.weather_forecast) if mpc_fused else [],
+                    # 24-hour forecast snapshot — from WeatherDisturbanceForecast model
+                    # if available (CSVInputProvider runs it on startup), otherwise
+                    # falls back to the CSV sequence look-ahead.
+                    "weather_24h_ahead": (
+                        self._model_weather_24h
+                        if self._model_weather_24h is not None
+                        else self._weather_seq[
+                            min(step + int(24 * 60 / self._dt_minutes),
+                                len(self._weather_seq) - 1)
+                        ].to_dict()
+                    ),
                     "step_in_image_cycle": step % self._image_cadence,
                 },
             )
@@ -498,6 +603,9 @@ class DTLoop:
             state = dt_out.next_state
             if self._auto_advance_stage:
                 state.growth_stage_index = stage_label_to_index(self._active_growth_stage)
+            # Push the post-step state into the sliding history buffer so the
+            # next MPC cycle's AI refresh has up-to-date conditions to work with.
+            self._state_history.append(GreenhouseState(**state.to_dict()))
 
     # ── Private helpers ───────────────────────────────────────────────
 
@@ -508,11 +616,14 @@ class DTLoop:
         weather: WeatherState,
         step_index: int,
         timestamp: _dt.datetime,
-    ) -> MPCSolution:
+    ) -> tuple[MPCSolution, "FusedState"]:
         """Build FusedState and invoke the MPC solver.
 
         Weather look-ahead: slices up to 12 future weather steps from the
         pre-generated sequence so the solver can anticipate diurnal shifts.
+
+        Returns both the MPC solution and the FusedState so callers can log
+        the growth/disease-progression and weather-forecast model outputs.
         """
         disease_risk = compute_disease_risk_score(
             temp=state.indoor_temp,
@@ -538,6 +649,30 @@ class DTLoop:
             timestamp=timestamp,
         )
 
+        # ── Enrich FusedState with startup AI model outputs ────────────
+        # Disease LSTM (severity_24h per disease) → DiseaseContext.severity_amplifier
+        # and constraint tightening inside the MPC cost function.
+        if self._model_disease_result:
+            fused.current_severity = {
+                d: float(v.get("severity_24h", 0.0))
+                for d, v in self._model_disease_result.items()
+            }
+            fused.severity_24h = fused.current_severity.copy()
+
+        # Growth LSTM (next_stage, hours_to_transition) → stage-transition
+        # blending weights inside CostBuilder.
+        if self._model_growth_result:
+            fused.next_stage = self._model_growth_result.get("next_stage") or ""
+            htt = self._model_growth_result.get("hours_to_transition")
+            if htt is not None:
+                fused.hours_to_transition = float(htt)
+            fused.transition_within_24h = bool(
+                self._model_growth_result.get("within_24h", False)
+            )
+            fused.transition_within_48h = bool(
+                self._model_growth_result.get("within_48h", False)
+            )
+
         solution = self._solver.solve(
             fused=fused,
             weather_forecast=wf,
@@ -552,4 +687,4 @@ class DTLoop:
             solution.fallback_used,
             solution.solve_time_ms,
         )
-        return solution
+        return solution, fused
