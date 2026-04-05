@@ -1403,32 +1403,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#compact-top-level-fields" class="md-nav__link">
+  <a href="#example-greenhousestate-unity-format" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Compact top-level fields
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#full-scene_context-block" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Full scene_context block
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#threedpayload-block" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ThreeDPayload block
+        Example GreenhouseState (Unity format)
       
     </span>
   </a>
@@ -1784,7 +1762,7 @@ FastAPI wraps them; it does not replace them.</p>
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│  │                    ROUTE HANDLERS  (thin adapters)                 │  │
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│  │  agritwin_gh/api/routes/                                           │  │
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│  │    dt.py · actuators.py · weather.py · intelligence.py            │  │
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│  │    resources.py · media.py · system.py                            │  │
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│  │    resources.py · media.py · system.py · greenhouse_3d.py         │  │
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│  │                                                                    │  │
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│  │  All routes: validate input → call service → return schema        │  │
 <a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│  │  Zero DB calls, zero MPC logic in route files                     │  │
@@ -1859,34 +1837,35 @@ FastAPI wraps them; it does not replace them.</p>
 <a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>│       ├── intelligence.py          GET /api/intelligence/disease, GET /api/intelligence/growth
 <a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>│       ├── resources.py             GET /api/resources/monthly
 <a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>│       ├── media.py                 GET /api/media/latest, /stage-images, /disease-scans
-<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>│       └── system.py               GET /api/system/health
-<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>│
-<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>├── services/                        ← EXTENDED (was empty __init__.py only)
-<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>│   ├── __init__.py                  (unchanged)
-<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>│   ├── dashboard_service.py         Read facade over RuntimeStore — one method per endpoint group
-<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>│   ├── control_service.py           Write facade — overrides, presets, actuator levels → RuntimeStore
-<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>│   ├── loop_service.py              Async background loop: drives DTLoop, commits LatestState
-<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>│   ├── system_service.py            Derives SystemHealthResponse from RuntimeStore staleness
-<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>│   ├── media_service.py             Queries PostgreSQL / MinIO; degrades to empty lists if unavailable
-<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>│   ├── actuator_service.py          Thin projection service (public surface of services/)
-<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>│   ├── weather_service.py           Thin projection service (public surface of services/)
-<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>│   ├── intelligence_service.py      Thin projection service (public surface of services/)
-<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>│   ├── resource_service.py          Thin projection service (public surface of services/)
-<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>│   └── dt_service.py                Placeholder skeleton for Phase 2 (live DB loop)
-<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>│
-<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>├── core/                            ← EXTENDED (was empty __init__.py only)
-<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>│   ├── __init__.py                  (unchanged)
-<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>│   ├── runtime_store.py             Thread-safe singleton (~1400 lines): LatestState, OverrideConfig,
-<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>│   │                                  all as_*_response() projection methods
-<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>│   └── lifespan.py                  FastAPI lifespan: startup init, optional background loop,
-<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>│                                      shutdown cleanup, TESTING guard
-<a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>│
-<a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>└── mpc/                             ← UNCHANGED — all files untouched
-<a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>    └── (no changes)
-<a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>
-<a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>main.py                              ← UPDATED: Uvicorn entry point calling create_app()
-<a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>tests/test_api_smoke.py              ← NEW: pytest smoke suite (15 endpoints, TestClient)
-<a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>scripts/sample_api_responses.py      ← NEW: stdlib-only manual endpoint sampler
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>│       ├── system.py               GET /api/system/health
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>│       └── greenhouse_3d.py        GET /api/greenhouse-3d/state
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>│
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>├── services/                        ← EXTENDED (was empty __init__.py only)
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>│   ├── __init__.py                  (unchanged)
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>│   ├── dashboard_service.py         Read facade over RuntimeStore — one method per endpoint group
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>│   ├── control_service.py           Write facade — overrides, presets, actuator levels → RuntimeStore
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>│   ├── loop_service.py              Async background loop: drives DTLoop, commits LatestState
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>│   ├── system_service.py            Derives SystemHealthResponse from RuntimeStore staleness
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>│   ├── media_service.py             Queries PostgreSQL / MinIO; degrades to empty lists if unavailable
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>│   ├── actuator_service.py          Thin projection service (public surface of services/)
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>│   ├── weather_service.py           Thin projection service (public surface of services/)
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>│   ├── intelligence_service.py      Thin projection service (public surface of services/)
+<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>│   ├── resource_service.py          Thin projection service (public surface of services/)
+<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>│   └── dt_service.py                Placeholder skeleton for Phase 2 (live DB loop)
+<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>│
+<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>├── core/                            ← EXTENDED (was empty __init__.py only)
+<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>│   ├── __init__.py                  (unchanged)
+<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>│   ├── runtime_store.py             Thread-safe singleton (~1400 lines): LatestState, OverrideConfig,
+<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>│   │                                  all as_*_response() projection methods
+<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>│   └── lifespan.py                  FastAPI lifespan: startup init, optional background loop,
+<a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>│                                      shutdown cleanup, TESTING guard
+<a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>│
+<a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>└── mpc/                             ← UNCHANGED — all files untouched
+<a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>    └── (no changes)
+<a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>
+<a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>main.py                              ← UPDATED: Uvicorn entry point calling create_app()
+<a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>tests/test_api_smoke.py              ← NEW: pytest smoke suite (15 endpoints, TestClient)
+<a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>scripts/sample_api_responses.py      ← NEW: stdlib-only manual endpoint sampler
 </code></pre></div>
 <hr />
 <h2 id="5-layer-by-layer-reference">5. Layer-by-Layer Reference<a class="headerlink" href="#5-layer-by-layer-reference" title="Permanent link">&para;</a></h2>
@@ -2256,6 +2235,20 @@ Interactive docs: <code>http://localhost:8000/docs</code></p>
 <td><code>RuntimeStore.as_dt_state_response()</code></td>
 </tr>
 <tr>
+<td><code>GET</code></td>
+<td><code>/api/greenhouse-3d/state</code></td>
+<td>—</td>
+<td><code>GreenhouseState</code> (Unity format, returns last POSTed state if present, else live state)</td>
+<td>Returns last POSTed state or <code>DashboardService.get_dt_state()</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/greenhouse-3d/state</code></td>
+<td><code>GreenhouseState</code> JSON</td>
+<td><code>{ok: true, received: ...}</code></td>
+<td>Stores payload for GET; used for 3D/Unity/manual override</td>
+</tr>
+<tr>
 <td><code>POST</code></td>
 <td><code>/api/dt/override</code></td>
 <td><code>{"param": str, "value": any}</code></td>
@@ -2498,43 +2491,27 @@ the effect before applying it.</p>
 without an extra <code>GET /api/dt/state</code> round-trip.</p>
 <hr />
 <h2 id="12-3d-integration-fields">12. 3D Integration Fields<a class="headerlink" href="#12-3d-integration-fields" title="Permanent link">&para;</a></h2>
-<p>Every <code>GET /api/dt/state</code> response already contains 3D scene metadata at zero
-extra compute cost. The current React dashboard does not consume it. A future
-Unity or WebGL layer can subscribe without any API change.</p>
-<h3 id="compact-top-level-fields">Compact top-level fields<a class="headerlink" href="#compact-top-level-fields" title="Permanent link">&para;</a></h3>
+<p>The API provides 3D scene metadata for greenhouse environment integration in two ways:</p>
+<ul>
+<li><code>GET /api/dt/state</code> returns the full digital-twin state, including 3D-ready fields and the full <code>scene_context</code> block for use by frontend dashboards or 3D clients.</li>
+<li><code>GET /api/greenhouse-3d/state</code> returns the last POSTed state (in Unity-compatible <code>GreenhouseState</code> format) if present, or falls back to the live state from the DT loop. This allows external tools (like Unity or smoke tests) to override the 3D greenhouse state for testing and integration. The POSTed state is stored in memory and is cleared on server restart.</li>
+</ul>
+<p><strong>Override behavior:</strong>
+When a POST is made to <code>/api/greenhouse-3d/state</code>, the payload is stored in memory. Subsequent GET requests to this endpoint will return the last POSTed state (in the Unity-compatible <code>GreenhouseState</code> format) until the server restarts or a new POST is made. If no POSTed state exists, the endpoint falls back to the live state from the DT loop.</p>
+<p>Both endpoints provide all necessary metadata for real-time 3D visualization, including actuator states, growth stage, and time-of-day context.</p>
+<h3 id="example-greenhousestate-unity-format">Example GreenhouseState (Unity format)<a class="headerlink" href="#example-greenhousestate-unity-format" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;time_of_day&quot;</span><span class="p">:</span><span class="w">           </span><span class="s2">&quot;morning&quot;</span><span class="p">,</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">&quot;current_growth_stage&quot;</span><span class="p">:</span><span class="w">  </span><span class="s2">&quot;flowering&quot;</span><span class="p">,</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nt">&quot;next_growth_stage&quot;</span><span class="p">:</span><span class="w">     </span><span class="s2">&quot;unripe&quot;</span><span class="p">,</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nt">&quot;actuator_visual_state&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="nt">&quot;on_off&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="nt">&quot;fan&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;led&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;co2&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;fogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;irrigation&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">},</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="nt">&quot;levels&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="nt">&quot;fan&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">75.0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;led&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;co2&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">55.0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">60.0</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;fogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w">  </span><span class="nt">&quot;irrigation&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="nt">&quot;mode&quot;</span><span class="p">:</span><span class="w">    </span><span class="s2">&quot;auto&quot;</span>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="p">}</span>
-</code></pre></div>
-<h3 id="full-scene_context-block">Full <code>scene_context</code> block<a class="headerlink" href="#full-scene_context-block" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">&quot;scene_context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nt">&quot;actuator_states_on_off&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="nt">&quot;fan&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="err">...</span><span class="p">},</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="nt">&quot;actuator_levels&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="nt">&quot;fan&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">75.0</span><span class="p">,</span><span class="w"> </span><span class="err">...</span><span class="p">},</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="nt">&quot;current_growth_stage&quot;</span><span class="p">:</span><span class="w">    </span><span class="s2">&quot;flowering&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="nt">&quot;next_growth_stage&quot;</span><span class="p">:</span><span class="w">       </span><span class="s2">&quot;unripe&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="nt">&quot;current_timestamp&quot;</span><span class="p">:</span><span class="w">       </span><span class="s2">&quot;2026-04-05T09:15:00&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="nt">&quot;time_of_day&quot;</span><span class="p">:</span><span class="w">             </span><span class="s2">&quot;morning&quot;</span>
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="p">}</span>
-</code></pre></div>
-<h3 id="threedpayload-block"><code>ThreeDPayload</code> block<a class="headerlink" href="#threedpayload-block" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">&quot;three_d&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="nt">&quot;plant_health_score&quot;</span><span class="p">:</span><span class="w">  </span><span class="mf">0.84</span><span class="p">,</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="nt">&quot;disease_risk_score&quot;</span><span class="p">:</span><span class="w">  </span><span class="mf">0.16</span><span class="p">,</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">    </span><span class="nt">&quot;growth_stage_label&quot;</span><span class="p">:</span><span class="w">  </span><span class="s2">&quot;flowering&quot;</span><span class="p">,</span>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">    </span><span class="nt">&quot;growth_stage_index&quot;</span><span class="p">:</span><span class="w">  </span><span class="mi">3</span><span class="p">,</span>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">    </span><span class="nt">&quot;alert_count&quot;</span><span class="p">:</span><span class="w">         </span><span class="mi">0</span>
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="p">}</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">},</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">},</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">},</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">},</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">},</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">},</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">  </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">},</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">  </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ripe&quot;</span><span class="p">},</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">  </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Evening&quot;</span><span class="p">},</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">  </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Yellow&quot;</span><span class="p">}</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="p">}</span>
 </code></pre></div>
 <p><strong>Time-of-day buckets:</strong></p>
 <table>
@@ -2576,7 +2553,7 @@ at higher frequency without fetching the full DT state.</p>
 <hr />
 <h2 id="13-environment-variables">13. Environment Variables<a class="headerlink" href="#13-environment-variables" title="Permanent link">&para;</a></h2>
 <h3 id="backend-env-in-repo-root">Backend (<code>.env</code> in repo root)<a class="headerlink" href="#backend-env-in-repo-root" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">cp </span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="n">example</span> <span class="p">.</span><span class="n">env</span>   <span class="c"># create from template</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nb">cp </span><span class="p">.</span><span class="n">env</span><span class="p">.</span><span class="n">example</span> <span class="p">.</span><span class="n">env</span>   <span class="c"># create from template</span>
 </code></pre></div>
 <table>
 <thead>
@@ -2640,68 +2617,68 @@ at higher frequency without fetching the full DT state.</p>
 </tbody>
 </table>
 <h3 id="frontend-srcagritwin_ghfrontendenvlocal">Frontend (<code>src/agritwin_gh/frontend/.env.local</code>)<a class="headerlink" href="#frontend-srcagritwin_ghfrontendenvlocal" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>VITE_API_BASE_URL=http://localhost:8000
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>VITE_API_BASE_URL=http://localhost:8000
 </code></pre></div>
 <p>Consumed by <code>api.js</code> as <code>import.meta.env.VITE_API_BASE_URL</code>. Change for
 staging/production deployments.</p>
 <hr />
 <h2 id="14-running-the-system">14. Running the System<a class="headerlink" href="#14-running-the-system" title="Permanent link">&para;</a></h2>
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c"># From repo root</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="p">.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="n">python</span> <span class="n">-c</span> <span class="s2">&quot;import fastapi, uvicorn; print(&#39;OK&#39;)&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c"># From repo root</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="p">.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">python</span> <span class="n">-c</span> <span class="s2">&quot;import fastapi, uvicorn; print(&#39;OK&#39;)&quot;</span>
 </code></pre></div>
 <h3 id="backend-development-auto-reload">Backend — development (auto-reload)<a class="headerlink" href="#backend-development-auto-reload" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nv">$env:PYTHONPATH</span> <span class="p">=</span> <span class="s2">&quot;src&quot;</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="n">uvicorn</span> <span class="n">main</span><span class="p">:</span><span class="n">app</span> <span class="p">-</span><span class="n">-reload</span> <span class="p">-</span><span class="n">-host</span> <span class="n">0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">0</span> <span class="p">-</span><span class="n">-port</span> <span class="n">8000</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nv">$env:PYTHONPATH</span> <span class="p">=</span> <span class="s2">&quot;src&quot;</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">uvicorn</span> <span class="n">main</span><span class="p">:</span><span class="n">app</span> <span class="p">-</span><span class="n">-reload</span> <span class="p">-</span><span class="n">-host</span> <span class="n">0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">0</span> <span class="p">-</span><span class="n">-port</span> <span class="n">8000</span>
 </code></pre></div>
 <p>Or via the entry point:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
 </code></pre></div>
 <p>After start, browse to:
 - <strong>Swagger UI:</strong> <code>http://localhost:8000/docs</code>
 - <strong>Quick check:</strong> <code>http://localhost:8000/api/dt/state</code></p>
 <h3 id="frontend-development">Frontend — development<a class="headerlink" href="#frontend-development" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nb">cd </span><span class="n">src</span><span class="p">\</span><span class="n">agritwin_gh</span><span class="p">\</span><span class="n">frontend</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">npm</span> <span class="n">install</span>        <span class="c"># first time only</span>
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>        <span class="c"># → http://localhost:5173</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nb">cd </span><span class="n">src</span><span class="p">\</span><span class="n">agritwin_gh</span><span class="p">\</span><span class="n">frontend</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="n">npm</span> <span class="n">install</span>        <span class="c"># first time only</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>        <span class="c"># → http://localhost:5173</span>
 </code></pre></div>
 <p>Production build:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">build</span>      <span class="c"># output → src/agritwin_gh/frontend/dist/</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">build</span>      <span class="c"># output → src/agritwin_gh/frontend/dist/</span>
 </code></pre></div>
 <h3 id="running-both-together">Running both together<a class="headerlink" href="#running-both-together" title="Permanent link">&para;</a></h3>
 <p><strong>Terminal 1 — backend:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="nv">$env:PYTHONPATH</span> <span class="p">=</span> <span class="s2">&quot;src&quot;</span>
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="n">uvicorn</span> <span class="n">main</span><span class="p">:</span><span class="n">app</span> <span class="p">-</span><span class="n">-reload</span> <span class="p">-</span><span class="n">-host</span> <span class="n">0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">0</span> <span class="p">-</span><span class="n">-port</span> <span class="n">8000</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="p">.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nv">$env:PYTHONPATH</span> <span class="p">=</span> <span class="s2">&quot;src&quot;</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">uvicorn</span> <span class="n">main</span><span class="p">:</span><span class="n">app</span> <span class="p">-</span><span class="n">-reload</span> <span class="p">-</span><span class="n">-host</span> <span class="n">0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">0</span><span class="p">.</span><span class="n">0</span> <span class="p">-</span><span class="n">-port</span> <span class="n">8000</span>
 </code></pre></div>
 <p><strong>Terminal 2 — frontend:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nb">cd </span><span class="n">src</span><span class="p">\</span><span class="n">agritwin_gh</span><span class="p">\</span><span class="n">frontend</span>
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nb">cd </span><span class="n">src</span><span class="p">\</span><span class="n">agritwin_gh</span><span class="p">\</span><span class="n">frontend</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>
 </code></pre></div>
 <p>Open <code>http://localhost:5173</code> — CORS is pre-configured.</p>
 <h3 id="common-launch-variants">Common launch variants<a class="headerlink" href="#common-launch-variants" title="Permanent link">&para;</a></h3>
 <p><strong>24-hour demo in flowering stage (no stage advance):</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nv">$env:AGRITWIN_GROWTH_STAGE</span>       <span class="p">=</span> <span class="s2">&quot;flowering&quot;</span>
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="nv">$env:AGRITWIN_TOTAL_STEPS</span>        <span class="p">=</span> <span class="s2">&quot;288&quot;</span>
-<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="nv">$env:AGRITWIN_AUTO_ADVANCE_STAGE</span> <span class="p">=</span> <span class="s2">&quot;0&quot;</span>
-<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nv">$env:AGRITWIN_GROWTH_STAGE</span>       <span class="p">=</span> <span class="s2">&quot;flowering&quot;</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="nv">$env:AGRITWIN_TOTAL_STEPS</span>        <span class="p">=</span> <span class="s2">&quot;288&quot;</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="nv">$env:AGRITWIN_AUTO_ADVANCE_STAGE</span> <span class="p">=</span> <span class="s2">&quot;0&quot;</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
 </code></pre></div>
 <p><strong>Rapid development (5-second steps, no frontend):</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nv">$env:AGRITWIN_STEP_INTERVAL_SEC</span> <span class="p">=</span> <span class="s2">&quot;5&quot;</span>
-<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="nv">$env:AGRITWIN_NO_FRONTEND</span>       <span class="p">=</span> <span class="s2">&quot;1&quot;</span>
-<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nv">$env:AGRITWIN_STEP_INTERVAL_SEC</span> <span class="p">=</span> <span class="s2">&quot;5&quot;</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="nv">$env:AGRITWIN_NO_FRONTEND</span>       <span class="p">=</span> <span class="s2">&quot;1&quot;</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
 </code></pre></div>
 <p><strong>API-driven step mode (no automatic advance):</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="nv">$env:AGRITWIN_BACKGROUND_LOOP</span> <span class="p">=</span> <span class="s2">&quot;0&quot;</span>
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
-<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="c"># Then push each step via: POST http://localhost:8000/api/loop/step</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nv">$env:AGRITWIN_BACKGROUND_LOOP</span> <span class="p">=</span> <span class="s2">&quot;0&quot;</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="c"># Then push each step via: POST http://localhost:8000/api/loop/step</span>
 </code></pre></div>
 <hr />
 <h2 id="15-testing-verification">15. Testing &amp; Verification<a class="headerlink" href="#15-testing-verification" title="Permanent link">&para;</a></h2>
 <h3 id="automated-smoke-tests-no-running-server-required">Automated smoke tests (no running server required)<a class="headerlink" href="#automated-smoke-tests-no-running-server-required" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="nv">$env:PYTHONPATH</span> <span class="p">=</span> <span class="s2">&quot;src&quot;</span>
-<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="n">pytest</span> <span class="n">tests</span><span class="p">/</span><span class="n">test_api_smoke</span><span class="p">.</span><span class="n">py</span> <span class="n">-v</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nv">$env:PYTHONPATH</span> <span class="p">=</span> <span class="s2">&quot;src&quot;</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="n">pytest</span> <span class="n">tests</span><span class="p">/</span><span class="n">test_api_smoke</span><span class="p">.</span><span class="n">py</span> <span class="n">-v</span>
 </code></pre></div>
 <p>Uses FastAPI's in-process <code>TestClient</code>. <code>TESTING=1</code> is set automatically
 so the lifespan skips the DB loop — no PostgreSQL needed.</p>
@@ -2758,45 +2735,49 @@ so the lifespan skips the DB loop — no PostgreSQL needed.</p>
 <td><code>POST /api/dt/preset/{id}</code></td>
 <td>All 5 presets → 200; invalid preset → 422</td>
 </tr>
+<tr>
+<td><code>POST /api/greenhouse-3d/state</code> + <code>GET /api/greenhouse-3d/state</code></td>
+<td>All valid actuator/crop/time/health combinations, state override and reflection, Unity compatibility</td>
+</tr>
 </tbody>
 </table>
 <h3 id="live-endpoint-sampler-requires-running-server">Live endpoint sampler (requires running server)<a class="headerlink" href="#live-endpoint-sampler-requires-running-server" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>                           <span class="c"># terminal 1</span>
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="n">python</span> <span class="n">scripts</span><span class="p">/</span><span class="n">sample_api_responses</span><span class="p">.</span><span class="n">py</span>  <span class="c"># terminal 2</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>                           <span class="c"># terminal 1</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="n">python</span> <span class="n">scripts</span><span class="p">/</span><span class="n">sample_api_responses</span><span class="p">.</span><span class="n">py</span>  <span class="c"># terminal 2</span>
 </code></pre></div>
 <p>Hits all endpoints, pretty-prints JSON excerpts, exits 1 if any fail.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c"># Override URL if needed:</span>
-<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="nv">$env:AGRITWIN_API_URL</span> <span class="p">=</span> <span class="s2">&quot;http://localhost:8000&quot;</span>
-<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="n">python</span> <span class="n">scripts</span><span class="p">/</span><span class="n">sample_api_responses</span><span class="p">.</span><span class="n">py</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c"># Override URL if needed:</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="nv">$env:AGRITWIN_API_URL</span> <span class="p">=</span> <span class="s2">&quot;http://localhost:8000&quot;</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="n">python</span> <span class="n">scripts</span><span class="p">/</span><span class="n">sample_api_responses</span><span class="p">.</span><span class="n">py</span>
 </code></pre></div>
 <h3 id="manual-powershell-checks">Manual PowerShell checks<a class="headerlink" href="#manual-powershell-checks" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c"># Full state snapshot</span>
-<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="nb">Invoke-RestMethod</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">dt</span><span class="p">/</span><span class="n">state</span> <span class="p">|</span> <span class="nb">ConvertTo-Json</span> <span class="n">-Depth</span> <span class="n">4</span>
-<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>
-<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="c"># Apply a sim override</span>
-<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="nv">$body</span> <span class="p">=</span> <span class="s1">&#39;{&quot;stage&quot;:&quot;flowering&quot;,&quot;day_in_stage&quot;:7,&quot;start_date&quot;:&quot;2026-04-04&quot;,&quot;start_hour&quot;:9}&#39;</span>
-<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a><span class="nb">Invoke-RestMethod</span> <span class="n">-Method</span> <span class="n">Post</span> <span class="n">-Uri</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">dt</span><span class="p">/</span><span class="n">override</span><span class="p">/</span><span class="n">sim</span> <span class="p">`</span>
-<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>    <span class="n">-ContentType</span> <span class="s2">&quot;application/json&quot;</span> <span class="n">-Body</span> <span class="nv">$body</span>
-<a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a>
-<a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a><span class="c"># Confirm mode changed</span>
-<a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a><span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">dt</span><span class="p">/</span><span class="n">state</span><span class="p">).</span><span class="n">mode</span>   <span class="c"># → &quot;override&quot;</span>
-<a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a>
-<a id="__codelineno-26-12" name="__codelineno-26-12" href="#__codelineno-26-12"></a><span class="c"># Clear override</span>
-<a id="__codelineno-26-13" name="__codelineno-26-13" href="#__codelineno-26-13"></a><span class="nb">Invoke-RestMethod</span> <span class="n">-Method</span> <span class="n">Delete</span> <span class="n">-Uri</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">dt</span><span class="p">/</span><span class="n">override</span>
-<a id="__codelineno-26-14" name="__codelineno-26-14" href="#__codelineno-26-14"></a>
-<a id="__codelineno-26-15" name="__codelineno-26-15" href="#__codelineno-26-15"></a><span class="c"># Confirm reverted</span>
-<a id="__codelineno-26-16" name="__codelineno-26-16" href="#__codelineno-26-16"></a><span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">dt</span><span class="p">/</span><span class="n">state</span><span class="p">).</span><span class="n">mode</span>   <span class="c"># → &quot;live&quot;</span>
-<a id="__codelineno-26-17" name="__codelineno-26-17" href="#__codelineno-26-17"></a>
-<a id="__codelineno-26-18" name="__codelineno-26-18" href="#__codelineno-26-18"></a><span class="c"># Apply preset</span>
-<a id="__codelineno-26-19" name="__codelineno-26-19" href="#__codelineno-26-19"></a><span class="nb">Invoke-RestMethod</span> <span class="n">-Method</span> <span class="n">Post</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">dt</span><span class="p">/</span><span class="n">preset</span><span class="p">/</span><span class="n">disease-alert</span>
-<a id="__codelineno-26-20" name="__codelineno-26-20" href="#__codelineno-26-20"></a>
-<a id="__codelineno-26-21" name="__codelineno-26-21" href="#__codelineno-26-21"></a><span class="c"># Check actuator override</span>
-<a id="__codelineno-26-22" name="__codelineno-26-22" href="#__codelineno-26-22"></a><span class="nv">$body</span> <span class="p">=</span> <span class="s1">&#39;[{&quot;id&quot;:&quot;fan&quot;,&quot;level&quot;:90,&quot;on&quot;:true}]&#39;</span>
-<a id="__codelineno-26-23" name="__codelineno-26-23" href="#__codelineno-26-23"></a><span class="nb">Invoke-RestMethod</span> <span class="n">-Method</span> <span class="n">Post</span> <span class="n">-Uri</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">actuators</span><span class="p">/</span><span class="nb">set </span><span class="p">`</span>
-<a id="__codelineno-26-24" name="__codelineno-26-24" href="#__codelineno-26-24"></a>    <span class="n">-ContentType</span> <span class="s2">&quot;application/json&quot;</span> <span class="n">-Body</span> <span class="nv">$body</span>
-<a id="__codelineno-26-25" name="__codelineno-26-25" href="#__codelineno-26-25"></a>
-<a id="__codelineno-26-26" name="__codelineno-26-26" href="#__codelineno-26-26"></a><span class="c"># System health</span>
-<a id="__codelineno-26-27" name="__codelineno-26-27" href="#__codelineno-26-27"></a><span class="nb">Invoke-RestMethod</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">system</span><span class="p">/</span><span class="n">health</span> <span class="p">|</span> <span class="nb">ConvertTo-Json</span> <span class="n">-Depth</span> <span class="n">3</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c"># Full state snapshot</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="nb">Invoke-RestMethod</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">dt</span><span class="p">/</span><span class="n">state</span> <span class="p">|</span> <span class="nb">ConvertTo-Json</span> <span class="n">-Depth</span> <span class="n">4</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="c"># Apply a sim override</span>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="nv">$body</span> <span class="p">=</span> <span class="s1">&#39;{&quot;stage&quot;:&quot;flowering&quot;,&quot;day_in_stage&quot;:7,&quot;start_date&quot;:&quot;2026-04-04&quot;,&quot;start_hour&quot;:9}&#39;</span>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="nb">Invoke-RestMethod</span> <span class="n">-Method</span> <span class="n">Post</span> <span class="n">-Uri</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">dt</span><span class="p">/</span><span class="n">override</span><span class="p">/</span><span class="n">sim</span> <span class="p">`</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>    <span class="n">-ContentType</span> <span class="s2">&quot;application/json&quot;</span> <span class="n">-Body</span> <span class="nv">$body</span>
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="c"># Confirm mode changed</span>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a><span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">dt</span><span class="p">/</span><span class="n">state</span><span class="p">).</span><span class="n">mode</span>   <span class="c"># → &quot;override&quot;</span>
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>
+<a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a><span class="c"># Clear override</span>
+<a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a><span class="nb">Invoke-RestMethod</span> <span class="n">-Method</span> <span class="n">Delete</span> <span class="n">-Uri</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">dt</span><span class="p">/</span><span class="n">override</span>
+<a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a>
+<a id="__codelineno-24-15" name="__codelineno-24-15" href="#__codelineno-24-15"></a><span class="c"># Confirm reverted</span>
+<a id="__codelineno-24-16" name="__codelineno-24-16" href="#__codelineno-24-16"></a><span class="p">(</span><span class="nb">Invoke-RestMethod</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">dt</span><span class="p">/</span><span class="n">state</span><span class="p">).</span><span class="n">mode</span>   <span class="c"># → &quot;live&quot;</span>
+<a id="__codelineno-24-17" name="__codelineno-24-17" href="#__codelineno-24-17"></a>
+<a id="__codelineno-24-18" name="__codelineno-24-18" href="#__codelineno-24-18"></a><span class="c"># Apply preset</span>
+<a id="__codelineno-24-19" name="__codelineno-24-19" href="#__codelineno-24-19"></a><span class="nb">Invoke-RestMethod</span> <span class="n">-Method</span> <span class="n">Post</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">dt</span><span class="p">/</span><span class="n">preset</span><span class="p">/</span><span class="n">disease-alert</span>
+<a id="__codelineno-24-20" name="__codelineno-24-20" href="#__codelineno-24-20"></a>
+<a id="__codelineno-24-21" name="__codelineno-24-21" href="#__codelineno-24-21"></a><span class="c"># Check actuator override</span>
+<a id="__codelineno-24-22" name="__codelineno-24-22" href="#__codelineno-24-22"></a><span class="nv">$body</span> <span class="p">=</span> <span class="s1">&#39;[{&quot;id&quot;:&quot;fan&quot;,&quot;level&quot;:90,&quot;on&quot;:true}]&#39;</span>
+<a id="__codelineno-24-23" name="__codelineno-24-23" href="#__codelineno-24-23"></a><span class="nb">Invoke-RestMethod</span> <span class="n">-Method</span> <span class="n">Post</span> <span class="n">-Uri</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">actuators</span><span class="p">/</span><span class="nb">set </span><span class="p">`</span>
+<a id="__codelineno-24-24" name="__codelineno-24-24" href="#__codelineno-24-24"></a>    <span class="n">-ContentType</span> <span class="s2">&quot;application/json&quot;</span> <span class="n">-Body</span> <span class="nv">$body</span>
+<a id="__codelineno-24-25" name="__codelineno-24-25" href="#__codelineno-24-25"></a>
+<a id="__codelineno-24-26" name="__codelineno-24-26" href="#__codelineno-24-26"></a><span class="c"># System health</span>
+<a id="__codelineno-24-27" name="__codelineno-24-27" href="#__codelineno-24-27"></a><span class="nb">Invoke-RestMethod</span> <span class="n">http</span><span class="p">://</span><span class="n">localhost</span><span class="p">:</span><span class="n">8000</span><span class="p">/</span><span class="n">api</span><span class="p">/</span><span class="n">system</span><span class="p">/</span><span class="n">health</span> <span class="p">|</span> <span class="nb">ConvertTo-Json</span> <span class="n">-Depth</span> <span class="n">3</span>
 </code></pre></div>
 <hr />
 <h2 id="16-design-decisions-constraints">16. Design Decisions &amp; Constraints<a class="headerlink" href="#16-design-decisions-constraints" title="Permanent link">&para;</a></h2>
@@ -2888,6 +2869,11 @@ so the lifespan skips the DB loop — no PostgreSQL needed.</p>
 <tr>
 <td><strong>Override persistence</strong></td>
 <td><code>OverrideConfig</code> is RAM-only; server restart clears all overrides</td>
+<td>Accepted by design for Phase 1; DB persistence is Phase 3+</td>
+</tr>
+<tr>
+<td><strong>3D override persistence</strong></td>
+<td><code>/api/greenhouse-3d/state</code> POSTed state is RAM-only; server restart clears the override</td>
 <td>Accepted by design for Phase 1; DB persistence is Phase 3+</td>
 </tr>
 <tr>
