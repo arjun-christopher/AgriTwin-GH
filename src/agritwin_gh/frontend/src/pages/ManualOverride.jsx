@@ -528,7 +528,7 @@ function ManualOverride() {
                 hint={isOverride ? 'Select the stage to inject - overrides crop model output.' : 'Automatically tracked by the digital twin.'}
               >
                 {isOverride ? (
-                  <Select value={stage} onChange={setStage} disabled={false}>
+                  <Select value={stage} onChange={(v) => { setStage(v); setApplied(false); }} disabled={false}>
                     {GROWTH_STAGES.map((s) => <option key={s} value={s}>{s}</option>)}
                   </Select>
                 ) : (
@@ -549,7 +549,7 @@ function ManualOverride() {
                     <button
                       key={s}
                       type="button"
-                      onClick={() => { setStage(s); setDaysInStage(0); }}
+                      onClick={() => { setStage(s); setDaysInStage(0); setApplied(false); }}
                       className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest transition-all duration-200
                         ${current
                           ? 'bg-primary text-on-primary shadow'

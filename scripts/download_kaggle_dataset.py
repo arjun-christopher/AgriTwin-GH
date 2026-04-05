@@ -87,7 +87,7 @@ def check_kaggle_credentials() -> bool:
     if not kaggle_json.exists():
         logger.error(f"Kaggle credentials not found at {kaggle_json}")
         logger.error("Please follow these steps:")
-        logger.error("1. Go to https://www.kaggle.com/account")
+        logger.error("1. Go to https://www.kaggle.com/")
         logger.error("2. Click 'Create New API Token'")
         logger.error("3. Place the downloaded kaggle.json in ~/.kaggle/")
         logger.error("4. On Windows: C:\\Users\\<username>\\.kaggle\\kaggle.json")

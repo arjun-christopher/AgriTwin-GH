@@ -135,6 +135,7 @@ def main() -> None:
         signal.signal(signal.SIGTERM, _shutdown)
 
     print("[main] Starting FastAPI backend on http://localhost:8000 …")
+    print("[main] Unity WebGL greenhouse available at http://localhost:8000/greenhouse-3d/")
     try:
         uvicorn.run(
             "main:app",

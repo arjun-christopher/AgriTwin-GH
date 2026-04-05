@@ -40,6 +40,7 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 | **Image Storage** | MinIO (S3-compatible) with PostgreSQL metadata indexing | ✅ Complete |
 | **Monthly Snapshots** | Per-month aggregated sensor, resource, MPC, and disease summary stored to SQLite/PostgreSQL | ✅ Complete |
 | **Frontend Dashboard** | React 19 + Tailwind v4 SPA — HomeDashboard, Detailed Insights, Manual Override | ✅ Complete |
+| **3D Greenhouse Scene** | Unity-based 3D greenhouse with 10 actuator controllers, 15 crop plants (6-stage visual progression), time-of-day environment, and a central JSON-driven state applier for Python/FastAPI integration | ✅ Complete |
 
 ## 📊 System Architecture
 
@@ -157,7 +158,7 @@ python setup.py           # installs uv, sets up venv, syncs deps, and optionall
 jupyter notebook feature_demos/
 ```
 
-> **`setup.py`** handles everything automatically — installing uv (if missing), initialising the project, creating the virtual environment, syncing dependencies, and optionally downloading the Kaggle dataset with an interactive token setup. You can also run the steps manually:
+> **`setup.py`** handles everything automatically across 9 steps: installs uv (if missing), initialises the project, creates the virtual environment, syncs dependencies, creates `.env` from `.env.example`, creates `config/settings.local.yaml`, ensures all required data and log directories exist, runs `npm install` for the React frontend, and optionally downloads the Kaggle dataset with an interactive token setup. A formatted manual-steps guide is printed at the end for anything that requires human action (PostgreSQL, MinIO, API keys, CUDA). You can also run the steps manually:
 >
 > ```powershell
 > uv venv && uv sync
@@ -184,6 +185,8 @@ jupyter notebook feature_demos/
 | [DT Loop Streaming Guide](docs/DT_LOOP_STREAMING_GUIDE.md) | Per-step data flow, log format walkthrough, cadence reference, AI model refresh, and FAQ |
 | [FastAPI Backend & API Guide](docs/FASTAPI_API_GUIDE.md) | All 15 REST endpoints, layer-by-layer architecture, runtime state, override mechanism, 3D fields, and testing |
 | [Frontend UI Reference](docs/FRONTEND_UI_REFERENCE.md) | React dashboard — pages, components, and live API data-binding contract |
+| [Greenhouse 3D Model Reference](docs/GREENHOUSE_3D_MODEL_REFERENCE.md) | Unity scene architecture — C# controllers, GameObject hierarchy, JSON state schema, and FastAPI integration guide |
+| [Disease Progression Synthetic Dataset](docs/DISEASE_PROGRESSION_SYNTHETIC_DOCUMENTATION.md) | Technical documentation for the synthetic disease progression dataset — generation methodology, disease dynamics, and feature schema |
 | [Deployment Guide](docs/DOCS_DEPLOYMENT.md) | MkDocs documentation site setup |
 
 **[📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)**
@@ -216,7 +219,17 @@ Interactive docs at `http://localhost:8000/docs`. See [FastAPI Backend & API Gui
 .venv\Scripts\Activate.ps1
 python main.py   # → FastAPI on http://localhost:8000
 ```
+## 🌿 3D Greenhouse Model
 
+A Unity-based 3D greenhouse scene that mirrors the live digital twin state in real time via a JSON-driven central controller:
+
+- **GreenhouseStateApplier** — Central C# orchestrator that reads a JSON state file (or FastAPI response), detects changes, and dispatches to all sub-controllers automatically
+- **10 Actuator Controllers** — Fluorescent lights, heater, humidifier, window fan, vent, and water tank, each with status indicators, particle effects, and audio
+- **15 Crop Plants** — Each with a `CropStageController` (6-stage visual model swap: Seedling → Ripe) and a `CropHealthIndicator` (green / yellow / red RGB health lights with blinking)
+- **Environment System** — `TimeOfDayController` drives skybox, directional light, fog, and night lights; `CropHealthIndicator` maps disease risk scores to visual health states
+- **FastAPI Integration** — The scene is designed to consume the `/api/dt/state` JSON payload and apply the full greenhouse state without code changes
+
+See [Greenhouse 3D Model Reference](docs/GREENHOUSE_3D_MODEL_REFERENCE.md) for the complete C# script reference, GameObject hierarchy, JSON schema, and integration guide.
 ## �️ Frontend Dashboard
 
 A React 19 + Tailwind v4 single-page application providing a real-time operator interface for the greenhouse digital twin.

@@ -777,8 +777,8 @@ function HomeDashboard({ navigate }) {
           role="button"
           tabIndex={0}
           className="group relative overflow-hidden cursor-pointer rounded-xl border border-outline-variant/15 bg-surface-deep hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-300"
-          onClick={() => window.open('/greenhouse-3d', '_blank')}
-          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && window.open('/greenhouse-3d', '_blank')}
+          onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'}/greenhouse-3d/`, '_blank')}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && window.open(`${import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'}/greenhouse-3d/`, '_blank')}
         >
           {/* Hover glow overlay */}
           <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/3 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
