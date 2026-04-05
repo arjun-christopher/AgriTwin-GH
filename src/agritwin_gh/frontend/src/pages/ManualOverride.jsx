@@ -6,7 +6,6 @@ import {
   Sun,
   AlertTriangle,
   SlidersHorizontal,
-  RotateCcw,
   CheckCircle2,
   Fan,
   Zap,
@@ -25,7 +24,6 @@ import {
   getActuatorState,
   postActuatorSet,
   postDtSimOverride,
-  deleteDtOverride,
 } from '../services/api.js';
 
 /* -----------------------------------------------------------------
@@ -99,6 +97,17 @@ const INITIAL_ACTUATORS = {
   led:       { active: false, level: 0  },
   co2:       { active: true,  level: 55 },
   fogger:    { active: false, level: 0  },
+};
+
+// Practical static ON levels used when a toggled-ON actuator has no prior level
+const ACTUATOR_OVERRIDE_DEFAULTS = {
+  fan:        60,   // 60 % — moderate circulation
+  vent:       40,   // 40 % — moderate ventilation
+  irrigation: 50,   // 50 % — moderate watering
+  heater:     70,   // 70 % — meaningful warming
+  led:        80,   // 80 % — good supplemental light
+  co2:        50,   // 50 % — moderate CO₂ enrichment
+  fogger:     60,   // 60 % — moderate humidification
 };
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -316,23 +325,33 @@ function ManualOverride() {
 
   const [overrideDate, setOverrideDate] = useState(getLiveDate);
   const [overrideHour, setOverrideHour] = useState(getLiveHour);
-  const [stage, setStage]               = useState('Flowering');
-  const [daysInStage, setDaysInStage]   = useState(12);
-  const [liveStage, setLiveStage]       = useState('Flowering');
+  const [stage, setStage]               = useState('Seedling');
+  const [daysInStage, setDaysInStage]   = useState(0);
+  const [liveStage, setLiveStage]       = useState('Seedling');
+  const [liveDaysInStage, setLiveDaysInStage] = useState(0);
 
-  const [actuators, setActuators] = useState(INITIAL_ACTUATORS);
-  const [applied, setApplied]     = useState(false);
-  const [applyError, setApplyError] = useState(null);
-  const [pendingReset, setPendingReset] = useState(false);
+  const [actuators, setActuators]       = useState(INITIAL_ACTUATORS);
+  const [baseActuators, setBaseActuators] = useState(INITIAL_ACTUATORS);
+  const [applied, setApplied]           = useState(false);
+  const [applyError, setApplyError]     = useState(null);
+  const [overrideCnn, setOverrideCnn]   = useState(null);  // { label, confidence }
 
   // Seed live values from API on mount
   useEffect(() => {
     getDtState()
       .then(d => {
-        if (d?.crop?.current)    setLiveStage(d.crop.current);
-        if (d?.crop?.daysInStage != null) setDaysInStage(Math.round(d.crop.daysInStage));
-        // Sync mode pill with backend — if backend is already in override, reflect it.
-        if (d?.mode === 'override') setMode('override');
+        if (d?.crop?.current) {
+          setLiveStage(d.crop.current);
+          setStage(d.crop.current);           // seed override field from live state
+        }
+        if (d?.crop?.daysInStage != null) {
+          const days = Math.round(d.crop.daysInStage);
+          setDaysInStage(days);
+          setLiveDaysInStage(days);           // track live baseline
+        }
+        // NOTE: Do NOT auto-switch the mode pill to 'override' based on backend.
+        // The user controls the pill explicitly; the override config persists
+        // on the backend regardless of which mode the pill is showing.
       })
       .catch(() => {});
     getActuatorState()
@@ -341,8 +360,26 @@ function ManualOverride() {
         const seeded = {};
         acts.forEach(a => { seeded[a.id] = { active: a.active, level: Math.round(a.level ?? 0) }; });
         setActuators(prev => ({ ...prev, ...seeded }));
+        setBaseActuators(prev => ({ ...prev, ...seeded })); // track live baseline
       })
       .catch(() => {});
+  }, []);
+
+  // Poll actuator state every 20 s in BOTH modes so backend changes
+  // (e.g. MPC zeroing a manually overridden actuator) are reflected promptly.
+  useEffect(() => {
+    const id = setInterval(() => {
+      getActuatorState()
+        .then(acts => {
+          if (!acts?.length) return;
+          const updated = {};
+          acts.forEach(a => { updated[a.id] = { active: a.active, level: Math.round(a.level ?? 0) }; });
+          setActuators(prev => ({ ...prev, ...updated }));
+          setBaseActuators(prev => ({ ...prev, ...updated }));
+        })
+        .catch(() => {});
+    }, 20_000);
+    return () => clearInterval(id);
   }, []);
 
   function toggleActuator(id) {
@@ -353,18 +390,29 @@ function ManualOverride() {
   async function handleApply() {
     setApplyError(null);
     try {
-      await postDtSimOverride({
+      const simRes = await postDtSimOverride({
         stage:        stage.toLowerCase(),
         day_in_stage: daysInStage,
         start_date:   overrideDate,
         start_hour:   overrideHour,
       });
+      // Capture one-shot CNN result for the overridden stage
+      if (simRes?.override_cnn_label) {
+        setOverrideCnn({ label: simRes.override_cnn_label, confidence: simRes.override_cnn_confidence });
+      }
       const actuatorPayload = ACTUATOR_DEFS.map(d => ({
         id:    d.id,
-        level: actuators[d.id].active ? (actuators[d.id].level || 100) : 0,
+        // Use seeded level if non-zero, otherwise practical static default
+        level: actuators[d.id].active
+          ? (actuators[d.id].level || ACTUATOR_OVERRIDE_DEFAULTS[d.id] || 60)
+          : 0,
       }));
       await postActuatorSet(actuatorPayload);
       setApplied(true);
+      // Freeze applied state as new baseline — persists to backend even after returning to live mode
+      setLiveStage(stage);
+      setLiveDaysInStage(0);
+      setBaseActuators({ ...actuators });
     } catch (e) {
       console.error('[api] handleApply:', e);
       setApplyError(e.message || 'Override failed — check backend connection.');
@@ -372,21 +420,16 @@ function ManualOverride() {
     }
   }
 
-  async function handleReset() {
-    const allOff = Object.fromEntries(
-      Object.keys(INITIAL_ACTUATORS).map((id) => [id, { ...INITIAL_ACTUATORS[id], active: false }])
-    );
-    setActuators(allOff);
-    setApplyError(null);
-    try {
-      await postActuatorSet(ACTUATOR_DEFS.map(d => ({ id: d.id, level: 0 })));
-      await deleteDtOverride();   // clears OverrideConfig and sets backend mode → "live"
-    } catch (e) {
-      console.error('[api] handleReset:', e);
+  function handleModeChange(newMode) {
+    if (newMode === 'live' && !applied) {
+      // Revert unapplied edits — restore last known backend state
+      setStage(liveStage);
+      setDaysInStage(liveDaysInStage);
+      setActuators(baseActuators);
     }
+    setMode(newMode);
     setApplied(false);
-    setPendingReset(false);
-    setMode('live');              // switch UI pill back to live immediately
+    setApplyError(null);
   }
 
   const displayDate  = isOverride ? overrideDate : liveDate;
@@ -404,7 +447,7 @@ function ManualOverride() {
           <span className={isOverride ? 'text-warning italic' : 'text-primary italic'}>Override</span>
         </h1>
         <div className="shrink-0">
-          <ModePill mode={mode} setMode={(m) => { setMode(m); setApplied(false); }} />
+          <ModePill mode={mode} setMode={handleModeChange} />
         </div>
       </header>
 
@@ -441,7 +484,7 @@ function ManualOverride() {
           </div>
           <div>
             <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant">Section A</p>
-            <h2 className="text-xl font-headline font-bold text-on-surface leading-none">Simulation Parameters</h2>
+            <h2 className="text-xl font-headline font-bold text-on-surface leading-none">Crop Stage Override</h2>
           </div>
           {!isOverride && (
             <span className="ml-auto text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-surface-high border border-outline-variant/20 text-on-surface-variant">
@@ -451,46 +494,6 @@ function ManualOverride() {
         </div>
 
         <div className="bg-surface-low rounded-xl border border-outline-variant/10 divide-y divide-outline-variant/10">
-
-          {/* Date + Hour */}
-          <div className="p-6">
-            <div className="flex items-center gap-2 mb-5">
-              <Calendar size={13} className="text-on-surface-variant" />
-              <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface">Date &amp; Time</p>
-              <span className="ml-2 text-[9px] text-on-surface-variant opacity-50">
-                {isOverride
-                  ? 'Set the simulation reference date and hour'
-                  : `Live - ${new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}`}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Field
-                label="Simulation Date"
-                hint={isOverride ? 'YYYY-MM-DD - used as the reference date for DT loop injection.' : 'Read from system clock - updates every minute.'}
-              >
-                <DateInput value={displayDate} onChange={setOverrideDate} disabled={!isOverride} />
-              </Field>
-
-              <Field
-                label="Hour of Day (0 - 23)"
-                hint={isOverride ? 'Select the hour of day for this simulation run. Minutes are not configurable.' : `Current hour: ${String(displayHour).padStart(2,'0')}:00`}
-              >
-                <div className="bg-surface-high rounded-xl p-3 border border-outline-variant/20">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Clock size={12} className="text-on-surface-variant" />
-                      <span className="text-[9px] uppercase tracking-widest text-on-surface-variant">Selected hour</span>
-                    </div>
-                    <span className="text-xl font-headline font-bold text-primary">
-                      {String(displayHour).padStart(2, '0')}:00
-                    </span>
-                  </div>
-                  <HourPicker value={displayHour} onChange={setOverrideHour} disabled={!isOverride} />
-                </div>
-              </Field>
-            </div>
-          </div>
 
           {/* Growth Stage */}
           <div className="p-6">
@@ -502,7 +505,7 @@ function ManualOverride() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               <Field
                 label="Growth Stage"
                 hint={isOverride ? 'Select the stage to inject - overrides crop model output.' : 'Automatically tracked by the digital twin.'}
@@ -515,30 +518,6 @@ function ManualOverride() {
                   <div className="bg-surface-high rounded-xl px-4 py-3 border border-outline-variant/20 text-sm font-medium text-on-surface opacity-60 cursor-not-allowed">
                     {displayStage}
                   </div>
-                )}
-              </Field>
-
-              <Field
-                label="Days in Current Stage"
-                hint={`0 - ${maxDays} days - Max for ${isOverride ? stage : displayStage}.`}
-              >
-                <NumberInput
-                  value={isOverride ? daysInStage : 12}
-                  onChange={(v) => setDaysInStage(Math.min(maxDays, Math.max(0, v)))}
-                  min={0}
-                  max={maxDays}
-                  disabled={!isOverride}
-                  suffix="days"
-                />
-                {isOverride && (
-                  <input
-                    type="range"
-                    min={0}
-                    max={maxDays}
-                    value={daysInStage}
-                    onChange={(e) => setDaysInStage(Number(e.target.value))}
-                    className="w-full h-1 rounded-full appearance-none bg-surface-highest mt-1 cursor-pointer"
-                  />
                 )}
               </Field>
             </div>
@@ -577,12 +556,19 @@ function ManualOverride() {
                 {isOverride ? 'Override Preview' : 'Live Reading'}
               </p>
               <div className="flex flex-wrap gap-3">
-                {[
-                  { icon: Calendar, label: 'Date',  value: displayDate },
-                  { icon: Clock,    label: 'Hour',  value: `${String(displayHour).padStart(2,'0')}:00` },
-                  { icon: Sprout,   label: 'Stage', value: isOverride ? stage : displayStage },
-                  { icon: Activity, label: 'Days',  value: `${isOverride ? daysInStage : 12} days` },
-                ].map(({ icon: I, label, value }) => (
+                {(() => {
+                  const h = displayHour;
+                  const period = h >= 6 && h < 12 ? 'Morning'
+                               : h >= 12 && h < 16 ? 'Afternoon'
+                               : h >= 16 && h < 20 ? 'Evening'
+                               : 'Night';
+                  return [
+                    { icon: Calendar, label: 'Date',   value: displayDate },
+                    { icon: Clock,    label: 'Hour',   value: `${String(displayHour).padStart(2,'0')}:00` },
+                    { icon: Sun,      label: 'Period', value: period },
+                    { icon: Sprout,   label: 'Stage',  value: isOverride ? stage : displayStage },
+                  ];
+                })().map(({ icon: I, label, value }) => (
                   <div key={label} className="flex items-center gap-1.5 bg-surface-high rounded-full px-3 py-1.5 border border-outline-variant/15">
                     <I size={10} className="text-on-surface-variant" />
                     <span className="text-[9px] text-on-surface-variant">{label}:</span>
@@ -594,6 +580,16 @@ function ManualOverride() {
                     <Zap size={10} />
                     Override active
                   </span>
+                )}
+                {isOverride && overrideCnn && (
+                  <div className="flex items-center gap-1.5 bg-primary/10 rounded-full px-3 py-1.5 border border-primary/20">
+                    <Activity size={10} className="text-primary" />
+                    <span className="text-[9px] text-on-surface-variant">CNN [override]:</span>
+                    <span className="text-[9px] font-bold text-primary">
+                      {overrideCnn.label}
+                      {overrideCnn.confidence != null && ` (${(overrideCnn.confidence * 100).toFixed(1)}%)`}
+                    </span>
+                  </div>
                 )}
                 {!isOverride && (
                   <span className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-primary">
@@ -662,15 +658,6 @@ function ManualOverride() {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => setPendingReset(true)}
-              disabled={!isOverride}
-              className="flex items-center gap-2 bg-surface-high border border-outline-variant/20 text-on-surface-variant font-headline font-bold text-sm px-5 py-2.5 rounded-full transition-all hover:bg-surface-highest hover:text-on-surface active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <RotateCcw size={14} />
-              Reset
-            </button>
-            <button
-              type="button"
               onClick={handleApply}
               disabled={!isOverride || applied}
               className={`font-headline font-bold text-sm px-6 py-2.5 rounded-full transition-all hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${isOverride ? 'bg-warning text-black' : 'bg-primary text-on-primary'}`}
@@ -688,30 +675,7 @@ function ManualOverride() {
           </div>
         )}
 
-        {/* Reset confirmation */}
-        {pendingReset && (
-          <div className="mt-3 flex items-center justify-between gap-4 bg-danger/8 border border-danger/20 rounded-xl px-5 py-4">
-            <p className="text-sm text-on-surface">
-              Turn off all actuators and reset to defaults?
-            </p>
-            <div className="flex gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => setPendingReset(false)}
-                className="px-4 py-1.5 rounded-full text-xs font-bold bg-surface-high border border-outline-variant/20 text-on-surface-variant hover:bg-surface-highest"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="px-4 py-1.5 rounded-full text-xs font-bold bg-danger text-white hover:opacity-90"
-              >
-                Confirm Reset
-              </button>
-            </div>
-          </div>
-        )}
+
       </section>
 
     </div>

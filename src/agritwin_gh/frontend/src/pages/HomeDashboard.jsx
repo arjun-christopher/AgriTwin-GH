@@ -221,7 +221,7 @@ function ActuatorRow({ icon: Icon, label, status, active, color }) {
  * CropStageTrack — horizontal stage dot + connecting-line progression track.
  * Filled (primary) for passed stages, pulsing ring for current, muted for future.
  */
-function CropStageTrack({ stages, currentIndex, currentPct }) {
+function CropStageTrack({ stages, currentIndex, currentPct, allComplete = false }) {
   return (
     <div className="relative flex items-start justify-between w-full pt-1">
       {/* Background connector line */}
@@ -231,13 +231,13 @@ function CropStageTrack({ stages, currentIndex, currentPct }) {
       <div
         className="absolute top-3.5 left-4 right-4 h-px bg-primary transition-all duration-700 origin-left"
         style={{
-          transform: `scaleX(${currentIndex === 0 ? 0 : (currentIndex / (stages.length - 1)).toFixed(4)})`,
+          transform: allComplete ? 'scaleX(1)' : `scaleX(${currentIndex === 0 ? 0 : (currentIndex / (stages.length - 1)).toFixed(4)})`,
         }}
       />
 
       {stages.map((stage, i) => {
-        const done    = i < currentIndex;
-        const current = i === currentIndex;
+        const done    = allComplete ? true : i < currentIndex;
+        const current = allComplete ? false : i === currentIndex;
         return (
           <div key={stage} className="relative z-10 flex flex-col items-center gap-2 w-14">
             {/* Stage dot */}
@@ -556,10 +556,12 @@ function HomeDashboard({ navigate }) {
                   stages={crop.stages}
                   currentIndex={crop.currentIndex}
                   currentPct={crop.currentPct}
+                  allComplete={crop.current === 'Ripe'}
                 />
               </div>
 
               {/* Stage completion progress bar */}
+              {crop.current !== 'Ripe' && (
               <div className="mt-6 pt-4 border-t border-outline-variant/10">
                 <div className="flex justify-between text-[9px] uppercase tracking-widest opacity-55 mb-2">
                   <span>Stage completion</span>
@@ -572,6 +574,7 @@ function HomeDashboard({ navigate }) {
                   />
                 </div>
               </div>
+              )}
             </div>
           </div>
 

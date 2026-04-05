@@ -28,11 +28,11 @@ Example JSON shape
 
     {
       "crop": {
-        "current": "Flowering",
-        "current_index": 3,
-        "progress_pct": 80.0,
-        "days_in_stage": 12.0,
-        "stage_duration_days": 15.0,
+        "current": "Seedling",
+        "current_index": 0,
+        "progress_pct": 0.0,
+        "days_in_stage": 0.0,
+        "stage_duration_days": 14.0,
         "next_stage": "Unripe",
         "next_in_days": 3.0,
         "stages": ["Seedling", "Early Vegetative", "Flowering Initiation",
@@ -169,11 +169,11 @@ class CropInfo(BaseModel):
     -------
     ::
         {
-          "current": "Flowering",
-          "current_index": 3,
-          "progress_pct": 80.0,
-          "days_in_stage": 12.0,
-          "stage_duration_days": 15.0,
+          "current": "Seedling",
+          "current_index": 0,
+          "progress_pct": 0.0,
+          "days_in_stage": 0.0,
+          "stage_duration_days": 14.0,
           "next_stage": "Unripe",
           "next_in_days": 3.0,
           "stages": ["Seedling", "Early Vegetative", "Flowering Initiation",
@@ -489,16 +489,18 @@ class DtSimOverrideRequest(BaseModel):
         description="Canonical lowercase growth stage label, e.g. 'flowering'.",
     )
     day_in_stage: int = Field(
-        ge=1,
-        description="Day within the current stage (1-based). Clamped to stage duration.",
+        ge=0,
+        description="Day within the current stage (0-based). Clamped to stage duration.",
     )
     start_date: str = Field(
-        description="Simulation start date in ISO format YYYY-MM-DD.",
+        default="",
+        description="Simulation start date in ISO format YYYY-MM-DD. Defaults to today.",
     )
     start_hour: int = Field(
-        ge=0,
+        default=-1,
+        ge=-1,
         le=23,
-        description="Simulation start hour (0–23, local wall-clock).",
+        description="Simulation start hour (0–23, local wall-clock). -1 = use current hour.",
     )
 
 
@@ -522,6 +524,16 @@ class DtOverrideResponse(BaseModel):
     applied_stage: str = Field(
         default="",
         description="Stage name applied (for DtSimOverrideRequest only).",
+    )
+    override_cnn_label: str | None = Field(
+        default=None,
+        description="Growth-stage CNN top-1 class name for the overridden stage "
+                    "(e.g. 'Stage3_Flowering_Initiation').  Null if CNN skipped.",
+    )
+    override_cnn_confidence: float | None = Field(
+        default=None,
+        description="CNN top-1 confidence in [0, 1] for override_cnn_label.  "
+                    "Null if CNN skipped.",
     )
     message: str = Field(
         default="",

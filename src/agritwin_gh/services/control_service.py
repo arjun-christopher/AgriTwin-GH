@@ -208,7 +208,12 @@ class ControlService:
             )
 
         max_days: float = STAGE_DURATION_DAYS.get(req.stage, 30.0)
-        clamped_day = max(1, min(req.day_in_stage, int(max_days)))
+        clamped_day = max(0, min(req.day_in_stage, int(max_days)))
+
+        import datetime as _dt  # noqa: PLC0415
+        _now = _dt.datetime.now()
+        effective_date = req.start_date if req.start_date else _now.strftime("%Y-%m-%d")
+        effective_hour = req.start_hour if req.start_hour >= 0 else _now.hour
 
         existing: OverrideConfig = self._store.get_override() or OverrideConfig()
 
@@ -218,24 +223,103 @@ class ControlService:
                 actuator_overrides=dict(existing.actuator_overrides),
                 sim_stage=req.stage,
                 sim_day_in_stage=clamped_day,
-                sim_start_date=req.start_date,
-                sim_start_hour=req.start_hour,
+                sim_start_date=effective_date,
+                sim_start_hour=effective_hour,
                 preset_id=existing.preset_id,
             )
         )
         logger.info(
             "DT sim override applied: stage=%s, day=%d, start=%sT%02d:00",
-            req.stage, clamped_day, req.start_date, req.start_hour,
+            req.stage, clamped_day, effective_date, effective_hour,
         )
+
+        # Run growth-stage CNN once for the overridden stage (one-shot; does not
+        # affect the 30-min image-refresh cadence in the DT loop).
+        import pathlib as _pl  # noqa: PLC0415
+        import random as _random  # noqa: PLC0415
+
+        _REPO_ROOT = _pl.Path(__file__).resolve().parents[3]
+        _GROWTH_FOLDER_MAP: dict[str, str] = {
+            "seedling":               "Stage1_Seedling",
+            "early vegetative":       "Stage2_Early_Vegetative",
+            "flowering initiation":   "Stage3_Flowering_Initiation",
+            "flowering":              "Stage4_Flowering",
+            "unripe":                 "Stage5_Unripe",
+            "ripe":                   "Stage6_Ripe",
+        }
+        _cnn_label: str | None = None
+        _cnn_confidence: float | None = None
+        try:
+            _folder_name = _GROWTH_FOLDER_MAP.get(req.stage.lower(), "Stage1_Seedling")
+            _gs_folder = _REPO_ROOT / "data" / "external" / "Tomato Growth Stages" / _folder_name
+            _imgs = (
+                [f for f in _gs_folder.iterdir() if f.suffix.lower() in {".jpg", ".jpeg", ".png"}]
+                if _gs_folder.is_dir() else []
+            )
+            if _imgs:
+                _img_path = _random.choice(_imgs)
+                logger.info(
+                    "[override] growth-stage CNN starting: stage=%s  img=%s",
+                    req.stage, _img_path.name,
+                )
+                from agritwin_gh.models.growth_stage_inference import predict_growth_stage  # noqa: PLC0415
+                # Called directly — the route runs this function via run_in_executor,
+                # so we are already in a worker thread and can call TF inline.
+                _cnn_res = predict_growth_stage(str(_img_path))
+                _cnn_label = _cnn_res.get("class_name")
+                _cnn_confidence = _cnn_res.get("confidence")
+                logger.info(
+                    "[override] growth-stage CNN  in=[img:%s] → %s (%.1f%%)",
+                    _img_path.name, _cnn_label, (_cnn_confidence or 0.0) * 100,
+                )
+
+                # Push result into MediaSnapshot so the dashboard (GET /api/media/latest)
+                # immediately reflects the overridden stage image + CNN label without
+                # waiting for the next 30-min cadence CNN tick in the DT loop.
+                if _cnn_label:
+                    try:
+                        from agritwin_gh.core.runtime_store import MediaSnapshot as _MS  # noqa: PLC0415
+                        _em = self._store.get_latest_state().media
+                        # Image key relative to repo root, forward-slash separated, so
+                        # media_service._local_url() can build a valid /api/media/local/ URL.
+                        _img_key = str(_img_path.relative_to(_REPO_ROOT)).replace("\\", "/")
+                        self._store.update_latest_state(
+                            media=_MS(
+                                latest_stage_src=_em.latest_stage_src,
+                                latest_stage_alt=f"Tomato plant — {_cnn_label} [override]",
+                                latest_stage_image_key=_img_key,
+                                latest_stage_label=_cnn_label,
+                                latest_stage_confidence=_cnn_confidence or 0.0,
+                                latest_leaf_src=_em.latest_leaf_src,
+                                latest_leaf_alt=_em.latest_leaf_alt,
+                                latest_leaf_image_key=_em.latest_leaf_image_key,
+                                latest_leaf_label=_em.latest_leaf_label,
+                                latest_leaf_confidence=_em.latest_leaf_confidence,
+                                stage_images=_em.stage_images,
+                                disease_scans=_em.disease_scans,
+                            )
+                        )
+                        logger.info(
+                            "[override] MediaSnapshot updated: key=%s  label=%s",
+                            _img_key, _cnn_label,
+                        )
+                    except Exception as _ms_err:  # noqa: BLE001
+                        logger.warning("[override] MediaSnapshot update failed: %s", _ms_err)
+            else:
+                logger.warning("[override] growth-stage CNN: no images in %s", _gs_folder)
+        except Exception as _cnn_err:  # noqa: BLE001
+            logger.warning("[override] growth-stage CNN failed: %s", _cnn_err, exc_info=True)
 
         return DtOverrideResponse(
             ok=True,
             applied_param="sim_params",
             applied_value=float(clamped_day),
             applied_stage=req.stage,
+            override_cnn_label=_cnn_label,
+            override_cnn_confidence=_cnn_confidence,
             message=(
                 f"Simulation set to '{req.stage}' day {clamped_day},"
-                f" starting {req.start_date} at {req.start_hour:02d}:00."
+                f" starting {effective_date} at {effective_hour:02d}:00."
             ),
         )
 

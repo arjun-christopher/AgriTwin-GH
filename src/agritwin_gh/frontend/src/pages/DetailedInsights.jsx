@@ -224,19 +224,19 @@ function ActuatorChip({ icon: Icon, label, active }) {
  * CropStageTrack — horizontal stage dot + connecting-line progression.
  * Copied from HomeDashboard for visual consistency.
  */
-function CropStageTrack({ stages, currentIndex, currentPct }) {
+function CropStageTrack({ stages, currentIndex, currentPct, allComplete = false }) {
   return (
     <div className="relative flex items-start justify-between w-full pt-1">
       <div className="absolute top-3.5 left-4 right-4 h-px bg-outline-variant/20" />
       <div
         className="absolute top-3.5 left-4 right-4 h-px bg-primary transition-all duration-700 origin-left"
         style={{
-          transform: `scaleX(${currentIndex === 0 ? 0 : (currentIndex / (stages.length - 1)).toFixed(4)})`,
+          transform: allComplete ? 'scaleX(1)' : `scaleX(${currentIndex === 0 ? 0 : (currentIndex / (stages.length - 1)).toFixed(4)})`,
         }}
       />
       {stages.map((stage, i) => {
-        const done    = i < currentIndex;
-        const current = i === currentIndex;
+        const done    = allComplete ? true : i < currentIndex;
+        const current = allComplete ? false : i === currentIndex;
         return (
           <div key={stage} className="relative z-10 flex flex-col items-center gap-2 w-14">
             <div className={[
@@ -467,6 +467,14 @@ function DetailedInsights() {
           }
         })
         .catch(() => {});
+
+      getMonthlyResources()
+        .then(d => {
+          if (d?.resources) setResources(d.resources);
+          if (d?.cost)      setCost(d.cost);
+          if (d?.actuators) setActuatorCosts(d.actuators);
+        })
+        .catch(() => {});
     }
 
     fetchDtLive();
@@ -487,14 +495,6 @@ function DetailedInsights() {
           stage: d.stage?.src ? d.stage : prev.stage,
           leaf:  d.leaf?.src  ? d.leaf  : prev.leaf,
         }));
-      })
-      .catch(() => {});
-
-    getMonthlyResources()
-      .then(d => {
-        if (d?.resources) setResources(d.resources);
-        if (d?.cost)      setCost(d.cost);
-        if (d?.actuators) setActuatorCosts(d.actuators);
       })
       .catch(() => {});
 
@@ -570,32 +570,48 @@ function DetailedInsights() {
                 stages={crop.stages}
                 currentIndex={crop.currentIndex}
                 currentPct={crop.currentPct}
+                allComplete={crop.current === 'Ripe'}
               />
             </div>
-            <div className="mt-6 pt-4 border-t border-outline-variant/10">
-              <div className="flex justify-between text-[9px] uppercase tracking-widest opacity-55 mb-2">
-                <span>Stage completion</span>
-                <span>{crop.currentPct}%</span>
+            {crop.current !== 'Ripe' && (
+              <div className="mt-6 pt-4 border-t border-outline-variant/10">
+                <div className="flex justify-between text-[9px] uppercase tracking-widest opacity-55 mb-2">
+                  <span>Stage completion</span>
+                  <span>{crop.currentPct}%</span>
+                </div>
+                <div className="h-1.5 bg-surface-highest rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-700"
+                    style={{ width: `${crop.currentPct}%` }}
+                  />
+                </div>
               </div>
-              <div className="h-1.5 bg-surface-highest rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary rounded-full transition-all duration-700"
-                  style={{ width: `${crop.currentPct}%` }}
-                />
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Predicted time to next stage (from growth-progression LSTM) */}
+        {/* Predicted time to next stage / Harvest Ready */}
         <div className="mb-5">
-          <GrowthSpotlight
-            label="Predicted Time to Next Stage"
-            value={growthIntel.hoursToNextStage != null ? growthIntel.hoursToNextStage.toFixed(1) : '—'}
-            unit="hrs"
-            days={growthIntel.hoursToNextStage != null ? Math.ceil(growthIntel.hoursToNextStage / 24) : null}
-            accent="primary"
-          />
+          {crop.current === 'Ripe' ? (
+            <div className="rounded-xl p-6 border flex flex-col justify-center bg-primary/5 border-primary/20">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant mb-3">Status</p>
+              <div className="flex items-center gap-3">
+                <CheckCircle2 size={28} className="text-primary shrink-0" />
+                <span className="text-4xl font-headline font-bold text-primary">Harvest Ready</span>
+              </div>
+              <p className="text-[10px] text-on-surface-variant mt-2 leading-snug">
+                Crop has reached the final growth stage. Ready for harvest.
+              </p>
+            </div>
+          ) : (
+            <GrowthSpotlight
+              label="Predicted Time to Next Stage"
+              value={growthIntel.hoursToNextStage != null ? growthIntel.hoursToNextStage.toFixed(1) : '—'}
+              unit="hrs"
+              days={growthIntel.hoursToNextStage != null ? Math.ceil(growthIntel.hoursToNextStage / 24) : null}
+              accent="primary"
+            />
+          )}
         </div>
 
         {/* Latest crop stage image — CNN classifier result */}

@@ -123,9 +123,9 @@ def _time_of_day(hour: int) -> str:
     """Return a human-readable time-of-day label for a given hour (0–23)."""
     if 6 <= hour < 12:
         return "Morning"
-    if 12 <= hour < 17:
+    if 12 <= hour < 16:
         return "Afternoon"
-    if 17 <= hour < 21:
+    if 16 <= hour < 20:
         return "Evening"
     return "Night"
 
@@ -313,25 +313,46 @@ class LoopService:
 
             self._last_result = result
 
-            # ── Growth-stage penalty: LSTM current_stage → DT ground truth ──
-            # The growth-progression LSTM is trained on sensor trajectories and
-            # can predict a stage that differs from the physics-derived stage
-            # (result.next_state.growth_stage_index).  The DT's index is
-            # authoritative (computed from days_elapsed).  Correct the LSTM
-            # prediction so that downstream logging and the API always agree.
+            # ── Growth-stage penalty: LSTM current_stage → authoritative stage ──
+            # Authority priority: (1) active sim_stage override, (2) ARX physics
+            # index.  When the operator has forced a specific stage, the LSTM
+            # prediction is irrelevant — override it so logs and the API agree.
+            # Additionally adjust hours_to_transition for any elapsed days within
+            # the overridden stage (sim_day_in_stage), preventing the LSTM from
+            # reporting the full stage duration when the operator skipped ahead.
+            # _GS and _ov_chk are computed here (outside if _mgr:) so they are
+            # available for INPUT / MPC log display regardless of LSTM presence.
+            from agritwin_gh.schemas.enums import GROWTH_STAGE_ORDERED as _GS
+            _ov_chk = self._store.get_override()
             _mgr = (result.cadence_info or {}).get("model_growth_result") or {}
             if _mgr:
-                from agritwin_gh.schemas.enums import GROWTH_STAGE_ORDERED as _GS
-                _dt_idx   = max(0, min(int(result.next_state.growth_stage_index), len(_GS) - 1))
-                _dt_stage = _GS[_dt_idx]
-                if _mgr.get("current_stage") and _mgr["current_stage"] != _dt_stage:
-                    logger.debug(
-                        "Growth-stage penalty: LSTM=%r  DT=%r  → correcting to DT",
-                        _mgr["current_stage"], _dt_stage,
-                    )
-                    _mgr["current_stage"] = _dt_stage
-                    _mgr["next_stage"] = _GS[_dt_idx + 1] if _dt_idx < len(_GS) - 1 else None
+                if _ov_chk and _ov_chk.sim_stage and _ov_chk.sim_stage in list(_GS):
+                    # Override is the authority
+                    _auth_stage = _ov_chk.sim_stage
+                    _auth_idx   = list(_GS).index(_auth_stage)
+                    _auth_next  = _GS[_auth_idx + 1] if _auth_idx < len(_GS) - 1 else None
+                    _mgr["current_stage"] = _auth_stage
+                    _mgr["next_stage"]    = _auth_next
+                    # Adjust h_to_transition by subtracting already-elapsed days
+                    if _ov_chk.sim_day_in_stage and _ov_chk.sim_day_in_stage > 0:
+                        _raw_htt = _mgr.get("hours_to_transition")
+                        if _raw_htt is not None:
+                            _mgr["hours_to_transition"] = max(
+                                0.0, _raw_htt - float(_ov_chk.sim_day_in_stage) * 24.0
+                            )
                     result.cadence_info["model_growth_result"] = _mgr
+                else:
+                    # No sim override — ARX physics is the authority
+                    _dt_idx   = max(0, min(int(result.next_state.growth_stage_index), len(_GS) - 1))
+                    _dt_stage = _GS[_dt_idx]
+                    if _mgr.get("current_stage") and _mgr["current_stage"] != _dt_stage:
+                        logger.debug(
+                            "Growth-stage penalty: LSTM=%r  DT=%r  → correcting to DT",
+                            _mgr["current_stage"], _dt_stage,
+                        )
+                        _mgr["current_stage"] = _dt_stage
+                        _mgr["next_stage"] = _GS[_dt_idx + 1] if _dt_idx < len(_GS) - 1 else None
+                        result.cadence_info["model_growth_result"] = _mgr
 
             # ── Phase logging — DB → AI → MPC → DT ───────────────────────
             step = int(result.step_index)
@@ -345,12 +366,20 @@ class LoopService:
 
             # INPUT: greenhouse state at the START of this step (read from CSV)
             cs = result.current_state
+            # ARX physics never sees the sim_stage override so cs.growth_stage_label
+            # is always the raw physical stage.  Display the overridden stage when active.
+            _log_stage = _ov_chk.sim_stage if (_ov_chk and _ov_chk.sim_stage) else cs.growth_stage_label
+            _log_stage_idx = (
+                list(_GS).index(_ov_chk.sim_stage)
+                if (_ov_chk and _ov_chk.sim_stage and _ov_chk.sim_stage in list(_GS))
+                else cs.growth_stage_index
+            )
             _phase(step, "INPUT",
                    f"state in  — T={cs.indoor_temp:.1f}°C  RH={cs.indoor_humidity:.1f}%  "
                    f"CO₂={cs.co2:.0f}ppm  soil={cs.soil_moisture:.1f}%  "
                    f"light={cs.light_intensity:.0f}lux  VPD={cs.vpd:.2f}kPa  "
                    f"leaf={cs.leaf_wetness_proxy:.2f}  risk={cs.disease_risk_score:.3f}  "
-                   f"stage={cs.growth_stage_label}({cs.growth_stage_index})")
+                   f"stage={_log_stage}({_log_stage_idx})")
 
             # INPUT: weather disturbance applied this step
             w = result.weather_used
@@ -461,12 +490,17 @@ class LoopService:
                 cost_str = f"{sol.total_cost:.4f}" if sol else "—"
                 conv_str = ("yes" if sol and sol.converged else
                             "fallback" if sol and sol.fallback_used else "no")
+                _mpc_stage_idx = (
+                    list(_GS).index(_ov_chk.sim_stage)
+                    if (_ov_chk and _ov_chk.sim_stage and _ov_chk.sim_stage in list(_GS))
+                    else cs.growth_stage_index
+                )
                 _phase(step, "MPC",
                        f"solve [{reason}] in=[T={cs.indoor_temp:.1f}  RH={cs.indoor_humidity:.1f}  "
                        f"CO₂={cs.co2:.0f}  soil={cs.soil_moisture:.1f}  "
                        f"light={cs.light_intensity:.0f}  VPD={cs.vpd:.2f}  "
                        f"leaf={cs.leaf_wetness_proxy:.2f}  risk={cs.disease_risk_score:.3f}  "
-                       f"stage={cs.growth_stage_index}]  "
+                       f"stage={_mpc_stage_idx}]  "
                        f"→ fan={act.fan_speed:.2f}  vent={act.vent_opening:.2f}  "
                        f"heat={act.heater_output:.2f}  led={act.led_intensity:.2f}  "
                        f"co2v={act.co2_valve_pct:.2f}  fog={act.fogger_duty:.2f}  "
@@ -567,10 +601,28 @@ class LoopService:
                 "irrigation_qty": 0.15,
             }
             _dt_h = 5.0 / 60.0
-            _act_energy: dict[str, float] = {
-                k: round(kw * (getattr(result.action_applied, k, 0.0) or 0.0) * _dt_h, 6)
-                for k, kw in _rated_kw.items()
+            # Mapping: act_key → frontend override ID (override levels are 0-100 scale)
+            _ACT_KEY_TO_OID: dict[str, str] = {
+                "fan_speed": "fan", "vent_opening": "vent", "heater_output": "heater",
+                "led_intensity": "led", "fogger_duty": "fogger",
+                "co2_valve_pct": "co2", "irrigation_qty": "irrigation",
             }
+            _override_ref = self._store.get_override()
+            _override_acts = _override_ref.actuator_overrides if _override_ref else {}
+            _act_energy: dict[str, float] = {}
+            for _ak, _kw in _rated_kw.items():
+                _oid = _ACT_KEY_TO_OID.get(_ak)
+                if result.mpc_ran_this_step:
+                    # MPC ran: MPC is the authority — use its output for every actuator.
+                    # This ensures actuators MPC explicitly zeroed (e.g. heater=0.00)
+                    # are not still billed at the old manual-override level.
+                    _lvl = getattr(result.action_applied, _ak, 0.0) or 0.0
+                elif _oid and _oid in _override_acts:
+                    # No MPC this step: use the operator-set override level (0-100 → 0-1)
+                    _lvl = _override_acts[_oid] / 100.0
+                else:
+                    _lvl = getattr(result.action_applied, _ak, 0.0) or 0.0
+                _act_energy[_ak] = round(_kw * _lvl * _dt_h, 6)
 
             self._store.accumulate_resources(
                 energy_kwh=energy_kwh, water_l=water_l, actuator_energy=_act_energy
@@ -604,6 +656,10 @@ class LoopService:
             if _act_parts:
                 _phase(step, "RES", "actuators: " + "  ".join(_act_parts))
 
+            # ── MPC authority: remove overrides that MPC explicitly zeroed ──
+            if result.mpc_ran_this_step:
+                self._clear_mpc_overridden_actuators(result)
+
             # ── Apply active actuator overrides from store ─────────────────
             self._apply_actuator_overrides_if_active()
 
@@ -617,6 +673,51 @@ class LoopService:
                 water_l,
             )
             return result
+
+    # Mapping: frontend override ID → MPC action_applied attribute name
+    _OVERRIDE_ID_TO_ACT_ATTR: dict[str, str] = {
+        "fan":        "fan_speed",
+        "vent":       "vent_opening",
+        "heater":     "heater_output",
+        "led":        "led_intensity",
+        "fogger":     "fogger_duty",
+        "co2":        "co2_valve_pct",
+        "irrigation": "irrigation_qty",
+    }
+
+    def _clear_mpc_overridden_actuators(self, result) -> None:  # type: ignore[type-arg]
+        """After MPC runs, remove from override.actuator_overrides any actuator
+        that MPC explicitly set to 0.  MPC authority overrides a manual ON toggle
+        so the store — and the frontend on next poll — reflects MPC output.
+        """
+        override = self._store.get_override()
+        if override is None or not override.actuator_overrides:
+            return
+        new_overrides = dict(override.actuator_overrides)
+        changed = False
+        for oid, attr in self._OVERRIDE_ID_TO_ACT_ATTR.items():
+            if oid in new_overrides:
+                mpc_level = getattr(result.action_applied, attr, None)
+                if mpc_level is not None and mpc_level < 0.01:
+                    del new_overrides[oid]
+                    changed = True
+                    logger.info(
+                        "MPC cleared actuator override: %s (was %.0f%%) → MPC=0",
+                        oid, override.actuator_overrides[oid],
+                    )
+        if changed:
+            from agritwin_gh.core.runtime_store import OverrideConfig as _OC  # noqa: PLC0415
+            self._store.set_override(
+                _OC(
+                    param_overrides=dict(override.param_overrides),
+                    actuator_overrides=new_overrides,
+                    sim_stage=override.sim_stage,
+                    sim_day_in_stage=override.sim_day_in_stage,
+                    sim_start_date=override.sim_start_date,
+                    sim_start_hour=override.sim_start_hour,
+                    preset_id=override.preset_id,
+                )
+            )
 
     def _apply_actuator_overrides_if_active(self) -> None:
         """If override mode is active, merge actuator_overrides into the store's

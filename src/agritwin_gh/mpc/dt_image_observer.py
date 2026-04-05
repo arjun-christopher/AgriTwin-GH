@@ -34,6 +34,7 @@ from typing import Protocol, runtime_checkable
 
 from sqlalchemy.orm import Session
 
+from .constants import DISEASE_IMAGE_SUBCATEGORY
 from .dt_input_provider import ImageObservation
 from .image_streamer import ImageStreamer
 from .state import GreenhouseState
@@ -53,6 +54,10 @@ _GROWTH_STAGE_FOLDER: dict[str, str] = {
     "unripe":                 "Stage5_Unripe",
     "ripe":                   "Stage6_Ripe",
 }
+
+# Reverse map: CNN output label → canonical display-form label
+# e.g. "tomato_leaf_healthy" → "healthy leaves"
+_DISEASE_CNN_TO_CANONICAL: dict[str, str] = {v: k for k, v in DISEASE_IMAGE_SUBCATEGORY.items()}
 
 _DISEASE_FOLDER: dict[str, str] = {
     "early_blight":   "Tomato_Early_Blight",
@@ -228,7 +233,7 @@ class SyntheticImageObserver:
         if _fdi is not None:
             try:
                 res = _fdi.result()
-                dis_label = res["class_name"]
+                dis_label = _DISEASE_CNN_TO_CANONICAL.get(res["class_name"], res["class_name"])
                 dis_confidence = float(res["confidence"])
             except Exception as exc:  # noqa: BLE001
                 logger.warning("Step %d: disease CNN failed: %s", step_index, exc)

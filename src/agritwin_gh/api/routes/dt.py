@@ -107,8 +107,12 @@ async def post_dt_sim_override(
 
     Body: ``{"stage": "flowering", "day_in_stage": 5, "start_date": "2026-03-01", "start_hour": 6}``
     """
+    import asyncio as _asyncio  # noqa: PLC0415
     try:
-        return svc.apply_dt_sim_override(body)
+        # Run the sync service (which calls TF CNN) in the event-loop's default
+        # thread executor so the event loop is never blocked during inference.
+        _loop = _asyncio.get_running_loop()
+        return await _loop.run_in_executor(None, svc.apply_dt_sim_override, body)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     except Exception as exc:

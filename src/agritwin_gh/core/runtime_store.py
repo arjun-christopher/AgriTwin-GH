@@ -513,9 +513,22 @@ class RuntimeStore:
         ns = result.next_state          # agritwin_gh.mpc.state.GreenhouseState
         step_ts: _dt.datetime | None = result.timestamp
 
-        stage_idx = max(0, min(int(ns.growth_stage_index), len(GROWTH_STAGES) - 1))
-        stage_label = GROWTH_STAGES[stage_idx]
-        next_stage = GROWTH_STAGES[stage_idx + 1] if stage_idx < len(GROWTH_STAGES) - 1 else None
+        # Use the LSTM penalty-corrected stage from cadence_info if available.
+        # LoopService.run_one_step() applies the penalty block (sim_stage override >
+        # ARX correction) *before* calling update_from_step_result, so
+        # model_growth_result["current_stage"] already reflects override priority.
+        _mgr_penalty = result.cadence_info.get("model_growth_result") or {}
+        if _mgr_penalty.get("current_stage") and _mgr_penalty["current_stage"] in list(GROWTH_STAGES):
+            stage_label = _mgr_penalty["current_stage"]
+            stage_idx   = list(GROWTH_STAGES).index(stage_label)
+            next_stage  = (
+                _mgr_penalty.get("next_stage")
+                or (GROWTH_STAGES[stage_idx + 1] if stage_idx < len(GROWTH_STAGES) - 1 else None)
+            )
+        else:
+            stage_idx  = max(0, min(int(ns.growth_stage_index), len(GROWTH_STAGES) - 1))
+            stage_label = GROWTH_STAGES[stage_idx]
+            next_stage  = GROWTH_STAGES[stage_idx + 1] if stage_idx < len(GROWTH_STAGES) - 1 else None
         stage_dur_days = STAGE_DURATION_DAYS.get(stage_label, 14.0)
 
         # ``days_in_stage`` comes from cadence_info (set by DTLoop.run())
