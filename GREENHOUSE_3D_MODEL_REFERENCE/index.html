@@ -1146,6 +1146,7 @@
 <h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
 <ol>
 <li><a href="#overview">Overview</a></li>
+<li><a href="#unity-source-project--unity_module">Unity Source Project — <code>unity_module/</code></a></li>
 <li><a href="#complete-project-reference">Complete Project Reference</a></li>
 <li><a href="#all-c-scripts--quick-reference">All C# Scripts — Quick Reference</a></li>
 <li><a href="#scene-gameobject-hierarchy">Scene GameObject Hierarchy</a></li>
@@ -1170,6 +1171,172 @@
 - <strong>3 environment controllers</strong> (crop stages, time of day, crop health)
 - <strong>1 central state applier</strong> (<code>GreenhouseStateApplier.cs</code>) that orchestrates everything from a JSON file</p>
 <p>All scripts are designed for <strong>Python backend integration</strong>. The central applier reads a JSON file at runtime, detects changes, and applies the full greenhouse state automatically. This allows testing backend-style control patterns locally inside Unity before connecting to FastAPI.</p>
+<hr />
+<hr />
+<h1 id="unity-source-project-unity_module">Unity Source Project — <code>unity_module/</code><a class="headerlink" href="#unity-source-project-unity_module" title="Permanent link">&para;</a></h1>
+<p>The <code>unity_module/</code> folder at the repository root contains the <strong>complete Unity Editor source project</strong> for the AgriTwin-GH 3D greenhouse scene. Opening this folder in Unity 2022 LTS or later gives you the full editable scene with all assets, scripts, audio, and skyboxes — no additional downloads required.</p>
+<h2 id="folder-structure">Folder Structure<a class="headerlink" href="#folder-structure" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>unity_module/
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── Assets/                              # All scene content
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│   ├── Scenes/                          # Unity scene files
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   │   ├── Environment.unity            # Main greenhouse scene (open this in Unity)
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│   │   └── SampleScene.unity            # Blank reference scene
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│   ├── Scripts/                         # All 12 C# controller scripts
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│   │   ├── GreenhouseStateApplier.cs    # Central JSON-driven orchestrator
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│   │   ├── CropStageController.cs       # Per-plant 6-stage visual swap
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│   │   ├── CropHealthIndicator.cs       # RGB status lights + blinking
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│   │   ├── TimeOfDayController.cs       # Skybox, fog, directional light
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│   │   ├── FluorescentLightController.cs
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│   │   ├── HeaterController.cs
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│   │   ├── EnergyCanisterController.cs
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│   │   ├── HumidifierController.cs
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│   │   ├── WindowFanController.cs
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│   │   ├── VentController.cs
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│   │   ├── WaterTankFloorController.cs
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│   │   └── FreeCameraController.cs
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│   ├── Environment/                     # Custom greenhouse prefabs and FBX models
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│   │   ├── Bld_GreenMouse.prefab        # Main greenhouse building structure
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│   │   ├── Crop Slot 1/2/3.prefab       # Crop container slot variants
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>│   │   ├── Seeding.prefab               # Stage 0 crop model
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>│   │   ├── Vegetative.fbx               # Stage 1 crop model
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│   │   ├── Flowering Initiation.prefab  # Stage 2 crop model
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│   │   ├── Flowering.prefab             # Stage 3 crop model
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│   │   ├── Unripe.prefab                # Stage 4 crop model
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>│   │   ├── Ripe.prefab                  # Stage 5 crop model
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│   │   ├── Fluorescent Light.fbx        # Actuator model — grow lights
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>│   │   ├── Heater.fbx                   # Actuator model — heater
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>│   │   ├── Humidifier (1).fbx           # Actuator model — humidifier
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>│   │   ├── Window fan.fbx               # Actuator model — window fan
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>│   │   ├── Vent.fbx                     # Actuator model — vent
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>│   │   ├── Water Tank Floor.fbx         # Actuator model — water tank
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>│   │   ├── Energy Canister.fbx          # Actuator model — energy canister
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>│   │   └── StatusIndicator.prefab       # Reusable RGB indicator light
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>│   ├── AllSkyFree/                      # Skybox cubemap pack (11 sky environments)
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>│   │   ├── Cartoon Base BlueSky/        # Day sky — PNG cubemap + material
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>│   │   ├── Cartoon Base NightSky/       # Night sky
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>│   │   ├── Cold Sunset/ Cold Night/     # Sunset and cold-night variants
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>│   │   ├── Deep Dusk/ Epic_BlueSunset/  # Dusk and dramatic sunset
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>│   │   └── ...                          # 11 total sky environments
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>│   ├── Pandazole_Ultimate_Pack/         # Greenhouse building 3D asset pack
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>│   │   └── Pandazole Farm Ranch Pack/   # Models, textures, prefabs, materials
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>│   ├── PolyOne/Stylized Tomato/         # Stylized tomato 3D asset
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>│   │   └── Model/ Texture/ Prefabs/     # FBX model + textures + diffuse material
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>│   ├── SimpleSky/                       # Alternative skybox pack
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>│   │   └── Materials/ Models/ Textures/ # Sky sphere material and textures
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>│   ├── Nature Sound FX/                 # WAV audio library for actuator sounds
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>│   │   ├── Steam/                       # Fan / humidifier steam audio (8 WAVs)
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>│   │   ├── Water/ Wind/ Rain/           # Ambient and environmental audio
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>│   │   └── ...                          # 11 sound categories total
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>│   ├── Imports/                         # Externally imported 3D assets
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>│   │   └── Tomato (2).glb               # GLTF tomato model (via GLTFUtility)
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a>│   ├── StreamingAssets/
+<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a>│   │   └── greenhouse_state.json        # Runtime JSON state file read by GreenhouseStateApplier
+<a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a>│   └── Settings/                        # URP and render pipeline asset settings
+<a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a>├── Packages/
+<a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a>│   ├── manifest.json                    # Unity package dependencies
+<a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a>│   └── packages-lock.json              # Locked package versions
+<a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a>├── ProjectSettings/                     # Full Unity project configuration
+<a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a>│   ├── ProjectSettings.asset            # Project name, version, target platform
+<a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a>│   ├── GraphicsSettings.asset           # URP pipeline assignment
+<a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a>│   ├── QualitySettings.asset            # Quality tiers
+<a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a>│   ├── AudioManager.asset               # Global audio settings
+<a id="__codelineno-0-65" name="__codelineno-0-65" href="#__codelineno-0-65"></a>│   └── ...                              # Physics, input, navmesh, VFX, XR settings
+<a id="__codelineno-0-66" name="__codelineno-0-66" href="#__codelineno-0-66"></a>└── build/                               # WebGL export (Git LFS — Brotli binaries)
+<a id="__codelineno-0-67" name="__codelineno-0-67" href="#__codelineno-0-67"></a>    ├── Build/
+<a id="__codelineno-0-68" name="__codelineno-0-68" href="#__codelineno-0-68"></a>    │   ├── build.data.br                # Scene &amp; asset data (~18 MB, LFS-tracked)
+<a id="__codelineno-0-69" name="__codelineno-0-69" href="#__codelineno-0-69"></a>    │   ├── build.wasm.br                # Unity WASM runtime (LFS-tracked)
+<a id="__codelineno-0-70" name="__codelineno-0-70" href="#__codelineno-0-70"></a>    │   ├── build.framework.js.br        # JS framework loader (LFS-tracked)
+<a id="__codelineno-0-71" name="__codelineno-0-71" href="#__codelineno-0-71"></a>    │   └── build.loader.js              # Bootstrap entry point
+<a id="__codelineno-0-72" name="__codelineno-0-72" href="#__codelineno-0-72"></a>    ├── StreamingAssets/                 # Default state JSON for the deployed scene
+<a id="__codelineno-0-73" name="__codelineno-0-73" href="#__codelineno-0-73"></a>    └── index.html                       # WebGL entry point
+</code></pre></div>
+<h2 id="unity-package-dependencies">Unity Package Dependencies<a class="headerlink" href="#unity-package-dependencies" title="Permanent link">&para;</a></h2>
+<p>The project uses <strong>Universal Render Pipeline (URP) 17.5.0</strong> (Unity 6) with the following key packages defined in <code>Packages/manifest.json</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Version</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>com.unity.render-pipelines.universal</code></td>
+<td>17.5.0</td>
+<td>URP — lighting, shaders, post-processing</td>
+</tr>
+<tr>
+<td><code>com.unity.inputsystem</code></td>
+<td>1.19.0</td>
+<td>New Input System for camera controls</td>
+</tr>
+<tr>
+<td><code>com.siccity.gltfutility</code></td>
+<td>git</td>
+<td>Runtime GLTF/GLB model import</td>
+</tr>
+<tr>
+<td><code>com.unity.ai.navigation</code></td>
+<td>2.0.11</td>
+<td>NavMesh (reserved for future agents)</td>
+</tr>
+<tr>
+<td><code>com.unity.timeline</code></td>
+<td>1.8.11</td>
+<td>Animation timeline support</td>
+</tr>
+<tr>
+<td><code>com.unity.visualscripting</code></td>
+<td>1.9.11</td>
+<td>Visual scripting support</td>
+</tr>
+</tbody>
+</table>
+<h2 id="git-lfs-what-is-tracked">Git LFS — What Is Tracked<a class="headerlink" href="#git-lfs-what-is-tracked" title="Permanent link">&para;</a></h2>
+<p>Large binary files in <code>unity_module/</code> are stored via <strong>Git LFS</strong> so the repository stays lean:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>**/*.fbx</code></td>
+<td>All actuator and crop 3D models</td>
+</tr>
+<tr>
+<td><code>**/*.glb</code></td>
+<td>Imported GLTF tomato model</td>
+</tr>
+<tr>
+<td><code>**/*.png</code></td>
+<td>Skybox cubemaps, all textures</td>
+</tr>
+<tr>
+<td><code>**/*.wav</code></td>
+<td>All audio clips in Nature Sound FX</td>
+</tr>
+<tr>
+<td><code>**/*.pdf</code></td>
+<td>AllSkyFree documentation PDF</td>
+</tr>
+<tr>
+<td><code>build/Build/*.br</code></td>
+<td>Brotli-compressed WebGL bundle</td>
+</tr>
+</tbody>
+</table>
+<h2 id="opening-in-unity">Opening in Unity<a class="headerlink" href="#opening-in-unity" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Install <strong>Unity 2022 LTS</strong> or <strong>Unity 6</strong> (matching URP 17.x) via Unity Hub</li>
+<li>In Unity Hub click <strong>Add project from disk</strong> → select the <code>unity_module/</code> folder</li>
+<li>Unity will auto-regenerate <code>Library/</code> on first open (takes 2–5 min)</li>
+<li>Open <code>Assets/Scenes/Environment.unity</code> — press <strong>Play</strong> to run the live scene</li>
+<li>The scene reads <code>Assets/StreamingAssets/greenhouse_state.json</code> every second — replace or update this file from Python/FastAPI to drive the 3D scene in real time</li>
+</ol>
 <hr />
 <hr />
 <h1 id="complete-project-reference">Complete Project Reference<a class="headerlink" href="#complete-project-reference" title="Permanent link">&para;</a></h1>
@@ -1261,63 +1428,63 @@
 <hr />
 <h2 id="scene-gameobject-hierarchy">Scene GameObject Hierarchy<a class="headerlink" href="#scene-gameobject-hierarchy" title="Permanent link">&para;</a></h2>
 <p>Your Unity scene should have this structure:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Scene/
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── GreenhouseManager (Empty GameObject)
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│   └── [GreenhouseStateApplier component attached]
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>├── Actuators/ (folder, organizing lights/effects)
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│   ├── FluorescentLight
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│   │   └── [FluorescentLightController component]
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│   ├── Heater
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│   │   └── [HeaterController component]
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│   ├── EnergyCanister
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│   │   └── [EnergyCanisterController component]
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│   ├── Humidifier
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│   │   └── [HumidifierController component]
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│   │       └── StatusIndicator (Light child)
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│   │       └── FogEffect (ParticleSystem child)
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│   │       └── AudioSource (parent object)
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│   ├── WindowFan
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│   │   └── [WindowFanController component]
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│   │       └── StatusIndicator (Light child)
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│   │       └── AirFlow (ParticleSystem child)
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│   │       └── AudioSource (parent object)
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>│   ├── Vent
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>│   │   └── [VentController component]
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│   │       └── StatusIndicator (Light child)
-<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│   │       └── AirFlow (ParticleSystem child)
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│   │       └── AudioSource (parent object)
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>│   └── WaterTank
-<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│       └── [WaterTankFloorController component]
-<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>│           └── StatusIndicator (Light child)
-<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>│           └── AudioSource (same object)
-<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>│
-<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>├── Crops/ (folder, organizing 15 crop plants)
-<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>│   ├── Crop_01
-<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>│   │   └── [CropStageController component]
-<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>│   │       ├── Seedling (Model)
-<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>│   │       ├── Vegetative (Model)
-<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>│   │       ├── FloweringInitiation (Model)
-<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>│   │       ├── Flowering (Model)
-<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>│   │       ├── Unripe (Model)
-<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>│   │       └── Ripe (Model)
-<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>│   │   └── CropHealth (ChildObject)
-<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>│   │       └── [CropHealthIndicator component]
-<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>│   │           ├── GreenLight (Light)
-<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>│   │           ├── YellowLight (Light)
-<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>│   │           └── RedLight (Light)
-<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>│   ├── Crop_02 ... Crop_15
-<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>│   │   └── [same structure as Crop_01]
-<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>│
-<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>├── Environment/ (folder)
-<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>│   └── [TimeOfDayController component on main light]
-<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>│       └── DirectionalLight (sun/moon)
-<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>│       └── NightLights (array of GameObjects for night)
-<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>│
-<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a>├── Camera (MainCamera)
-<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a>│   └── [FreeCameraController component]
-<a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a>│
-<a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a>└── [Skybox, Fog, Lighting settings]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Scene/
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── GreenhouseManager (Empty GameObject)
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│   └── [GreenhouseStateApplier component attached]
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>├── Actuators/ (folder, organizing lights/effects)
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│   ├── FluorescentLight
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│   │   └── [FluorescentLightController component]
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│   ├── Heater
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│   │   └── [HeaterController component]
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│   ├── EnergyCanister
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│   │   └── [EnergyCanisterController component]
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│   ├── Humidifier
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│   │   └── [HumidifierController component]
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│   │       └── StatusIndicator (Light child)
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│   │       └── FogEffect (ParticleSystem child)
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│   │       └── AudioSource (parent object)
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│   ├── WindowFan
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│   │   └── [WindowFanController component]
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│   │       └── StatusIndicator (Light child)
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│   │       └── AirFlow (ParticleSystem child)
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│   │       └── AudioSource (parent object)
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>│   ├── Vent
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>│   │   └── [VentController component]
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>│   │       └── StatusIndicator (Light child)
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>│   │       └── AirFlow (ParticleSystem child)
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>│   │       └── AudioSource (parent object)
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>│   └── WaterTank
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>│       └── [WaterTankFloorController component]
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>│           └── StatusIndicator (Light child)
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>│           └── AudioSource (same object)
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>│
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>├── Crops/ (folder, organizing 15 crop plants)
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>│   ├── Crop_01
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>│   │   └── [CropStageController component]
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>│   │       ├── Seedling (Model)
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>│   │       ├── Vegetative (Model)
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>│   │       ├── FloweringInitiation (Model)
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>│   │       ├── Flowering (Model)
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>│   │       ├── Unripe (Model)
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>│   │       └── Ripe (Model)
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>│   │   └── CropHealth (ChildObject)
+<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>│   │       └── [CropHealthIndicator component]
+<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>│   │           ├── GreenLight (Light)
+<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>│   │           ├── YellowLight (Light)
+<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>│   │           └── RedLight (Light)
+<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>│   ├── Crop_02 ... Crop_15
+<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>│   │   └── [same structure as Crop_01]
+<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>│
+<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>├── Environment/ (folder)
+<a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>│   └── [TimeOfDayController component on main light]
+<a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>│       └── DirectionalLight (sun/moon)
+<a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>│       └── NightLights (array of GameObjects for night)
+<a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>│
+<a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>├── Camera (MainCamera)
+<a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>│   └── [FreeCameraController component]
+<a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>│
+<a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>└── [Skybox, Fog, Lighting settings]
 </code></pre></div>
 <hr />
 <h2 id="growth-stages-complete-reference">Growth Stages — Complete Reference<a class="headerlink" href="#growth-stages-complete-reference" title="Permanent link">&para;</a></h2>
@@ -1379,12 +1546,12 @@
 </tbody>
 </table>
 <h3 id="json-stage-values-case-insensitive">JSON Stage Values (Case-Insensitive)<a class="headerlink" href="#json-stage-values-case-insensitive" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seedling&quot;</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Vegetative&quot;</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FloweringInitiation&quot;</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Flowering&quot;</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Unripe&quot;</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ripe&quot;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seedling&quot;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Vegetative&quot;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FloweringInitiation&quot;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Flowering&quot;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Unripe&quot;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ripe&quot;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <p><strong>Variants accepted</strong> (all auto-converted):
 - <code>"flowering_initiation"</code> → <code>FloweringInitiation</code>
@@ -1507,7 +1674,7 @@
 </tbody>
 </table>
 <p><strong>JSON Values (Case-Insensitive):</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Morning&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Afternoon&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Evening&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Night&quot;</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Morning&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Afternoon&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Evening&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Night&quot;</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div></p>
 <h3 id="crop-health-indicator">Crop Health Indicator<a class="headerlink" href="#crop-health-indicator" title="Permanent link">&para;</a></h3>
 <p>Controls RGB status lights showing crop health and maturity.</p>
@@ -1547,54 +1714,54 @@
 </table>
 <p><em>Blinking occurs </em><em>only when all crops are Ripe</em>*, regardless of JSON <code>blinkGreen</code> value.</p>
 <p><strong>JSON Values (Case-Insensitive):</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Yellow&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Red&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">  </span><span class="c1">// IGNORED — computed from crop stages</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Yellow&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Red&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">  </span><span class="c1">// IGNORED — computed from crop stages</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
 </code></pre></div></p>
 <p><strong>Blink Speed:</strong> Configurable in <code>CropHealthIndicator</code> Inspector (<code>blinkSpeed = 2.0</code> = 2 blinks/sec)</p>
 <hr />
 <h2 id="complete-data-flow">Complete Data Flow<a class="headerlink" href="#complete-data-flow" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>JSON File (greenhouse_state.json)
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    ↓
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>GreenhouseStateApplier.Update() [every 1s]
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    ↓
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>Change Detected? (compare file content hash)
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    ↓ YES
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>ParseJson() → GreenhouseState object
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    ↓
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>ApplyState() → dispatches to 8 controllers + 3 environment systems
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    ↓
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>Each Controller.SetState() or SetStageByName() or SetTimeOfDayByName()
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    ↓
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>Scene updates: Lights on/off, Particles play/stop, Models swap, Fog changes
-<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    ↓
-<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>GreenhouseStateApplier.LateUpdate() [every frame]
-<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    ↓
-<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>Re-assert health color (so CropStageController.SetGreen() doesn&#39;t override JSON)
-<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    ↓
-<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>Scene persists health color every frame
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>JSON File (greenhouse_state.json)
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    ↓
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>GreenhouseStateApplier.Update() [every 1s]
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    ↓
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>Change Detected? (compare file content hash)
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    ↓ YES
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>ParseJson() → GreenhouseState object
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    ↓
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>ApplyState() → dispatches to 8 controllers + 3 environment systems
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    ↓
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>Each Controller.SetState() or SetStageByName() or SetTimeOfDayByName()
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    ↓
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>Scene updates: Lights on/off, Particles play/stop, Models swap, Fog changes
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    ↓
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>GreenhouseStateApplier.LateUpdate() [every frame]
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>    ↓
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>Re-assert health color (so CropStageController.SetGreen() doesn&#39;t override JSON)
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>    ↓
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>Scene persists health color every frame
 </code></pre></div>
 <hr />
 <h2 id="file-structure-in-project">File Structure in Project<a class="headerlink" href="#file-structure-in-project" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Assets/
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>├── Scripts/
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>│   ├── GreenhouseStateApplier.cs          [Central orchestrator]
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>│   ├── CropStageController.cs              [Crop stage visuals]
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>│   ├── CropHealthIndicator.cs              [RGB health lights]
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>│   ├── TimeOfDayController.cs              [Global lighting/sky]
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>│   ├── FluorescentLightController.cs       [Light actuator]
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>│   ├── HeaterController.cs                 [Light actuator]
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>│   ├── EnergyCanisterController.cs         [Light actuator]
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>│   ├── HumidifierController.cs             [Effects + audio]
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>│   ├── WindowFanController.cs              [Effects + audio]
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>│   ├── VentController.cs                   [Effects + audio]
-<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>│   ├── WaterTankFloorController.cs         [Effects + audio]
-<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>│   ├── FreeCameraController.cs             [Utility]
-<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>│   └── GREENHOUSE_INTEGRATION_GUIDE.md     [This document]
-<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>│
-<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>└── StreamingAssets/
-<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>    └── greenhouse_state.json               [Runtime state file]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Assets/
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>├── Scripts/
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>│   ├── GreenhouseStateApplier.cs          [Central orchestrator]
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>│   ├── CropStageController.cs              [Crop stage visuals]
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>│   ├── CropHealthIndicator.cs              [RGB health lights]
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>│   ├── TimeOfDayController.cs              [Global lighting/sky]
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>│   ├── FluorescentLightController.cs       [Light actuator]
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>│   ├── HeaterController.cs                 [Light actuator]
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>│   ├── EnergyCanisterController.cs         [Light actuator]
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>│   ├── HumidifierController.cs             [Effects + audio]
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>│   ├── WindowFanController.cs              [Effects + audio]
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>│   ├── VentController.cs                   [Effects + audio]
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>│   ├── WaterTankFloorController.cs         [Effects + audio]
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>│   ├── FreeCameraController.cs             [Utility]
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>│   └── GREENHOUSE_INTEGRATION_GUIDE.md     [This document]
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>│
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>└── StreamingAssets/
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>    └── greenhouse_state.json               [Runtime state file]
 </code></pre></div>
 <hr />
 <h2 id="what-it-does">What It Does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h2>
@@ -1646,9 +1813,9 @@
 <h2 id="json-file-location">JSON File Location<a class="headerlink" href="#json-file-location" title="Permanent link">&para;</a></h2>
 <p><strong>Path:</strong> <code>Assets/StreamingAssets/greenhouse_state.json</code></p>
 <p>If the <code>StreamingAssets</code> folder doesn't exist, create it:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Assets/
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>├── StreamingAssets/
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>│   └── greenhouse_state.json
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Assets/
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>├── StreamingAssets/
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>│   └── greenhouse_state.json
 </code></pre></div></p>
 <hr />
 <hr />
@@ -1840,24 +2007,24 @@
 <hr />
 <h1 id="json-schema-format">JSON Schema &amp; Format<a class="headerlink" href="#json-schema-format" title="Permanent link">&para;</a></h1>
 <h2 id="complete-json-structure">Complete JSON Structure<a class="headerlink" href="#complete-json-structure" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seedling|Vegetative|FloweringInitiation|Flowering|Unripe|Ripe&quot;</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
-<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Morning|Afternoon|Evening|Night&quot;</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
-<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">        </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green|Yellow|Red&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">        </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">  </span><span class="c1">// IGNORED — computed from crop stages</span>
-<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seedling|Vegetative|FloweringInitiation|Flowering|Unripe|Ripe&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Morning|Afternoon|Evening|Night&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">        </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green|Yellow|Red&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">        </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">  </span><span class="c1">// IGNORED — computed from crop stages</span>
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="important-notes">Important Notes<a class="headerlink" href="#important-notes" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1869,41 +2036,41 @@
 </ul>
 <hr />
 <h2 id="sample-json-file">Sample JSON File<a class="headerlink" href="#sample-json-file" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ripe&quot;</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w">  </span><span class="s2">&quot;Morning&quot;</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ripe&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w">  </span><span class="s2">&quot;Morning&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="p">}</span>
 </code></pre></div>
 <hr />
 <hr />
 <h1 id="setup-instructions">Setup Instructions<a class="headerlink" href="#setup-instructions" title="Permanent link">&para;</a></h1>
 <h2 id="step-1-verify-file-structure">Step 1: Verify File Structure<a class="headerlink" href="#step-1-verify-file-structure" title="Permanent link">&para;</a></h2>
 <p>Ensure your project has:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Assets/
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>├── Scripts/
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>│   ├── GreenhouseStateApplier.cs
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>│   ├── CropStageController.cs
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>│   ├── CropHealthIndicator.cs
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>│   ├── TimeOfDayController.cs
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>│   ├── FluorescentLightController.cs
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>│   ├── HeaterController.cs
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>│   ├── EnergyCanisterController.cs
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>│   ├── HumidifierController.cs
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>│   ├── WindowFanController.cs
-<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>│   ├── VentController.cs
-<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>│   ├── WaterTankFloorController.cs
-<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>│   ├── FreeCameraController.cs
-<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>│   └── GREENHOUSE_INTEGRATION_GUIDE.md (this file)
-<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>└── StreamingAssets/
-<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>    └── greenhouse_state.json
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Assets/
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>├── Scripts/
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>│   ├── GreenhouseStateApplier.cs
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>│   ├── CropStageController.cs
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>│   ├── CropHealthIndicator.cs
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>│   ├── TimeOfDayController.cs
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>│   ├── FluorescentLightController.cs
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>│   ├── HeaterController.cs
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>│   ├── EnergyCanisterController.cs
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>│   ├── HumidifierController.cs
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>│   ├── WindowFanController.cs
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>│   ├── VentController.cs
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>│   ├── WaterTankFloorController.cs
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>│   ├── FreeCameraController.cs
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>│   └── GREENHOUSE_INTEGRATION_GUIDE.md (this file)
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>└── StreamingAssets/
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>    └── greenhouse_state.json
 </code></pre></div></p>
 <h2 id="step-2-create-manager-gameobject">Step 2: Create Manager GameObject<a class="headerlink" href="#step-2-create-manager-gameobject" title="Permanent link">&para;</a></h2>
 <ol>
@@ -1945,7 +2112,7 @@
 <ol>
 <li>
 <p><strong>Open the JSON file</strong> in VS Code, Notepad++, or any text editor:
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Assets/StreamingAssets/greenhouse_state.json
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Assets/StreamingAssets/greenhouse_state.json
 </code></pre></div></p>
 </li>
 <li>
@@ -1973,9 +2140,9 @@
 </li>
 <li>
 <p><strong>Watch the Console</strong> for debug messages:
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>[GreenhouseStateApplier] Crop[0] stage -&gt; Ripe
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>[GreenhouseStateApplier] CropHealth -&gt; Green (blinking) [auto-overridden: all crops Ripe]
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>[GreenhouseStateApplier] All states applied successfully.
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>[GreenhouseStateApplier] Crop[0] stage -&gt; Ripe
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>[GreenhouseStateApplier] CropHealth -&gt; Green (blinking) [auto-overridden: all crops Ripe]
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>[GreenhouseStateApplier] All states applied successfully.
 </code></pre></div></p>
 </li>
 </ol>
@@ -1988,57 +2155,57 @@
 <p>The current script reads from a local JSON file. To connect to a real Python FastAPI backend:</p>
 <h3 id="step-1-locate-the-read-method">Step 1: Locate the Read Method<a class="headerlink" href="#step-1-locate-the-read-method" title="Permanent link">&para;</a></h3>
 <p>Find this in <code>GreenhouseStateApplier.cs</code>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kt">string</span><span class="w"> </span><span class="nf">ReadJsonFromDisk</span><span class="p">()</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="p">{</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="k">try</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">File</span><span class="p">.</span><span class="n">Exists</span><span class="p">(</span><span class="n">_resolvedFilePath</span><span class="p">))</span>
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">            </span><span class="n">Debug</span><span class="p">.</span><span class="n">LogWarning</span><span class="p">(</span><span class="s">&quot;[GreenhouseStateApplier] JSON file not found: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">_resolvedFilePath</span><span class="p">);</span>
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="k">null</span><span class="p">;</span>
-<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>
-<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">File</span><span class="p">.</span><span class="n">ReadAllText</span><span class="p">(</span><span class="n">_resolvedFilePath</span><span class="p">);</span>
-<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">    </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span>
-<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="w">        </span><span class="n">Debug</span><span class="p">.</span><span class="n">LogError</span><span class="p">(</span><span class="s">&quot;[GreenhouseStateApplier] Failed to read JSON file: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ex</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
-<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">null</span><span class="p">;</span>
-<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kt">string</span><span class="w"> </span><span class="nf">ReadJsonFromDisk</span><span class="p">()</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="p">{</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="k">try</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">File</span><span class="p">.</span><span class="n">Exists</span><span class="p">(</span><span class="n">_resolvedFilePath</span><span class="p">))</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">            </span><span class="n">Debug</span><span class="p">.</span><span class="n">LogWarning</span><span class="p">(</span><span class="s">&quot;[GreenhouseStateApplier] JSON file not found: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">_resolvedFilePath</span><span class="p">);</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="k">null</span><span class="p">;</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">File</span><span class="p">.</span><span class="n">ReadAllText</span><span class="p">(</span><span class="n">_resolvedFilePath</span><span class="p">);</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">    </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span>
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">        </span><span class="n">Debug</span><span class="p">.</span><span class="n">LogError</span><span class="p">(</span><span class="s">&quot;[GreenhouseStateApplier] Failed to read JSON file: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ex</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">null</span><span class="p">;</span>
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="step-2-replace-with-fastapi-call">Step 2: Replace with FastAPI Call<a class="headerlink" href="#step-2-replace-with-fastapi-call" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">private</span><span class="w"> </span><span class="n">IEnumerator</span><span class="w"> </span><span class="nf">ReadJsonFromApi</span><span class="p">()</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="p">{</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="kt">string</span><span class="w"> </span><span class="n">apiUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;http://localhost:8000/state&quot;</span><span class="p">;</span><span class="w">  </span><span class="c1">// Your FastAPI endpoint</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">    </span><span class="n">UnityWebRequest</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UnityWebRequest</span><span class="p">.</span><span class="n">Get</span><span class="p">(</span><span class="n">apiUrl</span><span class="p">);</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">    </span><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="n">SendWebRequest</span><span class="p">();</span>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="n">result</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UnityWebRequest</span><span class="p">.</span><span class="n">Result</span><span class="p">.</span><span class="n">Success</span><span class="p">)</span>
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="n">downloadHandler</span><span class="p">.</span><span class="n">text</span><span class="p">;</span>
-<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">    </span><span class="k">else</span>
-<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">        </span><span class="n">Debug</span><span class="p">.</span><span class="n">LogError</span><span class="p">(</span><span class="s">&quot;[GreenhouseStateApplier] API request failed: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="n">error</span><span class="p">);</span>
-<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">null</span><span class="p">;</span>
-<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">private</span><span class="w"> </span><span class="n">IEnumerator</span><span class="w"> </span><span class="nf">ReadJsonFromApi</span><span class="p">()</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="p">{</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="kt">string</span><span class="w"> </span><span class="n">apiUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;http://localhost:8000/state&quot;</span><span class="p">;</span><span class="w">  </span><span class="c1">// Your FastAPI endpoint</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">    </span><span class="n">UnityWebRequest</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UnityWebRequest</span><span class="p">.</span><span class="n">Get</span><span class="p">(</span><span class="n">apiUrl</span><span class="p">);</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">    </span><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="n">SendWebRequest</span><span class="p">();</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="n">result</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UnityWebRequest</span><span class="p">.</span><span class="n">Result</span><span class="p">.</span><span class="n">Success</span><span class="p">)</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="n">downloadHandler</span><span class="p">.</span><span class="n">text</span><span class="p">;</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">    </span><span class="k">else</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="w">        </span><span class="n">Debug</span><span class="p">.</span><span class="n">LogError</span><span class="p">(</span><span class="s">&quot;[GreenhouseStateApplier] API request failed: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="n">error</span><span class="p">);</span>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">null</span><span class="p">;</span>
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="step-3-update-tryreadandapply">Step 3: Update TryReadAndApply<a class="headerlink" href="#step-3-update-tryreadandapply" title="Permanent link">&para;</a></h3>
 <p>Change from synchronous to coroutine:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1">// Before (synchronous)</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kt">string</span><span class="w"> </span><span class="n">json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReadJsonFromDisk</span><span class="p">();</span>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1">// After (coroutine)</span>
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="n">StartCoroutine</span><span class="p">(</span><span class="n">ReadJsonFromApiCoroutine</span><span class="p">());</span>
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="n">IEnumerator</span><span class="w"> </span><span class="nf">ReadJsonFromApiCoroutine</span><span class="p">()</span>
-<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="p">{</span>
-<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">    </span><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nf">StartCoroutine</span><span class="p">(</span><span class="n">ReadJsonFromApi</span><span class="p">());</span>
-<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">    </span><span class="c1">// Continue with parsing and applying...</span>
-<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1">// Before (synchronous)</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="kt">string</span><span class="w"> </span><span class="n">json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReadJsonFromDisk</span><span class="p">();</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="c1">// After (coroutine)</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="n">StartCoroutine</span><span class="p">(</span><span class="n">ReadJsonFromApiCoroutine</span><span class="p">());</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="n">IEnumerator</span><span class="w"> </span><span class="nf">ReadJsonFromApiCoroutine</span><span class="p">()</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="p">{</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">    </span><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nf">StartCoroutine</span><span class="p">(</span><span class="n">ReadJsonFromApi</span><span class="p">());</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">    </span><span class="c1">// Continue with parsing and applying...</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="p">}</span>
 </code></pre></div>
 <p><strong>That's it.</strong> Everything else in the pipeline (parsing, change detection, applying to controllers) stays exactly the same. The individual controller scripts need zero changes.</p>
 <hr />
@@ -2084,21 +2251,21 @@
 <ol>
 <li>Create the new controller script (e.g., <code>SoilSensorController.cs</code>)</li>
 <li>Add to <code>GreenhouseStateApplier</code>:
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">public</span><span class="w"> </span><span class="n">SoilSensorController</span><span class="w"> </span><span class="n">soilSensor</span><span class="p">;</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="k">void</span><span class="w"> </span><span class="nf">ApplySoilSensor</span><span class="p">(</span><span class="n">ActuatorState</span><span class="w"> </span><span class="n">s</span><span class="p">)</span>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="p">{</span>
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="k">null</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">AssertRef</span><span class="p">(</span><span class="n">soilSensor</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;SoilSensorController&quot;</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
-<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">    </span><span class="n">soilSensor</span><span class="p">.</span><span class="n">SetState</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">isOn</span><span class="p">);</span>
-<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">    </span><span class="n">Log</span><span class="p">(</span><span class="s">&quot;SoilSensor -&gt; &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">isOn</span><span class="p">);</span>
-<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="p">}</span>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">public</span><span class="w"> </span><span class="n">SoilSensorController</span><span class="w"> </span><span class="n">soilSensor</span><span class="p">;</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="k">void</span><span class="w"> </span><span class="nf">ApplySoilSensor</span><span class="p">(</span><span class="n">ActuatorState</span><span class="w"> </span><span class="n">s</span><span class="p">)</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="p">{</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="k">null</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">AssertRef</span><span class="p">(</span><span class="n">soilSensor</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;SoilSensorController&quot;</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">    </span><span class="n">soilSensor</span><span class="p">.</span><span class="n">SetState</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">isOn</span><span class="p">);</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">    </span><span class="n">Log</span><span class="p">(</span><span class="s">&quot;SoilSensor -&gt; &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">isOn</span><span class="p">);</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="p">}</span>
 </code></pre></div></li>
 <li>Call in <code>ApplyState()</code>:
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">ApplySoilSensor</span><span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">soilSensor</span><span class="p">);</span>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">ApplySoilSensor</span><span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">soilSensor</span><span class="p">);</span>
 </code></pre></div></li>
 <li>Update <code>GreenhouseState</code> data class:
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">public</span><span class="w"> </span><span class="n">ActuatorState</span><span class="w"> </span><span class="n">soilSensor</span><span class="p">;</span>
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">public</span><span class="w"> </span><span class="n">ActuatorState</span><span class="w"> </span><span class="n">soilSensor</span><span class="p">;</span>
 </code></pre></div></li>
 <li>Update JSON schema and sample file</li>
 <li><strong>Done.</strong> No other scripts touched.</li>
@@ -2106,17 +2273,17 @@
 <hr />
 <h2 id="testing-individual-controllers">Testing Individual Controllers<a class="headerlink" href="#testing-individual-controllers" title="Permanent link">&para;</a></h2>
 <p>You can test any controller in isolation by manually calling its methods in the editor:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1">// Test FluorescentLight</span>
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="n">fluorescent</span><span class="p">.</span><span class="n">SetState</span><span class="p">(</span><span class="k">true</span><span class="p">);</span>
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="n">fluorescent</span><span class="p">.</span><span class="n">TurnOff</span><span class="p">();</span>
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>
-<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="c1">// Test CropStage</span>
-<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="n">crop</span><span class="p">.</span><span class="n">SetStageByName</span><span class="p">(</span><span class="s">&quot;Ripe&quot;</span><span class="p">);</span>
-<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="n">crop</span><span class="p">.</span><span class="n">NextStage</span><span class="p">();</span>
-<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>
-<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="c1">// Test Health</span>
-<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="n">health</span><span class="p">.</span><span class="n">SetRed</span><span class="p">();</span>
-<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="n">health</span><span class="p">.</span><span class="n">SetBlinkGreen</span><span class="p">(</span><span class="k">true</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1">// Test FluorescentLight</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="n">fluorescent</span><span class="p">.</span><span class="n">SetState</span><span class="p">(</span><span class="k">true</span><span class="p">);</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="n">fluorescent</span><span class="p">.</span><span class="n">TurnOff</span><span class="p">();</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="c1">// Test CropStage</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="n">crop</span><span class="p">.</span><span class="n">SetStageByName</span><span class="p">(</span><span class="s">&quot;Ripe&quot;</span><span class="p">);</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="n">crop</span><span class="p">.</span><span class="n">NextStage</span><span class="p">();</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="c1">// Test Health</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="n">health</span><span class="p">.</span><span class="n">SetRed</span><span class="p">();</span>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="n">health</span><span class="p">.</span><span class="n">SetBlinkGreen</span><span class="p">(</span><span class="k">true</span><span class="p">);</span>
 </code></pre></div>
 <p>Or enable <code>debugManualControl</code> in the Inspector to toggle values in Play Mode without touching code.</p>
 <hr />
@@ -2131,23 +2298,23 @@
 <hr />
 <h2 id="common-integration-patterns">Common Integration Patterns<a class="headerlink" href="#common-integration-patterns" title="Permanent link">&para;</a></h2>
 <h3 id="pattern-1-direct-local-testing-current">Pattern 1: Direct Local Testing (Current)<a class="headerlink" href="#pattern-1-direct-local-testing-current" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>JSON File (disk)
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>    ↓
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>GreenhouseStateApplier (reads file every 1s)
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    ↓
-<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>Individual Controllers (apply state)
-<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>    ↓
-<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>Scene (lights, particles, audio)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>JSON File (disk)
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>    ↓
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>GreenhouseStateApplier (reads file every 1s)
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>    ↓
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>Individual Controllers (apply state)
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>    ↓
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>Scene (lights, particles, audio)
 </code></pre></div>
 <h3 id="pattern-2-fastapi-backend-future">Pattern 2: FastAPI Backend (Future)<a class="headerlink" href="#pattern-2-fastapi-backend-future" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>FastAPI Backend (Python)
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>    ↓ GET /state
-<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    ↓
-<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>GreenhouseStateApplier (polls API every 1s)
-<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>    ↓
-<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>Individual Controllers (apply state)
-<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>    ↓
-<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>Scene (lights, particles, audio)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>FastAPI Backend (Python)
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>    ↓ GET /state
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>    ↓
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>GreenhouseStateApplier (polls API every 1s)
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>    ↓
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>Individual Controllers (apply state)
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>    ↓
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>Scene (lights, particles, audio)
 </code></pre></div>
 <p><strong>Only the first read step changes. Everything after is identical.</strong></p>
 <hr />
@@ -2245,75 +2412,75 @@
 <hr />
 <h2 id="example-json-commands">Example JSON Commands<a class="headerlink" href="#example-json-commands" title="Permanent link">&para;</a></h2>
 <h3 id="fully-ripe-greenhouse">Fully Ripe Greenhouse<a class="headerlink" href="#fully-ripe-greenhouse" title="Permanent link">&para;</a></h3>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="p">{</span>
-<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ripe&quot;</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Afternoon&quot;</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="p">}</span>
-</code></pre></div>
-<strong>Result:</strong> All lights on, all particles running, all audio playing, every crop shows Ripe model, green light <strong>automatically blinking</strong>.</p>
-<h3 id="seedling-startup-morning">Seedling Startup (Morning)<a class="headerlink" href="#seedling-startup-morning" title="Permanent link">&para;</a></h3>
 <p><div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="p">{</span>
 <a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
 <a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
 <a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seedling&quot;</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Morning&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ripe&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Afternoon&quot;</span><span class="w"> </span><span class="p">},</span>
 <a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
 <a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a><span class="p">}</span>
 </code></pre></div>
-<strong>Result:</strong> Lights on for growth, heater off (seedlings sensitive), humidifier on, all crops show Seedling model, morning lighting, green light (no blink).</p>
-<h3 id="stressed-crop-emergency">Stressed Crop (Emergency)<a class="headerlink" href="#stressed-crop-emergency" title="Permanent link">&para;</a></h3>
+<strong>Result:</strong> All lights on, all particles running, all audio playing, every crop shows Ripe model, green light <strong>automatically blinking</strong>.</p>
+<h3 id="seedling-startup-morning">Seedling Startup (Morning)<a class="headerlink" href="#seedling-startup-morning" title="Permanent link">&para;</a></h3>
 <p><div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="p">{</span>
 <a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Flowering&quot;</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Night&quot;</span><span class="w"> </span><span class="p">},</span>
-<a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Red&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seedling&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Morning&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
 <a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a><span class="p">}</span>
+</code></pre></div>
+<strong>Result:</strong> Lights on for growth, heater off (seedlings sensitive), humidifier on, all crops show Seedling model, morning lighting, green light (no blink).</p>
+<h3 id="stressed-crop-emergency">Stressed Crop (Emergency)<a class="headerlink" href="#stressed-crop-emergency" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="p">{</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Flowering&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Night&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Red&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a><span class="p">}</span>
 </code></pre></div>
 <strong>Result:</strong> All systems active, humidifier off, crops in Flowering, night lighting, <strong>red health light</strong> (critical stress).</p>
 <hr />
 <h2 id="common-workflows">Common Workflows<a class="headerlink" href="#common-workflows" title="Permanent link">&para;</a></h2>
 <h3 id="workflow-1-develop-locally-vs-integrate-with-backend">Workflow 1: Develop Locally vs Integrate with Backend<a class="headerlink" href="#workflow-1-develop-locally-vs-integrate-with-backend" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>Phase 1: Local Testing (NOW)
-<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>  └─ Edit JSON manually
-<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>  └─ Watch scene update in real-time
-<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>  └─ Verify all actuators work
-<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>  └─ Test all combinations
-<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>
-<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>Phase 2: Backend Integration (FUTURE)
-<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>  └─ Replace ReadJsonFromDisk() with UnityWebRequest
-<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>  └─ Point to your FastAPI /state endpoint
-<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>  └─ Everything else unchanged
-<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>  └─ Drop into production
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>Phase 1: Local Testing (NOW)
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>  └─ Edit JSON manually
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>  └─ Watch scene update in real-time
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>  └─ Verify all actuators work
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>  └─ Test all combinations
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>Phase 2: Backend Integration (FUTURE)
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>  └─ Replace ReadJsonFromDisk() with UnityWebRequest
+<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>  └─ Point to your FastAPI /state endpoint
+<a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a>  └─ Everything else unchanged
+<a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a>  └─ Drop into production
 </code></pre></div>
 <h3 id="workflow-2-adding-a-new-actuator">Workflow 2: Adding a New Actuator<a class="headerlink" href="#workflow-2-adding-a-new-actuator" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>1. Create MyNewController.cs with SetState(bool)
-<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>2. Add to GreenhouseStateApplier class:
-<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>   - Public field: public MyNewController myNew;
-<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>   - Apply method: void ApplyMyNew(ActuatorState s) { ... }
-<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>   - Call in ApplyState(): ApplyMyNew(state.myNew);
-<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>3. Update GreenhouseState data class:
-<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>   - public ActuatorState myNew;
-<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>4. Update JSON schema and sample file
-<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>5. Done. No other scripts touched.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>1. Create MyNewController.cs with SetState(bool)
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>2. Add to GreenhouseStateApplier class:
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>   - Public field: public MyNewController myNew;
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>   - Apply method: void ApplyMyNew(ActuatorState s) { ... }
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>   - Call in ApplyState(): ApplyMyNew(state.myNew);
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>3. Update GreenhouseState data class:
+<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>   - public ActuatorState myNew;
+<a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a>4. Update JSON schema and sample file
+<a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a>5. Done. No other scripts touched.
 </code></pre></div>
 <h3 id="workflow-3-debugging-why-health-wont-change">Workflow 3: Debugging Why Health Won't Change<a class="headerlink" href="#workflow-3-debugging-why-health-wont-change" title="Permanent link">&para;</a></h3>
 <p>Check in this order:

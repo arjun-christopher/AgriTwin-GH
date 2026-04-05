@@ -2370,6 +2370,7 @@
 </tr>
 </tbody>
 </table>
+<p>The full <strong>Unity Editor source project</strong> — all C# scripts, scene files, prefabs, FBX models, skyboxes, and audio — lives in <code>unity_module/</code> at the repository root. Open it in Unity 2022 LTS or Unity 6 to edit, extend, or re-export the WebGL scene. The WebGL build at <code>unity_module/build/</code> mirrors the deployable artefact served by FastAPI at <code>src/agritwin_gh/build/</code>. See the <a href="docs/GREENHOUSE_3D_MODEL_REFERENCE.md">Greenhouse 3D Model Reference</a> for the complete source project layout and step-by-step opening instructions.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>src/agritwin_gh/build/
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>├── Build/
 <a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>│   ├── build.data.br          # Scene + asset data      (~18 MB, Git LFS)
@@ -2444,11 +2445,16 @@
 <a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a>│       ├── StreamingAssets/    # greenhouse_state.json — default DT state for the 3D scene
 <a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>│       └── TemplateData/       # WebGL template CSS, icons, and Unity branding
 <a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a>├── tests/                      # Unit and smoke tests
-<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a>├── data/                       # Raw, processed, and external datasets
-<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>│   ├── raw/                    # Unprocessed source files
-<a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>│   ├── processed/              # Cleaned and feature-engineered outputs
-<a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>│   └── external/               # Kaggle dataset — disease images, growth stages, weather CSV
-<a id="__codelineno-11-34" name="__codelineno-11-34" href="#__codelineno-11-34"></a>└── docs/                       # MkDocs documentation source files
+<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a>├── unity_module/               # Full Unity 3D source project — open in Unity to edit the greenhouse scene
+<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>│   ├── Assets/                 # Scenes, C# scripts, prefabs, FBX models, skyboxes, audio, textures
+<a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>│   ├── Packages/               # Unity package manifest (URP 17.x, Input System, GLTFUtility …)
+<a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>│   ├── ProjectSettings/        # Unity project config — graphics, physics, audio, URP pipeline
+<a id="__codelineno-11-34" name="__codelineno-11-34" href="#__codelineno-11-34"></a>│   └── build/                  # WebGL export — Build/*.br binaries tracked via Git LFS
+<a id="__codelineno-11-35" name="__codelineno-11-35" href="#__codelineno-11-35"></a>├── data/                       # Raw, processed, and external datasets
+<a id="__codelineno-11-36" name="__codelineno-11-36" href="#__codelineno-11-36"></a>│   ├── raw/                    # Unprocessed source files
+<a id="__codelineno-11-37" name="__codelineno-11-37" href="#__codelineno-11-37"></a>│   ├── processed/              # Cleaned and feature-engineered outputs
+<a id="__codelineno-11-38" name="__codelineno-11-38" href="#__codelineno-11-38"></a>│   └── external/               # Kaggle dataset — disease images, growth stages, weather CSV
+<a id="__codelineno-11-39" name="__codelineno-11-39" href="#__codelineno-11-39"></a>└── docs/                       # MkDocs documentation source files
 </code></pre></div>
 <hr />
 <h2 id="research-areas">🔬 Research Areas<a class="headerlink" href="#research-areas" title="Permanent link">&para;</a></h2>
