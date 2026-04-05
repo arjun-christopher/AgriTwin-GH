@@ -89,6 +89,7 @@ export async function getDtState() {
         rangeMax:   s.range_max,
         optimal:    s.optimal_range,
         status:     s.status,
+        delta:      s.delta ?? 0,
       })),
       growth: {
         hoursToNextStage:  d.growth.hours_to_next_stage,
@@ -214,6 +215,8 @@ export async function getWeather() {
         condition: f.condition,
         iconKey:   f.icon_key,
       })),
+      // 24-hr-ahead model forecast: {temp_external, humidity_external, solar_radiation, windspeed, conditions}
+      forecast24h: d.forecast_24h ?? {},
     };
   } catch (e) {
     console.error('[api] getWeather:', e);
@@ -277,6 +280,13 @@ export async function getMonthlyResources() {
         water:  d.cost.water_inr,
         total:  d.cost.total_inr,
       },
+      actuators: (d.actuators ?? []).map(a => ({
+        key:       a.key,
+        label:     a.label,
+        energyKwh: a.energy_kwh,
+        waterL:    a.water_l,
+        costInr:   a.cost_inr,
+      })),
     };
   } catch (e) {
     console.error('[api] getMonthlyResources:', e);

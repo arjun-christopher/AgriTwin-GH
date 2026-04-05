@@ -355,6 +355,11 @@ class SensorReading(BaseModel):
         description="Human-readable optimal range label shown in the sensor table, "
                     "e.g. '22–26 °C'.",
     )
+    delta: float = Field(
+        default=0.0,
+        description="Change vs. the previous DT step (new − old) for this sensor. "
+                    "Sourced from DTDiagnostics.state_delta.",
+    )
 
 
 # ── Top-level DT state response ───────────────────────────────────────────────

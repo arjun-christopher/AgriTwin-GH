@@ -30,11 +30,25 @@ class MonthlyCost(BaseModel):
     total_inr: float = Field(default=0.0, description="Total resource cost in INR.")
 
 
+class ActuatorResourceEntry(BaseModel):
+    """Per-actuator monthly resource consumption and cost."""
+
+    key: str = Field(description="MPC control variable key, e.g. 'fan_speed'.")
+    label: str = Field(description="Display label, e.g. 'Ventilation Fan'.")
+    energy_kwh: float = Field(default=0.0, description="Energy consumed this month in kWh.")
+    water_l: float = Field(default=0.0, description="Water used this month in litres (irrigation only).")
+    cost_inr: float = Field(default=0.0, description="Total cost for this actuator in INR.")
+
+
 class ResourcesResponse(BaseModel):
     """Response for ``GET /api/resources/monthly``."""
 
     resources: list[ResourceEntry]
     cost: MonthlyCost
+    actuators: list[ActuatorResourceEntry] = Field(
+        default_factory=list,
+        description="Per-actuator resource breakdown for the current billing month.",
+    )
     timestamp: str = Field(
         default="",
         description="ISO-8601 timestamp when the resource totals were computed.",

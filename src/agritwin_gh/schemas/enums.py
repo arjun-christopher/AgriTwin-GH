@@ -200,6 +200,26 @@ DISEASE_DISPLAY_NAME: dict[str, str] = {
 }
 """Title-cased display names for canonical disease labels."""
 
+GROWTH_CNN_DISPLAY_NAME: dict[str, str] = {
+    "Stage1_Seedling":              "Seedling",
+    "Stage2_Early_Vegetative":      "Early Vegetative",
+    "Stage3_Flowering_Initiation":  "Flw. Init.",
+    "Stage4_Flowering":             "Flowering",
+    "Stage5_Unripe":                "Unripe",
+    "Stage6_Ripe":                  "Ripe",
+}
+"""Display names for growth-stage CNN class names (from label_map.json)."""
+
+DISEASE_CNN_DISPLAY_NAME: dict[str, str] = {
+    "tomato_early_blight":   "Early Blight",
+    "tomato_late_blight":    "Late Blight",
+    "tomato_leaf_healthy":   "Healthy Leaves",
+    "tomato_leaf_mold":      "Leaf Mold",
+    "tomato_powdery_mildew": "Powdery Mildew",
+    "tomato_spider_mites":   "Spider Mites",
+}
+"""Display names for disease CNN class names (from label_map.json)."""
+
 # ── Sensor display metadata ────────────────────────────────────────────────────
 
 SENSOR_META: list[dict[str, object]] = [

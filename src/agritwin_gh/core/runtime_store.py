@@ -128,6 +128,11 @@ class ClimateSnapshot:
     last_step_ts: _dt.datetime | None = None   # logical sim timestamp of this step
     timestamp: str = ""                         # ISO-8601 string of last_step_ts
 
+    # Per-variable delta from the last DT step (new − old for each sensor)
+    state_delta: dict[str, float] = field(default_factory=dict)
+    """Keys match STATE_VARIABLES: indoor_temp, indoor_humidity, co2, soil_moisture,
+    light_intensity, vpd, leaf_wetness_proxy.  Populated from DTDiagnostics.state_delta."""
+
 
 @dataclass
 class ActuatorSnapshot:
@@ -191,6 +196,10 @@ class WeatherSnapshot:
     """Raw forecast dicts.  ``WeatherService`` converts them to ``ForecastEntry`` schemas.
     Each dict: {time, high, low, humidity, condition, icon_key}."""
 
+    forecast_24h: dict[str, Any] = field(default_factory=dict)
+    """Model 24-hr-ahead forecast from cadence_info[\"weather_24h_ahead\"].
+    Keys: temp_external, humidity_external, solar_radiation, windspeed, conditions."""
+
 
 @dataclass
 class DiseaseSnapshot:
@@ -230,6 +239,7 @@ class GrowthSnapshot:
     transition_prob_24h: float = 0.0    # 0–1 estimated 24h transition probability
     vpd: float = 0.0                    # current VPD (mirrored for the growth panel)
     growth_score: float = 0.0           # 0–1 composite growth quality score
+    growth_stage_confidence: float = 0.0  # 0–1 from the growth-stage CNN classifier
     stage_history: list[dict[str, Any]] = field(default_factory=list)
     """Each dict: {stage, stage_key, days_used, days_target, complete, status, progress_pct}"""
     timestamp: str = ""
@@ -245,11 +255,16 @@ class ResourceSnapshot:
 
     ``as_resources_response()`` converts totals to INR costs using default
     tariff rates (overridden by ``ResourceService`` in Phase 2).
+
+    Monthly billing: totals are reset to zero at the start of each new
+    calendar month (detected in ``accumulate_resources``).
     """
 
-    energy_kwh_total: float = 0.0       # kWh accumulated since loop_start_ts
-    water_l_total: float = 0.0          # litres accumulated since loop_start_ts
+    energy_kwh_total: float = 0.0       # kWh accumulated in current billing month
+    water_l_total: float = 0.0          # litres accumulated in current billing month
     loop_start_ts: _dt.datetime | None = None
+    billing_month: str = ""             # "YYYY-MM" of the active billing month
+    actuator_energy_kwh: dict = field(default_factory=dict)  # {key: kwh, ...}
 
 
 @dataclass
@@ -265,8 +280,17 @@ class MediaSnapshot:
     # GET /api/media/latest — single best image per category
     latest_stage_src: str = ""
     latest_stage_alt: str = ""
+    # CNN-derived image data (local path, class label, confidence) — carried
+    # forward every step until the next image-refresh cadence fires.
+    latest_stage_image_key: str = ""      # relative local path from CNN
+    latest_stage_label: str = ""          # CNN class name e.g. "Stage4_Flowering"
+    latest_stage_confidence: float = 0.0  # CNN confidence 0–1
+
     latest_leaf_src: str = ""
     latest_leaf_alt: str = ""
+    latest_leaf_image_key: str = ""       # relative local path from CNN
+    latest_leaf_label: str = ""           # CNN class name e.g. "tomato_leaf_healthy"
+    latest_leaf_confidence: float = 0.0   # CNN confidence 0–1
 
     # GET /api/media/stage-images — growth-stage photo gallery
     stage_images: list[dict[str, Any]] = field(default_factory=list)
@@ -479,6 +503,8 @@ class RuntimeStore:
         """
         from agritwin_gh.schemas.enums import (
             CONTROL_VAR_TO_ACTUATOR_ID,
+            DISEASE_DISPLAY_NAME,
+            DISEASE_PATHOGEN,
             GROWTH_STAGE_ORDERED as GROWTH_STAGES,
             STAGE_DURATION_DAYS,
         )
@@ -528,6 +554,7 @@ class RuntimeStore:
             loop_start_ts=self._state.climate.loop_start_ts,   # preserved across steps
             last_step_ts=step_ts,
             timestamp=step_ts.isoformat() if step_ts else _now_iso(),
+            state_delta=dict(result.diagnostics.state_delta),
         )
 
         # ── 2. Actuator snapshot — translated from ActuatorState MPC keys ─
@@ -546,41 +573,130 @@ class RuntimeStore:
         )
         actuators = ActuatorSnapshot(
             levels=levels,
-            on_off={k: v > 0.0 for k, v in levels.items()},
+            # Round to 2 d.p. before checking > 0 so that CVXPY solver residuals
+            # (e.g. 0.001) that display as "0.00" in the log don't show as ON.
+            on_off={k: round(v, 2) > 0.0 for k, v in levels.items()},
             mode=actuator_mode,
             mpc_ran_this_step=bool(result.mpc_ran_this_step),
         )
 
         # ── 3. Weather snapshot — from WeatherState ────────────────────────
         w = result.weather_used             # agritwin_gh.mpc.state.WeatherState
+        _old_w = self._state.weather        # preserve WeatherService-supplied fields
         weather = WeatherSnapshot(
             outdoor_temp=float(getattr(w, "temp_external", 0.0)),
             outdoor_humidity=float(getattr(w, "humidity_external", 0.0)),
             solar_rad=float(getattr(w, "solar_radiation", 0.0)),
             wind_speed=float(getattr(w, "windspeed", 0.0)),
             condition=str(getattr(w, "conditions", "")),
+            # Carry forward extended fields set by WeatherService
+            wind_dir=_old_w.wind_dir,
+            pressure=_old_w.pressure,
+            uv_index=_old_w.uv_index,
+            dew_point=_old_w.dew_point,
+            visibility=_old_w.visibility,
+            forecast=list(_old_w.forecast),
+            # 24h-ahead model forecast from the weather-forecast LSTM/ensemble
+            forecast_24h=dict(result.cadence_info.get("weather_24h_ahead") or {}),
         )
 
-        # ── 4. Disease snapshot — basic; IntelligenceService enriches later ─
+        # ── 4. Disease snapshot — build pathogens from cadence_info if available ─
+        # ``model_disease_result`` is {disease_label: {severity_24h, present, trend_24h}}
+        # ``severity_24h`` (from mpc_fused) is {disease_label: float(0–1)}
+        model_disease = result.cadence_info.get("model_disease_result") or {}
+        sev_24h_map   = result.cadence_info.get("severity_24h") or {}
+
+        if model_disease or sev_24h_map:
+            all_labels = sorted(set(model_disease) | set(sev_24h_map))
+            pathogens_list: list[dict] = []
+            for d_label in all_labels:
+                dis_info  = model_disease.get(d_label, {})
+                raw_sev   = float(dis_info.get("severity_24h", sev_24h_map.get(d_label, 0.0)))
+                risk_24h  = round(raw_sev * 100.0, 1)   # Convert 0–1 → 0–100 scale
+                prob      = float(dis_info.get("probability", raw_sev))
+                if risk_24h > 80:
+                    sev_label = "High"
+                elif risk_24h > 60:
+                    sev_label = "Medium"
+                else:
+                    sev_label = "Low"
+                pathogens_list.append({
+                    "label":      d_label,
+                    "name":       DISEASE_DISPLAY_NAME.get(d_label, d_label.replace("_", " ").title()),
+                    "pathogen":   DISEASE_PATHOGEN.get(d_label, ""),
+                    "risk_score": round(raw_sev, 3),
+                    "risk_24h":   risk_24h,
+                    "probability": round(prob, 3),
+                    "severity":   sev_label,
+                })
+        else:
+            pathogens_list = list(self._state.disease.pathogens)  # preserve enriched data
+
         disease = DiseaseSnapshot(
             composite_risk=float(ns.disease_risk_score),
             dominant_label=result.snapshot.disease_classification or "healthy leaves",
-            pathogens=list(self._state.disease.pathogens),  # preserve enriched data
+            pathogens=pathogens_list,
             timestamp=climate.timestamp,
         )
 
         # ── 5. Growth snapshot — basic; hours/prob set from stage_dur ─────
         #    IntelligenceService will overwrite ``stage_history`` later.
+        # Preserve growth_stage_confidence from the latest image observation.
+        if result.image_refresh_this_step and result.image_observation is not None:
+            gs_confidence = float(result.image_observation.growth_stage_confidence)
+        else:
+            gs_confidence = self._state.growth.growth_stage_confidence  # carry forward
+        # Use the LSTM's predicted hours_to_transition when available (it is based
+        # on actual sensor trajectories).  Fall back to the DT formula otherwise.
+        _mgr_for_h   = result.cadence_info.get("model_growth_result") or {}
+        _lstm_htt    = _mgr_for_h.get("hours_to_transition")
+        _hours_to_next = (
+            float(_lstm_htt)
+            if _lstm_htt is not None and float(_lstm_htt) >= 0.0
+            else max(0.0, (stage_dur_days - days_in_stage) * 24.0)
+        )
         growth = GrowthSnapshot(
             current_stage=stage_label,
             current_stage_index=stage_idx,
             next_stage=next_stage,
-            hours_to_next_stage=max(0.0, (stage_dur_days - days_in_stage) * 24.0),
+            hours_to_next_stage=_hours_to_next,
             days_to_next_stage=max(0.0, stage_dur_days - days_in_stage),
             vpd=float(ns.vpd),
+            growth_stage_confidence=gs_confidence,
             stage_history=list(self._state.growth.stage_history),  # preserve enriched
             timestamp=climate.timestamp,
         )
+
+        # ── 6. Media snapshot — carry forward CNN image observation data ──────
+        # Only updated when the image-refresh cadence fires (every ~6 steps).
+        # Between refreshes, the old CNN keys/labels/confidence are preserved.
+        old_media = self._state.media
+        if result.image_refresh_this_step and result.image_observation is not None:
+            obs = result.image_observation
+            media: MediaSnapshot | None = MediaSnapshot(
+                latest_stage_src=old_media.latest_stage_src,
+                latest_stage_alt=old_media.latest_stage_alt,
+                latest_stage_image_key=obs.growth_stage_image_key or old_media.latest_stage_image_key,
+                latest_stage_label=obs.growth_stage_label or old_media.latest_stage_label,
+                latest_stage_confidence=(
+                    obs.growth_stage_confidence
+                    if obs.growth_stage_confidence > 0.0
+                    else old_media.latest_stage_confidence
+                ),
+                latest_leaf_src=old_media.latest_leaf_src,
+                latest_leaf_alt=old_media.latest_leaf_alt,
+                latest_leaf_image_key=obs.disease_image_key or old_media.latest_leaf_image_key,
+                latest_leaf_label=obs.disease_label or old_media.latest_leaf_label,
+                latest_leaf_confidence=(
+                    obs.disease_confidence
+                    if obs.disease_confidence > 0.0
+                    else old_media.latest_leaf_confidence
+                ),
+                stage_images=old_media.stage_images,
+                disease_scans=old_media.disease_scans,
+            )
+        else:
+            media = None  # no change — update_latest_state preserves existing media
 
         self.update_latest_state(
             climate=climate,
@@ -588,6 +704,7 @@ class RuntimeStore:
             weather=weather,
             disease=disease,
             growth=growth,
+            media=media,
         )
 
     def set_loop_start(self, ts: _dt.datetime) -> None:
@@ -612,7 +729,12 @@ class RuntimeStore:
                 last_updated=_now_iso(),
             )
 
-    def accumulate_resources(self, energy_kwh: float, water_l: float) -> None:
+    def accumulate_resources(
+        self,
+        energy_kwh: float,
+        water_l: float,
+        actuator_energy: dict[str, float] | None = None,
+    ) -> None:
         """Add incremental resource usage to the running totals.
 
         Called by ``DTService`` after each DT step, based on the actuator
@@ -620,10 +742,33 @@ class RuntimeStore:
 
         ``ResourceService`` uses the totals in ``as_resources_response()``
         to compute INR costs.
+
+        Monthly rollover: if the calendar month has changed since the last
+        accumulation, all totals are reset to zero before adding the new step
+        (so the response always reflects the *current* billing month only).
         """
+        current_month = _dt.datetime.now().strftime("%Y-%m")
+
         with self._lock:
             s = self._state
             r = s.resources
+
+            # ── Month rollover ─────────────────────────────────────────
+            if r.billing_month and r.billing_month != current_month:
+                # New calendar month → wipe all accumulators
+                r = _dataclass_replace(
+                    r,
+                    energy_kwh_total=0.0,
+                    water_l_total=0.0,
+                    actuator_energy_kwh={},
+                )
+
+            # ── Per-actuator accumulation ──────────────────────────────
+            new_act = dict(r.actuator_energy_kwh)
+            if actuator_energy:
+                for k, v in actuator_energy.items():
+                    new_act[k] = new_act.get(k, 0.0) + v
+
             self._state = LatestState(
                 climate=s.climate,
                 actuators=s.actuators,
@@ -634,6 +779,8 @@ class RuntimeStore:
                     r,
                     energy_kwh_total=r.energy_kwh_total + energy_kwh,
                     water_l_total=r.water_l_total + water_l,
+                    billing_month=current_month,
+                    actuator_energy_kwh=new_act,
                 ),
                 media=s.media,
                 mode=s.mode,
@@ -928,6 +1075,7 @@ class RuntimeStore:
                 range_min=float(meta["range_min"]),
                 range_max=float(meta["range_max"]),
                 optimal_range=str(meta["optimal_range"]),
+                delta=round(cl.state_delta.get(str(meta["key"]), 0.0), 3),
             )
             for meta in SENSOR_META
         ]
@@ -1066,6 +1214,7 @@ class RuntimeStore:
             ),
             current=current,
             forecast=forecast_entries,
+            forecast_24h=dict(w.forecast_24h),
             timestamp=ts,
         )
 
@@ -1153,6 +1302,7 @@ class RuntimeStore:
         ``ResourceService`` will override these using ``MPCConfig`` in Phase 2.
         """
         from agritwin_gh.schemas.resource_schemas import (
+            ActuatorResourceEntry,
             MonthlyCost,
             ResourceEntry,
             ResourcesResponse,
@@ -1166,12 +1316,46 @@ class RuntimeStore:
         _WATER_RATE_INR_PER_1000L = 4.0       # approximate
         energy_cost = r.energy_kwh_total * _ENERGY_RATE_INR_PER_KWH
         water_cost = (r.water_l_total / 1000.0) * _WATER_RATE_INR_PER_1000L
-        month_label = (r.loop_start_ts or _dt.datetime.utcnow()).strftime("%B %Y")
+        month_label = _dt.datetime.now().strftime("%B %Y")
+
+        # ── Per-actuator breakdown ─────────────────────────────────────
+        _ACTUATOR_LABELS: dict[str, tuple[str, bool]] = {
+            # key: (display label, has_water)
+            "fan_speed":      ("Ventilation Fan",   False),
+            "vent_opening":   ("Vent Opening",       False),
+            "heater_output":  ("Heater",             False),
+            "led_intensity":  ("LED Grow Lights",    False),
+            "fogger_duty":    ("Fogger / Humidifier", False),
+            "co2_valve_pct":  ("CO₂ Valve",          False),
+            "irrigation_qty": ("Irrigation Pump",    True),
+        }
+        _WATER_PER_STEP_L = 10.0  # L per 5-min step at duty=1.0
+
+        actuator_entries: list[ActuatorResourceEntry] = []
+        for key, (label, has_water) in _ACTUATOR_LABELS.items():
+            act_kwh = r.actuator_energy_kwh.get(key, 0.0)
+            # Water: only irrigation; back-calculate from steps accumulated
+            # (water_l accrued per step = duty * 10 L; energy used = duty * 0.15kW * (5/60)h)
+            act_water_l = 0.0
+            if has_water and act_kwh > 0.0:
+                _rated_kw = 0.15
+                _step_h = 5.0 / 60.0
+                # infer total duty-steps from energy, then apply water rate
+                act_water_l = (act_kwh / (_rated_kw * _step_h)) * _WATER_PER_STEP_L
+            act_energy_cost = act_kwh * _ENERGY_RATE_INR_PER_KWH
+            act_water_cost = (act_water_l / 1000.0) * _WATER_RATE_INR_PER_1000L
+            actuator_entries.append(ActuatorResourceEntry(
+                key=key,
+                label=label,
+                energy_kwh=round(act_kwh, 5),
+                water_l=round(act_water_l, 2),
+                cost_inr=round(act_energy_cost + act_water_cost, 4),
+            ))
 
         return ResourcesResponse(
             resources=[
                 ResourceEntry(label="Water",  used=round(r.water_l_total, 1),  unit="L"),
-                ResourceEntry(label="Energy", used=round(r.energy_kwh_total, 2), unit="kWh"),
+                ResourceEntry(label="Energy", used=round(r.energy_kwh_total, 3), unit="kWh"),
             ],
             cost=MonthlyCost(
                 month=month_label,
@@ -1179,6 +1363,7 @@ class RuntimeStore:
                 water_inr=round(water_cost, 2),
                 total_inr=round(energy_cost + water_cost, 2),
             ),
+            actuators=actuator_entries,
             timestamp=ts,
         )
 

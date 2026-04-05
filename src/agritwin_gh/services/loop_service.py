@@ -119,6 +119,17 @@ def _phase(step: int, tag: str, msg: str) -> None:
     _get_loop_file_logger().info("STEP %04d | %-5s | %s", step, tag, msg)
 
 
+def _time_of_day(hour: int) -> str:
+    """Return a human-readable time-of-day label for a given hour (0–23)."""
+    if 6 <= hour < 12:
+        return "Morning"
+    if 12 <= hour < 17:
+        return "Afternoon"
+    if 17 <= hour < 21:
+        return "Evening"
+    return "Night"
+
+
 class LoopService:
     """Manages the DT+MPC loop lifecycle and feeds the RuntimeStore.
 
@@ -302,9 +313,35 @@ class LoopService:
 
             self._last_result = result
 
+            # ── Growth-stage penalty: LSTM current_stage → DT ground truth ──
+            # The growth-progression LSTM is trained on sensor trajectories and
+            # can predict a stage that differs from the physics-derived stage
+            # (result.next_state.growth_stage_index).  The DT's index is
+            # authoritative (computed from days_elapsed).  Correct the LSTM
+            # prediction so that downstream logging and the API always agree.
+            _mgr = (result.cadence_info or {}).get("model_growth_result") or {}
+            if _mgr:
+                from agritwin_gh.schemas.enums import GROWTH_STAGE_ORDERED as _GS
+                _dt_idx   = max(0, min(int(result.next_state.growth_stage_index), len(_GS) - 1))
+                _dt_stage = _GS[_dt_idx]
+                if _mgr.get("current_stage") and _mgr["current_stage"] != _dt_stage:
+                    logger.debug(
+                        "Growth-stage penalty: LSTM=%r  DT=%r  → correcting to DT",
+                        _mgr["current_stage"], _dt_stage,
+                    )
+                    _mgr["current_stage"] = _dt_stage
+                    _mgr["next_stage"] = _GS[_dt_idx + 1] if _dt_idx < len(_GS) - 1 else None
+                    result.cadence_info["model_growth_result"] = _mgr
+
             # ── Phase logging — DB → AI → MPC → DT ───────────────────────
             step = int(result.step_index)
             ci   = result.cadence_info or {}
+
+            # TIME: step-start timestamp and time-of-day label
+            _now = _dt.datetime.now()
+            _phase(step, "TIME",
+                   f"{_now:%Y-%m-%d} {_now:%A} {_now:%H:%M:%S}  "
+                   f"{_time_of_day(_now.hour)} ({_now.hour:02d}:00–{(_now.hour + 1) % 24:02d}:00)")
 
             # INPUT: greenhouse state at the START of this step (read from CSV)
             cs = result.current_state
@@ -518,7 +555,54 @@ class LoopService:
             water_l: float = round(
                 getattr(result.action_applied, "irrigation_qty", 0.0) * 10.0, 4
             )
-            self._store.accumulate_resources(energy_kwh=energy_kwh, water_l=water_l)
+
+            # Per-actuator energy for billing breakdown (same rated_kw as estimate_energy)
+            _rated_kw = {
+                "fan_speed":      0.75,
+                "vent_opening":   0.10,
+                "heater_output":  3.00,
+                "led_intensity":  2.00,
+                "fogger_duty":    0.20,
+                "co2_valve_pct":  0.05,
+                "irrigation_qty": 0.15,
+            }
+            _dt_h = 5.0 / 60.0
+            _act_energy: dict[str, float] = {
+                k: round(kw * (getattr(result.action_applied, k, 0.0) or 0.0) * _dt_h, 6)
+                for k, kw in _rated_kw.items()
+            }
+
+            self._store.accumulate_resources(
+                energy_kwh=energy_kwh, water_l=water_l, actuator_energy=_act_energy
+            )
+
+            # RES: step-end resource and cost summary
+            _rs = self._store.get_latest_state().resources
+            _cost_inr = (
+                _rs.energy_kwh_total * 7.0          # ₹7.00 / kWh
+                + (_rs.water_l_total / 1000.0) * 4.0  # ₹4.00 / kL
+            )
+            _phase(step, "RES",
+                   f"step: energy={energy_kwh:.5f}kWh  water={water_l:.3f}L  "
+                   f"\u2502  month total: energy={_rs.energy_kwh_total:.3f}kWh  "
+                   f"water={_rs.water_l_total:.1f}L  cost=\u20b9{_cost_inr:.2f}")
+
+            # RES actuator breakdown (only non-zero actuators for brevity)
+            _ERATES = 7.0
+            _WRATE_PER_L = 4.0 / 1000.0
+            _act_parts: list[str] = []
+            for _k, _kwh in _act_energy.items():
+                if _kwh <= 0.0:
+                    continue
+                _act_cost = _kwh * _ERATES
+                if _k == "irrigation_qty":
+                    _act_wl = (_act_energy[_k] / (0.15 * _dt_h)) * 10.0
+                    _act_cost += _act_wl * _WRATE_PER_L
+                    _act_parts.append(f"{_k}={_kwh:.5f}kWh+{_act_wl:.3f}L(\u20b9{_act_cost:.3f})")
+                else:
+                    _act_parts.append(f"{_k}={_kwh:.5f}kWh(\u20b9{_act_cost:.3f})")
+            if _act_parts:
+                _phase(step, "RES", "actuators: " + "  ".join(_act_parts))
 
             # ── Apply active actuator overrides from store ─────────────────
             self._apply_actuator_overrides_if_active()

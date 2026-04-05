@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Thermometer,
   Droplets,
@@ -28,6 +28,7 @@ import {
   getActuatorState,
   getMonthlyResources,
   getLatestMedia,
+  getDiseaseRisks,
 } from '../services/api.js';
 
 const ACTUATOR_ICON_MAP = {
@@ -40,6 +41,13 @@ const ACTUATOR_ICON_MAP = {
   CloudDrizzle,
   Thermometer,
 };
+
+/** Map a disease risk_24h value (0–100) to a severity label and chip CSS classes. */
+function diseaseSeverity(risk24h) {
+  if (risk24h > 80) return { label: 'High',   chipClass: 'bg-danger/10 border-danger/25 text-danger'   };
+  if (risk24h > 60) return { label: 'Medium', chipClass: 'bg-warning/10 border-warning/25 text-warning' };
+  return               { label: 'Low',    chipClass: 'bg-primary/10 border-primary/20 text-primary'  };
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    MOCK DATA
@@ -77,13 +85,13 @@ const WEATHER = {
 
 // ── 3. Actuator state — from MPC ActuatorState (constants.py CONTROL_VARIABLES) ────
 const ACTUATORS = [
-  { icon: Fan,         label: 'Fan Speed',    status: 'ON',  active: true,  color: 'primary'   },
-  { icon: Wind,        label: 'Vent Opening', status: 'ON',  active: true,  color: 'primary'   },
-  { icon: Droplets,    label: 'Irrigation',   status: 'ON',  active: true,  color: 'secondary' },
-  { icon: Thermometer, label: 'Heater',       status: 'ON',  active: true,  color: 'warning'   },
-  { icon: Sun,         label: 'LED Intensity',status: 'OFF', active: false, color: 'neutral'   },
-  { icon: Wind,        label: 'CO₂ Valve',    status: 'ON',  active: true,  color: 'warning'   },
-  { icon: Droplets,    label: 'Fogger',       status: 'OFF', active: false, color: 'neutral'   },
+  { icon: Fan,          label: 'Ventilation Fan',  status: 'OFF', active: false, color: 'primary'   },
+  { icon: Wind,         label: 'Vent Opening',      status: 'OFF', active: false, color: 'secondary' },
+  { icon: Droplets,     label: 'Irrigation',        status: 'OFF', active: false, color: 'secondary' },
+  { icon: Flame,        label: 'Heater',            status: 'OFF', active: false, color: 'warning'   },
+  { icon: Sun,          label: 'LED Intensity',     status: 'OFF', active: false, color: 'warning'   },
+  { icon: Leaf,         label: 'CO₂ Valve',         status: 'OFF', active: false, color: 'primary'   },
+  { icon: CloudDrizzle, label: 'Fogger',            status: 'OFF', active: false, color: 'secondary' },
 ];
 
 // ── 4. Monthly resource usage ─────────────────────────────────────────────
@@ -344,35 +352,67 @@ function HomeDashboard({ navigate }) {
   const [cost, setCost]               = useState(MONTHLY_COST);
   const [images, setImages]           = useState(CROP_IMAGES);
   const [growthIntel, setGrowthIntel] = useState(GROWTH_INTEL);
+  const [diseases, setDiseases]       = useState([]);
 
   useEffect(() => {
-    getDtState()
-      .then(d => {
-        if (d?.crop)    setCrop(d.crop);
-        if (d?.health)  setHealth(d.health);
-        if (d?.growth)  setGrowthIntel(d.growth);
-      })
-      .catch(() => {});
+    const fetchAll = () => {
+      getDtState()
+        .then(d => {
+          if (d?.crop)    setCrop(d.crop);
+          if (d?.health)  setHealth(d.health);
+          if (d?.growth)  setGrowthIntel(d.growth);
+        })
+        .catch(() => {});
 
-    getActuatorState()
-      .then(acts => {
-        if (acts?.length) {
-          setActuators(acts.map(a => ({ ...a, icon: ACTUATOR_ICON_MAP[a.iconKey] ?? Wind })));
-        }
-      })
-      .catch(() => {});
+      getActuatorState()
+        .then(acts => {
+          if (acts?.length) {
+            setActuators(acts.map(a => ({ ...a, icon: ACTUATOR_ICON_MAP[a.iconKey] ?? Wind })));
+          }
+        })
+        .catch(() => {});
 
-    getMonthlyResources()
-      .then(d => {
-        if (d?.resources) setResources(d.resources);
-        if (d?.cost)      setCost(d.cost);
-      })
-      .catch(() => {});
+      getMonthlyResources()
+        .then(d => {
+          if (d?.resources) setResources(d.resources);
+          if (d?.cost)      setCost(d.cost);
+        })
+        .catch(() => {});
 
-    getLatestMedia()
-      .then(d => { if (d) setImages(d); })
-      .catch(() => {});
+      getLatestMedia()
+        .then(d => {
+          if (d) setImages(prev => ({
+            stage: d.stage?.src ? d.stage : prev.stage,
+            leaf:  d.leaf?.src  ? d.leaf  : prev.leaf,
+          }));
+        })
+        .catch(() => {});
+
+      getDiseaseRisks()
+        .then(d => { if (d?.length) setDiseases(d); })
+        .catch(() => {});
+    };
+
+    fetchAll();
+    const id = setInterval(fetchAll, 10_000);
+    return () => clearInterval(id);
   }, []);
+
+  // Derive crop health status from live disease risk data.
+  const cropHealthStatus = useMemo(() => {
+    if (!diseases.length) return health;
+    // "absent" = all diseases have severity 'Low' (risk_24h < 60 in backend model)
+    const allAbsent = diseases.every(d => d.severity === 'Low');
+    const dominant  = diseases.reduce((a, b) => (a.risk24h > b.risk24h ? a : b));
+    const maxRisk   = dominant.risk24h;
+    if (allAbsent) {
+      return { status: 'Healthy', detail: 'All clear. No disease detected.',       scannedAgo: health.scannedAgo };
+    }
+    if (maxRisk >= 80) {
+      return { status: 'Risk',    detail: `High risk: ${dominant.name}`,           scannedAgo: health.scannedAgo };
+    }
+    return           { status: 'Warning', detail: `Watch: ${dominant.name} (${dominant.risk24h.toFixed(1)}%)`, scannedAgo: health.scannedAgo };
+  }, [diseases, health]);
 
   return (
     <div className="py-6">
@@ -400,7 +440,7 @@ function HomeDashboard({ navigate }) {
           {/* Insights overview panel */}
           <PanelCard
             title="Detailed Insights"
-            subtitle="Env. trends · growth · risk score"
+            subtitle="Env · growth · risk score"
             icon={BarChart2}
             badge="Preview"
             onNavigate={() => navigate?.('insights')}
@@ -437,18 +477,24 @@ function HomeDashboard({ navigate }) {
                 Disease Risk
               </p>
               <div className="flex flex-col gap-1.5">
-                {[
-                  { label: 'Late Blight',  sev: 'High',   chipClass: 'bg-danger/10 border-danger/25 text-danger'   },
-                  { label: 'Gray Mold',    sev: 'Medium', chipClass: 'bg-warning/10 border-warning/25 text-warning' },
-                  { label: 'Early Blight', sev: 'Low',    chipClass: 'bg-primary/10 border-primary/20 text-primary' },
-                ].map(({ label, sev, chipClass }) => (
-                  <div key={label} className="flex items-center justify-between px-2 py-1 rounded-lg bg-surface-highest/30 border border-outline-variant/10">
-                    <span className="text-[9px] text-on-surface-variant">{label}</span>
-                    <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${chipClass}`}>
-                      {sev}
-                    </span>
-                  </div>
-                ))}
+                {diseases.length > 0
+                  ? diseases.map(({ name, risk24h }) => {
+                      const { label, chipClass } = diseaseSeverity(risk24h);
+                      return (
+                        <div key={name} className="flex items-center justify-between px-2 py-1 rounded-lg bg-surface-highest/30 border border-outline-variant/10">
+                          <span className="text-[9px] text-on-surface-variant">{name}</span>
+                          <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${chipClass}`}>
+                            {label}
+                          </span>
+                        </div>
+                      );
+                    })
+                  : (
+                    <div className="px-2 py-1 rounded-lg bg-surface-highest/30 border border-outline-variant/10 text-center">
+                      <span className="text-[9px] text-on-surface-variant opacity-60">No diseases detected</span>
+                    </div>
+                  )
+                }
               </div>
             </div>
           </PanelCard>
@@ -483,7 +529,7 @@ function HomeDashboard({ navigate }) {
                       {crop.current}
                     </span>
                     <span className="text-xs font-light text-on-surface-variant">
-                      Day {crop.daysInStage} of {crop.stageDuration}
+                      {((crop.daysInStage ?? 0) * 24).toFixed(1)}h in stage
                     </span>
                   </div>
                 </div>
@@ -498,7 +544,7 @@ function HomeDashboard({ navigate }) {
                   </p>
                   {crop.current !== 'Ripe' && (
                     <p className="text-[9px] text-on-surface-variant opacity-70 mt-0.5">
-                      in {crop.nextInDays} days
+                      in {growthIntel.hoursToNextStage != null ? `${growthIntel.hoursToNextStage.toFixed(1)}h` : `${crop.nextInDays}d`}
                     </p>
                   )}
                 </div>
@@ -532,9 +578,9 @@ function HomeDashboard({ navigate }) {
           {/* ── ② CROP HEALTH ─────────────────────────────────── */}
           <StatusCard
             label="Crop Health"
-            status={health.status}
-            detail={health.detail}
-            meta={health.scannedAgo}
+            status={cropHealthStatus.status}
+            detail={cropHealthStatus.detail}
+            meta={cropHealthStatus.scannedAgo}
             variant="crop"
           />
 
@@ -681,7 +727,7 @@ function HomeDashboard({ navigate }) {
                   loading="lazy"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/70 to-transparent px-4 py-3">
-                  <p className="text-[10px] font-bold text-white leading-none">No Anomalies Detected</p>
+                  <p className="text-[10px] font-bold text-white leading-none">{images.leaf.alt || 'Leaf Scan'}</p>
                   <p className="text-[8px] text-white/70 mt-0.5">{images.leaf.location}</p>
                 </div>
                 <span className="absolute top-3 right-3 text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-primary/20 text-primary border border-primary/25">
@@ -782,7 +828,7 @@ function HomeDashboard({ navigate }) {
                   3D Greenhouse Environment
                 </h2>
                 <p className="text-xs text-on-surface-variant mt-1 max-w-lg leading-relaxed">
-                  Explore your digital twin in a real-time 3D environment. Monitor sensors, inspect
+                  Explore your digital twin in a real-time 3D environment. Monitor and inspect
                   actuators, and walk through the virtual greenhouse spatially.
                 </p>
               </div>

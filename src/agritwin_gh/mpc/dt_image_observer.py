@@ -166,13 +166,11 @@ class SyntheticImageObserver:
         model_disease_result: dict | None = None,
     ) -> ImageObservation:
         # ── Growth-stage image ────────────────────────────────────────────────
-        # Use the LSTM current_stage if available; fall back to the loop stage.
-        effective_stage = (
-            model_growth_result.get("current_stage") or growth_stage
-            if model_growth_result
-            else growth_stage
-        )
-        gs_folder_name = _GROWTH_STAGE_FOLDER.get(effective_stage, "Stage1_Seedling")
+        # Always use the DT-authoritative growth_stage (passed from DTLoop) to
+        # select the image folder.  The LSTM current_stage may disagree; the
+        # penalty correction in loop_service.py canonicalises it only after the
+        # step result is yielded — too late to affect image selection here.
+        gs_folder_name = _GROWTH_STAGE_FOLDER.get(growth_stage, "Stage1_Seedling")
         gs_folder = (
             _REPO_ROOT / "data" / "external" / "Tomato Growth Stages" / gs_folder_name
         )

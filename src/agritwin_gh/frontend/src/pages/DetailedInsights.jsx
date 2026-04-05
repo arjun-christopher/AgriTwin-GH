@@ -28,8 +28,8 @@ import {
   getActuatorState,
   getDiseaseRisks,
   getWeather,
-  getStageImages,
-  getDiseaseImages,
+  getLatestMedia,
+  getMonthlyResources,
 } from '../services/api.js';
 
 const SENSOR_ICON_MAP = {
@@ -150,24 +150,18 @@ const INDOOR_SENSORS = [
   { icon: ShieldCheck, label: 'Disease Risk',   value: 0.12,  unit: 'score', status: 'ok', rangeMin: 0,     rangeMax: 1.0,   optimal: '< 0.3'      },
 ];
 
-// ── Recent Crop Images — rolling 30-min cadence, max 5 frames ───────────────
-const RECENT_CROP_IMAGES = [
-  { src: 'https://picsum.photos/seed/crop-r1/400/260', alt: 'Recent crop image 1', capturedAgo: '30 min ago',  stage: 'Flowering', confidence: 99.5 },
-  { src: 'https://picsum.photos/seed/crop-r2/400/260', alt: 'Recent crop image 2', capturedAgo: '60 min ago',  stage: 'Flowering', confidence: 98.2 },
-  { src: 'https://picsum.photos/seed/crop-r3/400/260', alt: 'Recent crop image 3', capturedAgo: '90 min ago',  stage: 'Flowering', confidence: 97.8 },
-  { src: 'https://picsum.photos/seed/crop-r4/400/260', alt: 'Recent crop image 4', capturedAgo: '120 min ago', stage: 'Flowering', confidence: 99.1 },
-  { src: 'https://picsum.photos/seed/crop-r5/400/260', alt: 'Recent crop image 5', capturedAgo: '150 min ago', stage: 'Flowering', confidence: 98.6 },
-];
+// ── Latest media fallbacks (until API populates)
+const DEFAULT_IMAGES = {
+  stage: { src: 'https://picsum.photos/seed/tomato-stage/480/280', alt: 'Crop stage image', badge: 'Stage', location: 'Camera', captured: 'just now' },
+  leaf:  { src: 'https://picsum.photos/seed/tomato-leaf/480/280',  alt: 'Leaf scan image',  badge: 'Scan',  location: 'Camera', captured: 'just now' },
+};
 
-// ── Recent Leaf Scans — rolling 30-min cadence, max 5 frames ────────────────
-// Classification labels from canonical DISEASE_CATEGORIES (constants.py)
-const RECENT_LEAF_IMAGES = [
-  { src: 'https://picsum.photos/seed/leaf-scan-1/400/260', alt: 'Leaf scan 1', capturedAgo: '30 min ago',  classification: 'Late Blight',    risk: 'High',   confidence: 91.4 },
-  { src: 'https://picsum.photos/seed/leaf-scan-2/400/260', alt: 'Leaf scan 2', capturedAgo: '60 min ago',  classification: 'Healthy Leaves', risk: 'Low',    confidence: 97.8 },
-  { src: 'https://picsum.photos/seed/leaf-scan-3/400/260', alt: 'Leaf scan 3', capturedAgo: '90 min ago',  classification: 'Powdery Mildew', risk: 'Low',    confidence: 62.3 },
-  { src: 'https://picsum.photos/seed/leaf-scan-4/400/260', alt: 'Leaf scan 4', capturedAgo: '120 min ago', classification: 'Healthy Leaves', risk: 'Low',    confidence: 94.1 },
-  { src: 'https://picsum.photos/seed/leaf-scan-5/400/260', alt: 'Leaf scan 5', capturedAgo: '150 min ago', classification: 'Spider Mites',   risk: 'Medium', confidence: 76.5 },
+// ── Monthly Resources fallbacks
+const DEFAULT_RESOURCES = [
+  { label: 'Water',  used: 0, unit: 'L'   },
+  { label: 'Energy', used: 0, unit: 'kWh' },
 ];
+const DEFAULT_COST = { month: '—', energy: 0, water: 0, total: 0 };
 
 // ── Historical Charts (kept from original page) ─────────────────────────
 
@@ -400,9 +394,16 @@ function OutdoorMetric({ icon: Icon, label, value, forecast }) {
   );
 }
 
-/** Indoor sensor card — current value only. */
-function SensorCard({ icon: Icon, label, value, unit }) {
+/** Indoor sensor card — current value + DT step delta. */
+function SensorCard({ icon: Icon, label, value, unit, delta }) {
   const display = value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value;
+  const hasDelta = delta != null && delta !== 0;
+  const deltaColor = hasDelta
+    ? (delta > 0 ? 'text-primary' : 'text-warning')
+    : 'text-on-surface-variant';
+  const deltaStr = hasDelta
+    ? `${delta > 0 ? '+' : ''}${Math.abs(delta) < 1 ? delta.toFixed(2) : delta.toFixed(1)}`
+    : null;
   return (
     <div className="bg-surface-high rounded-xl p-4 border border-outline-variant/10">
       <div className="flex items-center gap-1.5 mb-3 text-on-surface-variant">
@@ -413,6 +414,11 @@ function SensorCard({ icon: Icon, label, value, unit }) {
         <span className="text-2xl font-headline font-bold text-on-surface">{display}</span>
         <span className="text-xs text-on-surface-variant">{unit}</span>
       </div>
+      {deltaStr && (
+        <p className={`text-[9px] font-semibold mt-1 ${deltaColor}`}>
+          Δ {deltaStr} {unit}
+        </p>
+      )}
     </div>
   );
 }
@@ -428,8 +434,10 @@ function DetailedInsights() {
   const [actuators, setActuators]     = useState(ACTUATORS);
   const [diseaseRisks, setDiseaseRisks]     = useState(DISEASE_RISKS);
   const [weather, setWeather]         = useState(null);
-  const [stageImages, setStageImages]     = useState(RECENT_CROP_IMAGES);
-  const [leafImages, setLeafImages]       = useState(RECENT_LEAF_IMAGES);
+  const [latestImages, setLatestImages]   = useState(DEFAULT_IMAGES);
+  const [resources, setResources]     = useState(DEFAULT_RESOURCES);
+  const [cost, setCost]               = useState(DEFAULT_COST);
+  const [actuatorCosts, setActuatorCosts] = useState([]);
   const [indoorSensors, setIndoorSensors] = useState(INDOOR_SENSORS);
 
   useEffect(() => {
@@ -442,10 +450,11 @@ function DetailedInsights() {
           if (d?.growth) setGrowthIntel(d.growth);
           if (d?.sensors?.length) {
             setIndoorSensors(d.sensors.map(s => ({
-              icon:  SENSOR_ICON_MAP[s.icon_key] ?? Thermometer,
+              icon:  SENSOR_ICON_MAP[s.iconKey] ?? Thermometer,
               label: s.label,
               value: s.value,
               unit:  s.unit,
+              delta: s.delta ?? 0,
             })));
           }
         })
@@ -472,24 +481,34 @@ function DetailedInsights() {
       .then(d => { if (d) setWeather(d); })
       .catch(() => {});
 
-    getStageImages()
-      .then(d => { if (d?.length) setStageImages(d); })
+    getLatestMedia()
+      .then(d => {
+        if (d) setLatestImages(prev => ({
+          stage: d.stage?.src ? d.stage : prev.stage,
+          leaf:  d.leaf?.src  ? d.leaf  : prev.leaf,
+        }));
+      })
       .catch(() => {});
 
-    getDiseaseImages()
-      .then(d => { if (d?.length) setLeafImages(d); })
+    getMonthlyResources()
+      .then(d => {
+        if (d?.resources) setResources(d.resources);
+        if (d?.cost)      setCost(d.cost);
+        if (d?.actuators) setActuatorCosts(d.actuators);
+      })
       .catch(() => {});
 
     return () => clearInterval(timer);
   }, []);
 
-  // Construct nested {now, forecast} shape from flat weather API response
+  // Construct nested {now, forecast} shape from flat weather API response.
+  // forecast24h comes from the weather-forecast model (cadence_info weather_24h_ahead).
   const outdoorMetrics = weather ? {
-    temp:          { now: weather.current.temp,      forecast: weather.forecast.at(-1)?.high      ?? weather.current.temp      },
-    humidity:      { now: weather.current.humidity,  forecast: weather.forecast.at(-1)?.humidity  ?? weather.current.humidity  },
-    windspeed:     { now: weather.current.windSpeed, forecast: weather.forecast.at(-1)?.low       ?? weather.current.windSpeed },
-    solarradiation:{ now: weather.current.solarRad,  forecast: weather.forecast.at(-1)?.high      ?? 0                         },
-    conditions:    { now: weather.current.condition, forecast: weather.forecast.at(-1)?.condition ?? ''                        },
+    temp:          { now: weather.current.temp,      forecast: weather.forecast24h?.temp_external      ?? weather.current.temp      },
+    humidity:      { now: weather.current.humidity,  forecast: weather.forecast24h?.humidity_external  ?? weather.current.humidity  },
+    windspeed:     { now: weather.current.windSpeed, forecast: weather.forecast24h?.windspeed          ?? weather.current.windSpeed },
+    solarradiation:{ now: weather.current.solarRad,  forecast: weather.forecast24h?.solar_radiation    ?? weather.current.solarRad  },
+    conditions:    { now: weather.current.condition, forecast: weather.forecast24h?.conditions         ?? weather.current.condition },
   } : OUTDOOR_CURRENT;
 
   return (
@@ -511,7 +530,7 @@ function DetailedInsights() {
           icon={Leaf}
           eyebrow="Growth Analysis"
           title="Growth Intelligence"
-          subtitle="Stage progression, transition probability, and historical comparison"
+          subtitle="Stage progression, predicted time to transition, and historical comparison"
         />
 
         {/* Stage progress card */}
@@ -568,43 +587,44 @@ function DetailedInsights() {
           </div>
         </div>
 
-        {/* Hours to next stage + Transition probability */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+        {/* Predicted time to next stage (from growth-progression LSTM) */}
+        <div className="mb-5">
           <GrowthSpotlight
-            label="Estimated Time to Next Stage"
-            value={growthIntel.hoursToNextStage}
+            label="Predicted Time to Next Stage"
+            value={growthIntel.hoursToNextStage != null ? growthIntel.hoursToNextStage.toFixed(1) : '—'}
             unit="hrs"
-            days={Math.ceil(growthIntel.hoursToNextStage / 24)}
+            days={growthIntel.hoursToNextStage != null ? Math.ceil(growthIntel.hoursToNextStage / 24) : null}
             accent="primary"
-          />
-          <GrowthSpotlight
-            label="Transition Probability (24hr)"
-            value={`${growthIntel.transitionProb24h}%`}
-            unit="likelihood"
-            accent="secondary"
           />
         </div>
 
-        {/* Recent crop image gallery — rolling 30-min captures, max 5 */}
-        <div className="bg-surface-low rounded-xl p-5 border border-outline-variant/10">
-          <div className="flex items-center gap-2 mb-4">
-            <Camera size={13} className="text-primary" />
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface">
-              Recent Crop Images
-            </p>
-            <span className="ml-auto text-[9px] text-on-surface-variant opacity-50">5 captures</span>
+        {/* Latest crop stage image — CNN classifier result */}
+        <div className="bg-surface-deep rounded-xl overflow-hidden border border-outline-variant/10 flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-outline-variant/10">
+            <div className="flex items-center gap-2">
+              <Camera size={13} className="text-primary" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface">
+                Crop Stage Image
+              </span>
+            </div>
+            <span className="text-[9px] text-on-surface-variant opacity-60">
+              {latestImages.stage.captured}
+            </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {stageImages.map((img) => (
-              <GalleryFrame
-                key={img.capturedAgo}
-                src={img.src}
-                alt={img.alt}
-                label={img.stage}
-                badge={img.capturedAgo}
-                sub={`${img.confidence}% conf.`}
-              />
-            ))}
+          <div className="relative overflow-hidden">
+            <img
+              src={latestImages.stage.src}
+              alt={latestImages.stage.alt}
+              className="w-full aspect-video object-cover"
+              loading="lazy"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/70 to-transparent px-4 py-3">
+              <p className="text-[10px] font-bold text-white leading-none">{crop.current} Stage</p>
+              <p className="text-[8px] text-white/70 mt-0.5">{latestImages.stage.location}</p>
+            </div>
+            <span className="absolute top-3 right-3 text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-primary/20 text-primary border border-primary/25">
+              {latestImages.stage.badge}
+            </span>
           </div>
         </div>
       </section>
@@ -638,26 +658,33 @@ function DetailedInsights() {
           ))}
         </div>
 
-        {/* Recent leaf scan gallery — rolling 30-min captures, max 5 */}
-        <div className="bg-surface-low rounded-xl p-5 border border-outline-variant/10">
-          <div className="flex items-center gap-2 mb-4">
-            <ScanSearch size={13} className="text-primary" />
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface">
-              Recent Leaf Scans
-            </p>
-            <span className="ml-auto text-[9px] text-on-surface-variant opacity-50">5 captures</span>
+        {/* Latest leaf / disease scan image — CNN classifier result */}
+        <div className="bg-surface-deep rounded-xl overflow-hidden border border-outline-variant/10 flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-outline-variant/10">
+            <div className="flex items-center gap-2">
+              <ScanSearch size={13} className="text-primary" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface">
+                Leaf / Disease Scan
+              </span>
+            </div>
+            <span className="text-[9px] text-on-surface-variant opacity-60">
+              {latestImages.leaf.captured}
+            </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {leafImages.map((img) => (
-              <GalleryFrame
-                key={img.capturedAgo}
-                src={img.src}
-                alt={img.alt}
-                label={img.classification}
-                badge={img.capturedAgo}
-                sub={`${img.confidence}% conf.`}
-              />
-            ))}
+          <div className="relative overflow-hidden">
+            <img
+              src={latestImages.leaf.src}
+              alt={latestImages.leaf.alt}
+              className="w-full aspect-video object-cover"
+              loading="lazy"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/70 to-transparent px-4 py-3">
+              <p className="text-[10px] font-bold text-white leading-none">{latestImages.leaf.alt || 'Leaf Scan'}</p>
+              <p className="text-[8px] text-white/70 mt-0.5">{latestImages.leaf.location}</p>
+            </div>
+            <span className="absolute top-3 right-3 text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-primary/20 text-primary border border-primary/25">
+              {latestImages.leaf.badge}
+            </span>
           </div>
         </div>
       </section>
@@ -717,6 +744,113 @@ function DetailedInsights() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════
+          § 6 — MONTHLY RESOURCES & COST
+      ══════════════════════════════════════════════════════════════ */}
+      <section>
+        <SectionHeader
+          icon={Zap}
+          eyebrow="Resource Accounting"
+          title="Monthly Resources & Cost"
+          subtitle={`Operational consumption and cost for ${cost.month} · Tamil Nadu tariff rates`}
+        />
+
+        {/* Top row: Monthly Resources + Monthly Cost — same layout as dashboard */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+
+          {/* Monthly resource usage */}
+          <div className="bg-surface-high rounded-xl p-5 border border-outline-variant/10 flex flex-col gap-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-on-surface">
+                  Monthly Resources
+                </h3>
+                <p className="text-[9px] text-on-surface-variant mt-0.5">Monthly consumption</p>
+              </div>
+              <span className="text-[9px] text-on-surface-variant opacity-55 shrink-0">{cost.month}</span>
+            </div>
+            <div className="flex flex-col gap-3.5">
+              {resources.map(({ label, used, unit }) => (
+                <div key={label} className="flex items-center justify-between">
+                  <span className="text-[9px] uppercase tracking-widest text-on-surface-variant opacity-70">{label}</span>
+                  <span className="text-sm font-headline font-bold text-on-surface">
+                    {used} <span className="text-xs font-light text-on-surface-variant">{unit}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Monthly cost breakdown */}
+          <div className="bg-surface-high rounded-xl p-5 border border-outline-variant/10 flex flex-col gap-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-[10px] font-bold uppercase tracking-widest text-on-surface">
+                  Monthly Cost
+                </h3>
+                <p className="text-[9px] text-on-surface-variant mt-0.5">Operational expenditure</p>
+              </div>
+              <span className="text-[9px] text-on-surface-variant opacity-55 shrink-0">{cost.month}</span>
+            </div>
+            <div className="flex flex-col gap-2 flex-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-on-surface-variant">Energy</span>
+                <span className="text-sm font-medium text-on-surface-variant">₹{cost.energy.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-on-surface-variant">Water</span>
+                <span className="text-sm font-medium text-on-surface-variant">₹{cost.water.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center justify-between pt-3 border-t border-outline-variant/15 mt-1">
+                <span className="text-sm font-semibold text-on-surface">Total</span>
+                <span className="text-2xl font-headline font-bold text-on-surface">₹{cost.total.toFixed(2)}</span>
+              </div>
+            </div>
+            <div className="pt-3 border-t border-outline-variant/10 flex items-center justify-between">
+              <span className="text-[9px] uppercase tracking-widest text-on-surface-variant opacity-55">
+                Daily avg. cost
+              </span>
+              <span className="text-sm font-headline font-bold text-on-surface">
+                ₹{cost.total > 0 ? (cost.total / new Date().getDate()).toFixed(2) : '0.00'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Per-actuator resource breakdown */}
+        {actuatorCosts.length > 0 && (
+          <div className="bg-surface-high rounded-xl p-5 border border-outline-variant/10">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-on-surface mb-4">
+              Actuator Resource Breakdown
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {actuatorCosts.map((a) => (
+                <div
+                  key={a.key}
+                  className="bg-surface-low rounded-xl p-4 border border-outline-variant/10 flex flex-col gap-2"
+                >
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant">{a.label}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] text-on-surface-variant">Energy</span>
+                    <span className="text-xs font-medium text-on-surface">{a.energyKwh.toFixed(4)} kWh</span>
+                  </div>
+                  {a.waterL > 0 && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] text-on-surface-variant">Water</span>
+                      <span className="text-xs font-medium text-on-surface">{a.waterL.toFixed(1)} L</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between pt-2 border-t border-outline-variant/10">
+                    <span className="text-[9px] text-on-surface-variant">Cost</span>
+                    <span className="text-sm font-headline font-bold text-primary">₹{a.costInr.toFixed(2)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
     </div>

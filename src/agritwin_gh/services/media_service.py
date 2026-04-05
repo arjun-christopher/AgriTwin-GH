@@ -49,7 +49,11 @@ from sqlalchemy.orm import Session
 
 from agritwin_gh.core.runtime_store import MediaSnapshot, RuntimeStore, get_store
 from agritwin_gh.mpc.constants import DISEASE_CATEGORIES, GROWTH_STAGES
-from agritwin_gh.schemas.enums import GROWTH_STAGE_DISPLAY_NAME
+from agritwin_gh.schemas.enums import (
+    DISEASE_CNN_DISPLAY_NAME,
+    GROWTH_CNN_DISPLAY_NAME,
+    GROWTH_STAGE_DISPLAY_NAME,
+)
 from agritwin_gh.schemas.media_schemas import (
     DiseaseImagesResponse,
     ImageEntry,
@@ -194,87 +198,122 @@ class MediaService:
     def get_latest(self) -> LatestMediaResponse:
         """Return one stage image and one leaf scan image for the home dashboard.
 
-        Reads the current ``growth_stage`` and ``disease.dominant_label`` from
-        the store, fetches one random image per category from ``ImageStreamer``,
-        presigns the URLs, updates ``MediaSnapshot`` in the store, and returns
-        a ``LatestMediaResponse``.
+        Priority for image ``src``:
+        1. MinIO pre-signed URL (when DB + MinIO are reachable).
+        2. Local ``/api/media/local/{path}`` URL constructed from the CNN
+           image path stored in ``MediaSnapshot`` by the DT loop.
+        3. Empty string (frontend renders placeholder).
 
-        Falls back to an empty ``ImageEntry`` on any error.
+        Badge and location are always derived from CNN inference data stored
+        in ``MediaSnapshot``, so they persist between MinIO refreshes.
         """
+        import urllib.parse
+
         state = self._store.get_latest_state()
         now = _dt.datetime.now()
         streamer = self._get_streamer()
 
+        # ── helpers ─────────────────────────────────────────────────────────
+        def _local_url(image_key: str) -> str:
+            """Convert a repo-relative CNN image key to a servable local URL."""
+            prefix = "data/external/"
+            if image_key.startswith(prefix):
+                rel = image_key[len(prefix):]
+                return f"/api/media/local/{urllib.parse.quote(rel, safe='/')}"
+            return ""
+
         # ── Stage image ─────────────────────────────────────────────────────
         stage = state.growth.current_stage or "seedling"
         stage_display = GROWTH_STAGE_DISPLAY_NAME.get(stage, stage.title())
-        stage_entry = ImageEntry(
-            src="",
-            alt=f"Tomato plant — {stage_display} stage",
-            badge=f"Day {max(1, int(state.growth.hours_to_next_stage // 24))}",
-            location="GH-04 · Camera 2",
-            captured=_human_ago(now),
+
+        # CNN-derived badge and location (carried forward by update_from_step_result)
+        gs_cnn_label = state.media.latest_stage_label
+        gs_conf = state.media.latest_stage_confidence  # 0–1
+        gs_badge = (
+            GROWTH_CNN_DISPLAY_NAME.get(gs_cnn_label, stage_display)
+            if gs_cnn_label
+            else stage_display
         )
+        gs_location = (
+            f"{gs_conf * 100:.1f}% Conf."
+            if gs_conf > 0.0
+            else stage_display
+        )
+
+        stage_src = ""
         if streamer is not None:
             try:
                 payload = streamer.get_random_growth_stage_image(stage)
                 if payload:
-                    src = self._presign(payload.image_key, payload.bucket_name)
-                    stage_entry = ImageEntry(
-                        src=src,
-                        alt=f"Tomato plant — {stage_display} stage",
-                        badge=f"Day {max(1, int(state.growth.hours_to_next_stage // 24))}",
-                        location="GH-04 · Camera 2",
-                        captured=_human_ago(now),
-                        image_key=payload.image_key,
-                        bucket_name=payload.bucket_name,
-                    )
+                    stage_src = self._presign(payload.image_key, payload.bucket_name)
             except Exception as exc:
-                logger.warning("get_latest stage image failed: %s", exc)
+                logger.warning("get_latest stage MinIO failed: %s", exc)
+
+        # Fallback: serve local CNN image path
+        if not stage_src:
+            stage_src = _local_url(state.media.latest_stage_image_key)
+
+        stage_entry = ImageEntry(
+            src=stage_src,
+            alt=f"Tomato plant — {gs_badge} stage",
+            badge=gs_badge,
+            location=gs_location,
+            captured=_human_ago(now),
+        )
 
         # ── Leaf scan image ─────────────────────────────────────────────────
         disease_label = state.disease.dominant_label or "healthy leaves"
-        leaf_entry = ImageEntry(
-            src="",
-            alt=f"Leaf scan — {disease_label}",
-            badge="",
-            location="Sector B · Leaf #7",
-            captured=_human_ago(now),
+
+        # CNN-derived badge and location
+        leaf_cnn_label = state.media.latest_leaf_label
+        leaf_conf = state.media.latest_leaf_confidence  # 0–1
+        leaf_badge = (
+            DISEASE_CNN_DISPLAY_NAME.get(leaf_cnn_label, disease_label.replace("_", " ").title())
+            if leaf_cnn_label
+            else disease_label.replace("_", " ").title()
         )
+        leaf_location = (
+            f"{leaf_conf * 100:.1f}% Conf."
+            if leaf_conf > 0.0
+            else "Disease Scan"
+        )
+
+        leaf_src = ""
         if streamer is not None:
             try:
                 payload = streamer.get_random_disease_image(disease_label)
                 if payload:
-                    src = self._presign(payload.image_key, payload.bucket_name)
-                    confidence = 0.0
-                    if state.disease.pathogens:
-                        top = max(
-                            state.disease.pathogens,
-                            key=lambda p: p.get("probability", 0.0),
-                            default={},
-                        )
-                        confidence = float(top.get("probability", 0.0)) * 100.0
-                    leaf_entry = ImageEntry(
-                        src=src,
-                        alt=f"Leaf scan — {disease_label}",
-                        badge=f"{confidence:.1f}% Conf." if confidence else "",
-                        location="Sector B · Leaf #7",
-                        captured=_human_ago(now),
-                        image_key=payload.image_key,
-                        bucket_name=payload.bucket_name,
-                    )
+                    leaf_src = self._presign(payload.image_key, payload.bucket_name)
             except Exception as exc:
-                logger.warning("get_latest leaf image failed: %s", exc)
+                logger.warning("get_latest leaf MinIO failed: %s", exc)
 
-        # ── Persist to store so WebSocket layer can read without re-fetching ─
+        # Fallback: serve local CNN image path
+        if not leaf_src:
+            leaf_src = _local_url(state.media.latest_leaf_image_key)
+
+        leaf_entry = ImageEntry(
+            src=leaf_src,
+            alt=f"Leaf scan — {leaf_badge}",
+            badge=leaf_badge,
+            location=leaf_location,
+            captured=_human_ago(now),
+        )
+
+        # ── Persist to store — keep CNN keys, only overwrite src/alt ────────
         self._store.update_latest_state(
             media=MediaSnapshot(
                 latest_stage_src=stage_entry.src,
                 latest_stage_alt=stage_entry.alt,
+                latest_stage_image_key=state.media.latest_stage_image_key,
+                latest_stage_label=state.media.latest_stage_label,
+                latest_stage_confidence=state.media.latest_stage_confidence,
                 latest_leaf_src=leaf_entry.src,
                 latest_leaf_alt=leaf_entry.alt,
-                stage_images=self._store.get_latest_state().media.stage_images,
-                disease_scans=self._store.get_latest_state().media.disease_scans,
+                latest_leaf_image_key=state.media.latest_leaf_image_key,
+                latest_leaf_label=state.media.latest_leaf_label,
+                latest_leaf_confidence=state.media.latest_leaf_confidence,
+                stage_images=state.media.stage_images,
+                disease_scans=state.media.disease_scans,
             )
         )
 

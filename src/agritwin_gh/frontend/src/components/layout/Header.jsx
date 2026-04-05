@@ -30,9 +30,9 @@ function formatDate(d) {
   return `${DAY_NAMES[d.getDay()]} ${pad(d.getDate())} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-/** Format a Date → e.g.  "14:32:07 UTC" */
+/** Format a Date → e.g.  "14:32:07" (local system time) */
 function formatTime(d) {
-  return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())} UTC`;
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
 /* ── Component ────────────────────────────────────────────────────────────── */

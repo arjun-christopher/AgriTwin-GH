@@ -203,6 +203,12 @@ class WeatherResponse(BaseModel):
     status: WeatherStatus
     current: OutdoorCurrent
     forecast: list[ForecastEntry]
+    forecast_24h: dict = Field(
+        default_factory=dict,
+        description="24-hr-ahead model forecast from the weather-forecast LSTM/ensemble. "
+                    "Keys: temp_external (°C), humidity_external (%), "
+                    "solar_radiation (W/m²), windspeed (km/h), conditions (str).",
+    )
     timestamp: str = Field(
         default="",
         description="ISO-8601 UTC timestamp of the observation / model run.",
