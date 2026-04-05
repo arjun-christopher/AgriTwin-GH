@@ -25,6 +25,15 @@ AGRITWIN_NO_FRONTEND
     Set to ``1`` to skip launching the Vite dev server (e.g. in CI or
     when running ``uvicorn main:app`` directly).
     Default: ``0`` (Vite is launched alongside the backend).
+
+AGRITWIN_MONTHLY_DB
+    Set to ``1`` to enable automatic monthly snapshot persistence.
+    At each calendar-month boundary the DT loop flushes aggregated sensor,
+    actuator, MPC, and resource data into the ``monthly_snapshots`` table
+    and creates / reuses a ``crop_cycles`` row for the current run.
+    Requires the database schema in ``database/schema/monthly_snapshots.sql``
+    to be applied first (see ``docs/MONTHLY_SNAPSHOT_REFERENCE.md``).
+    Default: ``0`` (disabled — the DT loop runs normally without DB writes).
 """
 
 import sys

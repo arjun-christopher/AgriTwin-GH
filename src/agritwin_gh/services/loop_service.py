@@ -179,6 +179,9 @@ class LoopService:
         self._growth_stage: str = "seedling"
         self._total_steps: int = 288            # one full 24-hour synthetic day
 
+        # Monthly snapshot service (enabled when AGRITWIN_MONTHLY_DB=1)
+        self._monthly_svc: Any = None
+
     # ─────────────────────────────────────────────────────────────────────────
     # Lifecycle
     # ─────────────────────────────────────────────────────────────────────────
@@ -267,9 +270,47 @@ class LoopService:
         self._store.set_loop_start(now)
         logger.info("LoopService: loop_start_ts set to %s", now.isoformat())
 
+        # ── Monthly snapshot service ────────────────────────────────────────
+        from agritwin_gh.services.monthly_snapshot_service import (
+            MonthlySnapshotService as _MSS, monthly_db_enabled as _mde,
+        )
+        if _mde():
+            try:
+                from agritwin_gh.utils.database import get_db_manager as _get_dbm
+                from sqlalchemy import text as _stext
+                _dbmgr = _get_dbm()
+                _tmp_sess = _dbmgr.get_session()
+                try:
+                    _cnt = _tmp_sess.execute(
+                        _stext("SELECT COUNT(*) FROM crop_cycles")
+                    ).scalar() or 0
+                finally:
+                    _tmp_sess.close()
+                _cycle_label = f"cycle-{_cnt + 1:03d}"
+                self._monthly_svc = _MSS(
+                    session_factory=_dbmgr.get_session,
+                    cycle_label=_cycle_label,
+                )
+                self._monthly_svc.initialise()
+                logger.info(
+                    "LoopService: MonthlySnapshotService enabled (cycle=%s)",
+                    _cycle_label,
+                )
+            except Exception:
+                logger.exception(
+                    "LoopService: MonthlySnapshotService init failed — monthly snapshots disabled"
+                )
+                self._monthly_svc = None
+
     def stop_loop(self) -> None:
         """Signal the background loop to stop after the current step completes."""
         self._running = False
+        if self._monthly_svc is not None:
+            try:
+                self._monthly_svc.flush_current_month()
+                logger.info("LoopService: monthly snapshot flushed on stop.")
+            except Exception:
+                logger.exception("LoopService: monthly flush on stop failed")
         logger.info("LoopService: stop requested — loop will halt after current step.")
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -627,6 +668,28 @@ class LoopService:
             self._store.accumulate_resources(
                 energy_kwh=energy_kwh, water_l=water_l, actuator_energy=_act_energy
             )
+
+            # ── Monthly snapshot ingestion ─────────────────────────────────
+            if self._monthly_svc is not None:
+                _w_used = result.weather_used
+                _monthly_weather = {
+                    "temp_external":     getattr(_w_used, "temp_external",     0.0),
+                    "humidity_external": getattr(_w_used, "humidity_external", 0.0),
+                    "solar_radiation":   getattr(_w_used, "solar_radiation",   0.0),
+                    "windspeed":         getattr(_w_used, "windspeed",         0.0),
+                } if _w_used is not None else {}
+                try:
+                    self._monthly_svc.ingest_step(
+                        result=result,
+                        actuator_energy=_act_energy,
+                        water_l=water_l,
+                        energy_kwh=energy_kwh,
+                        cadence_info=result.cadence_info or {},
+                        disease_info=(result.cadence_info or {}).get("model_disease_result") or {},
+                        weather_info=_monthly_weather,
+                    )
+                except Exception:
+                    logger.exception("LoopService: monthly_svc.ingest_step failed")
 
             # RES: step-end resource and cost summary
             _rs = self._store.get_latest_state().resources
