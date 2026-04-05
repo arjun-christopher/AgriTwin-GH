@@ -476,7 +476,7 @@
   <a href="#components" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ✅ Components
+        🧩 Components
       
     </span>
   </a>
@@ -1427,7 +1427,7 @@
   <a href="#components" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ✅ Components
+        🧩 Components
       
     </span>
   </a>
@@ -1689,7 +1689,7 @@
 
 **An Advanced Digital Twin System for Precision Greenhouse Agriculture**
 
-*Combining real-time sensor fusion, physics-based simulation, multi-model ML inference, and model predictive control into a unified cyber-physical platform for intelligent tomato cultivation.*
+*Integrating real-time environmental data streams, physics-based simulation, multi-model ML inference, and model predictive control into a unified cyber-physical platform for intelligent tomato cultivation.*
 
 [📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)
 
@@ -1761,140 +1761,173 @@
 </tbody>
 </table>
 <hr />
-<h2 id="components">✅ Components<a class="headerlink" href="#components" title="Permanent link">&para;</a></h2>
+<h2 id="components">🧩 Components<a class="headerlink" href="#components" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Component</th>
 <th>Description</th>
-<th>Status</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><strong>Synthetic Data Generator</strong></td>
 <td>Configurable greenhouse sensor data generation</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Indoor Dataset Generator</strong></td>
 <td>Passive greenhouse physics model from outdoor weather</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Disease Classifier</strong></td>
 <td>EfficientNetB0 — 6-class tomato leaf disease classification</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Growth Stage Classifier</strong></td>
 <td>EfficientNetB3 — 6-stage tomato plant growth classification</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Growth Progression Model</strong></td>
 <td>Multi-task LSTM predicting current stage, next stage, and hours to transition from sensor time-series</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Disease Progression Model</strong></td>
 <td>Baseline + LSTM/GRU progression pipeline predicting per-disease current presence, 24h infection severity, and 24h trend (absent/emerging/reducing/stable/worsening) from hourly sensor time-series</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Greenhouse Weather Forecast Model</strong></td>
 <td>Chronos + XGBoost + LSTM ensemble forecasting 24h/48h indoor climate conditions for digital twin and control</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Digital Twin Simulator</strong></td>
 <td>Physics-based greenhouse model for scenario simulation</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>MPC-Like Control Policy</strong></td>
 <td>Model predictive control for actuator management</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Real-Time Closed-Loop</strong></td>
 <td>DB→AI→MPC→DB autonomous control cycle with in-memory context buffers</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>What-If Analysis</strong></td>
 <td>Comparative scenario evaluation and decision support</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Non-Verbal Alerts</strong></td>
 <td>Visual operator notifications for critical events</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Dashboard Visualizations</strong></td>
 <td>Interactive monitoring and performance comparison</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Resource Tracking</strong></td>
 <td>Energy and water usage optimization and reporting</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Time-Series Database</strong></td>
 <td>PostgreSQL + TimescaleDB hypertables for sensor data</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Image Storage</strong></td>
 <td>MinIO (S3-compatible) with PostgreSQL metadata indexing</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Monthly Snapshots</strong></td>
 <td>Per-month aggregated sensor, resource, MPC, and disease summary stored to SQLite/PostgreSQL</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>Frontend Dashboard</strong></td>
 <td>React 19 + Tailwind v4 SPA — HomeDashboard, Detailed Insights, Manual Override</td>
-<td>✅ Complete</td>
 </tr>
 <tr>
 <td><strong>3D Greenhouse Scene</strong></td>
 <td>Unity WebGL greenhouse with 10 actuator controllers, 15 crop plants (6-stage visual progression), time-of-day environment, and a central JSON-driven state applier for Python/FastAPI integration</td>
-<td>✅ Complete</td>
 </tr>
 </tbody>
 </table>
 <hr />
 <h2 id="system-architecture">📊 System Architecture<a class="headerlink" href="#system-architecture" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────────────┐
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                      AgriTwin-GH System                          │
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>└─────────────────────────────────────────────────────────────────┘
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                              │
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>        ┌─────────────────────┼─────────────────────┐
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        │                     │                     │
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        ▼                     ▼                     ▼
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>┌──────────────┐    ┌──────────────────┐    ┌──────────────┐
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│   Sensors    │    │  Digital Twin    │    │  Actuators   │
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│ (Monitoring) │───▶│   (Simulation)   │───▶│  (Control)   │
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>└──────────────┘    └──────────────────┘    └──────────────┘
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        │                     │                     │
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>        ▼                     ▼                     ▼
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>┌──────────────┐    ┌──────────────────┐    ┌──────────────┐
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│ Disease Risk │    │  Growth Stage    │    │ MPC Control  │
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│  Detection   │    │   Detection      │    │   Policy     │
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>└──────────────┘    └──────────────────┘    └──────────────┘
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>        │                     │                     │
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        └─────────────────────┼─────────────────────┘
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>                              ▼
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>                    ┌────────────────────────────────┐
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>                    │   FastAPI  ·  React Dashboard   │
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>                    │    Unity 3D Greenhouse Scene    │
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>                    └────────────────────────────────┘
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>╔══════════════════════════════════════════════════════════════════════════╗
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>║                   PRESENTATION &amp; VISUALISATION LAYER                     ║
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>║                                                                          ║
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>║   React 19 + Tailwind v4  (Vite · port 5173)                            ║
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>║   HomeDashboard · Detailed Insights · Manual Override                    ║
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>║                                                                          ║
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>║   Unity WebGL 3D Scene  (src/agritwin_gh/build/ · Git LFS)              ║
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>║   10 Actuator Controllers · 15 Crop Plants · TimeOfDay Environment       ║
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>╚══════════════════════════╦═══════════════════════════════════════════════╝
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>                           ║ HTTP + JSON  (CORS · port 8000)
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>╔══════════════════════════╩═══════════════════════════════════════════════╗
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>║                         FASTAPI APPLICATION LAYER                        ║
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>║                                                                          ║
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>║   Route Handlers  (thin adapters — no DB / no MPC logic)                ║
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>║   dt · actuators · weather · intelligence · resources · media · system   ║
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>║                        ▼                                                 ║
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>║   Service Layer  (business logic)                                        ║
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>║   DashboardService · ControlService · LoopService · MediaService         ║
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>║                        ▼                                                 ║
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>║   RuntimeStore  (in-process singleton — last DT step result)            ║
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>╚══════════════════════════╦═══════════════════════════════════════════════╝
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>                           ║ import only (no HTTP)
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>╔══════════════════════════╩═══════════════════════════════════════════════╗
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>║                     DIGITAL TWIN · MPC ENGINE LAYER                      ║
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>║                                                                          ║
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>║   Input Provider              DTLoop (Orchestrator)                      ║
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>║   ─────────────               ────────────────────                       ║
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>║   SyntheticInputProvider  ──► every 5 min:  DTEngine  (ARX physics)     ║
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>║   DatabaseInputProvider       every 15 min: MPCSolver (SLSQP/CVXPY)    ║
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>║   (swap with no loop change)  every 30 min: Image refresh hook          ║
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>║                                                                          ║
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>║   ML Inference Pipelines  (called per DT step)                          ║
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>║   ──────────────────────────────────────────────                         ║
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>║   Disease Classifier      EfficientNetB0  — 6-class leaf disease        ║
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>║   Growth Stage Classifier EfficientNetB3  — 6-stage plant growth        ║
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>║   Disease Progression     LSTM / GRU      — 24h severity + trend        ║
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>║   Growth Progression      Multi-task LSTM — stage + hours to transition ║
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>║   Weather Forecast        Chronos + XGBoost + LSTM — 24h / 48h climate  ║
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>╚══════════════════════════╦═══════════════════════════════════════════════╝
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>                           ║ read / write
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>╔══════════════════════════╩═══════════════════════════════════════════════╗
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>║                           DATA LAYER                                     ║
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>║                                                                          ║
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>║   PostgreSQL + TimescaleDB     Hypertables: weather · indoor conditions  ║
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>║   MinIO  (S3-compatible)       Image store: disease scans · growth imgs  ║
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>║   SQLite  (dev / no-DB mode)   Monthly snapshots + fallback storage      ║
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>╚══════════════════════════════════════════════════════════════════════════╝
 </code></pre></div>
+<p><strong>Multi-rate DT cadence:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Rate</th>
+<th>Period</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DT physics step</td>
+<td>every 5 min</td>
+<td>ARX model advances greenhouse state by one timestep</td>
+</tr>
+<tr>
+<td>MPC re-solve</td>
+<td>every 15 min</td>
+<td>SLSQP optimiser recomputes optimal actuator trajectory</td>
+</tr>
+<tr>
+<td>Image refresh</td>
+<td>every 30 min</td>
+<td>Disease / growth image observation hook fires</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>AgriTwin-GH is a <strong>fully software-defined</strong> system — no physical hardware required. The <code>SyntheticInputProvider</code> generates realistic greenhouse conditions from a diurnal weather model, while the <code>DatabaseInputProvider</code> swaps in live PostgreSQL data for production use. Swapping providers does not change the loop, the MPC solver, or any ML model.</p>
+</blockquote>
 <hr />
 <h2 id="data-infrastructure">🗄️ Data Infrastructure<a class="headerlink" href="#data-infrastructure" title="Permanent link">&para;</a></h2>
 <ul>
