@@ -71,6 +71,25 @@ _loop_file_logger: logging.Logger | None = None
 _loop_file_lock = threading.Lock()
 
 
+class _WriteThroughRotatingFileHandler(logging.handlers.RotatingFileHandler):
+    """RotatingFileHandler with write_through=True.
+
+    Python's default text-mode FileHandler buffers ~8 KB before flushing to
+    disk.  That means log lines only appear in the file after the buffer fills
+    or the process exits — making live monitoring impossible.  This subclass
+    opens the underlying stream with ``write_through=True`` so every ``emit()``
+    hits the OS immediately (no TextIOWrapper buffering layer).
+    """
+
+    def _open(self):
+        import io as _io
+
+        mode = self.mode          # 'a' by default
+        raw  = _io.FileIO(self.baseFilename, mode=mode + "b" if "b" not in mode else mode)
+        buf  = _io.BufferedWriter(raw)
+        return _io.TextIOWrapper(buf, encoding=self.encoding or "utf-8", write_through=True)
+
+
 def _get_loop_file_logger() -> logging.Logger:
     """Return (and lazily create) the dedicated DT-loop trace file logger."""
     global _loop_file_logger
@@ -81,7 +100,7 @@ def _get_loop_file_logger() -> logging.Logger:
             return _loop_file_logger
         _LOOP_LOG_DIR.mkdir(parents=True, exist_ok=True)
         log_path = _LOOP_LOG_DIR / f"dt_loop_{_dt.date.today():%Y%m%d}.log"
-        handler = logging.handlers.RotatingFileHandler(
+        handler = _WriteThroughRotatingFileHandler(
             log_path, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"
         )
         handler.setFormatter(

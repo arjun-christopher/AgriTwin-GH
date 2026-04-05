@@ -530,6 +530,7 @@ class CSVInputProvider:
         hourly_states: list,
         stage: str = "seedling",
         timestamp: "_dt.datetime | None" = None,
+        elapsed_hours: float = 0.0,
     ) -> None:
         """Re-run both progression LSTMs with the current DT state history.
 
@@ -546,7 +547,7 @@ class CSVInputProvider:
         ts = timestamp or _dt.datetime.now()
         from concurrent.futures import ThreadPoolExecutor
         with ThreadPoolExecutor(max_workers=2, thread_name_prefix="ai_refresh") as pool:
-            _fg = pool.submit(self._refresh_growth_model, hourly_states, stage, ts)
+            _fg = pool.submit(self._refresh_growth_model, hourly_states, stage, ts, elapsed_hours)
             _fd = pool.submit(self._refresh_disease_model, hourly_states, stage, ts)
         _fg.result()
         _fd.result()
@@ -556,6 +557,7 @@ class CSVInputProvider:
         hourly_states: list,
         stage: str,
         ts: _dt.datetime,
+        elapsed_hours: float = 0.0,
     ) -> None:
         """Rebuild the growth-progression LSTM forecast from DT state history."""
         import logging as _log
@@ -585,8 +587,11 @@ class CSVInputProvider:
                 rh     = float(st.indoor_humidity)
                 temp   = float(st.indoor_temp)
                 dew    = temp - (100.0 - rh) / 5.0   # simplified Magnus approx.
-                hours_in      = float(i)
-                days_in       = i / 24.0
+                # hours_in_current_stage counts backward from the current
+                # elapsed time so the LSTM sees the plant's real age in-stage
+                # rather than always starting from 0.
+                hours_in      = max(0.0, elapsed_hours - (24 - 1 - i))
+                days_in       = hours_in / 24.0
                 hours_to_next = max(0.0, stage_dur_h - hours_in)
                 rows.append({
                     "timestamp":                     row_ts,
@@ -631,9 +636,6 @@ class CSVInputProvider:
             )
 
             wsw = GrowthStageWeights()
-            if wsw.model is None:
-                return
-
             out = wsw.predict_from_dataframe(df_hist)
             if out is None:
                 return

@@ -455,7 +455,10 @@ class DTLoop:
                     # Sub-sample every 12th state → 24 hourly snapshots.
                     _hourly = list(self._state_history)[::12]  # 24 entries
                     try:
-                        self._input_provider.refresh_ai_models(_hourly, stage, ts)  # type: ignore[attr-defined]
+                        self._input_provider.refresh_ai_models(  # type: ignore[attr-defined]
+                            _hourly, stage, ts,
+                            elapsed_hours=self._hours_in_stage,
+                        )
                         self._model_growth_result = getattr(
                             self._input_provider, "_model_growth_result",
                             self._model_growth_result,
