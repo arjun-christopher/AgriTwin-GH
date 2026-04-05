@@ -13,7 +13,7 @@
 
 **An Advanced Digital Twin System for Precision Greenhouse Agriculture**
 
-*Combining real-time sensor fusion, physics-based simulation, multi-model ML inference, and model predictive control into a unified cyber-physical platform for intelligent tomato cultivation.*
+*Integrating real-time environmental data streams, physics-based simulation, multi-model ML inference, and model predictive control into a unified cyber-physical platform for intelligent tomato cultivation.*
 
 [📖 View Full Documentation →](https://arjun-christopher.github.io/AgriTwin-GH/)
 
@@ -59,60 +59,93 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 
 ---
 
-## ✅ Components
+## 🧩 Components
 
-| Component | Description | Status |
-|-----------|-------------|--------|
-| **Synthetic Data Generator** | Configurable greenhouse sensor data generation | ✅ Complete |
-| **Indoor Dataset Generator** | Passive greenhouse physics model from outdoor weather | ✅ Complete |
-| **Disease Classifier** | EfficientNetB0 — 6-class tomato leaf disease classification | ✅ Complete |
-| **Growth Stage Classifier** | EfficientNetB3 — 6-stage tomato plant growth classification | ✅ Complete |
-| **Growth Progression Model** | Multi-task LSTM predicting current stage, next stage, and hours to transition from sensor time-series | ✅ Complete |
-| **Disease Progression Model** | Baseline + LSTM/GRU progression pipeline predicting per-disease current presence, 24h infection severity, and 24h trend (absent/emerging/reducing/stable/worsening) from hourly sensor time-series | ✅ Complete |
-| **Greenhouse Weather Forecast Model** | Chronos + XGBoost + LSTM ensemble forecasting 24h/48h indoor climate conditions for digital twin and control | ✅ Complete |
-| **Digital Twin Simulator** | Physics-based greenhouse model for scenario simulation | ✅ Complete |
-| **MPC-Like Control Policy** | Model predictive control for actuator management | ✅ Complete |
-| **Real-Time Closed-Loop** | DB→AI→MPC→DB autonomous control cycle with in-memory context buffers | ✅ Complete |
-| **What-If Analysis** | Comparative scenario evaluation and decision support | ✅ Complete |
-| **Non-Verbal Alerts** | Visual operator notifications for critical events | ✅ Complete |
-| **Dashboard Visualizations** | Interactive monitoring and performance comparison | ✅ Complete |
-| **Resource Tracking** | Energy and water usage optimization and reporting | ✅ Complete |
-| **Time-Series Database** | PostgreSQL + TimescaleDB hypertables for sensor data | ✅ Complete |
-| **Image Storage** | MinIO (S3-compatible) with PostgreSQL metadata indexing | ✅ Complete |
-| **Monthly Snapshots** | Per-month aggregated sensor, resource, MPC, and disease summary stored to SQLite/PostgreSQL | ✅ Complete |
-| **Frontend Dashboard** | React 19 + Tailwind v4 SPA — HomeDashboard, Detailed Insights, Manual Override | ✅ Complete |
-| **3D Greenhouse Scene** | Unity WebGL greenhouse with 10 actuator controllers, 15 crop plants (6-stage visual progression), time-of-day environment, and a central JSON-driven state applier for Python/FastAPI integration | ✅ Complete |
+| Component | Description |
+|-----------|-------------|
+| **Synthetic Data Generator** | Configurable greenhouse sensor data generation |
+| **Indoor Dataset Generator** | Passive greenhouse physics model from outdoor weather |
+| **Disease Classifier** | EfficientNetB0 — 6-class tomato leaf disease classification |
+| **Growth Stage Classifier** | EfficientNetB3 — 6-stage tomato plant growth classification |
+| **Growth Progression Model** | Multi-task LSTM predicting current stage, next stage, and hours to transition from sensor time-series |
+| **Disease Progression Model** | Baseline + LSTM/GRU progression pipeline predicting per-disease current presence, 24h infection severity, and 24h trend (absent/emerging/reducing/stable/worsening) from hourly sensor time-series |
+| **Greenhouse Weather Forecast Model** | Chronos + XGBoost + LSTM ensemble forecasting 24h/48h indoor climate conditions for digital twin and control |
+| **Digital Twin Simulator** | Physics-based greenhouse model for scenario simulation |
+| **MPC-Like Control Policy** | Model predictive control for actuator management |
+| **Real-Time Closed-Loop** | DB→AI→MPC→DB autonomous control cycle with in-memory context buffers |
+| **What-If Analysis** | Comparative scenario evaluation and decision support |
+| **Non-Verbal Alerts** | Visual operator notifications for critical events |
+| **Dashboard Visualizations** | Interactive monitoring and performance comparison |
+| **Resource Tracking** | Energy and water usage optimization and reporting |
+| **Time-Series Database** | PostgreSQL + TimescaleDB hypertables for sensor data |
+| **Image Storage** | MinIO (S3-compatible) with PostgreSQL metadata indexing |
+| **Monthly Snapshots** | Per-month aggregated sensor, resource, MPC, and disease summary stored to SQLite/PostgreSQL |
+| **Frontend Dashboard** | React 19 + Tailwind v4 SPA — HomeDashboard, Detailed Insights, Manual Override |
+| **3D Greenhouse Scene** | Unity WebGL greenhouse with 10 actuator controllers, 15 crop plants (6-stage visual progression), time-of-day environment, and a central JSON-driven state applier for Python/FastAPI integration |
 
 ---
 
 ## 📊 System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                      AgriTwin-GH System                          │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-        ┌─────────────────────┼─────────────────────┐
-        │                     │                     │
-        ▼                     ▼                     ▼
-┌──────────────┐    ┌──────────────────┐    ┌──────────────┐
-│   Sensors    │    │  Digital Twin    │    │  Actuators   │
-│ (Monitoring) │───▶│   (Simulation)   │───▶│  (Control)   │
-└──────────────┘    └──────────────────┘    └──────────────┘
-        │                     │                     │
-        ▼                     ▼                     ▼
-┌──────────────┐    ┌──────────────────┐    ┌──────────────┐
-│ Disease Risk │    │  Growth Stage    │    │ MPC Control  │
-│  Detection   │    │   Detection      │    │   Policy     │
-└──────────────┘    └──────────────────┘    └──────────────┘
-        │                     │                     │
-        └─────────────────────┼─────────────────────┘
-                              ▼
-                    ┌────────────────────────────────┐
-                    │   FastAPI  ·  React Dashboard   │
-                    │    Unity 3D Greenhouse Scene    │
-                    └────────────────────────────────┘
+╔══════════════════════════════════════════════════════════════════════════╗
+║                   PRESENTATION & VISUALISATION LAYER                     ║
+║                                                                          ║
+║   React 19 + Tailwind v4  (Vite · port 5173)                            ║
+║   HomeDashboard · Detailed Insights · Manual Override                    ║
+║                                                                          ║
+║   Unity WebGL 3D Scene  (src/agritwin_gh/build/ · Git LFS)              ║
+║   10 Actuator Controllers · 15 Crop Plants · TimeOfDay Environment       ║
+╚══════════════════════════╦═══════════════════════════════════════════════╝
+                           ║ HTTP + JSON  (CORS · port 8000)
+╔══════════════════════════╩═══════════════════════════════════════════════╗
+║                         FASTAPI APPLICATION LAYER                        ║
+║                                                                          ║
+║   Route Handlers  (thin adapters — no DB / no MPC logic)                ║
+║   dt · actuators · weather · intelligence · resources · media · system   ║
+║                        ▼                                                 ║
+║   Service Layer  (business logic)                                        ║
+║   DashboardService · ControlService · LoopService · MediaService         ║
+║                        ▼                                                 ║
+║   RuntimeStore  (in-process singleton — last DT step result)            ║
+╚══════════════════════════╦═══════════════════════════════════════════════╝
+                           ║ import only (no HTTP)
+╔══════════════════════════╩═══════════════════════════════════════════════╗
+║                     DIGITAL TWIN · MPC ENGINE LAYER                      ║
+║                                                                          ║
+║   Input Provider              DTLoop (Orchestrator)                      ║
+║   ─────────────               ────────────────────                       ║
+║   SyntheticInputProvider  ──► every 5 min:  DTEngine  (ARX physics)     ║
+║   DatabaseInputProvider       every 15 min: MPCSolver (SLSQP/CVXPY)    ║
+║   (swap with no loop change)  every 30 min: Image refresh hook          ║
+║                                                                          ║
+║   ML Inference Pipelines  (called per DT step)                          ║
+║   ──────────────────────────────────────────────                         ║
+║   Disease Classifier      EfficientNetB0  — 6-class leaf disease        ║
+║   Growth Stage Classifier EfficientNetB3  — 6-stage plant growth        ║
+║   Disease Progression     LSTM / GRU      — 24h severity + trend        ║
+║   Growth Progression      Multi-task LSTM — stage + hours to transition ║
+║   Weather Forecast        Chronos + XGBoost + LSTM — 24h / 48h climate  ║
+╚══════════════════════════╦═══════════════════════════════════════════════╝
+                           ║ read / write
+╔══════════════════════════╩═══════════════════════════════════════════════╗
+║                           DATA LAYER                                     ║
+║                                                                          ║
+║   PostgreSQL + TimescaleDB     Hypertables: weather · indoor conditions  ║
+║   MinIO  (S3-compatible)       Image store: disease scans · growth imgs  ║
+║   SQLite  (dev / no-DB mode)   Monthly snapshots + fallback storage      ║
+╚══════════════════════════════════════════════════════════════════════════╝
 ```
+
+**Multi-rate DT cadence:**
+
+| Rate | Period | What happens |
+|------|--------|-------------|
+| DT physics step | every 5 min | ARX model advances greenhouse state by one timestep |
+| MPC re-solve | every 15 min | SLSQP optimiser recomputes optimal actuator trajectory |
+| Image refresh | every 30 min | Disease / growth image observation hook fires |
+
+> AgriTwin-GH is a **fully software-defined** system — no physical hardware required. The `SyntheticInputProvider` generates realistic greenhouse conditions from a diurnal weather model, while the `DatabaseInputProvider` swaps in live PostgreSQL data for production use. Swapping providers does not change the loop, the MPC solver, or any ML model.
 
 ---
 
