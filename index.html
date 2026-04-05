@@ -492,6 +492,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="🗄️ Data Infrastructure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-schemas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Schemas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monthly-snapshot-quick-enable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monthly Snapshot Quick Enable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1354,6 +1382,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="🗄️ Data Infrastructure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-schemas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Schemas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monthly-snapshot-quick-enable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monthly Snapshot Quick Enable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1606,6 +1662,11 @@
 <td>✅ Complete</td>
 </tr>
 <tr>
+<td><strong>Monthly Snapshots</strong></td>
+<td>Per-month aggregated sensor, resource, MPC, and disease summary stored to SQLite/PostgreSQL</td>
+<td>✅ Complete</td>
+</tr>
+<tr>
 <td><strong>Frontend Dashboard</strong></td>
 <td>React 19 + Tailwind v4 SPA — HomeDashboard, Detailed Insights, Manual Override</td>
 <td>✅ Complete</td>
@@ -1642,9 +1703,50 @@
 <ul>
 <li><strong>TimescaleDB</strong> — Hypertable storage for weather and indoor greenhouse time-series (5-min and hourly) → <a href="docs/DATABASE_REFERENCE.md">Database Reference</a></li>
 <li><strong>MinIO</strong> — S3-compatible image object storage with PostgreSQL metadata indexing → <a href="docs/IMAGE_STORAGE_SETUP.md">Image Storage Setup</a></li>
+<li><strong>Monthly Snapshots</strong> — Per-month aggregated summaries (sensor averages, energy/water totals, per-actuator billing, MPC convergence rate, disease peaks, AI run counts) stored to SQLite (dev) or PostgreSQL (prod) → <a href="docs/MONTHLY_SNAPSHOT_REFERENCE.md">Monthly Snapshot Reference</a></li>
 <li><strong>Indoor Dataset</strong> — Passive greenhouse physics model deriving indoor conditions from outdoor weather data → <a href="docs/INDOOR_GREENHOUSE_DATASET.md">Dataset Guide</a></li>
 <li><strong>Data Directory Guide</strong> — Structure and management conventions → <a href="docs/DATA.md">Data Guide</a></li>
 </ul>
+<h3 id="database-schemas">Database Schemas<a class="headerlink" href="#database-schemas" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>database/schema/timeseries_data.sql</code></td>
+<td>Sensor hypertables — weather and indoor greenhouse time-series</td>
+</tr>
+<tr>
+<td><code>database/schema/image_metadata.sql</code></td>
+<td>Image object store metadata — disease scans and growth stage images</td>
+</tr>
+<tr>
+<td><code>database/schema/monthly_snapshots.sql</code></td>
+<td>Monthly aggregation tables — <code>monthly_snapshots</code> and <code>monthly_actuator_energy</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="monthly-snapshot-quick-enable">Monthly Snapshot Quick Enable<a class="headerlink" href="#monthly-snapshot-quick-enable" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c"># Windows PowerShell</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">$env:AGRITWIN_MONTHLY_DB</span> <span class="p">=</span> <span class="s2">&quot;1&quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Linux / macOS</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nv">AGRITWIN_MONTHLY_DB</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>main.py
+</code></pre></div></p>
+<p>Apply the schema first (SQLite auto-creates on first ingest; PostgreSQL requires explicit apply):
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>psql<span class="w"> </span>-d<span class="w"> </span>agritwin_db<span class="w"> </span>-f<span class="w"> </span>database/schema/monthly_snapshots.sql
+</code></pre></div></p>
+<p>Seed mock data and inspect:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python<span class="w"> </span>scripts/seed_monthly_mock.py<span class="w">       </span><span class="c1"># inserts 3 rows across 2 crop cycles</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>python<span class="w"> </span>scripts/show_monthly_snapshots.py<span class="w">  </span><span class="c1"># compact table view</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>python<span class="w"> </span>scripts/show_monthly_snapshots.py<span class="w"> </span>--detail<span class="w">  </span><span class="c1"># full per-row breakdown</span>
+</code></pre></div></p>
+<p>See <a href="docs/MONTHLY_SNAPSHOT_REFERENCE.md">Monthly Snapshot Reference</a> for the full schema, field reference, and API integration.</p>
 <h2 id="ml-models">🤖 ML Models<a class="headerlink" href="#ml-models" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Disease Classifier</strong> — EfficientNetB0, 6 classes: Early Blight, Late Blight, Leaf Mold, Powdery Mildew, Septoria Leaf Spot, Spider Mites + Healthy → <a href="docs/TOMATO_DISEASE_CLASSIFICATION.md">Disease Classification</a></li>
@@ -1681,15 +1783,15 @@
 <li><strong>MkDocs Material</strong> — Documentation website</li>
 </ul>
 <h2 id="quick-start">🚀 Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">arjun-christopher</span><span class="p">/</span><span class="n">AgriTwin-GH</span><span class="p">.</span><span class="n">git</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">cd </span><span class="n">AgriTwin-GH</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">python</span> <span class="n">setup</span><span class="p">.</span><span class="n">py</span>           <span class="c"># installs uv, sets up venv, syncs deps, and optionally downloads the dataset</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">jupyter</span> <span class="n">notebook</span> <span class="n">feature_demos</span><span class="p">/</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">://</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="p">/</span><span class="n">arjun-christopher</span><span class="p">/</span><span class="n">AgriTwin-GH</span><span class="p">.</span><span class="n">git</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">cd </span><span class="n">AgriTwin-GH</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">python</span> <span class="n">setup</span><span class="p">.</span><span class="n">py</span>           <span class="c"># installs uv, sets up venv, syncs deps, and optionally downloads the dataset</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">jupyter</span> <span class="n">notebook</span> <span class="n">feature_demos</span><span class="p">/</span>
 </code></pre></div>
 <blockquote>
 <p><strong><code>setup.py</code></strong> handles everything automatically — installing uv (if missing), initialising the project, creating the virtual environment, syncing dependencies, and optionally downloading the Kaggle dataset with an interactive token setup. You can also run the steps manually:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">uv</span> <span class="n">venv</span> <span class="p">&amp;&amp;</span> <span class="n">uv</span> <span class="n">sync</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="p">.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">activate</span>   <span class="c"># Windows — or `source .venv/bin/activate` on macOS/Linux</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">uv</span> <span class="n">venv</span> <span class="p">&amp;&amp;</span> <span class="n">uv</span> <span class="n">sync</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="p">.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">activate</span>   <span class="c"># Windows — or `source .venv/bin/activate` on macOS/Linux</span>
 </code></pre></div>
 </blockquote>
 <h2 id="documentation">📚 Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
@@ -1716,6 +1818,10 @@
 <tr>
 <td><a href="docs/IMAGE_STORAGE_SETUP.md">Image Storage Setup</a></td>
 <td>MinIO + PostgreSQL image pipeline</td>
+</tr>
+<tr>
+<td><a href="docs/MONTHLY_SNAPSHOT_REFERENCE.md">Monthly Snapshot Reference</a></td>
+<td>Per-month aggregated sensor, resource, MPC, and disease summary — schema, API, scripts</td>
 </tr>
 <tr>
 <td><a href="docs/INDOOR_GREENHOUSE_DATASET.md">Indoor Greenhouse Dataset</a></td>
@@ -1769,7 +1875,7 @@
 </table>
 <p><strong><a href="https://arjun-christopher.github.io/AgriTwin-GH/">📖 View Full Documentation →</a></strong></p>
 <h2 id="fastapi-backend">🌐 FastAPI Backend<a class="headerlink" href="#fastapi-backend" title="Permanent link">&para;</a></h2>
-<p>A FastAPI + Uvicorn server exposes 15 REST endpoints backed by the live DT loop and <code>RuntimeStore</code>:</p>
+<p>A FastAPI + Uvicorn server exposes 16 REST endpoints backed by the live DT loop and <code>RuntimeStore</code>:</p>
 <table>
 <thead>
 <tr>
@@ -1786,8 +1892,13 @@
 </tr>
 <tr>
 <td>POST</td>
-<td><code>/api/dt/override/sim</code></td>
+<td><code>/api/dt/override</code></td>
 <td>Enter override mode with custom env/crop values</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/dt/override/sim</code></td>
+<td>Enter sim override mode (stage + start time)</td>
 </tr>
 <tr>
 <td>DELETE</td>
@@ -1831,14 +1942,29 @@
 </tr>
 <tr>
 <td>GET</td>
+<td><code>/api/media/latest</code></td>
+<td>Latest disease scan and growth stage image</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/media/stage-images</code></td>
+<td>Rolling gallery of growth stage captures</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/media/disease-scans</code></td>
+<td>Rolling gallery of disease scan images</td>
+</tr>
+<tr>
+<td>GET</td>
 <td><code>/api/system/health</code></td>
 <td>6-subsystem health check</td>
 </tr>
 </tbody>
 </table>
 <p>Interactive docs at <code>http://localhost:8000/docs</code>. See <a href="docs/FASTAPI_API_GUIDE.md">FastAPI Backend &amp; API Guide</a> for the full architecture, layer reference, and testing guide.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>   <span class="c"># → FastAPI on http://localhost:8000</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>   <span class="c"># → FastAPI on http://localhost:8000</span>
 </code></pre></div>
 <h2 id="frontend-dashboard">�️ Frontend Dashboard<a class="headerlink" href="#frontend-dashboard" title="Permanent link">&para;</a></h2>
 <p>A React 19 + Tailwind v4 single-page application providing a real-time operator interface for the greenhouse digital twin.</p>
@@ -1848,21 +1974,31 @@
 <li><strong>Manual Override</strong> — live/override mode toggle, editable growth stage + day-in-stage + start time, per-actuator on/off toggles, apply and reset-all actions</li>
 </ul>
 <p>All pages are wired to live FastAPI endpoints. The service layer (<code>src/agritwin_gh/frontend/src/services/api.js</code>) makes real <code>fetch()</code> calls to <code>http://localhost:8000/api/*</code>. Run <code>python main.py</code> to start the backend, then <code>npm run dev</code> for the dev server. See <a href="docs/FASTAPI_API_GUIDE.md">FastAPI Backend &amp; API Guide</a> for the full endpoint reference, override mode, and 3D integration fields.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">cd </span><span class="n">src</span><span class="p">/</span><span class="n">agritwin_gh</span><span class="p">/</span><span class="n">frontend</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">npm</span> <span class="n">install</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>      <span class="c"># → http://localhost:5173</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nb">cd </span><span class="n">src</span><span class="p">/</span><span class="n">agritwin_gh</span><span class="p">/</span><span class="n">frontend</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">npm</span> <span class="n">install</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">npm</span> <span class="n">run</span> <span class="n">dev</span>      <span class="c"># → http://localhost:5173</span>
 </code></pre></div>
 <h2 id="repository-structure">📂 Repository Structure<a class="headerlink" href="#repository-structure" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>AgriTwin-GH/
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>├── setup.py                # Interactive setup — uv install, venv, deps, Kaggle dataset
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>├── feature_demos/          # Interactive Jupyter notebook demonstrations (01–06)
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>├── notebooks/              # ML training notebooks (disease &amp; growth stage classifiers)
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>├── scripts/                # Data loading, upload, and classification scripts
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>├── src/agritwin_gh/        # Core library — API, models, services, utils
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>│   └── frontend/           # React 19 + Tailwind v4 dashboard SPA
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>├── data/                   # Raw, processed, and external datasets
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>├── database/               # PostgreSQL schema files
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>└── docs/                   # Documentation source files
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>AgriTwin-GH/
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>├── setup.py                # Interactive setup — uv install, venv, deps, Kaggle dataset
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>├── main.py                 # FastAPI entry point (Uvicorn + DT loop startup)
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>├── feature_demos/          # Interactive Jupyter notebook demonstrations (01–06)
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>├── notebooks/              # ML training notebooks (disease &amp; growth stage classifiers)
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>├── scripts/                # Utility scripts
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>│   ├── seed_monthly_mock.py        # Seed 3 monthly snapshot rows for demo
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>│   ├── show_monthly_snapshots.py   # Display monthly snapshot table (--detail, --cycle, --limit)
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>│   ├── load_timeseries_to_postgres.py  # Load sensor data into PostgreSQL/TimescaleDB
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>│   └── classify_input_leaf.py      # Run leaf disease classifier on an input image
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>├── database/
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>│   └── schema/
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>│       ├── timeseries_data.sql         # Sensor hypertables (weather + indoor)
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>│       ├── image_metadata.sql          # MinIO image metadata index
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>│       └── monthly_snapshots.sql       # Monthly aggregation tables
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>├── src/agritwin_gh/        # Core library — API, models, services, utils
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>│   └── frontend/           # React 19 + Tailwind v4 dashboard SPA
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>├── tests/                  # Unit and smoke tests
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>├── data/                   # Raw, processed, and external datasets
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>└── docs/                   # Documentation source files
 </code></pre></div>
 <h2 id="research-areas">🔬 Research Areas<a class="headerlink" href="#research-areas" title="Permanent link">&para;</a></h2>
 <ul>
