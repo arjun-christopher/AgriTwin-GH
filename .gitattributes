@@ -4,3 +4,4 @@
 *.pkl filter=lfs diff=lfs merge=lfs -text
 *.pt filter=lfs diff=lfs merge=lfs -text
 *.pth filter=lfs diff=lfs merge=lfs -text
+src/agritwin_gh/build/Build/*.br filter=lfs diff=lfs merge=lfs -text

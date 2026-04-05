@@ -17,7 +17,12 @@ ENV/
 *.egg-info/
 .eggs/
 dist/
-build/
+/build/
+
+# Unity WebGL build — tracked via Git LFS
+# src/agritwin_gh/build/ is allowed (not matched by /build/ above)
+# Unity Burst debug output — explicitly marked DoNotShip by Unity
+src/agritwin_gh/build/AgriTwin-GH_BurstDebugInformation_DoNotShip/
 
 # UV package manager
 .uv-cache/
