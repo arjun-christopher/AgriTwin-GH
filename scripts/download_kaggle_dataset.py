@@ -31,6 +31,20 @@ from datetime import datetime
 from typing import Dict, List, Tuple
 import zipfile
 
+import sys
+
+# Ensure stdout/stderr use UTF-8 encoding to avoid UnicodeEncodeError in logging
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+if hasattr(sys.stderr, "reconfigure"):
+    try:
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
@@ -87,13 +101,13 @@ def check_kaggle_credentials() -> bool:
     if not kaggle_json.exists():
         logger.error(f"Kaggle credentials not found at {kaggle_json}")
         logger.error("Please follow these steps:")
-        logger.error("1. Go to https://www.kaggle.com/")
+        logger.error("1. Go to https://www.kaggle.com")
         logger.error("2. Click 'Create New API Token'")
         logger.error("3. Place the downloaded kaggle.json in ~/.kaggle/")
         logger.error("4. On Windows: C:\\Users\\<username>\\.kaggle\\kaggle.json")
         return False
     
-    logger.info(f"✓ Kaggle credentials found at {kaggle_json}")
+    logger.info(f"Kaggle credentials found at {kaggle_json} [OK]")
     return True
 
 
@@ -137,7 +151,7 @@ def download_dataset(force: bool = False) -> Path:
             unzip=True
         )
         
-        logger.info("✓ Dataset downloaded successfully")
+        logger.info("Dataset downloaded successfully [OK]")
         return TEMP_DOWNLOAD_DIR
         
     except Exception as e:
@@ -188,7 +202,7 @@ def organize_files(source_dir: Path, dry_run: bool = False) -> Dict[str, int]:
                     if not destination.exists():
                         shutil.copytree(source, destination)
                         stats["folders_created"] += 1
-                        logger.info(f"  ✓ Created directory: {destination.name}")
+                        logger.info(f"  Created directory: {destination.name} [OK]")
                     else:
                         # Copy files into existing directory
                         for item in source.rglob("*"):
@@ -203,7 +217,7 @@ def organize_files(source_dir: Path, dry_run: bool = False) -> Dict[str, int]:
                                     shutil.copy2(item, dest_file)
                                     stats["files_copied"] += 1
                         
-                        logger.info(f"  ✓ Updated directory: {destination.name}")
+                        logger.info(f"  Updated directory: {destination.name} [OK]")
                 else:
                     # Copy single file
                     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -214,7 +228,7 @@ def organize_files(source_dir: Path, dry_run: bool = False) -> Dict[str, int]:
                         stats["files_copied"] += 1
                     
             except Exception as e:
-                logger.error(f"  ✗ Error copying {kaggle_path}: {e}")
+                logger.error(f"  Error copying {kaggle_path}: {e} [ERROR]")
                 stats["errors"] += 1
         else:
             # Dry run - just count files
@@ -241,7 +255,7 @@ def cleanup_temp_files(keep_download: bool = False):
     try:
         if TEMP_DOWNLOAD_DIR.exists():
             shutil.rmtree(TEMP_DOWNLOAD_DIR)
-            logger.info(f"✓ Cleaned up temporary files at {TEMP_DOWNLOAD_DIR}")
+            logger.info(f"Cleaned up temporary files at {TEMP_DOWNLOAD_DIR} [OK]")
     except Exception as e:
         logger.warning(f"Could not clean up temporary files: {e}")
 
@@ -263,7 +277,7 @@ def verify_dataset_structure():
     
     # Report present directories
     if present:
-        logger.info(f"✓ Found {len(present)} directories:")
+        logger.info(f"Found {len(present)} directories: [OK]")
         for path, count in present:
             logger.info(f"  - {path} ({count} files)")
     
@@ -273,7 +287,7 @@ def verify_dataset_structure():
         for path in missing:
             logger.warning(f"  - {path}")
     else:
-        logger.info("✓ All expected directories are present")
+        logger.info("All expected directories are present [OK]")
 
 
 def main():
@@ -345,7 +359,7 @@ def main():
     if not args.dry_run:
         cleanup_temp_files(keep_download=args.keep_download)
     
-    logger.info(f"✓ Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    logger.info(f"Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} [OK]")
     
     if args.dry_run:
         logger.info("\nThis was a DRY RUN. Re-run without --dry-run to actually copy files.")
