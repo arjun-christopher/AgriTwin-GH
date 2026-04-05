@@ -1,0 +1,12 @@
+{
+    "fluorescentLight":  { "isOn": true  },
+    "heater":            { "isOn": false },
+    "energyCanister":    { "isOn": true  },
+    "humidifier":        { "isOn": true  },
+    "windowFan":         { "isOn": true },
+    "vent":              { "isOn": false  },
+    "waterTankFloor":    { "isOn": false },
+    "cropStage":         { "stage": "Ripe" },
+    "timeOfDay":         { "time":  "Evening"    },
+    "cropHealth":        { "state": "Yellow", "blinkGreen": false }
+}

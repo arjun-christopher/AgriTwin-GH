@@ -5,3 +5,33 @@
 *.pt filter=lfs diff=lfs merge=lfs -text
 *.pth filter=lfs diff=lfs merge=lfs -text
 src/agritwin_gh/build/Build/*.br filter=lfs diff=lfs merge=lfs -text
+
+# ─── Unity 3D Source Project (unity_module/) — Git LFS patterns ───────────────
+
+# 3D models
+unity_module/**/*.fbx filter=lfs diff=lfs merge=lfs -text
+unity_module/**/*.glb filter=lfs diff=lfs merge=lfs -text
+unity_module/**/*.obj filter=lfs diff=lfs merge=lfs -text
+unity_module/**/*.blend filter=lfs diff=lfs merge=lfs -text
+
+# Textures and images
+unity_module/**/*.png filter=lfs diff=lfs merge=lfs -text
+unity_module/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+unity_module/**/*.jpeg filter=lfs diff=lfs merge=lfs -text
+unity_module/**/*.tga filter=lfs diff=lfs merge=lfs -text
+unity_module/**/*.psd filter=lfs diff=lfs merge=lfs -text
+unity_module/**/*.tiff filter=lfs diff=lfs merge=lfs -text
+
+# Audio
+unity_module/**/*.wav filter=lfs diff=lfs merge=lfs -text
+unity_module/**/*.mp3 filter=lfs diff=lfs merge=lfs -text
+unity_module/**/*.ogg filter=lfs diff=lfs merge=lfs -text
+unity_module/**/*.aiff filter=lfs diff=lfs merge=lfs -text
+
+# Documentation PDFs inside the asset packs
+unity_module/**/*.pdf filter=lfs diff=lfs merge=lfs -text
+
+# WebGL build binaries (Brotli-compressed bundles)
+unity_module/build/Build/*.br filter=lfs diff=lfs merge=lfs -text
+unity_module/build/Build/*.data filter=lfs diff=lfs merge=lfs -text
+unity_module/build/Build/*.wasm filter=lfs diff=lfs merge=lfs -text

@@ -7,7 +7,8 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Complete Project Reference](#complete-project-reference)
+2. [Unity Source Project — `unity_module/`](#unity-source-project--unity_module)
+3. [Complete Project Reference](#complete-project-reference)
    - [All C# Scripts — Quick Reference](#all-c-scripts--quick-reference)
    - [Scene GameObject Hierarchy](#scene-gameobject-hierarchy)
    - [Growth Stages — Complete Reference](#growth-stages--complete-reference)
@@ -15,14 +16,14 @@
    - [Environment Systems](#environment-systems)
    - [Complete Data Flow](#complete-data-flow)
    - [File Structure in Project](#file-structure-in-project)
-3. [GreenhouseStateApplier — Central Controller](#greenhousestateapplier--central-controller)
-4. [Individual Actuator Controllers](#individual-actuator-controllers)
-5. [Environment Controllers](#environment-controllers)
-6. [JSON Schema & Format](#json-schema--format)
-7. [Setup Instructions](#setup-instructions)
-8. [Live Testing in Play Mode](#live-testing-in-play-mode)
-9. [Future FastAPI / Python Backend Integration](#future-fastapi--python-backend-integration)
-10. [Architecture & Design Patterns](#architecture--design-patterns)
+4. [GreenhouseStateApplier — Central Controller](#greenhousestateapplier--central-controller)
+5. [Individual Actuator Controllers](#individual-actuator-controllers)
+6. [Environment Controllers](#environment-controllers)
+7. [JSON Schema & Format](#json-schema--format)
+8. [Setup Instructions](#setup-instructions)
+9. [Live Testing in Play Mode](#live-testing-in-play-mode)
+10. [Future FastAPI / Python Backend Integration](#future-fastapi--python-backend-integration)
+11. [Architecture & Design Patterns](#architecture--design-patterns)
 
 ---
 
@@ -34,6 +35,126 @@ This greenhouse Unity scene is composed of:
 - **1 central state applier** (`GreenhouseStateApplier.cs`) that orchestrates everything from a JSON file
 
 All scripts are designed for **Python backend integration**. The central applier reads a JSON file at runtime, detects changes, and applies the full greenhouse state automatically. This allows testing backend-style control patterns locally inside Unity before connecting to FastAPI.
+
+---
+
+---
+
+# Unity Source Project — `unity_module/`
+
+The `unity_module/` folder at the repository root contains the **complete Unity Editor source project** for the AgriTwin-GH 3D greenhouse scene. Opening this folder in Unity 2022 LTS or later gives you the full editable scene with all assets, scripts, audio, and skyboxes — no additional downloads required.
+
+## Folder Structure
+
+```
+unity_module/
+├── Assets/                              # All scene content
+│   ├── Scenes/                          # Unity scene files
+│   │   ├── Environment.unity            # Main greenhouse scene (open this in Unity)
+│   │   └── SampleScene.unity            # Blank reference scene
+│   ├── Scripts/                         # All 12 C# controller scripts
+│   │   ├── GreenhouseStateApplier.cs    # Central JSON-driven orchestrator
+│   │   ├── CropStageController.cs       # Per-plant 6-stage visual swap
+│   │   ├── CropHealthIndicator.cs       # RGB status lights + blinking
+│   │   ├── TimeOfDayController.cs       # Skybox, fog, directional light
+│   │   ├── FluorescentLightController.cs
+│   │   ├── HeaterController.cs
+│   │   ├── EnergyCanisterController.cs
+│   │   ├── HumidifierController.cs
+│   │   ├── WindowFanController.cs
+│   │   ├── VentController.cs
+│   │   ├── WaterTankFloorController.cs
+│   │   └── FreeCameraController.cs
+│   ├── Environment/                     # Custom greenhouse prefabs and FBX models
+│   │   ├── Bld_GreenMouse.prefab        # Main greenhouse building structure
+│   │   ├── Crop Slot 1/2/3.prefab       # Crop container slot variants
+│   │   ├── Seeding.prefab               # Stage 0 crop model
+│   │   ├── Vegetative.fbx               # Stage 1 crop model
+│   │   ├── Flowering Initiation.prefab  # Stage 2 crop model
+│   │   ├── Flowering.prefab             # Stage 3 crop model
+│   │   ├── Unripe.prefab                # Stage 4 crop model
+│   │   ├── Ripe.prefab                  # Stage 5 crop model
+│   │   ├── Fluorescent Light.fbx        # Actuator model — grow lights
+│   │   ├── Heater.fbx                   # Actuator model — heater
+│   │   ├── Humidifier (1).fbx           # Actuator model — humidifier
+│   │   ├── Window fan.fbx               # Actuator model — window fan
+│   │   ├── Vent.fbx                     # Actuator model — vent
+│   │   ├── Water Tank Floor.fbx         # Actuator model — water tank
+│   │   ├── Energy Canister.fbx          # Actuator model — energy canister
+│   │   └── StatusIndicator.prefab       # Reusable RGB indicator light
+│   ├── AllSkyFree/                      # Skybox cubemap pack (11 sky environments)
+│   │   ├── Cartoon Base BlueSky/        # Day sky — PNG cubemap + material
+│   │   ├── Cartoon Base NightSky/       # Night sky
+│   │   ├── Cold Sunset/ Cold Night/     # Sunset and cold-night variants
+│   │   ├── Deep Dusk/ Epic_BlueSunset/  # Dusk and dramatic sunset
+│   │   └── ...                          # 11 total sky environments
+│   ├── Pandazole_Ultimate_Pack/         # Greenhouse building 3D asset pack
+│   │   └── Pandazole Farm Ranch Pack/   # Models, textures, prefabs, materials
+│   ├── PolyOne/Stylized Tomato/         # Stylized tomato 3D asset
+│   │   └── Model/ Texture/ Prefabs/     # FBX model + textures + diffuse material
+│   ├── SimpleSky/                       # Alternative skybox pack
+│   │   └── Materials/ Models/ Textures/ # Sky sphere material and textures
+│   ├── Nature Sound FX/                 # WAV audio library for actuator sounds
+│   │   ├── Steam/                       # Fan / humidifier steam audio (8 WAVs)
+│   │   ├── Water/ Wind/ Rain/           # Ambient and environmental audio
+│   │   └── ...                          # 11 sound categories total
+│   ├── Imports/                         # Externally imported 3D assets
+│   │   └── Tomato (2).glb               # GLTF tomato model (via GLTFUtility)
+│   ├── StreamingAssets/
+│   │   └── greenhouse_state.json        # Runtime JSON state file read by GreenhouseStateApplier
+│   └── Settings/                        # URP and render pipeline asset settings
+├── Packages/
+│   ├── manifest.json                    # Unity package dependencies
+│   └── packages-lock.json              # Locked package versions
+├── ProjectSettings/                     # Full Unity project configuration
+│   ├── ProjectSettings.asset            # Project name, version, target platform
+│   ├── GraphicsSettings.asset           # URP pipeline assignment
+│   ├── QualitySettings.asset            # Quality tiers
+│   ├── AudioManager.asset               # Global audio settings
+│   └── ...                              # Physics, input, navmesh, VFX, XR settings
+└── build/                               # WebGL export (Git LFS — Brotli binaries)
+    ├── Build/
+    │   ├── build.data.br                # Scene & asset data (~18 MB, LFS-tracked)
+    │   ├── build.wasm.br                # Unity WASM runtime (LFS-tracked)
+    │   ├── build.framework.js.br        # JS framework loader (LFS-tracked)
+    │   └── build.loader.js              # Bootstrap entry point
+    ├── StreamingAssets/                 # Default state JSON for the deployed scene
+    └── index.html                       # WebGL entry point
+```
+
+## Unity Package Dependencies
+
+The project uses **Universal Render Pipeline (URP) 17.5.0** (Unity 6) with the following key packages defined in `Packages/manifest.json`:
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `com.unity.render-pipelines.universal` | 17.5.0 | URP — lighting, shaders, post-processing |
+| `com.unity.inputsystem` | 1.19.0 | New Input System for camera controls |
+| `com.siccity.gltfutility` | git | Runtime GLTF/GLB model import |
+| `com.unity.ai.navigation` | 2.0.11 | NavMesh (reserved for future agents) |
+| `com.unity.timeline` | 1.8.11 | Animation timeline support |
+| `com.unity.visualscripting` | 1.9.11 | Visual scripting support |
+
+## Git LFS — What Is Tracked
+
+Large binary files in `unity_module/` are stored via **Git LFS** so the repository stays lean:
+
+| Pattern | Examples |
+|---------|---------|
+| `**/*.fbx` | All actuator and crop 3D models |
+| `**/*.glb` | Imported GLTF tomato model |
+| `**/*.png` | Skybox cubemaps, all textures |
+| `**/*.wav` | All audio clips in Nature Sound FX |
+| `**/*.pdf` | AllSkyFree documentation PDF |
+| `build/Build/*.br` | Brotli-compressed WebGL bundle |
+
+## Opening in Unity
+
+1. Install **Unity 2022 LTS** or **Unity 6** (matching URP 17.x) via Unity Hub
+2. In Unity Hub click **Add project from disk** → select the `unity_module/` folder
+3. Unity will auto-regenerate `Library/` on first open (takes 2–5 min)
+4. Open `Assets/Scenes/Environment.unity` — press **Play** to run the live scene
+5. The scene reads `Assets/StreamingAssets/greenhouse_state.json` every second — replace or update this file from Python/FastAPI to drive the 3D scene in real time
 
 ---
 

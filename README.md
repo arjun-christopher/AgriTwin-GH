@@ -363,6 +363,8 @@ A Unity-based 3D greenhouse scene that mirrors the live digital twin state in re
 | **15 Crop Plants** | Each with a `CropStageController` (6-stage visual model swap: Seedling → Ripe) and a `CropHealthIndicator` (green / yellow / red RGB health lights with blinking) |
 | **Environment System** | `TimeOfDayController` drives skybox, directional light, fog, and night lights; disease risk scores are mapped to visual health states |
 
+The full **Unity Editor source project** — all C# scripts, scene files, prefabs, FBX models, skyboxes, and audio — lives in `unity_module/` at the repository root. Open it in Unity 2022 LTS or Unity 6 to edit, extend, or re-export the WebGL scene. The WebGL build at `unity_module/build/` mirrors the deployable artefact served by FastAPI at `src/agritwin_gh/build/`. See the [Greenhouse 3D Model Reference](docs/GREENHOUSE_3D_MODEL_REFERENCE.md) for the complete source project layout and step-by-step opening instructions.
+
 ```
 src/agritwin_gh/build/
 ├── Build/
@@ -434,6 +436,11 @@ AgriTwin-GH/
 │       ├── StreamingAssets/    # greenhouse_state.json — default DT state for the 3D scene
 │       └── TemplateData/       # WebGL template CSS, icons, and Unity branding
 ├── tests/                      # Unit and smoke tests
+├── unity_module/               # Full Unity 3D source project — open in Unity to edit the greenhouse scene
+│   ├── Assets/                 # Scenes, C# scripts, prefabs, FBX models, skyboxes, audio, textures
+│   ├── Packages/               # Unity package manifest (URP 17.x, Input System, GLTFUtility …)
+│   ├── ProjectSettings/        # Unity project config — graphics, physics, audio, URP pipeline
+│   └── build/                  # WebGL export — Build/*.br binaries tracked via Git LFS
 ├── data/                       # Raw, processed, and external datasets
 │   ├── raw/                    # Unprocessed source files
 │   ├── processed/              # Cleaned and feature-engineered outputs
