@@ -600,6 +600,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#3d-greenhouse-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🌿 3D Greenhouse Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#frontend-dashboard" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1490,6 +1501,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#3d-greenhouse-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🌿 3D Greenhouse Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#frontend-dashboard" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1671,6 +1693,11 @@
 <td>React 19 + Tailwind v4 SPA — HomeDashboard, Detailed Insights, Manual Override</td>
 <td>✅ Complete</td>
 </tr>
+<tr>
+<td><strong>3D Greenhouse Scene</strong></td>
+<td>Unity-based 3D greenhouse with 10 actuator controllers, 15 crop plants (6-stage visual progression), time-of-day environment, and a central JSON-driven state applier for Python/FastAPI integration</td>
+<td>✅ Complete</td>
+</tr>
 </tbody>
 </table>
 <h2 id="system-architecture">📊 System Architecture<a class="headerlink" href="#system-architecture" title="Permanent link">&para;</a></h2>
@@ -1789,7 +1816,7 @@
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">jupyter</span> <span class="n">notebook</span> <span class="n">feature_demos</span><span class="p">/</span>
 </code></pre></div>
 <blockquote>
-<p><strong><code>setup.py</code></strong> handles everything automatically — installing uv (if missing), initialising the project, creating the virtual environment, syncing dependencies, and optionally downloading the Kaggle dataset with an interactive token setup. You can also run the steps manually:</p>
+<p><strong><code>setup.py</code></strong> handles everything automatically across 9 steps: installs uv (if missing), initialises the project, creates the virtual environment, syncs dependencies, creates <code>.env</code> from <code>.env.example</code>, creates <code>config/settings.local.yaml</code>, ensures all required data and log directories exist, runs <code>npm install</code> for the React frontend, and optionally downloads the Kaggle dataset with an interactive token setup. A formatted manual-steps guide is printed at the end for anything that requires human action (PostgreSQL, MinIO, API keys, CUDA). You can also run the steps manually:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">uv</span> <span class="n">venv</span> <span class="p">&amp;&amp;</span> <span class="n">uv</span> <span class="n">sync</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="p">.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">activate</span>   <span class="c"># Windows — or `source .venv/bin/activate` on macOS/Linux</span>
 </code></pre></div>
@@ -1866,6 +1893,14 @@
 <tr>
 <td><a href="docs/FRONTEND_UI_REFERENCE.md">Frontend UI Reference</a></td>
 <td>React dashboard — pages, components, and live API data-binding contract</td>
+</tr>
+<tr>
+<td><a href="docs/GREENHOUSE_3D_MODEL_REFERENCE.md">Greenhouse 3D Model Reference</a></td>
+<td>Unity scene architecture — C# controllers, GameObject hierarchy, JSON state schema, and FastAPI integration guide</td>
+</tr>
+<tr>
+<td><a href="docs/DISEASE_PROGRESSION_SYNTHETIC_DOCUMENTATION.md">Disease Progression Synthetic Dataset</a></td>
+<td>Technical documentation for the synthetic disease progression dataset — generation methodology, disease dynamics, and feature schema</td>
 </tr>
 <tr>
 <td><a href="docs/DOCS_DEPLOYMENT.md">Deployment Guide</a></td>
@@ -1966,6 +2001,16 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
 <a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>   <span class="c"># → FastAPI on http://localhost:8000</span>
 </code></pre></div>
+<h2 id="3d-greenhouse-model">🌿 3D Greenhouse Model<a class="headerlink" href="#3d-greenhouse-model" title="Permanent link">&para;</a></h2>
+<p>A Unity-based 3D greenhouse scene that mirrors the live digital twin state in real time via a JSON-driven central controller:</p>
+<ul>
+<li><strong>GreenhouseStateApplier</strong> — Central C# orchestrator that reads a JSON state file (or FastAPI response), detects changes, and dispatches to all sub-controllers automatically</li>
+<li><strong>10 Actuator Controllers</strong> — Fluorescent lights, heater, humidifier, window fan, vent, and water tank, each with status indicators, particle effects, and audio</li>
+<li><strong>15 Crop Plants</strong> — Each with a <code>CropStageController</code> (6-stage visual model swap: Seedling → Ripe) and a <code>CropHealthIndicator</code> (green / yellow / red RGB health lights with blinking)</li>
+<li><strong>Environment System</strong> — <code>TimeOfDayController</code> drives skybox, directional light, fog, and night lights; <code>CropHealthIndicator</code> maps disease risk scores to visual health states</li>
+<li><strong>FastAPI Integration</strong> — The scene is designed to consume the <code>/api/dt/state</code> JSON payload and apply the full greenhouse state without code changes</li>
+</ul>
+<p>See <a href="docs/GREENHOUSE_3D_MODEL_REFERENCE.md">Greenhouse 3D Model Reference</a> for the complete C# script reference, GameObject hierarchy, JSON schema, and integration guide.</p>
 <h2 id="frontend-dashboard">�️ Frontend Dashboard<a class="headerlink" href="#frontend-dashboard" title="Permanent link">&para;</a></h2>
 <p>A React 19 + Tailwind v4 single-page application providing a real-time operator interface for the greenhouse digital twin.</p>
 <ul>

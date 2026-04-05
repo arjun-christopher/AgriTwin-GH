@@ -1,0 +1,2484 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AgriTwin Greenhouse Digital Twin - Documentation and Feature Demos">
+      
+      
+        <meta name="author" content="AgriTwin Team">
+      
+      
+        <link rel="canonical" href="https://arjun-christopher.github.io/AgriTwin-GH/GREENHOUSE_3D_MODEL_REFERENCE/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Greenhouse Unity Scene - AgriTwin-GH Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#greenhouse-unity-scene" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="AgriTwin-GH Documentation" class="md-header__button md-logo" aria-label="AgriTwin-GH Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AgriTwin-GH Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Greenhouse Unity Scene
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="light-green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/arjun-christopher/AgriTwin-GH" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AgriTwin-GH
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../FEATURE_DEMOS_GUIDE/" class="md-tabs__link">
+          
+  
+  
+  Feature Demos
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../DATABASE_REFERENCE/" class="md-tabs__link">
+          
+  
+  
+  Data & Database
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../TOMATO_DISEASE_CLASSIFICATION/" class="md-tabs__link">
+          
+  
+  
+  ML Models
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../MPC_COMPLETE_GUIDE/" class="md-tabs__link">
+          
+  
+  
+  Control & Simulation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../DOCS_DEPLOYMENT/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Deployment Guide
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="AgriTwin-GH Documentation" class="md-nav__button md-logo" aria-label="AgriTwin-GH Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AgriTwin-GH Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/arjun-christopher/AgriTwin-GH" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AgriTwin-GH
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature Demos
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Feature Demos
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FEATURE_DEMOS_GUIDE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data & Database
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Data & Database
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DATABASE_REFERENCE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../POSTGRESQL_QUICKSTART/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PostgreSQL Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../IMAGE_STORAGE_SETUP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Image Storage Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../INDOOR_GREENHOUSE_DATASET/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Indoor Greenhouse Dataset
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DATA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Directory
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ML Models
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ML Models
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_DISEASE_CLASSIFICATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_DISEASE_PROGRESSION_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Progression Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DISEASE_PROGRESSION_SYNTHETIC_DOCUMENTATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disease Progression Synthetic Data
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_GROWTH_STAGE_CLASSIFICATION/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Growth Stage Classification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TOMATO_GROWTH_PROGRESSION_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Growth Progression Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../WEATHER_FORECAST_MODEL/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Weather Forecast Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control & Simulation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Control & Simulation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MPC_COMPLETE_GUIDE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MPC Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DT_LOOP_GUIDE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Digital Twin Closed-Loop
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DOCS_DEPLOYMENT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="greenhouse-unity-scene">Greenhouse Unity Scene<a class="headerlink" href="#greenhouse-unity-scene" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>Complete documentation for all greenhouse controllers, central state applier, and backend integration patterns.</strong></p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#complete-project-reference">Complete Project Reference</a></li>
+<li><a href="#all-c-scripts--quick-reference">All C# Scripts — Quick Reference</a></li>
+<li><a href="#scene-gameobject-hierarchy">Scene GameObject Hierarchy</a></li>
+<li><a href="#growth-stages--complete-reference">Growth Stages — Complete Reference</a></li>
+<li><a href="#actuators--complete-list">Actuators — Complete List</a></li>
+<li><a href="#environment-systems">Environment Systems</a></li>
+<li><a href="#complete-data-flow">Complete Data Flow</a></li>
+<li><a href="#file-structure-in-project">File Structure in Project</a></li>
+<li><a href="#greenhousestateapplier--central-controller">GreenhouseStateApplier — Central Controller</a></li>
+<li><a href="#individual-actuator-controllers">Individual Actuator Controllers</a></li>
+<li><a href="#environment-controllers">Environment Controllers</a></li>
+<li><a href="#json-schema--format">JSON Schema &amp; Format</a></li>
+<li><a href="#setup-instructions">Setup Instructions</a></li>
+<li><a href="#live-testing-in-play-mode">Live Testing in Play Mode</a></li>
+<li><a href="#future-fastapi--python-backend-integration">Future FastAPI / Python Backend Integration</a></li>
+<li><a href="#architecture--design-patterns">Architecture &amp; Design Patterns</a></li>
+</ol>
+<hr />
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>This greenhouse Unity scene is composed of:
+- <strong>10 actuator controllers</strong> (lights, effects, audio) for manual state control
+- <strong>3 environment controllers</strong> (crop stages, time of day, crop health)
+- <strong>1 central state applier</strong> (<code>GreenhouseStateApplier.cs</code>) that orchestrates everything from a JSON file</p>
+<p>All scripts are designed for <strong>Python backend integration</strong>. The central applier reads a JSON file at runtime, detects changes, and applies the full greenhouse state automatically. This allows testing backend-style control patterns locally inside Unity before connecting to FastAPI.</p>
+<hr />
+<hr />
+<h1 id="complete-project-reference">Complete Project Reference<a class="headerlink" href="#complete-project-reference" title="Permanent link">&para;</a></h1>
+<h2 id="all-c-scripts-quick-reference">All C# Scripts — Quick Reference<a class="headerlink" href="#all-c-scripts-quick-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Script</th>
+<th>Purpose</th>
+<th>Type</th>
+<th>Key Method(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GreenhouseStateApplier.cs</strong></td>
+<td>Central orchestrator; reads JSON, detects changes, applies state</td>
+<td>Manager</td>
+<td><code>SetState()</code> dispatches to all controllers</td>
+</tr>
+<tr>
+<td><strong>FluorescentLightController.cs</strong></td>
+<td>Controls fluorescent light (status + spots)</td>
+<td>Actuator</td>
+<td><code>SetState(bool)</code></td>
+</tr>
+<tr>
+<td><strong>HeaterController.cs</strong></td>
+<td>Controls heater (indicator + glow)</td>
+<td>Actuator</td>
+<td><code>SetState(bool)</code></td>
+</tr>
+<tr>
+<td><strong>EnergyCanisterController.cs</strong></td>
+<td>Controls energy canister (status light)</td>
+<td>Actuator</td>
+<td><code>SetState(bool)</code></td>
+</tr>
+<tr>
+<td><strong>HumidifierController.cs</strong></td>
+<td>Controls humidifier (light + fog + audio)</td>
+<td>Actuator</td>
+<td><code>SetState(bool)</code></td>
+</tr>
+<tr>
+<td><strong>WindowFanController.cs</strong></td>
+<td>Controls window fan (light + particles + audio)</td>
+<td>Actuator</td>
+<td><code>SetState(bool)</code></td>
+</tr>
+<tr>
+<td><strong>VentController.cs</strong></td>
+<td>Controls vent system (light + particles + audio)</td>
+<td>Actuator</td>
+<td><code>SetState(bool)</code></td>
+</tr>
+<tr>
+<td><strong>WaterTankFloorController.cs</strong></td>
+<td>Controls water tank (light + audio)</td>
+<td>Actuator</td>
+<td><code>SetState(bool)</code></td>
+</tr>
+<tr>
+<td><strong>CropStageController.cs</strong></td>
+<td>Controls one crop's visual stage</td>
+<td>Environment</td>
+<td><code>SetStageByName(string)</code></td>
+</tr>
+<tr>
+<td><strong>TimeOfDayController.cs</strong></td>
+<td>Controls lighting, skybox, fog, night lights</td>
+<td>Environment</td>
+<td><code>SetTimeOfDayByName(string)</code></td>
+</tr>
+<tr>
+<td><strong>CropHealthIndicator.cs</strong></td>
+<td>Controls RGB health lights + blinking</td>
+<td>Environment</td>
+<td><code>SetGreen()</code>, <code>SetYellow()</code>, <code>SetRed()</code>, <code>SetBlinkGreen(bool)</code></td>
+</tr>
+<tr>
+<td><strong>FreeCameraController.cs</strong></td>
+<td>Provides free camera controls</td>
+<td>Utility</td>
+<td>(no public state methods)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="scene-gameobject-hierarchy">Scene GameObject Hierarchy<a class="headerlink" href="#scene-gameobject-hierarchy" title="Permanent link">&para;</a></h2>
+<p>Your Unity scene should have this structure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Scene/
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── GreenhouseManager (Empty GameObject)
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│   └── [GreenhouseStateApplier component attached]
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>├── Actuators/ (folder, organizing lights/effects)
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│   ├── FluorescentLight
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│   │   └── [FluorescentLightController component]
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│   ├── Heater
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│   │   └── [HeaterController component]
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│   ├── EnergyCanister
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│   │   └── [EnergyCanisterController component]
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│   ├── Humidifier
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│   │   └── [HumidifierController component]
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│   │       └── StatusIndicator (Light child)
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│   │       └── FogEffect (ParticleSystem child)
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│   │       └── AudioSource (parent object)
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│   ├── WindowFan
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│   │   └── [WindowFanController component]
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│   │       └── StatusIndicator (Light child)
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│   │       └── AirFlow (ParticleSystem child)
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│   │       └── AudioSource (parent object)
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>│   ├── Vent
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>│   │   └── [VentController component]
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│   │       └── StatusIndicator (Light child)
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│   │       └── AirFlow (ParticleSystem child)
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│   │       └── AudioSource (parent object)
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>│   └── WaterTank
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│       └── [WaterTankFloorController component]
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>│           └── StatusIndicator (Light child)
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>│           └── AudioSource (same object)
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>│
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>├── Crops/ (folder, organizing 15 crop plants)
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>│   ├── Crop_01
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>│   │   └── [CropStageController component]
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>│   │       ├── Seedling (Model)
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>│   │       ├── Vegetative (Model)
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>│   │       ├── FloweringInitiation (Model)
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>│   │       ├── Flowering (Model)
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>│   │       ├── Unripe (Model)
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>│   │       └── Ripe (Model)
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>│   │   └── CropHealth (ChildObject)
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>│   │       └── [CropHealthIndicator component]
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>│   │           ├── GreenLight (Light)
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>│   │           ├── YellowLight (Light)
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>│   │           └── RedLight (Light)
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>│   ├── Crop_02 ... Crop_15
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>│   │   └── [same structure as Crop_01]
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>│
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>├── Environment/ (folder)
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>│   └── [TimeOfDayController component on main light]
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>│       └── DirectionalLight (sun/moon)
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>│       └── NightLights (array of GameObjects for night)
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>│
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a>├── Camera (MainCamera)
+<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a>│   └── [FreeCameraController component]
+<a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a>│
+<a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a>└── [Skybox, Fog, Lighting settings]
+</code></pre></div>
+<hr />
+<h2 id="growth-stages-complete-reference">Growth Stages — Complete Reference<a class="headerlink" href="#growth-stages-complete-reference" title="Permanent link">&para;</a></h2>
+<p>When a crop grows, it progresses through 6 distinct stages. Each stage has a corresponding GameObject model that becomes visible/invisible.</p>
+<h3 id="stage-progression-0-5">Stage Progression (0 → 5)<a class="headerlink" href="#stage-progression-0-5" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Index</th>
+<th>Name</th>
+<th>Visual</th>
+<th>Duration (Typical)</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><strong>Seedling</strong></td>
+<td>Tiny sprout</td>
+<td>Days 0–7</td>
+<td>Initial germination; very small plant</td>
+</tr>
+<tr>
+<td>1</td>
+<td><strong>Vegetative</strong></td>
+<td>Young plant</td>
+<td>Days 7–21</td>
+<td>Leaf growth; expanding stem</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>FloweringInitiation</strong></td>
+<td>Budding</td>
+<td>Days 21–28</td>
+<td>Buds beginning to form</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Flowering</strong></td>
+<td>Blooming</td>
+<td>Days 28–42</td>
+<td>Full flowers open; peak beauty</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Unripe</strong></td>
+<td>Young fruit</td>
+<td>Days 42–56</td>
+<td>Fruit formed but not mature</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Ripe</strong></td>
+<td>Ready to harvest</td>
+<td>Days 56+</td>
+<td>Fully mature; ready for pickup</td>
+</tr>
+</tbody>
+</table>
+<h3 id="json-stage-values-case-insensitive">JSON Stage Values (Case-Insensitive)<a class="headerlink" href="#json-stage-values-case-insensitive" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seedling&quot;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Vegetative&quot;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FloweringInitiation&quot;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Flowering&quot;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Unripe&quot;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ripe&quot;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>Variants accepted</strong> (all auto-converted):
+- <code>"flowering_initiation"</code> → <code>FloweringInitiation</code>
+- <code>"RIPE"</code> → <code>Ripe</code>
+- <code>"vegetative"</code> → <code>Vegetative</code></p>
+<h3 id="key-behaviors-by-stage">Key Behaviors by Stage<a class="headerlink" href="#key-behaviors-by-stage" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Seedling/Vegetative:</strong> Health indicator can show any color (Green/Yellow/Red)</li>
+<li><strong>All stages up to Unripe:</strong> No blinking, even if manually set</li>
+<li><strong>Ripe (all crops):</strong> Health <strong>automatically forced to Green + blinking</strong>, overriding JSON</li>
+<li><strong>Any stage change:</strong> Emits <code>SetBlinkGreen(false)</code> unless all crops are Ripe</li>
+</ul>
+<hr />
+<h2 id="actuators-complete-list">Actuators — Complete List<a class="headerlink" href="#actuators-complete-list" title="Permanent link">&para;</a></h2>
+<p>All 8 actuators follow the unified <strong><code>SetState(bool)</code></strong> pattern: <code>true</code> = on, <code>false</code> = off.</p>
+<h3 id="group-1-lighting-actuators">Group 1: Lighting Actuators<a class="headerlink" href="#group-1-lighting-actuators" title="Permanent link">&para;</a></h3>
+<h4 id="1-fluorescentlight">1. FluorescentLight<a class="headerlink" href="#1-fluorescentlight" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Controls:</strong> Status indicator (green), main spot light, point light</li>
+<li><strong>Behavior:</strong> All 3 lights turn on/off together</li>
+<li><strong>Inspector Fields:</strong> <code>statusIndicatorLight</code>, <code>fluorescentSpotLight</code>, <code>fluorescentPointLight</code></li>
+<li><strong>JSON:</strong> <code>"fluorescentLight": { "isOn": true | false }</code></li>
+</ul>
+<h4 id="2-heater">2. Heater<a class="headerlink" href="#2-heater" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Controls:</strong> Status indicator (green), heater glow effect</li>
+<li><strong>Behavior:</strong> Both lights turn on/off together</li>
+<li><strong>Inspector Fields:</strong> <code>statusIndicatorLight</code>, <code>heaterLight</code></li>
+<li><strong>JSON:</strong> <code>"heater": { "isOn": true | false }</code></li>
+</ul>
+<h4 id="3-energycanister">3. EnergyCanister<a class="headerlink" href="#3-energycanister" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Controls:</strong> Energy status light</li>
+<li><strong>Behavior:</strong> Light on/off</li>
+<li><strong>Inspector Fields:</strong> <code>statusLight</code></li>
+<li><strong>JSON:</strong> <code>"energyCanister": { "isOn": true | false }</code></li>
+</ul>
+<h3 id="group-2-effects-with-audio">Group 2: Effects with Audio<a class="headerlink" href="#group-2-effects-with-audio" title="Permanent link">&para;</a></h3>
+<h4 id="4-humidifier">4. Humidifier<a class="headerlink" href="#4-humidifier" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Controls:</strong> Status indicator, fog particles, audio playback</li>
+<li><strong>Behavior:</strong> When on → light on, particles play, audio continuous. When off → all stop.</li>
+<li><strong>Inspector Fields:</strong> <code>statusIndicatorLight</code>, <code>fogParticle</code></li>
+<li><strong>Auto-Found:</strong> <code>fogAudio</code> (from parent)</li>
+<li><strong>JSON:</strong> <code>"humidifier": { "isOn": true | false }</code></li>
+</ul>
+<h4 id="5-windowfan">5. WindowFan<a class="headerlink" href="#5-windowfan" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Controls:</strong> Status indicator, air flow particles, audio playback</li>
+<li><strong>Behavior:</strong> When on → light on, particles play, audio continuous loop. When off → all stop.</li>
+<li><strong>Inspector Fields:</strong> <code>statusIndicatorLight</code>, <code>airFlowParticle</code></li>
+<li><strong>Auto-Found:</strong> <code>fanAudio</code> (from parent)</li>
+<li><strong>JSON:</strong> <code>"windowFan": { "isOn": true | false }</code></li>
+</ul>
+<h4 id="6-vent">6. Vent<a class="headerlink" href="#6-vent" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Controls:</strong> Status indicator, air flow particles, audio trigger</li>
+<li><strong>Behavior:</strong> When on → light on, particles play, audio plays <strong>once per state change</strong>. When off → particles stop.</li>
+<li><strong>Inspector Fields:</strong> <code>statusIndicatorLight</code>, <code>airFlowParticle</code></li>
+<li><strong>Auto-Found:</strong> <code>ventAudio</code> (from parent)</li>
+<li><strong>JSON:</strong> <code>"vent": { "isOn": true | false }</code></li>
+</ul>
+<h4 id="7-watertankfloor">7. WaterTankFloor<a class="headerlink" href="#7-watertankfloor" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Controls:</strong> Status indicator, audio playback</li>
+<li><strong>Behavior:</strong> When on → light on, audio continuous. When off → both stop.</li>
+<li><strong>Auto-Found:</strong> <code>statusLight</code> (from StatusIndicator child), <code>audioSource</code> (self)</li>
+<li><strong>JSON:</strong> <code>"waterTankFloor": { "isOn": true | false }</code></li>
+</ul>
+<h3 id="group-3-utility-lights">Group 3: Utility Lights<a class="headerlink" href="#group-3-utility-lights" title="Permanent link">&para;</a></h3>
+<p><em>No additional actuators; lights are controlled by environment systems</em></p>
+<hr />
+<h2 id="environment-systems">Environment Systems<a class="headerlink" href="#environment-systems" title="Permanent link">&para;</a></h2>
+<h3 id="time-of-day">Time of Day<a class="headerlink" href="#time-of-day" title="Permanent link">&para;</a></h3>
+<p>Affects <strong>global lighting, skybox, fog, and night lights</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Time</th>
+<th>Lighting</th>
+<th>Skybox</th>
+<th>Fog</th>
+<th>Sun Angle</th>
+<th>Night Lights</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Morning</strong></td>
+<td>Warm (0.75, 0.72, 0.65)</td>
+<td>Clear sky</td>
+<td>Warm fog (on)</td>
+<td>25°, 30°</td>
+<td>Off</td>
+</tr>
+<tr>
+<td><strong>Afternoon</strong></td>
+<td>Bright (1.0, 1.0, 1.0)</td>
+<td>Bright blue</td>
+<td>Off</td>
+<td>60°, 0°</td>
+<td>Off</td>
+</tr>
+<tr>
+<td><strong>Evening</strong></td>
+<td>Orange (1.0, 0.55, 0.3)</td>
+<td>Orange sky</td>
+<td>Orange fog (on)</td>
+<td>15°, 220°</td>
+<td>Off</td>
+</tr>
+<tr>
+<td><strong>Night</strong></td>
+<td>Dark blue (0.4, 0.45, 0.6)</td>
+<td>Night sky</td>
+<td>Dim fog (on)</td>
+<td>-10°, 0°</td>
+<td>On</td>
+</tr>
+</tbody>
+</table>
+<p><strong>JSON Values (Case-Insensitive):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Morning&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Afternoon&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Evening&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Night&quot;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="crop-health-indicator">Crop Health Indicator<a class="headerlink" href="#crop-health-indicator" title="Permanent link">&para;</a></h3>
+<p>Controls RGB status lights showing crop health and maturity.</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Color</th>
+<th>Light</th>
+<th>Blink?</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Green</strong></td>
+<td>RGB Green</td>
+<td>Bright</td>
+<td>Auto*</td>
+<td>Healthy</td>
+</tr>
+<tr>
+<td><strong>Yellow</strong></td>
+<td>RGB Yellow</td>
+<td>Medium</td>
+<td>Never</td>
+<td>Stressed</td>
+</tr>
+<tr>
+<td><strong>Red</strong></td>
+<td>RGB Red</td>
+<td>Bright</td>
+<td>Never</td>
+<td>Critical</td>
+</tr>
+</tbody>
+</table>
+<p><em>Blinking occurs </em><em>only when all crops are Ripe</em>*, regardless of JSON <code>blinkGreen</code> value.</p>
+<p><strong>JSON Values (Case-Insensitive):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Yellow&quot;</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="s2">&quot;Red&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">  </span><span class="c1">// IGNORED — computed from crop stages</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Blink Speed:</strong> Configurable in <code>CropHealthIndicator</code> Inspector (<code>blinkSpeed = 2.0</code> = 2 blinks/sec)</p>
+<hr />
+<h2 id="complete-data-flow">Complete Data Flow<a class="headerlink" href="#complete-data-flow" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>JSON File (greenhouse_state.json)
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    ↓
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>GreenhouseStateApplier.Update() [every 1s]
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    ↓
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>Change Detected? (compare file content hash)
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    ↓ YES
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>ParseJson() → GreenhouseState object
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    ↓
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>ApplyState() → dispatches to 8 controllers + 3 environment systems
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    ↓
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>Each Controller.SetState() or SetStageByName() or SetTimeOfDayByName()
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    ↓
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>Scene updates: Lights on/off, Particles play/stop, Models swap, Fog changes
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    ↓
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>GreenhouseStateApplier.LateUpdate() [every frame]
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    ↓
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>Re-assert health color (so CropStageController.SetGreen() doesn&#39;t override JSON)
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    ↓
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>Scene persists health color every frame
+</code></pre></div>
+<hr />
+<h2 id="file-structure-in-project">File Structure in Project<a class="headerlink" href="#file-structure-in-project" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Assets/
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>├── Scripts/
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>│   ├── GreenhouseStateApplier.cs          [Central orchestrator]
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>│   ├── CropStageController.cs              [Crop stage visuals]
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>│   ├── CropHealthIndicator.cs              [RGB health lights]
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>│   ├── TimeOfDayController.cs              [Global lighting/sky]
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>│   ├── FluorescentLightController.cs       [Light actuator]
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>│   ├── HeaterController.cs                 [Light actuator]
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>│   ├── EnergyCanisterController.cs         [Light actuator]
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>│   ├── HumidifierController.cs             [Effects + audio]
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>│   ├── WindowFanController.cs              [Effects + audio]
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>│   ├── VentController.cs                   [Effects + audio]
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>│   ├── WaterTankFloorController.cs         [Effects + audio]
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>│   ├── FreeCameraController.cs             [Utility]
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>│   └── GREENHOUSE_INTEGRATION_GUIDE.md     [This document]
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>│
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>└── StreamingAssets/
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>    └── greenhouse_state.json               [Runtime state file]
+</code></pre></div>
+<hr />
+<h2 id="what-it-does">What It Does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h2>
+<p><code>GreenhouseStateApplier.cs</code> is the <strong>single central point</strong> that controls:
+- All 8 actuators (lights, heater, canister, humidifier, fan, vent, water tank)
+- All 15 crops (stage progression)
+- Time of day (lighting, skybox, fog)
+- Crop health indicator (color + auto-blinking based on stage)</p>
+<p>It reads a JSON file from disk at a <strong>configurable polling interval</strong>, detects changes, and applies updates automatically during Play Mode.</p>
+<h3 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h3>
+<p>✅ <strong>Reads JSON at runtime</strong> — no code changes needed to update scene state<br />
+✅ <strong>Detects changes automatically</strong> — only reapplies when file content changes<br />
+✅ <strong>Supports any crop count</strong> — JSON array can have 15, 50, or 100 crops<br />
+✅ <strong>Safe missing references</strong> — logs clear warnings but never crashes<br />
+✅ <strong>Health color auto-logic</strong> — forces Green+blink when all crops are Ripe<br />
+✅ <strong>LateUpdate assertion</strong> — health color persists even if other scripts modify it<br />
+✅ <strong>Production-ready</strong> — clean error handling, verbose logging, easy to extend  </p>
+<hr />
+<h2 id="inspector-setup">Inspector Setup<a class="headerlink" href="#inspector-setup" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Create empty GameObject</strong> in your scene (e.g., <code>"GreenhouseManager"</code>)</li>
+<li><strong>Attach <code>GreenhouseStateApplier</code></strong> component</li>
+<li><strong>Assign every field</strong> in the Inspector by dragging scene GameObjects:</li>
+</ol>
+<h3 id="actuators-to-assign">Actuators to Assign<a class="headerlink" href="#actuators-to-assign" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>Fluorescent Light</code> — GameObject with <code>FluorescentLightController</code></li>
+<li><code>Heater</code> — GameObject with <code>HeaterController</code></li>
+<li><code>Energy Canister</code> — GameObject with <code>EnergyCanisterController</code></li>
+<li><code>Humidifier</code> — GameObject with <code>HumidifierController</code></li>
+<li><code>Window Fan</code> — GameObject with <code>WindowFanController</code></li>
+<li><code>Vent</code> — GameObject with <code>VentController</code></li>
+<li><code>Water Tank Floor</code> — GameObject with <code>WaterTankFloorController</code></li>
+</ul>
+<h3 id="environment-crop-to-assign">Environment &amp; Crop to Assign<a class="headerlink" href="#environment-crop-to-assign" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>Crop Stages</code> (<strong>Array</strong>) — Drag all 15 crop GameObjects here (one per slot)</li>
+<li><code>Time Of Day</code> — GameObject with <code>TimeOfDayController</code></li>
+<li><code>Crop Health</code> — GameObject with <code>CropHealthIndicator</code></li>
+</ul>
+<h3 id="settings">Settings<a class="headerlink" href="#settings" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Json File Path:</strong> (default) <code>Assets/StreamingAssets/greenhouse_state.json</code></li>
+<li><strong>Poll Interval Seconds:</strong> <code>1.0</code> (check file every 1 second)</li>
+<li><strong>Verbose Logging:</strong> <code>true</code> (see detailed console output)</li>
+<li><strong>Force Refresh:</strong> Checkbox in Play Mode to instantly re-apply without waiting</li>
+</ul>
+<hr />
+<h2 id="json-file-location">JSON File Location<a class="headerlink" href="#json-file-location" title="Permanent link">&para;</a></h2>
+<p><strong>Path:</strong> <code>Assets/StreamingAssets/greenhouse_state.json</code></p>
+<p>If the <code>StreamingAssets</code> folder doesn't exist, create it:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Assets/
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>├── StreamingAssets/
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>│   └── greenhouse_state.json
+</code></pre></div></p>
+<hr />
+<hr />
+<h1 id="individual-actuator-controllers">Individual Actuator Controllers<a class="headerlink" href="#individual-actuator-controllers" title="Permanent link">&para;</a></h1>
+<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
+<p>All actuator scripts follow the <strong>unified control pattern</strong>:</p>
+<ul>
+<li><strong>Protected State Variables:</strong> <code>[SerializeField] private bool isOn</code> prevents accidental manual manipulation</li>
+<li><strong>Single Entry Point:</strong> <code>SetState(bool state)</code> is the only method the backend calls</li>
+<li><strong>Debug Mode:</strong> Optional <code>debugManualControl</code> toggle for editor testing</li>
+<li><strong>Simple &amp; Direct:</strong> Changes apply immediately, no complex state tracking</li>
+</ul>
+<hr />
+<h2 id="1-fluorescentlightcontrollercs">1. FluorescentLightController.cs<a class="headerlink" href="#1-fluorescentlightcontrollercs" title="Permanent link">&para;</a></h2>
+<p><strong>Purpose:</strong> Controls a fluorescent light fixture with status indicator and point lights</p>
+<p><strong>Controls:</strong>
+- Status indicator light (green)
+- Fluorescent spot light (main light)
+- Fluorescent point light (additional brightness)</p>
+<p><strong>Public Methods:</strong>
+- <code>SetState(bool state)</code> — <strong>main entry point</strong> (pass <code>true</code> to turn on)
+- <code>TurnOn()</code> / <code>TurnOff()</code> — convenience helpers</p>
+<p><strong>Inspector Fields:</strong>
+- <code>statusIndicatorLight</code> — Light component for status
+- <code>fluorescentSpotLight</code> — Main spotlight
+- <code>fluorescentPointLight</code> — Additional point light for ambiance
+- <code>debugManualControl</code> — Edit in Play Mode for testing</p>
+<hr />
+<h2 id="2-heatercontrollercs">2. HeaterController.cs<a class="headerlink" href="#2-heatercontrollercs" title="Permanent link">&para;</a></h2>
+<p><strong>Purpose:</strong> Controls a heater with indicator light and glow effect</p>
+<p><strong>Controls:</strong>
+- Status indicator light (green)
+- Heater glow/point light</p>
+<p><strong>Public Methods:</strong>
+- <code>SetState(bool state)</code> — <strong>main entry point</strong>
+- <code>TurnOn()</code> / <code>TurnOff()</code> — convenience helpers</p>
+<p><strong>Inspector Fields:</strong>
+- <code>statusIndicatorLight</code> — Status indicator
+- <code>heaterLight</code> — Heater glow effect
+- <code>debugManualControl</code> — Edit in Play Mode for testing</p>
+<hr />
+<h2 id="3-energycanistercontrollercs">3. EnergyCanisterController.cs<a class="headerlink" href="#3-energycanistercontrollercs" title="Permanent link">&para;</a></h2>
+<p><strong>Purpose:</strong> Controls an energy canister with status light</p>
+<p><strong>Controls:</strong>
+- Status point light</p>
+<p><strong>Public Methods:</strong>
+- <code>SetState(bool state)</code> — <strong>main entry point</strong>
+- <code>TurnOn()</code> / <code>TurnOff()</code> — convenience helpers</p>
+<p><strong>Inspector Fields:</strong>
+- <code>statusLight</code> — Energy status indicator
+- <code>debugManualControl</code> — Edit in Play Mode for testing</p>
+<hr />
+<h2 id="4-humidifiercontrollercs">4. HumidifierController.cs<a class="headerlink" href="#4-humidifiercontrollercs" title="Permanent link">&para;</a></h2>
+<p><strong>Purpose:</strong> Controls a humidifier with fog particle effect and audio</p>
+<p><strong>Controls:</strong>
+- Status indicator light
+- Fog particle system
+- Audio source (auto-found from parent)</p>
+<p><strong>Public Methods:</strong>
+- <code>SetState(bool state)</code> — <strong>main entry point</strong>
+- <code>TurnOn()</code> / <code>TurnOff()</code> — convenience helpers</p>
+<p><strong>Inspector Fields:</strong>
+- <code>statusIndicatorLight</code> — Status indicator
+- <code>fogParticle</code> — Particle system for fog effect
+- <code>debugManualControl</code> — Edit in Play Mode for testing</p>
+<p><strong>Auto-Found:</strong>
+- <code>fogAudio</code> — Looks for AudioSource on parent object</p>
+<hr />
+<h2 id="5-windowfancontrollercs">5. WindowFanController.cs<a class="headerlink" href="#5-windowfancontrollercs" title="Permanent link">&para;</a></h2>
+<p><strong>Purpose:</strong> Controls a window fan with air flow effect and audio</p>
+<p><strong>Controls:</strong>
+- Status indicator light
+- Air flow particle system
+- Audio source (continuous playback)</p>
+<p><strong>Public Methods:</strong>
+- <code>SetState(bool state)</code> — <strong>main entry point</strong>
+- <code>TurnOn()</code> / <code>TurnOff()</code> — convenience helpers</p>
+<p><strong>Inspector Fields:</strong>
+- <code>statusIndicatorLight</code> — Status indicator
+- <code>airFlowParticle</code> — Particle system for air flow
+- <code>debugManualControl</code> — Edit in Play Mode for testing</p>
+<p><strong>Auto-Found:</strong>
+- <code>fanAudio</code> — Looks for AudioSource on parent object</p>
+<hr />
+<h2 id="6-ventcontrollercs">6. VentController.cs<a class="headerlink" href="#6-ventcontrollercs" title="Permanent link">&para;</a></h2>
+<p><strong>Purpose:</strong> Controls a ventilation system with air flow and audio trigger</p>
+<p><strong>Controls:</strong>
+- Status indicator light
+- Air flow particle system
+- Audio source (plays once per state change)</p>
+<p><strong>Public Methods:</strong>
+- <code>SetState(bool state)</code> — <strong>main entry point</strong>
+- <code>TurnOn()</code> / <code>TurnOff()</code> — convenience helpers</p>
+<p><strong>Inspector Fields:</strong>
+- <code>statusIndicatorLight</code> — Status indicator
+- <code>airFlowParticle</code> — Particle system for air flow
+- <code>debugManualControl</code> — Edit in Play Mode for testing</p>
+<p><strong>Auto-Found:</strong>
+- <code>ventAudio</code> — Looks for AudioSource on parent object</p>
+<p><strong>Note:</strong> Audio plays only on state changes, not continuously (unlike fan)</p>
+<hr />
+<h2 id="7-watertankfloorcontrollercs">7. WaterTankFloorController.cs<a class="headerlink" href="#7-watertankfloorcontrollercs" title="Permanent link">&para;</a></h2>
+<p><strong>Purpose:</strong> Controls a water tank with status light and audio</p>
+<p><strong>Controls:</strong>
+- Status indicator light (child of <code>StatusIndicator</code>)
+- Audio source (on same object, continuous playback)</p>
+<p><strong>Public Methods:</strong>
+- <code>SetState(bool state)</code> — <strong>main entry point</strong>
+- <code>TurnOn()</code> / <code>TurnOff()</code> — convenience helpers</p>
+<p><strong>Inspector Fields:</strong>
+- <code>debugManualControl</code> — Edit in Play Mode for testing</p>
+<p><strong>Auto-Found:</strong>
+- <code>statusLight</code> — Looks in children for <code>StatusIndicator</code> child, then its Light
+- <code>audioSource</code> — Looks on same GameObject for AudioSource</p>
+<hr />
+<hr />
+<h1 id="environment-controllers">Environment Controllers<a class="headerlink" href="#environment-controllers" title="Permanent link">&para;</a></h1>
+<h2 id="8-cropstagecontrollercs">8. CropStageController.cs<a class="headerlink" href="#8-cropstagecontrollercs" title="Permanent link">&para;</a></h2>
+<p><strong>Purpose:</strong> Controls a single crop's visual stage and updates its health indicator</p>
+<p><strong>Growth Stages (0-5):</strong>
+- <code>Seedling</code> (0) — Initial stage
+- <code>Vegetative</code> (1) — Growth phase
+- <code>FloweringInitiation</code> (2) — Transition to flowering
+- <code>Flowering</code> (3) — Bloom phase
+- <code>Unripe</code> (4) — Fruit developing
+- <code>Ripe</code> (5) — Ready to harvest</p>
+<p><strong>Public Methods:</strong>
+- <code>SetStage(GrowthStage stage)</code> — Pass enum directly
+- <code>SetStageByIndex(int index)</code> — Pass 0-5, clamped automatically
+- <code>SetStageByName(string stageName)</code> — Pass string like <code>"Ripe"</code> or <code>"flowering_initiation"</code>
+- <code>NextStage()</code> / <code>PreviousStage()</code> — Increment/decrement</p>
+<p><strong>Inspector Fields:</strong>
+- <code>seedling</code> / <code>vegetative</code> / <code>floweringInitiation</code> / <code>flowering</code> / <code>unripe</code> / <code>ripe</code> — GameObjects for each stage (only one visible at a time)
+- <code>healthIndicator</code> — Reference to the CropHealthIndicator (auto-found from parent/children)
+- <code>debugManualControl</code> — Edit in Play Mode for testing</p>
+<p><strong>Auto-Behavior:</strong>
+- When set to <code>Ripe</code>, automatically calls <code>healthIndicator.SetGreen()</code> and <code>SetBlinkGreen(true)</code>
+- When set to any other stage, calls <code>SetBlinkGreen(false)</code></p>
+<hr />
+<h2 id="9-timeofdaycontrollercs">9. TimeOfDayController.cs<a class="headerlink" href="#9-timeofdaycontrollercs" title="Permanent link">&para;</a></h2>
+<p><strong>Purpose:</strong> Controls scene lighting, skybox, fog, and night lights</p>
+<p><strong>Time Periods:</strong>
+- <code>Morning</code> — Warm light, clear sky, some fog
+- <code>Afternoon</code> — Bright sun, no fog, high intensity
+- <code>Evening</code> — Orange light, orange sky, fog
+- <code>Night</code> — Dark blue light, night sky, dim fog, night lights on</p>
+<p><strong>Public Methods:</strong>
+- <code>SetTimeOfDay(TimeOfDay timeOfDay)</code> — Pass enum directly
+- <code>SetTimeOfDayByName(string timeName)</code> — Pass <code>"Morning"</code>, <code>"Afternoon"</code>, <code>"Evening"</code>, or <code>"Night"</code></p>
+<p><strong>Inspector Fields:</strong>
+- <code>directionalLight</code> — Main sun/moon light
+- <code>morningSkybox</code> / <code>afternoonSkybox</code> / <code>eveningSkybox</code> / <code>nightSkybox</code> — Material for each time
+- <code>nightLights</code> — Array of GameObjects to enable only at night
+- <code>enableKeyboardDebugControl</code> — Press 1/2/3/4 to switch times in Play Mode
+- <code>debugManualControl</code> — Edit in Play Mode for testing</p>
+<hr />
+<h2 id="10-crophealthindicatorcs">10. CropHealthIndicator.cs<a class="headerlink" href="#10-crophealthindicatorcs" title="Permanent link">&para;</a></h2>
+<p><strong>Purpose:</strong> Controls green/yellow/red status lights with optional blinking</p>
+<p><strong>Health States:</strong>
+- <code>Green</code> — Healthy (can blink if all crops are Ripe)
+- <code>Yellow</code> — Moderate stress
+- <code>Red</code> — Critical stress</p>
+<p><strong>Public Methods:</strong>
+- <code>SetState(HealthState state)</code> — Pass enum directly
+- <code>SetGreen()</code> / <code>SetYellow()</code> / <code>SetRed()</code> — Direct helpers
+- <code>SetBlinkGreen(bool shouldBlink)</code> — Enable/disable green blinking</p>
+<p><strong>Inspector Fields:</strong>
+- <code>greenLight</code> / <code>yellowLight</code> / <code>redLight</code> — Light components for each state
+- <code>blinkGreen</code> — Manual blink toggle (read-only in normal use; <code>GreenhouseStateApplier</code> controls this)
+- <code>blinkSpeed</code> — Speed of green blink (2.0 = 2 blinks per second)
+- <code>debugManualControl</code> — Edit in Play Mode for testing</p>
+<p><strong>Auto-Behavior (via GreenhouseStateApplier):</strong>
+- Green light blinks when <strong>ALL 15 crops are in Ripe stage</strong>
+- If even one crop is not Ripe, blinking stops (even if manually set)
+- If JSON says <code>state: "Yellow"</code> or <code>"Red"</code> but all crops are Ripe, automatically forced to <code>Green + blink</code></p>
+<hr />
+<h2 id="11-freecameracontrollercs">11. FreeCameraController.cs<a class="headerlink" href="#11-freecameracontrollercs" title="Permanent link">&para;</a></h2>
+<p><strong>Purpose:</strong> Provides free camera movement and look controls</p>
+<p><strong>Controls:</strong>
+- Right-click + move mouse to look around (sensitivity: 0.15)
+- WASD to move forward/back/strafe
+- Shift to double speed (2x movement)
+- Mouse scroll to zoom in/out
+- Confined to <code>boundsBox</code> if assigned</p>
+<p><strong>Inspector Fields:</strong>
+- <code>boundsBox</code> — Assign a Collider (usually a cube) to constrain camera movement
+- (Requires <code>CharacterController</code> component on same GameObject)</p>
+<hr />
+<hr />
+<h1 id="json-schema-format">JSON Schema &amp; Format<a class="headerlink" href="#json-schema-format" title="Permanent link">&para;</a></h1>
+<h2 id="complete-json-structure">Complete JSON Structure<a class="headerlink" href="#complete-json-structure" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seedling|Vegetative|FloweringInitiation|Flowering|Unripe|Ripe&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Morning|Afternoon|Evening|Night&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">        </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green|Yellow|Red&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">        </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">  </span><span class="c1">// IGNORED — computed from crop stages</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="important-notes">Important Notes<a class="headerlink" href="#important-notes" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>All string values are case-insensitive</strong> (e.g., <code>"Ripe"</code>, <code>"RIPE"</code>, <code>"ripe"</code> all work)</li>
+<li><strong>Crop stage applies to all crops</strong> — the single <code>cropStage</code> value is applied to every crop in the Inspector array</li>
+<li><strong>Any key can be omitted</strong> — missing keys default to no action (safe partial JSON)</li>
+<li><strong>Crop stage underscore variants</strong> are auto-converted (e.g., <code>"flowering_initiation"</code> → <code>"FloweringInitiation"</code>)</li>
+<li><strong><code>blinkGreen</code> field</strong> is kept in schema for compatibility but is <strong>never read</strong> — it is always computed from crop stage</li>
+</ul>
+<hr />
+<h2 id="sample-json-file">Sample JSON File<a class="headerlink" href="#sample-json-file" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ripe&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w">  </span><span class="s2">&quot;Morning&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="p">}</span>
+</code></pre></div>
+<hr />
+<hr />
+<h1 id="setup-instructions">Setup Instructions<a class="headerlink" href="#setup-instructions" title="Permanent link">&para;</a></h1>
+<h2 id="step-1-verify-file-structure">Step 1: Verify File Structure<a class="headerlink" href="#step-1-verify-file-structure" title="Permanent link">&para;</a></h2>
+<p>Ensure your project has:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Assets/
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>├── Scripts/
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>│   ├── GreenhouseStateApplier.cs
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>│   ├── CropStageController.cs
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>│   ├── CropHealthIndicator.cs
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>│   ├── TimeOfDayController.cs
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>│   ├── FluorescentLightController.cs
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>│   ├── HeaterController.cs
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>│   ├── EnergyCanisterController.cs
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>│   ├── HumidifierController.cs
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>│   ├── WindowFanController.cs
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>│   ├── VentController.cs
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>│   ├── WaterTankFloorController.cs
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>│   ├── FreeCameraController.cs
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>│   └── GREENHOUSE_INTEGRATION_GUIDE.md (this file)
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>└── StreamingAssets/
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>    └── greenhouse_state.json
+</code></pre></div></p>
+<h2 id="step-2-create-manager-gameobject">Step 2: Create Manager GameObject<a class="headerlink" href="#step-2-create-manager-gameobject" title="Permanent link">&para;</a></h2>
+<ol>
+<li>In the Hierarchy, right-click → <strong>Create Empty</strong></li>
+<li>Name it <code>"GreenhouseManager"</code></li>
+<li>Attach <code>GreenhouseStateApplier</code> component to it</li>
+</ol>
+<h2 id="step-3-assign-inspector-references">Step 3: Assign Inspector References<a class="headerlink" href="#step-3-assign-inspector-references" title="Permanent link">&para;</a></h2>
+<p>In the Inspector for <code>GreenhouseStateApplier</code>, drag:</p>
+<h3 id="actuators-8-items">Actuators (8 items)<a class="headerlink" href="#actuators-8-items" title="Permanent link">&para;</a></h3>
+<ol>
+<li><code>Fluorescent Light</code> ← GameObject with <code>FluorescentLightController</code></li>
+<li><code>Heater</code> ← GameObject with <code>HeaterController</code></li>
+<li><code>Energy Canister</code> ← GameObject with <code>EnergyCanisterController</code></li>
+<li><code>Humidifier</code> ← GameObject with <code>HumidifierController</code></li>
+<li><code>Window Fan</code> ← GameObject with <code>WindowFanController</code></li>
+<li><code>Vent</code> ← GameObject with <code>VentController</code></li>
+<li><code>Water Tank Floor</code> ← GameObject with <code>WaterTankFloorController</code></li>
+</ol>
+<h3 id="crops-environment-3-items">Crops &amp; Environment (3 items)<a class="headerlink" href="#crops-environment-3-items" title="Permanent link">&para;</a></h3>
+<ol>
+<li><code>Crop Stages</code> array — Set Size = 15 (or however many crops you have), then drag each crop GameObject into Element 0–14. <strong>Note:</strong> All crops receive the same <code>cropStage</code> value from the JSON.</li>
+<li><code>Time Of Day</code> ← GameObject with <code>TimeOfDayController</code></li>
+<li><code>Crop Health</code> ← GameObject with <code>CropHealthIndicator</code></li>
+</ol>
+<h2 id="step-4-create-json-file">Step 4: Create JSON File<a class="headerlink" href="#step-4-create-json-file" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Create folder: <code>Assets/StreamingAssets/</code></li>
+<li>Create file: <code>greenhouse_state.json</code></li>
+<li>Paste the sample JSON content (see <a href="#sample-json-file">Sample JSON File</a> above)</li>
+</ol>
+<h2 id="step-5-play-test">Step 5: Play &amp; Test<a class="headerlink" href="#step-5-play-test" title="Permanent link">&para;</a></h2>
+<p>Press <strong>Play</strong> — the GreenhouseStateApplier reads the JSON file and applies the state automatically within 1 second (default poll interval).</p>
+<hr />
+<hr />
+<h1 id="live-testing-in-play-mode">Live Testing in Play Mode<a class="headerlink" href="#live-testing-in-play-mode" title="Permanent link">&para;</a></h1>
+<h2 id="how-to-test-dynamic-updates">How to Test Dynamic Updates<a class="headerlink" href="#how-to-test-dynamic-updates" title="Permanent link">&para;</a></h2>
+<p>While Play Mode is running:</p>
+<ol>
+<li>
+<p><strong>Open the JSON file</strong> in VS Code, Notepad++, or any text editor:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Assets/StreamingAssets/greenhouse_state.json
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Make a change</strong> (Examples):</p>
+</li>
+<li>Turn on heater: <code>"heater": { "isOn": false }</code> → <code>"heater": { "isOn": true }</code></li>
+<li>Change crop stage (applies to all 15 crops): <code>"cropStage": { "stage": "Seedling" }</code> → <code>"cropStage": { "stage": "Ripe" }</code></li>
+<li>Set health to Yellow: <code>"state": "Green"</code> → <code>"state": "Yellow"</code></li>
+<li>
+<p>Change time: <code>"time": "Morning"</code> → <code>"time": "Night"</code></p>
+</li>
+<li>
+<p><strong>Save the file</strong> (Ctrl+S)</p>
+</li>
+<li>
+<p><strong>Within 1 second</strong>, the scene updates automatically:</p>
+</li>
+<li>Lights turn on/off</li>
+<li>Particles start/stop</li>
+<li>Audio plays/stops</li>
+<li>Crop models swap stages</li>
+<li>Sky and fog change</li>
+<li>
+<p>Health indicator colors shift</p>
+</li>
+<li>
+<p><strong>Watch the Console</strong> for debug messages:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>[GreenhouseStateApplier] Crop[0] stage -&gt; Ripe
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>[GreenhouseStateApplier] CropHealth -&gt; Green (blinking) [auto-overridden: all crops Ripe]
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>[GreenhouseStateApplier] All states applied successfully.
+</code></pre></div></p>
+</li>
+</ol>
+<h2 id="force-refresh">Force Refresh<a class="headerlink" href="#force-refresh" title="Permanent link">&para;</a></h2>
+<p>In the Inspector during Play Mode, tick the <strong>Force Refresh</strong> checkbox to immediately re-apply without waiting for the next poll interval. The checkbox auto-resets after use.</p>
+<hr />
+<hr />
+<h1 id="future-fastapi-python-backend-integration">Future FastAPI / Python Backend Integration<a class="headerlink" href="#future-fastapi-python-backend-integration" title="Permanent link">&para;</a></h1>
+<h2 id="swapping-file-to-api">Swapping File to API<a class="headerlink" href="#swapping-file-to-api" title="Permanent link">&para;</a></h2>
+<p>The current script reads from a local JSON file. To connect to a real Python FastAPI backend:</p>
+<h3 id="step-1-locate-the-read-method">Step 1: Locate the Read Method<a class="headerlink" href="#step-1-locate-the-read-method" title="Permanent link">&para;</a></h3>
+<p>Find this in <code>GreenhouseStateApplier.cs</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kt">string</span><span class="w"> </span><span class="nf">ReadJsonFromDisk</span><span class="p">()</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="p">{</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="k">try</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">File</span><span class="p">.</span><span class="n">Exists</span><span class="p">(</span><span class="n">_resolvedFilePath</span><span class="p">))</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">            </span><span class="n">Debug</span><span class="p">.</span><span class="n">LogWarning</span><span class="p">(</span><span class="s">&quot;[GreenhouseStateApplier] JSON file not found: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">_resolvedFilePath</span><span class="p">);</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="k">null</span><span class="p">;</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">File</span><span class="p">.</span><span class="n">ReadAllText</span><span class="p">(</span><span class="n">_resolvedFilePath</span><span class="p">);</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">    </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">ex</span><span class="p">)</span>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="w">        </span><span class="n">Debug</span><span class="p">.</span><span class="n">LogError</span><span class="p">(</span><span class="s">&quot;[GreenhouseStateApplier] Failed to read JSON file: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ex</span><span class="p">.</span><span class="n">Message</span><span class="p">);</span>
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">null</span><span class="p">;</span>
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="step-2-replace-with-fastapi-call">Step 2: Replace with FastAPI Call<a class="headerlink" href="#step-2-replace-with-fastapi-call" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">private</span><span class="w"> </span><span class="n">IEnumerator</span><span class="w"> </span><span class="nf">ReadJsonFromApi</span><span class="p">()</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="p">{</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="kt">string</span><span class="w"> </span><span class="n">apiUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;http://localhost:8000/state&quot;</span><span class="p">;</span><span class="w">  </span><span class="c1">// Your FastAPI endpoint</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">    </span><span class="n">UnityWebRequest</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UnityWebRequest</span><span class="p">.</span><span class="n">Get</span><span class="p">(</span><span class="n">apiUrl</span><span class="p">);</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">    </span><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="n">SendWebRequest</span><span class="p">();</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">request</span><span class="p">.</span><span class="n">result</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">UnityWebRequest</span><span class="p">.</span><span class="n">Result</span><span class="p">.</span><span class="n">Success</span><span class="p">)</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="n">downloadHandler</span><span class="p">.</span><span class="n">text</span><span class="p">;</span>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">    </span><span class="k">else</span>
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">        </span><span class="n">Debug</span><span class="p">.</span><span class="n">LogError</span><span class="p">(</span><span class="s">&quot;[GreenhouseStateApplier] API request failed: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="n">error</span><span class="p">);</span>
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">null</span><span class="p">;</span>
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="step-3-update-tryreadandapply">Step 3: Update TryReadAndApply<a class="headerlink" href="#step-3-update-tryreadandapply" title="Permanent link">&para;</a></h3>
+<p>Change from synchronous to coroutine:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1">// Before (synchronous)</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kt">string</span><span class="w"> </span><span class="n">json</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReadJsonFromDisk</span><span class="p">();</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1">// After (coroutine)</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="n">StartCoroutine</span><span class="p">(</span><span class="n">ReadJsonFromApiCoroutine</span><span class="p">());</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="n">IEnumerator</span><span class="w"> </span><span class="nf">ReadJsonFromApiCoroutine</span><span class="p">()</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="p">{</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">    </span><span class="k">yield</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nf">StartCoroutine</span><span class="p">(</span><span class="n">ReadJsonFromApi</span><span class="p">());</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">    </span><span class="c1">// Continue with parsing and applying...</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>That's it.</strong> Everything else in the pipeline (parsing, change detection, applying to controllers) stays exactly the same. The individual controller scripts need zero changes.</p>
+<hr />
+<hr />
+<h1 id="architecture-design-patterns">Architecture &amp; Design Patterns<a class="headerlink" href="#architecture-design-patterns" title="Permanent link">&para;</a></h1>
+<h2 id="why-this-structure">Why This Structure?<a class="headerlink" href="#why-this-structure" title="Permanent link">&para;</a></h2>
+<h3 id="separation-of-concerns">Separation of Concerns<a class="headerlink" href="#separation-of-concerns" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Individual Controllers</strong> handle: lights, particles, audio, UI</li>
+<li><strong>GreenhouseStateApplier</strong> handles: orchestration, JSON parsing, change detection</li>
+<li><strong>Backend</strong> (future) handles: business logic, state computation</li>
+</ul>
+<p>Each layer knows nothing about lower layers and can be tested independently.</p>
+<h3 id="unified-control-pattern">Unified Control Pattern<a class="headerlink" href="#unified-control-pattern" title="Permanent link">&para;</a></h3>
+<p>Every actuator exposes <code>SetState(bool)</code> — a single, predictable method signature that the central applier can call uniformly. This makes it trivial to add new actuators later.</p>
+<h3 id="lateupdate-for-health-persistence">LateUpdate for Health Persistence<a class="headerlink" href="#lateupdate-for-health-persistence" title="Permanent link">&para;</a></h3>
+<p><code>CropStageController.Update()</code> might call <code>SetGreen()</code> (because a crop is Ripe). If <code>GreenhouseStateApplier.Update()</code> happens to run <em>after</em> that, it would override the health you just set in the JSON. </p>
+<p><strong>Solution:</strong> <code>GreenhouseStateApplier</code> uses <code>LateUpdate()</code> to re-assert health color <strong>after all Update() calls finish</strong>. This guarantees the health color you set in JSON persists every frame, regardless of execution order.</p>
+<h3 id="all-ripe-override-logic">All-Ripe Override Logic<a class="headerlink" href="#all-ripe-override-logic" title="Permanent link">&para;</a></h3>
+<p>When all 15 crops are Ripe, the logic is:
+1. <strong>Always</strong> set health to Green (even if JSON says Yellow/Red)
+2. <strong>Always</strong> enable blinking (even if JSON says <code>"blinkGreen": false</code>)
+3. <strong>Automatically</strong> detect when this condition starts/stops</p>
+<p>This is business logic: "A fully mature crop garden should always show green + blinking." The JSON cannot override this — it's part of the scene's DNA.</p>
+<h3 id="fault-tolerance">Fault Tolerance<a class="headerlink" href="#fault-tolerance" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Missing JSON keys → safely skipped (no error)</li>
+<li>Null references → warning logged, skipped (no crash)</li>
+<li>Invalid JSON → error logged, previous state retained (no crash)</li>
+<li>File encoding issues → caught and logged (no silent failures)</li>
+</ul>
+<hr />
+<h2 id="future-extensibility">Future Extensibility<a class="headerlink" href="#future-extensibility" title="Permanent link">&para;</a></h2>
+<h3 id="adding-more-crops-or-fewer">Adding More Crops (or Fewer)<a class="headerlink" href="#adding-more-crops-or-fewer" title="Permanent link">&para;</a></h3>
+<p>Since all crops share a <strong>single <code>cropStage</code> value</strong>, adding or removing crops is trivial:</p>
+<ol>
+<li>Create new crop GameObject(s) in the scene with <code>CropStageController</code> component</li>
+<li>In <code>GreenhouseStateApplier</code> Inspector, increase <code>Crop Stages</code> array Size</li>
+<li>Drag the new crop(s) into the new array slots</li>
+<li><strong>Done.</strong> No JSON or code changes required. The single <code>cropStage</code> value applies to all crops automatically.</li>
+</ol>
+<h3 id="adding-a-new-actuator">Adding a New Actuator<a class="headerlink" href="#adding-a-new-actuator" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Create the new controller script (e.g., <code>SoilSensorController.cs</code>)</li>
+<li>Add to <code>GreenhouseStateApplier</code>:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">public</span><span class="w"> </span><span class="n">SoilSensorController</span><span class="w"> </span><span class="n">soilSensor</span><span class="p">;</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="k">void</span><span class="w"> </span><span class="nf">ApplySoilSensor</span><span class="p">(</span><span class="n">ActuatorState</span><span class="w"> </span><span class="n">s</span><span class="p">)</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="p">{</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">s</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="k">null</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">AssertRef</span><span class="p">(</span><span class="n">soilSensor</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;SoilSensorController&quot;</span><span class="p">))</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">    </span><span class="n">soilSensor</span><span class="p">.</span><span class="n">SetState</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">isOn</span><span class="p">);</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">    </span><span class="n">Log</span><span class="p">(</span><span class="s">&quot;SoilSensor -&gt; &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">isOn</span><span class="p">);</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="p">}</span>
+</code></pre></div></li>
+<li>Call in <code>ApplyState()</code>:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">ApplySoilSensor</span><span class="p">(</span><span class="n">state</span><span class="p">.</span><span class="n">soilSensor</span><span class="p">);</span>
+</code></pre></div></li>
+<li>Update <code>GreenhouseState</code> data class:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">public</span><span class="w"> </span><span class="n">ActuatorState</span><span class="w"> </span><span class="n">soilSensor</span><span class="p">;</span>
+</code></pre></div></li>
+<li>Update JSON schema and sample file</li>
+<li><strong>Done.</strong> No other scripts touched.</li>
+</ol>
+<hr />
+<h2 id="testing-individual-controllers">Testing Individual Controllers<a class="headerlink" href="#testing-individual-controllers" title="Permanent link">&para;</a></h2>
+<p>You can test any controller in isolation by manually calling its methods in the editor:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1">// Test FluorescentLight</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="n">fluorescent</span><span class="p">.</span><span class="n">SetState</span><span class="p">(</span><span class="k">true</span><span class="p">);</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="n">fluorescent</span><span class="p">.</span><span class="n">TurnOff</span><span class="p">();</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="c1">// Test CropStage</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="n">crop</span><span class="p">.</span><span class="n">SetStageByName</span><span class="p">(</span><span class="s">&quot;Ripe&quot;</span><span class="p">);</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="n">crop</span><span class="p">.</span><span class="n">NextStage</span><span class="p">();</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="c1">// Test Health</span>
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="n">health</span><span class="p">.</span><span class="n">SetRed</span><span class="p">();</span>
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="n">health</span><span class="p">.</span><span class="n">SetBlinkGreen</span><span class="p">(</span><span class="k">true</span><span class="p">);</span>
+</code></pre></div>
+<p>Or enable <code>debugManualControl</code> in the Inspector to toggle values in Play Mode without touching code.</p>
+<hr />
+<h2 id="shader-updates">Shader Updates<a class="headerlink" href="#shader-updates" title="Permanent link">&para;</a></h2>
+<h3 id="lit-shader-leaf-green-default-color">Lit Shader - Leaf Green Default Color<a class="headerlink" href="#lit-shader-leaf-green-default-color" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>File:</strong> <code>Library/PackageCache/com.unity.render-pipelines.universal@*/Shaders/Lit.shader</code></li>
+<li><strong>Change:</strong> Default <code>_BaseColor</code> updated to leaf green <strong>(0.298, 0.686, 0.314, 1)</strong></li>
+<li><strong>Impact:</strong> All materials using the Universal Render Pipeline Lit shader default to leaf green unless overridden</li>
+<li><strong>Hex Value:</strong> <code>#4CAF50</code></li>
+</ul>
+<hr />
+<h2 id="common-integration-patterns">Common Integration Patterns<a class="headerlink" href="#common-integration-patterns" title="Permanent link">&para;</a></h2>
+<h3 id="pattern-1-direct-local-testing-current">Pattern 1: Direct Local Testing (Current)<a class="headerlink" href="#pattern-1-direct-local-testing-current" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>JSON File (disk)
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>    ↓
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>GreenhouseStateApplier (reads file every 1s)
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    ↓
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>Individual Controllers (apply state)
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>    ↓
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>Scene (lights, particles, audio)
+</code></pre></div>
+<h3 id="pattern-2-fastapi-backend-future">Pattern 2: FastAPI Backend (Future)<a class="headerlink" href="#pattern-2-fastapi-backend-future" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>FastAPI Backend (Python)
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>    ↓ GET /state
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    ↓
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>GreenhouseStateApplier (polls API every 1s)
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>    ↓
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>Individual Controllers (apply state)
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>    ↓
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>Scene (lights, particles, audio)
+</code></pre></div>
+<p><strong>Only the first read step changes. Everything after is identical.</strong></p>
+<hr />
+<h2 id="debugging-checklist">Debugging Checklist<a class="headerlink" href="#debugging-checklist" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Script not compiling</td>
+<td>Check for missing references in Inspector</td>
+</tr>
+<tr>
+<td>Scene not updating on JSON change</td>
+<td>Verify file path is correct; check Console for errors</td>
+</tr>
+<tr>
+<td>Health color won't change to Red</td>
+<td>Check <code>debugManualControl</code> is <code>false</code>; ensure not all crops are Ripe</td>
+</tr>
+<tr>
+<td>Crop stage not changing</td>
+<td>Verify <code>cropStages</code> array is assigned and not empty</td>
+</tr>
+<tr>
+<td>No blink even though all Ripe</td>
+<td>Verify <code>cropHealth</code> is assigned; check health state is "Green" or all-Ripe override should apply</td>
+</tr>
+<tr>
+<td>Reference warnings in Console</td>
+<td>Drag missing controller from scene into the Inspector slot</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="version-history">Version History<a class="headerlink" href="#version-history" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Changes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>Initial release: 8 actuators, 3 environment controllers, central JSON applier</td>
+</tr>
+<tr>
+<td>-</td>
+<td>Support for 15 crops (expandable)</td>
+</tr>
+<tr>
+<td>-</td>
+<td>LateUpdate health persistence</td>
+</tr>
+<tr>
+<td>-</td>
+<td>All-Ripe auto-blink override logic</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1 id="quick-start-summary">Quick Start Summary<a class="headerlink" href="#quick-start-summary" title="Permanent link">&para;</a></h1>
+<h2 id="what-you-have">What You Have<a class="headerlink" href="#what-you-have" title="Permanent link">&para;</a></h2>
+<p>✅ <strong>12 C# Scripts</strong> — all production-ready, well-commented<br />
+✅ <strong>8 Actuator Controllers</strong> — lights, effects, audio (all use <code>SetState(bool)</code>)<br />
+✅ <strong>3 Environment Controllers</strong> — crop stages, time of day, health indicator<br />
+✅ <strong>1 Central Applier</strong> — reads JSON, auto-applies state<br />
+✅ <strong>1 Sample JSON File</strong> — ready to edit and test<br />
+✅ <strong>1 Integration Guide</strong> — this document (everything you need)  </p>
+<h2 id="what-you-do">What You Do<a class="headerlink" href="#what-you-do" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Create <code>GreenhouseManager</code> GameObject</strong> in your scene</li>
+<li><strong>Attach <code>GreenhouseStateApplier</code></strong> component</li>
+<li><strong>Drag 10 controller GameObjects</strong> into Inspector slots</li>
+<li><strong>Set JSON file path</strong> (default: <code>Assets/StreamingAssets/greenhouse_state.json</code>)</li>
+<li><strong>Press Play</strong> — scene auto-updates as you edit the JSON</li>
+</ol>
+<h2 id="key-concepts">Key Concepts<a class="headerlink" href="#key-concepts" title="Permanent link">&para;</a></h2>
+<h3 id="unified-control">Unified Control<a class="headerlink" href="#unified-control" title="Permanent link">&para;</a></h3>
+<p>Every actuator is commanded <strong>identically</strong>: <code>SetState(bool)</code>. You pass <code>true</code> or <code>false</code>. That's it.</p>
+<h3 id="single-crop-stage-value">Single Crop Stage Value<a class="headerlink" href="#single-crop-stage-value" title="Permanent link">&para;</a></h3>
+<p>The JSON has <strong>one</strong> <code>cropStage</code> value (not 15). It applies to all 15 crops simultaneously. This matches your real project where the backend sends a single stage value.</p>
+<h3 id="auto-blink-logic">Auto-Blink Logic<a class="headerlink" href="#auto-blink-logic" title="Permanent link">&para;</a></h3>
+<p>Green blinking <strong>automatically activates</strong> when all crops are Ripe. You cannot manually disable it — it's built in. Remove it from the JSON or set another state (Yellow/Red) stops blinking.</p>
+<h3 id="change-detection">Change Detection<a class="headerlink" href="#change-detection" title="Permanent link">&para;</a></h3>
+<p>The applier only re-applies when file content <strong>actually changes</strong>. Touching the file without changing content = no re-apply (efficient).</p>
+<h3 id="lateupdate-guarantee">LateUpdate Guarantee<a class="headerlink" href="#lateupdate-guarantee" title="Permanent link">&para;</a></h3>
+<p>Health color persists every frame, even if <code>CropStageController.Update()</code> tries to modify it. The applier always has the final say.</p>
+<hr />
+<h2 id="example-json-commands">Example JSON Commands<a class="headerlink" href="#example-json-commands" title="Permanent link">&para;</a></h2>
+<h3 id="fully-ripe-greenhouse">Fully Ripe Greenhouse<a class="headerlink" href="#fully-ripe-greenhouse" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="p">{</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Ripe&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Afternoon&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="p">}</span>
+</code></pre></div>
+<strong>Result:</strong> All lights on, all particles running, all audio playing, every crop shows Ripe model, green light <strong>automatically blinking</strong>.</p>
+<h3 id="seedling-startup-morning">Seedling Startup (Morning)<a class="headerlink" href="#seedling-startup-morning" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="p">{</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Seedling&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Morning&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Green&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a><span class="p">}</span>
+</code></pre></div>
+<strong>Result:</strong> Lights on for growth, heater off (seedlings sensitive), humidifier on, all crops show Seedling model, morning lighting, green light (no blink).</p>
+<h3 id="stressed-crop-emergency">Stressed Crop (Emergency)<a class="headerlink" href="#stressed-crop-emergency" title="Permanent link">&para;</a></h3>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="p">{</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">    </span><span class="nt">&quot;fluorescentLight&quot;</span><span class="p">:</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">    </span><span class="nt">&quot;heater&quot;</span><span class="p">:</span><span class="w">            </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">    </span><span class="nt">&quot;energyCanister&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">    </span><span class="nt">&quot;humidifier&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">    </span><span class="nt">&quot;windowFan&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="w">    </span><span class="nt">&quot;vent&quot;</span><span class="p">:</span><span class="w">              </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="w">    </span><span class="nt">&quot;waterTankFloor&quot;</span><span class="p">:</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;isOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a><span class="w">    </span><span class="nt">&quot;cropStage&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;stage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Flowering&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a><span class="w">    </span><span class="nt">&quot;timeOfDay&quot;</span><span class="p">:</span><span class="w">         </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Night&quot;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a><span class="w">    </span><span class="nt">&quot;cropHealth&quot;</span><span class="p">:</span><span class="w">        </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Red&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;blinkGreen&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a><span class="p">}</span>
+</code></pre></div>
+<strong>Result:</strong> All systems active, humidifier off, crops in Flowering, night lighting, <strong>red health light</strong> (critical stress).</p>
+<hr />
+<h2 id="common-workflows">Common Workflows<a class="headerlink" href="#common-workflows" title="Permanent link">&para;</a></h2>
+<h3 id="workflow-1-develop-locally-vs-integrate-with-backend">Workflow 1: Develop Locally vs Integrate with Backend<a class="headerlink" href="#workflow-1-develop-locally-vs-integrate-with-backend" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>Phase 1: Local Testing (NOW)
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>  └─ Edit JSON manually
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>  └─ Watch scene update in real-time
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>  └─ Verify all actuators work
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>  └─ Test all combinations
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>Phase 2: Backend Integration (FUTURE)
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>  └─ Replace ReadJsonFromDisk() with UnityWebRequest
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>  └─ Point to your FastAPI /state endpoint
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>  └─ Everything else unchanged
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>  └─ Drop into production
+</code></pre></div>
+<h3 id="workflow-2-adding-a-new-actuator">Workflow 2: Adding a New Actuator<a class="headerlink" href="#workflow-2-adding-a-new-actuator" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>1. Create MyNewController.cs with SetState(bool)
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>2. Add to GreenhouseStateApplier class:
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>   - Public field: public MyNewController myNew;
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>   - Apply method: void ApplyMyNew(ActuatorState s) { ... }
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>   - Call in ApplyState(): ApplyMyNew(state.myNew);
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>3. Update GreenhouseState data class:
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>   - public ActuatorState myNew;
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>4. Update JSON schema and sample file
+<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>5. Done. No other scripts touched.
+</code></pre></div>
+<h3 id="workflow-3-debugging-why-health-wont-change">Workflow 3: Debugging Why Health Won't Change<a class="headerlink" href="#workflow-3-debugging-why-health-wont-change" title="Permanent link">&para;</a></h3>
+<p>Check in this order:
+1. Verify <code>cropHealth</code> component is assigned in Inspector
+2. Verify <code>debugManualControl</code> is <code>false</code> on CropHealthIndicator
+3. Check Console for <code>[GreenhouseStateApplier]</code> messages
+4. If all crops are Ripe, health is <strong>forced to Green</strong> (this is intentional)
+5. Try <code>forceRefresh</code> checkbox in Inspector to re-apply immediately</p>
+<hr />
+<h2 id="file-format-quick-reference">File Format Quick Reference<a class="headerlink" href="#file-format-quick-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Valid Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fluorescentLight.isOn</code></td>
+<td>bool</td>
+<td><code>true</code>, <code>false</code></td>
+</tr>
+<tr>
+<td><code>heater.isOn</code></td>
+<td>bool</td>
+<td><code>true</code>, <code>false</code></td>
+</tr>
+<tr>
+<td><code>energyCanister.isOn</code></td>
+<td>bool</td>
+<td><code>true</code>, <code>false</code></td>
+</tr>
+<tr>
+<td><code>humidifier.isOn</code></td>
+<td>bool</td>
+<td><code>true</code>, <code>false</code></td>
+</tr>
+<tr>
+<td><code>windowFan.isOn</code></td>
+<td>bool</td>
+<td><code>true</code>, <code>false</code></td>
+</tr>
+<tr>
+<td><code>vent.isOn</code></td>
+<td>bool</td>
+<td><code>true</code>, <code>false</code></td>
+</tr>
+<tr>
+<td><code>waterTankFloor.isOn</code></td>
+<td>bool</td>
+<td><code>true</code>, <code>false</code></td>
+</tr>
+<tr>
+<td><code>cropStage.stage</code></td>
+<td>string</td>
+<td><code>Seedling</code>, <code>Vegetative</code>, <code>FloweringInitiation</code>, <code>Flowering</code>, <code>Unripe</code>, <code>Ripe</code> (case-insensitive)</td>
+</tr>
+<tr>
+<td><code>timeOfDay.time</code></td>
+<td>string</td>
+<td><code>Morning</code>, <code>Afternoon</code>, <code>Evening</code>, <code>Night</code> (case-insensitive)</td>
+</tr>
+<tr>
+<td><code>cropHealth.state</code></td>
+<td>string</td>
+<td><code>Green</code>, <code>Yellow</code>, <code>Red</code> (case-insensitive)</td>
+</tr>
+<tr>
+<td><code>cropHealth.blinkGreen</code></td>
+<td>bool</td>
+<td><code>true</code>, <code>false</code> (IGNORED — auto-computed)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="performance-notes">Performance Notes<a class="headerlink" href="#performance-notes" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Polling Interval:</strong> Default 1.0 seconds between file checks (configurable, 0.1–5.0 recommended)</li>
+<li><strong>CPU Impact:</strong> Negligible — only string comparison on poll, no parsing until change detected</li>
+<li><strong>Memory:</strong> ~5KB JSON file + state object in heap</li>
+<li><strong>Update Frequency:</strong> All controllers updated within same Update() call once per poll</li>
+<li><strong>LateUpdate Overhead:</strong> One extra <code>ApplyCropHealth()</code> call per frame (minimal)</li>
+</ul>
+<hr />
+<p><strong>End of Integration Guide</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/arjun-christopher" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
