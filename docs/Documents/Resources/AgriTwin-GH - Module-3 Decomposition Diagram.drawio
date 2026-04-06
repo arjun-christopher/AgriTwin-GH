@@ -4,100 +4,100 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="SGrGPtpaNjyridnIrCZK-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="SGrGPtpaNjyridnIrCZK-2" target="SGrGPtpaNjyridnIrCZK-10">
+        <mxCell id="SGrGPtpaNjyridnIrCZK-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="SGrGPtpaNjyridnIrCZK-2" target="SGrGPtpaNjyridnIrCZK-10" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-2" value="" style="swimlane;startSize=0;dashed=1;dashPattern=8 8;" vertex="1" parent="1">
-          <mxGeometry x="530" y="509" width="200" height="390" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-2" value="" style="swimlane;startSize=0;dashed=1;dashPattern=8 8;" parent="1" vertex="1">
+          <mxGeometry x="530" y="509" width="200" height="451" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-3" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-2">
+        <mxCell id="SGrGPtpaNjyridnIrCZK-3" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" parent="SGrGPtpaNjyridnIrCZK-2" vertex="1">
           <mxGeometry x="15" y="24.5" width="170" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-4" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Environmental Forecast Data&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-2">
+        <mxCell id="SGrGPtpaNjyridnIrCZK-4" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Environmental Forecast Data&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="SGrGPtpaNjyridnIrCZK-2" vertex="1">
           <mxGeometry x="25" y="40.5" width="150" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-29" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-2">
-          <mxGeometry x="15" y="115.5" width="170" height="70" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-29" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" parent="SGrGPtpaNjyridnIrCZK-2" vertex="1">
+          <mxGeometry x="15" y="131" width="170" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-30" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Disease Risk&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-2">
-          <mxGeometry x="25" y="131.5" width="150" height="30" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-30" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Disease Progression Data&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="SGrGPtpaNjyridnIrCZK-2" vertex="1">
+          <mxGeometry x="25" y="147" width="150" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-31" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-2">
-          <mxGeometry x="15" y="205.5" width="170" height="70" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-31" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" parent="SGrGPtpaNjyridnIrCZK-2" vertex="1">
+          <mxGeometry x="15" y="241" width="170" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-32" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Growth Forecast Data&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-2">
-          <mxGeometry x="25" y="221.5" width="150" height="30" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-32" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Growth Progression Data&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="SGrGPtpaNjyridnIrCZK-2" vertex="1">
+          <mxGeometry x="25" y="257" width="150" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-33" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-2">
-          <mxGeometry x="15" y="295.5" width="170" height="70" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-33" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" parent="SGrGPtpaNjyridnIrCZK-2" vertex="1">
+          <mxGeometry x="15" y="361" width="170" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-34" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Real-Time Greenhouse &amp;amp; Actuator Status&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-2">
-          <mxGeometry x="25" y="311.5" width="150" height="30" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-34" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&amp;nbsp;Greenhouse Condition &amp;amp; Actuator Status&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="SGrGPtpaNjyridnIrCZK-2" vertex="1">
+          <mxGeometry x="25" y="377" width="150" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="SGrGPtpaNjyridnIrCZK-10" target="SGrGPtpaNjyridnIrCZK-17">
+        <mxCell id="SGrGPtpaNjyridnIrCZK-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="SGrGPtpaNjyridnIrCZK-10" target="SGrGPtpaNjyridnIrCZK-17" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-10" value="" style="swimlane;startSize=0;" vertex="1" parent="1">
-          <mxGeometry x="780" y="509" width="270" height="390" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-10" value="" style="swimlane;startSize=0;" parent="1" vertex="1">
+          <mxGeometry x="780" y="509" width="270" height="451" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-11" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-10">
-          <mxGeometry x="26.5" y="6" width="217.5" height="79" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-11" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" parent="SGrGPtpaNjyridnIrCZK-10" vertex="1">
+          <mxGeometry x="26.5" y="21" width="217.5" height="79" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-12" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Digital Twin Simulation&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-10">
-          <mxGeometry x="39" y="30.5" width="192.5" height="30" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-12" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Digital Twin Closed Loop Simulation&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="SGrGPtpaNjyridnIrCZK-10" vertex="1">
+          <mxGeometry x="39" y="45.5" width="192.5" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-35" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-10">
-          <mxGeometry x="26.5" y="106" width="217.5" height="79" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-35" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" parent="SGrGPtpaNjyridnIrCZK-10" vertex="1">
+          <mxGeometry x="26.5" y="131" width="217.5" height="79" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-36" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Model Predictive Control&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-10">
-          <mxGeometry x="39" y="130.5" width="192.5" height="30" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-36" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Model Predictive Control&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="SGrGPtpaNjyridnIrCZK-10" vertex="1">
+          <mxGeometry x="39" y="155.5" width="192.5" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-37" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-10">
-          <mxGeometry x="26.5" y="206" width="217.5" height="79" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-37" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" parent="SGrGPtpaNjyridnIrCZK-10" vertex="1">
+          <mxGeometry x="26.5" y="241" width="217.5" height="79" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-38" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Human–Machine Interface&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-10">
-          <mxGeometry x="39" y="230.5" width="192.5" height="30" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-38" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Frontend Interface &amp;amp; System Integration&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="SGrGPtpaNjyridnIrCZK-10" vertex="1">
+          <mxGeometry x="39" y="265.5" width="192.5" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-39" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-10">
-          <mxGeometry x="26.5" y="306" width="217.5" height="79" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-39" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" parent="SGrGPtpaNjyridnIrCZK-10" vertex="1">
+          <mxGeometry x="26.5" y="351" width="217.5" height="79" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-40" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Monitoring Dashboard&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-10">
-          <mxGeometry x="39" y="330.5" width="192.5" height="30" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-40" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;3D Greenhouse Visualization&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="SGrGPtpaNjyridnIrCZK-10" vertex="1">
+          <mxGeometry x="39" y="375.5" width="192.5" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-17" value="" style="swimlane;startSize=0;dashed=1;dashPattern=8 8;" vertex="1" parent="1">
-          <mxGeometry x="1090" y="509" width="200" height="390" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-17" value="" style="swimlane;startSize=0;dashed=1;dashPattern=8 8;" parent="1" vertex="1">
+          <mxGeometry x="1090" y="509" width="200" height="451" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-18" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-17">
-          <mxGeometry x="23.13" y="11" width="153.75" height="79" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-18" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" parent="SGrGPtpaNjyridnIrCZK-17" vertex="1">
+          <mxGeometry x="21.56" y="21" width="156.87" height="89" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-19" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Simulated Greenhouse State&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-17">
-          <mxGeometry x="30.009999999999998" y="35.5" width="140" height="30" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-19" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Simulated Greenhouse State&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="SGrGPtpaNjyridnIrCZK-17" vertex="1">
+          <mxGeometry x="28.439999999999998" y="45.5" width="140" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-20" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-17">
-          <mxGeometry x="23.129999999999995" y="106" width="153.75" height="79" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-20" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" parent="SGrGPtpaNjyridnIrCZK-17" vertex="1">
+          <mxGeometry x="21.56" y="121" width="156.87" height="84" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-21" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Control Actions&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-17">
-          <mxGeometry x="30.009999999999998" y="130.5" width="140" height="30" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-21" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Optimized Greenhouse Control Decisions&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="SGrGPtpaNjyridnIrCZK-17" vertex="1">
+          <mxGeometry x="25.299999999999997" y="142" width="146.87" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-22" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-17">
-          <mxGeometry x="23.129999999999995" y="206" width="153.75" height="79" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-22" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" parent="SGrGPtpaNjyridnIrCZK-17" vertex="1">
+          <mxGeometry x="23.13" y="231" width="156.87" height="94" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-23" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Monitoring Output&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-17">
-          <mxGeometry x="30.009999999999998" y="230.5" width="140" height="30" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-23" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Integrated Monitoring and Operator Interface&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="SGrGPtpaNjyridnIrCZK-17" vertex="1">
+          <mxGeometry x="31.57" y="256" width="140" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-24" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-17">
-          <mxGeometry x="23.129999999999995" y="300" width="153.75" height="79" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-24" value="" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;whiteSpace=wrap;" parent="SGrGPtpaNjyridnIrCZK-17" vertex="1">
+          <mxGeometry x="30" y="340" width="153.43" height="91" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-25" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Harvest Readiness Signal&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="SGrGPtpaNjyridnIrCZK-17">
-          <mxGeometry x="30.009999999999998" y="324.5" width="140" height="30" as="geometry" />
+        <mxCell id="SGrGPtpaNjyridnIrCZK-25" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Historical Summary&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="SGrGPtpaNjyridnIrCZK-17" vertex="1">
+          <mxGeometry x="36.72" y="370.5" width="140" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-26" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Input&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="SGrGPtpaNjyridnIrCZK-26" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Input&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="530" y="420" width="200" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-27" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Tasks&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="SGrGPtpaNjyridnIrCZK-27" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Tasks&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="780" y="420" width="270" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="SGrGPtpaNjyridnIrCZK-28" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Output&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="SGrGPtpaNjyridnIrCZK-28" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Output&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="1090" y="420" width="200" height="60" as="geometry" />
         </mxCell>
       </root>
