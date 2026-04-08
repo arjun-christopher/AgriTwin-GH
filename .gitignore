@@ -1,3 +1,5 @@
+# Ignore Visual Studio solution file
+AgriTwin-GH.sln
 # MkDocs build output
 site/
 
