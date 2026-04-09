@@ -297,7 +297,7 @@ jupyter notebook feature_demos/
 
 | Guide | Description |
 |-------|-------------|
-| [Feature Demos Guide](feature_demos/FEATURE_DEMOS_GUIDE.md) | Walkthrough of all 6 interactive notebooks |
+| [Feature Demos Guide](docs/FEATURE_DEMOS_GUIDE.md) | Walkthrough of all 6 interactive notebooks |
 | [Database Reference](docs/DATABASE_REFERENCE.md) | Schema, queries, and time-series data guide |
 | [PostgreSQL Quick Start](docs/POSTGRESQL_QUICKSTART.md) | Database setup and data loading |
 | [Image Storage Setup](docs/IMAGE_STORAGE_SETUP.md) | MinIO + PostgreSQL image pipeline |
