@@ -323,27 +323,9 @@ jupyter notebook feature_demos/
 
 ## 🌐 FastAPI Backend
 
-A FastAPI + Uvicorn server exposes 16 REST endpoints backed by the live DT loop and `RuntimeStore`. Interactive API docs at `http://localhost:8000/docs`.
+A FastAPI + Uvicorn server that powers the digital twin system, exposing REST endpoints for real-time environmental monitoring, ML inference, actuator control, and system diagnostics. Includes interactive API documentation and runtime state management.
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/dt/state` | Full DT snapshot — sensors, crop, actuators, 3D scene context |
-| `POST` | `/api/dt/override` | Enter override mode with custom env/crop values |
-| `POST` | `/api/dt/override/sim` | Enter sim override mode (stage + start time) |
-| `DELETE` | `/api/dt/override` | Return to live DT data |
-| `POST` | `/api/dt/preset/{id}` | Apply a named preset (e.g. `high-growth`, `disease-alert`) |
-| `GET` | `/api/intelligence/disease` | Per-pathogen risk scores with confidence and trend |
-| `GET` | `/api/intelligence/growth` | Growth stage transition forecasts |
-| `GET` | `/api/weather/current` | Outdoor conditions + 24h forecast |
-| `GET` | `/api/actuators/state` | Current actuator levels |
-| `POST` | `/api/actuators/set` | Override individual actuator levels |
-| `GET` | `/api/resources/monthly` | Energy (kWh) + water (L) usage and INR cost |
-| `GET` | `/api/media/latest` | Latest disease scan and growth stage image |
-| `GET` | `/api/media/stage-images` | Rolling gallery of growth stage captures |
-| `GET` | `/api/media/disease-scans` | Rolling gallery of disease scan images |
-| `GET` | `/api/system/health` | 6-subsystem health check |
-
-→ [FastAPI Backend & API Guide](docs/FASTAPI_API_GUIDE.md)
+→ [FastAPI Backend & API Guide](docs/FASTAPI_API_GUIDE.md) — Full endpoint reference, architecture, and usage
 
 ```powershell
 .venv\Scripts\Activate.ps1
@@ -382,7 +364,7 @@ src/agritwin_gh/build/
 
 ---
 
-## �️ Frontend Dashboard
+## 💻 Frontend Dashboard
 
 A React 19 + Tailwind v4 single-page application providing a real-time operator interface for the greenhouse digital twin.
 
