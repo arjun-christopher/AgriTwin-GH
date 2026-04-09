@@ -220,7 +220,7 @@ See [Monthly Snapshot Reference](docs/MONTHLY_SNAPSHOT_REFERENCE.md) for the ful
 
 A production-grade real-time closed-loop layer (`realtime_core.py`) that connects the PostgreSQL database, all AI inference pipelines, and the MPC solver into a single autonomous control cycle:
 
-- **DB → AI → MPC → DB** — Each 5-minute step reads live sensor rows, runs weather forecast (Chronos/XGBoost/LSTM ensemble), disease progression (LSTM/GRU), and growth stage progression (multi-task LSTM), feeds results into the MPC solver, advances the digital twin physics model, and writes the output back to `realtime_greenhouse_stream`
+- **STATE → AI → MPC → DT → STATE** — Each 5-minute step reads live sensor rows, runs weather forecast (Chronos/XGBoost/LSTM ensemble), disease progression (LSTM/GRU), and growth stage progression (multi-task LSTM), feeds results into the MPC solver, advances the digital twin physics model, and writes the output back to `realtime_greenhouse_stream`
 - **In-Memory Context Buffers** — Bootstrapped from historical hypertables at startup; grown with each step so all AI models always have a full look-back window without repeated DB queries
 - **Multi-Rate Cadence** — DT physics every 5 min · MPC solve every 15 min (configurable) · hold steps carry forward last actuator trajectory between solves
 - **CLI Runner** — `scripts/run_realtime_loop.py` with flags `--steps`, `--stage`, `--days-elapsed`, `--mpc-every`, `--no-images`, `--dry-run` — per-step console output and NDJSON artifact logs
