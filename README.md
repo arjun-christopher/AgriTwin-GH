@@ -115,8 +115,8 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 ║                                                                          ║
 ║   Input Provider              DTLoop (Orchestrator)                      ║
 ║   ─────────────               ────────────────────                       ║
-║   SyntheticInputProvider  ──► every 5 min:  DTEngine  (ARX physics)     ║
-║   DatabaseInputProvider       every 15 min: MPCSolver (SLSQP/CVXPY)    ║
+║   CSVInputProvider  ──► every 5 min:  DTEngine  (ARX physics)     ║
+║   SyntheticInputProvider       every 15 min: MPCSolver (SLSQP/CVXPY)    ║
 ║   (swap with no loop change)  every 30 min: Image refresh hook          ║
 ║                                                                          ║
 ║   ML Inference Pipelines  (called per DT step)                          ║
