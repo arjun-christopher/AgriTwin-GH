@@ -664,7 +664,7 @@
   <a href="#frontend-dashboard" class="md-nav__link">
     <span class="md-ellipsis">
       
-        �️ Frontend Dashboard
+        💻 Frontend Dashboard
       
     </span>
   </a>
@@ -1615,7 +1615,7 @@
   <a href="#frontend-dashboard" class="md-nav__link">
     <span class="md-ellipsis">
       
-        �️ Frontend Dashboard
+        💻 Frontend Dashboard
       
     </span>
   </a>
@@ -2250,94 +2250,8 @@
 <p><strong><a href="https://arjun-christopher.github.io/AgriTwin-GH/">📖 View Full Documentation →</a></strong></p>
 <hr />
 <h2 id="fastapi-backend">🌐 FastAPI Backend<a class="headerlink" href="#fastapi-backend" title="Permanent link">&para;</a></h2>
-<p>A FastAPI + Uvicorn server exposes 16 REST endpoints backed by the live DT loop and <code>RuntimeStore</code>. Interactive API docs at <code>http://localhost:8000/docs</code>.</p>
-<table>
-<thead>
-<tr>
-<th>Method</th>
-<th>Path</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>GET</code></td>
-<td><code>/api/dt/state</code></td>
-<td>Full DT snapshot — sensors, crop, actuators, 3D scene context</td>
-</tr>
-<tr>
-<td><code>POST</code></td>
-<td><code>/api/dt/override</code></td>
-<td>Enter override mode with custom env/crop values</td>
-</tr>
-<tr>
-<td><code>POST</code></td>
-<td><code>/api/dt/override/sim</code></td>
-<td>Enter sim override mode (stage + start time)</td>
-</tr>
-<tr>
-<td><code>DELETE</code></td>
-<td><code>/api/dt/override</code></td>
-<td>Return to live DT data</td>
-</tr>
-<tr>
-<td><code>POST</code></td>
-<td><code>/api/dt/preset/{id}</code></td>
-<td>Apply a named preset (e.g. <code>high-growth</code>, <code>disease-alert</code>)</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/api/intelligence/disease</code></td>
-<td>Per-pathogen risk scores with confidence and trend</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/api/intelligence/growth</code></td>
-<td>Growth stage transition forecasts</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/api/weather/current</code></td>
-<td>Outdoor conditions + 24h forecast</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/api/actuators/state</code></td>
-<td>Current actuator levels</td>
-</tr>
-<tr>
-<td><code>POST</code></td>
-<td><code>/api/actuators/set</code></td>
-<td>Override individual actuator levels</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/api/resources/monthly</code></td>
-<td>Energy (kWh) + water (L) usage and INR cost</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/api/media/latest</code></td>
-<td>Latest disease scan and growth stage image</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/api/media/stage-images</code></td>
-<td>Rolling gallery of growth stage captures</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/api/media/disease-scans</code></td>
-<td>Rolling gallery of disease scan images</td>
-</tr>
-<tr>
-<td><code>GET</code></td>
-<td><code>/api/system/health</code></td>
-<td>6-subsystem health check</td>
-</tr>
-</tbody>
-</table>
-<p>→ <a href="docs/FASTAPI_API_GUIDE.md">FastAPI Backend &amp; API Guide</a></p>
+<p>A FastAPI + Uvicorn server that powers the digital twin system, exposing REST endpoints for real-time environmental monitoring, ML inference, actuator control, and system diagnostics. Includes interactive API documentation and runtime state management.</p>
+<p>→ <a href="docs/FASTAPI_API_GUIDE.md">FastAPI Backend &amp; API Guide</a> — Full endpoint reference, architecture, and usage</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">.</span><span class="n">venv</span><span class="p">\</span><span class="n">Scripts</span><span class="p">\</span><span class="n">Activate</span><span class="p">.</span><span class="n">ps1</span>
 <a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>   <span class="c"># → FastAPI on http://localhost:8000</span>
 </code></pre></div>
@@ -2384,7 +2298,7 @@
 </code></pre></div>
 <p>→ <a href="docs/GREENHOUSE_3D_MODEL_REFERENCE.md">Greenhouse 3D Model Reference</a></p>
 <hr />
-<h2 id="frontend-dashboard">�️ Frontend Dashboard<a class="headerlink" href="#frontend-dashboard" title="Permanent link">&para;</a></h2>
+<h2 id="frontend-dashboard">💻 Frontend Dashboard<a class="headerlink" href="#frontend-dashboard" title="Permanent link">&para;</a></h2>
 <p>A React 19 + Tailwind v4 single-page application providing a real-time operator interface for the greenhouse digital twin.</p>
 <table>
 <thead>
