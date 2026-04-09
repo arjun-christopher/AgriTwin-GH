@@ -9,7 +9,7 @@
 [![Unity](https://img.shields.io/badge/Unity-WebGL-000000?logo=unity&logoColor=white)](https://unity.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Git LFS](https://img.shields.io/badge/Git_LFS-enabled-F05032?logo=git&logoColor=white)](https://git-lfs.com/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: Proprietary](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
 
 **An Advanced Digital Twin System for Precision Greenhouse Agriculture**
 
@@ -462,7 +462,20 @@ AgriTwin-GH/
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
+**⚠️ PROPRIETARY LICENSE**
+
+This project is released under a **restrictive proprietary license**. All rights are reserved.
+
+**You are NOT permitted to:**
+- Use this Software for any purpose without explicit written permission
+- Modify, adapt, or create derivative works
+- Copy, distribute, sublicense, or transfer the Software
+- Reverse engineer or attempt to discover source code
+- Share or publicly disclose this Software
+
+For licensing inquiries or permission to use this Software, contact the copyright holder.
+
+See [LICENSE](LICENSE) file for the complete terms and conditions.
 
 ---
 
