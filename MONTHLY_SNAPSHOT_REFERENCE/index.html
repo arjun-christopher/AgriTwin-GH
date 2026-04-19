@@ -1441,64 +1441,126 @@
 <p>AgriTwin-GH records aggregated greenhouse telemetry into the database at every calendar-month boundary.  Each row in <code>monthly_snapshots</code> is a complete month-level summary for one crop cycle — combining sensor averages, resource totals, per-actuator billing, MPC performance, disease peaks, and AI model run counts.</p>
 <hr />
 <h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<h3 id="1-apply-the-schema">1 — Apply the schema<a class="headerlink" href="#1-apply-the-schema" title="Permanent link">&para;</a></h3>
-<p><strong>PostgreSQL</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>psql<span class="w"> </span>-d<span class="w"> </span>agritwin_db<span class="w"> </span>-f<span class="w"> </span>database/schema/monthly_snapshots.sql
+<blockquote>
+<p><strong>Prerequisites</strong> — PostgreSQL is served via Docker using the TimescaleDB image (<code>agritwin-timescaledb</code>).  Credentials are already configured in <code>.env</code> and <code>config/settings.local.yaml</code>.  Start the container if it is not running:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">docker</span> <span class="nb">start </span><span class="n">agritwin-timescaledb</span>
 </code></pre></div></p>
-<p><strong>SQLite</strong> (dev default) — tables are created automatically when the feature is enabled and the first step is ingested.  However, to inspect the schema independently:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sqlite3<span class="w"> </span>data/processed/agritwin.db<span class="w"> </span>&lt;<span class="w"> </span>database/schema/monthly_snapshots.sql
+</blockquote>
+<h3 id="1-apply-the-schema">1 — Apply the schema<a class="headerlink" href="#1-apply-the-schema" title="Permanent link">&para;</a></h3>
+<p><strong>PostgreSQL (Docker — recommended)</strong></p>
+<p>Pipe the SQL file directly into the running container:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c"># Windows PowerShell</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">Get-Content</span> <span class="n">database</span><span class="p">/</span><span class="n">schema</span><span class="p">/</span><span class="n">monthly_snapshots</span><span class="p">.</span><span class="n">sql</span> <span class="p">|</span> <span class="n">docker</span> <span class="n">exec</span> <span class="n">-i</span> <span class="n">agritwin-timescaledb</span> <span class="n">psql</span> <span class="n">-U</span> <span class="n">postgres</span> <span class="n">-d</span> <span class="n">agritwin_db</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Linux / macOS</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-i<span class="w"> </span>agritwin-timescaledb<span class="w"> </span>psql<span class="w"> </span>-U<span class="w"> </span>postgres<span class="w"> </span>-d<span class="w"> </span>agritwin_db<span class="w"> </span>&lt;<span class="w"> </span>database/schema/monthly_snapshots.sql
+</code></pre></div></p>
+<p>Expected output:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>CREATE TABLE
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>CREATE INDEX
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>CREATE INDEX
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>CREATE TABLE
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>CREATE INDEX
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>CREATE INDEX
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>CREATE INDEX
+</code></pre></div></p>
+<p><strong>SQLite</strong> (dev default) — tables are created automatically when the feature is enabled and the first step is ingested.  To inspect the schema independently:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sqlite3<span class="w"> </span>data/processed/agritwin.db<span class="w"> </span>&lt;<span class="w"> </span>database/schema/monthly_snapshots.sql
 </code></pre></div></p>
 <h3 id="2-enable-the-feature">2 — Enable the feature<a class="headerlink" href="#2-enable-the-feature" title="Permanent link">&para;</a></h3>
 <p>Set the env var before starting <code>main.py</code>:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c"># Windows PowerShell</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nv">$env:AGRITWIN_MONTHLY_DB</span> <span class="p">=</span> <span class="s2">&quot;1&quot;</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c"># Windows PowerShell</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nv">$env:AGRITWIN_MONTHLY_DB</span> <span class="p">=</span> <span class="s2">&quot;1&quot;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">python</span> <span class="n">main</span><span class="p">.</span><span class="n">py</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Linux / macOS</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">AGRITWIN_MONTHLY_DB</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>main.py
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Linux / macOS</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nv">AGRITWIN_MONTHLY_DB</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>main.py
 </code></pre></div></p>
 <p>The default is <code>0</code> (disabled) so the DT loop runs normally without attempting DB writes.</p>
 <h3 id="3-seed-mock-data-for-demo">3 — Seed mock data for demo<a class="headerlink" href="#3-seed-mock-data-for-demo" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python<span class="w"> </span>scripts/seed_monthly_mock.py
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">python</span> <span class="n">scripts</span><span class="p">/</span><span class="n">seed_monthly_mock</span><span class="p">.</span><span class="n">py</span>
 </code></pre></div>
-<p>Inserts 2 crop cycles (cycle-001, cycle-002) with 3 monthly snapshot rows.  Safe to run multiple times — uses <code>ON CONFLICT DO NOTHING</code>.</p>
+<p>Inserts 2 crop cycles (<code>cycle-001</code>, <code>cycle-002</code>) with 3 monthly snapshot rows containing realistic greenhouse telemetry.  Safe to run multiple times — uses <code>ON CONFLICT DO NOTHING</code>.</p>
+<p><strong>What gets seeded:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Cycle</th>
+<th>Month</th>
+<th>Stages</th>
+<th>Steps</th>
+<th>Energy</th>
+<th>Water</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cycle-001</td>
+<td>Jan 2026</td>
+<td>Seedling → Early Vegetative</td>
+<td>8 928</td>
+<td>38.45 kWh</td>
+<td>1 240 L</td>
+<td>₹274</td>
+</tr>
+<tr>
+<td>cycle-001</td>
+<td>Feb 2026</td>
+<td>Flowering Init → Ripe</td>
+<td>8 064</td>
+<td>29.82 kWh</td>
+<td>720 L</td>
+<td>₹212</td>
+</tr>
+<tr>
+<td>cycle-002</td>
+<td>Mar 2026</td>
+<td>Seedling → Early Vegetative</td>
+<td>8 928</td>
+<td>41.10 kWh</td>
+<td>1 380 L</td>
+<td>₹293</td>
+</tr>
+</tbody>
+</table>
 <h3 id="4-display-the-table">4 — Display the table<a class="headerlink" href="#4-display-the-table" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Compact table (20 rows)</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>python<span class="w"> </span>scripts/show_monthly_snapshots.py
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># Last 5 rows only</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>python<span class="w"> </span>scripts/show_monthly_snapshots.py<span class="w"> </span>--limit<span class="w"> </span><span class="m">5</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="c1"># Filter to one cycle</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>python<span class="w"> </span>scripts/show_monthly_snapshots.py<span class="w"> </span>--cycle<span class="w"> </span>cycle-001
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="c1"># Detailed multi-line output per row</span>
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>python<span class="w"> </span>scripts/show_monthly_snapshots.py<span class="w"> </span>--detail
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c"># Compact table (20 rows)</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">python</span> <span class="n">scripts</span><span class="p">/</span><span class="n">show_monthly_snapshots</span><span class="p">.</span><span class="n">py</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c"># Last 5 rows only</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">python</span> <span class="n">scripts</span><span class="p">/</span><span class="n">show_monthly_snapshots</span><span class="p">.</span><span class="n">py</span> <span class="p">-</span><span class="n">-limit</span> <span class="n">5</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c"># Filter to one cycle</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="n">python</span> <span class="n">scripts</span><span class="p">/</span><span class="n">show_monthly_snapshots</span><span class="p">.</span><span class="n">py</span> <span class="p">-</span><span class="n">-cycle</span> <span class="n">cycle</span><span class="p">-</span><span class="n">001</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="c"># Detailed multi-line output per row</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="n">python</span> <span class="n">scripts</span><span class="p">/</span><span class="n">show_monthly_snapshots</span><span class="p">.</span><span class="n">py</span> <span class="p">-</span><span class="n">-detail</span>
 </code></pre></div>
 <h3 id="5-run-tests">5 — Run tests<a class="headerlink" href="#5-run-tests" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>tests/test_monthly_snapshot.py
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>tests/test_monthly_snapshot.py
 </code></pre></div>
 <hr />
 <h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>main.py (AGRITWIN_MONTHLY_DB=1)
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>│
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>└─► LoopService.start_loop()
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>       └─► MonthlySnapshotService.initialise()
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>               └─► INSERT INTO crop_cycles (cycle_label)
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    LoopService.run_one_step()   (every 5 min)
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>       └─► accumulate_resources()          ← existing path
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>       └─► MonthlySnapshotService.ingest_step()
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>               └─► MonthlyAccumulator.accumulate()
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
-<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    When calendar month changes:
-<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>       └─► MonthlySnapshotService._flush_month()
-<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>               └─► INSERT INTO monthly_snapshots
-<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>               └─► MonthlyAccumulator reset
-<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>
-<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>    LoopService.stop_loop()
-<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>       └─► MonthlySnapshotService.flush_current_month()
-<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>               └─► Partial-month row written on shutdown
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>main.py (AGRITWIN_MONTHLY_DB=1)
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>│
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>└─► LoopService.start_loop()
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>       └─► MonthlySnapshotService.initialise()
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>               └─► INSERT INTO crop_cycles (cycle_label)
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>    LoopService.run_one_step()   (every 5 min)
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>       └─► accumulate_resources()          ← existing path
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>       └─► MonthlySnapshotService.ingest_step()
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>               └─► MonthlyAccumulator.accumulate()
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>    When calendar month changes:
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>       └─► MonthlySnapshotService._flush_month()
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>               └─► INSERT INTO monthly_snapshots
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>               └─► MonthlyAccumulator reset
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>    LoopService.stop_loop()
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>       └─► MonthlySnapshotService.flush_current_month()
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>               └─► Partial-month row written on shutdown
 </code></pre></div>
 <h3 id="key-components">Key components<a class="headerlink" href="#key-components" title="Permanent link">&para;</a></h3>
 <table>
@@ -2043,32 +2105,32 @@
 <hr />
 <h2 id="demo-queries">Demo Queries<a class="headerlink" href="#demo-queries" title="Permanent link">&para;</a></h2>
 <h3 id="list-all-months-for-all-cycles">List all months for all cycles<a class="headerlink" href="#list-all-months-for-all-cycles" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">cycle_label</span><span class="p">,</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">billing_month</span><span class="p">,</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">month_label</span><span class="p">,</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">       </span><span class="n">ms</span><span class="p">.</span><span class="n">total_steps</span><span class="p">,</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">total_energy_kwh</span><span class="p">,</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">total_water_l</span><span class="p">,</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">total_cost_inr</span><span class="p">,</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">       </span><span class="n">ms</span><span class="p">.</span><span class="n">stage_at_month_start</span><span class="p">,</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">stage_at_month_end</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="k">FROM</span><span class="w"> </span><span class="n">monthly_snapshots</span><span class="w"> </span><span class="n">ms</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">crop_cycles</span><span class="w"> </span><span class="n">cc</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">cycle_id</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">billing_month</span><span class="p">,</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">cycle_label</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">cycle_label</span><span class="p">,</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">billing_month</span><span class="p">,</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">month_label</span><span class="p">,</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">       </span><span class="n">ms</span><span class="p">.</span><span class="n">total_steps</span><span class="p">,</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">total_energy_kwh</span><span class="p">,</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">total_water_l</span><span class="p">,</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">total_cost_inr</span><span class="p">,</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">       </span><span class="n">ms</span><span class="p">.</span><span class="n">stage_at_month_start</span><span class="p">,</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">stage_at_month_end</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="k">FROM</span><span class="w"> </span><span class="n">monthly_snapshots</span><span class="w"> </span><span class="n">ms</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">crop_cycles</span><span class="w"> </span><span class="n">cc</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">cycle_id</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">billing_month</span><span class="p">,</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">cycle_label</span><span class="p">;</span>
 </code></pre></div>
 <h3 id="resource-totals-by-cycle">Resource totals by cycle<a class="headerlink" href="#resource-totals-by-cycle" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">cycle_label</span><span class="p">,</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">       </span><span class="k">COUNT</span><span class="p">(</span><span class="n">ms</span><span class="p">.</span><span class="n">id</span><span class="p">)</span><span class="w">                    </span><span class="k">AS</span><span class="w"> </span><span class="n">months_recorded</span><span class="p">,</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">       </span><span class="k">SUM</span><span class="p">(</span><span class="n">ms</span><span class="p">.</span><span class="n">total_energy_kwh</span><span class="p">)</span><span class="w">        </span><span class="k">AS</span><span class="w"> </span><span class="n">lifetime_kwh</span><span class="p">,</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">       </span><span class="k">SUM</span><span class="p">(</span><span class="n">ms</span><span class="p">.</span><span class="n">total_water_l</span><span class="p">)</span><span class="w">           </span><span class="k">AS</span><span class="w"> </span><span class="n">lifetime_water_l</span><span class="p">,</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">       </span><span class="k">SUM</span><span class="p">(</span><span class="n">ms</span><span class="p">.</span><span class="n">total_cost_inr</span><span class="p">)</span><span class="w">          </span><span class="k">AS</span><span class="w"> </span><span class="n">lifetime_cost_inr</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="k">FROM</span><span class="w"> </span><span class="n">monthly_snapshots</span><span class="w"> </span><span class="n">ms</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">crop_cycles</span><span class="w"> </span><span class="n">cc</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">cycle_id</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">cycle_label</span>
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">cycle_label</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">cycle_label</span><span class="p">,</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">       </span><span class="k">COUNT</span><span class="p">(</span><span class="n">ms</span><span class="p">.</span><span class="n">id</span><span class="p">)</span><span class="w">                    </span><span class="k">AS</span><span class="w"> </span><span class="n">months_recorded</span><span class="p">,</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">       </span><span class="k">SUM</span><span class="p">(</span><span class="n">ms</span><span class="p">.</span><span class="n">total_energy_kwh</span><span class="p">)</span><span class="w">        </span><span class="k">AS</span><span class="w"> </span><span class="n">lifetime_kwh</span><span class="p">,</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">       </span><span class="k">SUM</span><span class="p">(</span><span class="n">ms</span><span class="p">.</span><span class="n">total_water_l</span><span class="p">)</span><span class="w">           </span><span class="k">AS</span><span class="w"> </span><span class="n">lifetime_water_l</span><span class="p">,</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">       </span><span class="k">SUM</span><span class="p">(</span><span class="n">ms</span><span class="p">.</span><span class="n">total_cost_inr</span><span class="p">)</span><span class="w">          </span><span class="k">AS</span><span class="w"> </span><span class="n">lifetime_cost_inr</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="k">FROM</span><span class="w"> </span><span class="n">monthly_snapshots</span><span class="w"> </span><span class="n">ms</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="k">JOIN</span><span class="w"> </span><span class="n">crop_cycles</span><span class="w"> </span><span class="n">cc</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ms</span><span class="p">.</span><span class="n">cycle_id</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">cycle_label</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">cc</span><span class="p">.</span><span class="n">cycle_label</span><span class="p">;</span>
 </code></pre></div>
 <h3 id="peak-disease-month">Peak disease month<a class="headerlink" href="#peak-disease-month" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">billing_month</span><span class="p">,</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">       </span><span class="n">GREATEST</span><span class="p">(</span><span class="n">peak_early_blight_sev</span><span class="p">,</span><span class="w"> </span><span class="n">peak_late_blight_sev</span><span class="p">,</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">                </span><span class="n">peak_leaf_mold_sev</span><span class="p">,</span><span class="w"> </span><span class="n">peak_powdery_mildew_sev</span><span class="p">,</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">                </span><span class="n">peak_spider_mites_sev</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">worst_disease_sev</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="k">FROM</span><span class="w"> </span><span class="n">monthly_snapshots</span>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">worst_disease_sev</span><span class="w"> </span><span class="k">DESC</span>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="k">LIMIT</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">SELECT</span><span class="w"> </span><span class="n">billing_month</span><span class="p">,</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">       </span><span class="n">GREATEST</span><span class="p">(</span><span class="n">peak_early_blight_sev</span><span class="p">,</span><span class="w"> </span><span class="n">peak_late_blight_sev</span><span class="p">,</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">                </span><span class="n">peak_leaf_mold_sev</span><span class="p">,</span><span class="w"> </span><span class="n">peak_powdery_mildew_sev</span><span class="p">,</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">                </span><span class="n">peak_spider_mites_sev</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">worst_disease_sev</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="k">FROM</span><span class="w"> </span><span class="n">monthly_snapshots</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">worst_disease_sev</span><span class="w"> </span><span class="k">DESC</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="k">LIMIT</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
 </code></pre></div>
 <hr />
 <h2 id="files-created-modified">Files Created / Modified<a class="headerlink" href="#files-created-modified" title="Permanent link">&para;</a></h2>
