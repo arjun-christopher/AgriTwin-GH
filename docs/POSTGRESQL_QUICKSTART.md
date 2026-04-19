@@ -1,5 +1,7 @@
 # PostgreSQL Quick Start - AgriTwin-GH
 
+> **Current setup** — The project runs PostgreSQL via Docker using the TimescaleDB image.  The container is named `agritwin-timescaledb` and is already configured.  `psql` does **not** need to be installed locally — use `docker exec` to run queries instead.
+
 ## 1. Setup (One-time)
 
 ### Install packages
@@ -7,31 +9,54 @@
 uv add -r requirements.txt
 ```
 
-### Start PostgreSQL (Docker)
-```powershell
-# Standard PostgreSQL
-docker run --name agritwin-postgres -e POSTGRES_PASSWORD=yourpassword -e POSTGRES_DB=agritwin_db -p 5432:5432 -d postgres:15
+### Start PostgreSQL (Docker — TimescaleDB)
 
-# OR with TimescaleDB (recommended)
-docker run --name agritwin-timescaledb -e POSTGRES_PASSWORD=yourpassword -e POSTGRES_DB=agritwin_db -p 5432:5432 -d timescale/timescaledb:latest-pg15
+The project uses TimescaleDB on PostgreSQL 15.  Start the container with:
+```powershell
+docker run --name agritwin-timescaledb `
+  -e POSTGRES_PASSWORD=agritwin-gh `
+  -e POSTGRES_DB=agritwin_db `
+  -p 5432:5432 -d `
+  timescale/timescaledb:latest-pg15
 ```
 
-### Configure environment
-Create `.env` file:
+If the container already exists, just start it:
+```powershell
+docker start agritwin-timescaledb
+```
+
+Check it is running:
+```powershell
+docker ps --format "{{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+```
+
+### Environment — already configured
+
+Credentials are set in `.env` (git-ignored) and `config/settings.local.yaml`:
+
+`.env`:
 ```dotenv
 DB_USER=postgres
-DB_PASSWORD=yourpassword
+DB_PASSWORD=agritwin-gh
 DB_NAME=agritwin_db
 DB_HOST=localhost
 DB_PORT=5432
 ```
 
-Create `config/settings.local.yaml`:
+`config/settings.local.yaml`:
 ```yaml
 database:
   type: "postgresql"
   host: "localhost"
   port: 5432
+```
+
+### Apply schemas
+
+Pipe SQL files directly into the Docker container — no local `psql` needed:
+```powershell
+# Monthly snapshots schema
+Get-Content database/schema/monthly_snapshots.sql | docker exec -i agritwin-timescaledb psql -U postgres -d agritwin_db
 ```
 
 ## 2. Load Data
@@ -95,10 +120,12 @@ engine = create_engine('postgresql://postgres:yourpassword@localhost:5432/agritw
 df = pd.read_sql_query("SELECT * FROM weather_data LIMIT 100", engine)
 ```
 
-## 4. Connect with psql
+## 4. Connect to PostgreSQL
+
+Since `psql` is served inside Docker, connect via `docker exec`:
 ```powershell
-# Using psql
-psql -U postgres -d agritwin_db -h localhost
+# Open interactive psql session
+docker exec -it agritwin-timescaledb psql -U postgres -d agritwin_db
 
 # View tables
 \dt
@@ -106,6 +133,13 @@ psql -U postgres -d agritwin_db -h localhost
 # Query
 SELECT COUNT(*) FROM weather_data;
 SELECT * FROM greenhouse_data LIMIT 10;
+SELECT * FROM crop_cycles;
+SELECT billing_month, stage_at_month_start, stage_at_month_end, total_cost_inr FROM monthly_snapshots;
+```
+
+Or run a one-liner without entering the shell:
+```powershell
+docker exec -i agritwin-timescaledb psql -U postgres -d agritwin_db -c "\dt"
 ```
 
 ## 5. Useful Scripts

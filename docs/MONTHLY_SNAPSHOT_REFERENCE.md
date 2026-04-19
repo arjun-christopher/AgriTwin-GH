@@ -6,14 +6,37 @@ AgriTwin-GH records aggregated greenhouse telemetry into the database at every c
 
 ## Quick Start
 
+> **Prerequisites** — PostgreSQL is served via Docker using the TimescaleDB image (`agritwin-timescaledb`).  Credentials are already configured in `.env` and `config/settings.local.yaml`.  Start the container if it is not running:
+> ```powershell
+> docker start agritwin-timescaledb
+> ```
+
 ### 1 — Apply the schema
 
-**PostgreSQL**
+**PostgreSQL (Docker — recommended)**
+
+Pipe the SQL file directly into the running container:
+```powershell
+# Windows PowerShell
+Get-Content database/schema/monthly_snapshots.sql | docker exec -i agritwin-timescaledb psql -U postgres -d agritwin_db
+```
 ```bash
-psql -d agritwin_db -f database/schema/monthly_snapshots.sql
+# Linux / macOS
+docker exec -i agritwin-timescaledb psql -U postgres -d agritwin_db < database/schema/monthly_snapshots.sql
 ```
 
-**SQLite** (dev default) — tables are created automatically when the feature is enabled and the first step is ingested.  However, to inspect the schema independently:
+Expected output:
+```
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+```
+
+**SQLite** (dev default) — tables are created automatically when the feature is enabled and the first step is ingested.  To inspect the schema independently:
 ```bash
 sqlite3 data/processed/agritwin.db < database/schema/monthly_snapshots.sql
 ```
@@ -35,15 +58,23 @@ The default is `0` (disabled) so the DT loop runs normally without attempting DB
 
 ### 3 — Seed mock data for demo
 
-```bash
+```powershell
 python scripts/seed_monthly_mock.py
 ```
 
-Inserts 2 crop cycles (cycle-001, cycle-002) with 3 monthly snapshot rows.  Safe to run multiple times — uses `ON CONFLICT DO NOTHING`.
+Inserts 2 crop cycles (`cycle-001`, `cycle-002`) with 3 monthly snapshot rows containing realistic greenhouse telemetry.  Safe to run multiple times — uses `ON CONFLICT DO NOTHING`.
+
+**What gets seeded:**
+
+| Cycle | Month | Stages | Steps | Energy | Water | Cost |
+|---|---|---|---|---|---|---|
+| cycle-001 | Jan 2026 | Seedling → Early Vegetative | 8 928 | 38.45 kWh | 1 240 L | ₹274 |
+| cycle-001 | Feb 2026 | Flowering Init → Ripe | 8 064 | 29.82 kWh | 720 L | ₹212 |
+| cycle-002 | Mar 2026 | Seedling → Early Vegetative | 8 928 | 41.10 kWh | 1 380 L | ₹293 |
 
 ### 4 — Display the table
 
-```bash
+```powershell
 # Compact table (20 rows)
 python scripts/show_monthly_snapshots.py
 

@@ -589,7 +589,7 @@ class MonthlySnapshotService:
                         8928, 446, 93,
                         'seedling', 'early vegetative',
                         0, 1, 1,
-                        '[{"from_stage":"seedling","to_stage":"early vegetative","step":4464,"ts":"2026-01-16T12:30:00"}]',
+                        :stl1,
                         26.3, 71.8, 520.4, 62.1, 8840.0, 0.89, 0.18, 0.12,
                         22.1, 31.4, 64.2, 81.5, 412.0, 664.8, 54.0, 72.0,
                         0.45,
@@ -604,7 +604,8 @@ class MonthlySnapshotService:
                         446, 446, 446
                     )
                     ON CONFLICT (cycle_id, billing_month) DO NOTHING
-                """), {"cid": cycle1_id, "e1": round(_e1,4), "w1": _w1, "c1": round(_c1,2)})
+                """), {"cid": cycle1_id, "e1": round(_e1,4), "w1": _w1, "c1": round(_c1,2),
+                       "stl1": '[{"from_stage":"seedling","to_stage":"early vegetative","step":4464,"ts":"2026-01-16T12:30:00"}]'})
 
                 # February 2026 — flowering initiation → ripe
                 _e2 = 29.82; _w2 = 720.0; _c2 = _e2 * _ENERGY_RATE + _w2 * _WATER_RATE
@@ -647,7 +648,7 @@ class MonthlySnapshotService:
                         8064, 403, 84,
                         'flowering initiation', 'ripe',
                         2, 5, 3,
-                        '[{"from_stage":"flowering initiation","to_stage":"flowering","step":2688,"ts":"2026-02-10T12:00:00"},{"from_stage":"flowering","to_stage":"unripe","step":5376,"ts":"2026-02-20T00:00:00"},{"from_stage":"unripe","to_stage":"ripe","step":7392,"ts":"2026-02-27T00:00:00"}]',
+                        :stl2,
                         24.8, 68.4, 612.3, 65.0, 10200.0, 0.97, 0.15, 0.10,
                         21.0, 29.8, 61.0, 78.2, 480.0, 742.0, 58.0, 75.0,
                         0.38,
@@ -662,7 +663,8 @@ class MonthlySnapshotService:
                         403, 403, 403
                     )
                     ON CONFLICT (cycle_id, billing_month) DO NOTHING
-                """), {"cid": cycle1_id, "e2": round(_e2,4), "w2": _w2, "c2": round(_c2,2)})
+                """), {"cid": cycle1_id, "e2": round(_e2,4), "w2": _w2, "c2": round(_c2,2),
+                       "stl2": '[{"from_stage":"flowering initiation","to_stage":"flowering","step":2688,"ts":"2026-02-10T12:00:00"},{"from_stage":"flowering","to_stage":"unripe","step":5376,"ts":"2026-02-20T00:00:00"},{"from_stage":"unripe","to_stage":"ripe","step":7392,"ts":"2026-02-27T00:00:00"}]'})
 
             # ── Cycle 2 — ongoing (started March 2026) ───────────────────
             session.execute(text("""
@@ -716,7 +718,7 @@ class MonthlySnapshotService:
                         8928, 446, 93,
                         'seedling', 'early vegetative',
                         0, 1, 1,
-                        '[{"from_stage":"seedling","to_stage":"early vegetative","step":4464,"ts":"2026-03-16T12:30:00"}]',
+                        :stl3,
                         27.1, 73.2, 534.8, 60.8, 9120.0, 0.91, 0.17, 0.14,
                         23.0, 32.8, 65.0, 83.1, 420.0, 680.0, 52.0, 70.0,
                         0.51,
@@ -731,7 +733,8 @@ class MonthlySnapshotService:
                         446, 446, 446
                     )
                     ON CONFLICT (cycle_id, billing_month) DO NOTHING
-                """), {"cid": cycle2_id, "e3": round(_e3,4), "w3": _w3, "c3": round(_c3,2)})
+                """), {"cid": cycle2_id, "e3": round(_e3,4), "w3": _w3, "c3": round(_c3,2),
+                       "stl3": '[{"from_stage":"seedling","to_stage":"early vegetative","step":4464,"ts":"2026-03-16T12:30:00"}]'})
 
             session.commit()
             print("[seed_mock_data] Done — 2 cycles, 3 monthly snapshot rows inserted.")
