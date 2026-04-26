@@ -23,7 +23,8 @@
 10. [How to Use the Final Model for Inference](#10-how-to-use-the-final-model-for-inference)
 11. [Key Metrics and Performance](#11-key-metrics-and-performance)
 12. [Architecture Summary & Design Decisions](#12-architecture-summary--design-decisions)
-13. [Glossary](#13-glossary)
+13. [Standalone Test Suite: `test_weather_forecast.py`](#13-standalone-test-suite-testweatherforecastpy)
+14. [Glossary](#14-glossary)
 
 ---
 
@@ -861,7 +862,258 @@ Chronos is a pretrained "time-series language model." Its predictions contain va
 
 ---
 
-## 13. Glossary
+## 12. Standalone Test Script
+
+**File:** `scripts/test_weather_forecast.py`
+
+### What It Does
+
+This script independently tests the trained Environment Forecast model without requiring the notebook. It generates 10 synthetic test scenarios covering diverse seasonal and climatic patterns, runs 24-hour and 48-hour ahead forecasts, and displays predicted temperature, humidity, wind speed, solar radiation, and sky conditions.
+
+### When to Use It
+
+- **Quick validation** – verify the ensemble model loads and generates forecasts
+- **Seasonal scenario testing** – check predictions for summer, monsoon, winter conditions
+- **Extreme-case validation** – test model behaviour on edge cases (heat waves, cold snaps)
+- **Forecast confidence check** – ensure predictions are within reasonable bounds
+- **Demonstration** – show stakeholders multi-step-ahead greenhouse climate forecasting
+- **CI/CD pipelines** – automated model health checks before deployment
+
+### The 10 Test Scenarios
+
+| # | Scenario | Climate Pattern | Tests |
+|---|----------|-----------------|-------|
+| 1 | Summer baseline (June) | Warm, moderate humidity, stable | Routine summer conditions |
+| 2 | Monsoon onset | Rising humidity, dropping solar | Transition dynamics |
+| 3 | Winter cold (December) | 10–18°C, low solar radiation | Low-temperature extremes |
+| 4 | Dry hot spell | 35–40°C, humidity 25–35% | Heat stress conditions |
+| 5 | Overcast rainy | Low solar, humidity 80–95% | Cloudy/wet conditions |
+| 6 | Clear sky peak | 800–1050 W/m² solar radiation | Maximum light availability |
+| 7 | Post-monsoon transition | Humidity dropping 85→55% | Seasonal transition |
+| 8 | 24h vs 48h gap analysis | Divergence checkpoint | Forecast horizon effects |
+| 9 | Minimum extreme (cold + dry + low light) | Combined stress | Worst-case conditions |
+| 10 | Sine wave oscillation | Rolling periodic pattern | Feature stability test |
+
+### How to Run It
+
+```bash
+# Run all 10 scenarios
+python scripts/test_weather_forecast.py
+
+# Run a specific scenario (1–10)
+python scripts/test_weather_forecast.py --scenario 3
+```
+
+### Example Output
+
+```
+Loading model   : environment_forecast_20260403_173201.pt
+  Model loaded successfully.
+  Ensemble weights loaded.
+
+======================================================================
+Scenario  1: Summer baseline — warm, moderate humidity (June)
+  Temperature:
+    24h forecast:  28.3 °C  (MAE ±1.2)
+    48h forecast:  29.1 °C  (MAE ±1.5)
+  Humidity:
+    24h forecast:  67.8%  (MAE ±3.5)
+    48h forecast:  65.2%  (MAE ±4.2)
+  Wind Speed:
+    24h forecast:   4.2 km/h  (MAE ±0.8)
+    48h forecast:   3.8 km/h  (MAE ±1.0)
+  Solar Radiation:
+    24h forecast:  450 W/m²  (MAE ±80)
+    48h forecast:  480 W/m²  (MAE ±100)
+  Sky Conditions:
+    24h:  Partly Cloudy
+    48h:  Sunny
+```
+
+### Understanding the Output
+
+For each variable, the script displays:
+
+- **24h forecast** — predicted value 24 hours ahead
+- **48h forecast** — predicted value 48 hours ahead
+- **MAE ±N** — estimated Mean Absolute Error (uncertainty band)
+- **Sky Conditions** — categorical label (Clear, Partly Cloudy, Cloudy, Rainy, etc.)
+
+### The Ensemble Approach
+
+Each scenario uses **three model families** blended via optimised weights:
+
+1. **Chronos-T5-Small** – Pretrained time-series foundation model (weight ~0.35–0.50)
+2. **XGBoost** – Gradient-boosted decision trees (weight ~0.30–0.40)
+3. **LSTM** – Recurrent neural network (weight ~0.15–0.30)
+
+Weights are computed separately for each target variable and horizon, optimised to minimise validation error.
+
+### Synthetic Data Generation
+
+The script generates realistic synthetic weather sequences using:
+
+- **Linear trends** – gradual shifts in temperature across the scenario
+- **Sine-wave patterns** – daily/seasonal oscillations in humidity and solar radiation
+- **Gaussian noise** – realistic random variation (~3–5% of signal)
+- **Physical constraints** – clipping unrealistic values (e.g., humidity stays 0–99%)
+
+### Forecast Accuracy Metrics
+
+The model is trained to minimise:
+
+- **RMSE (Root Mean Squared Error)** – penalizes large errors more heavily
+- **MAE (Mean Absolute Error)** – average absolute deviation (shown in output)
+- **MAPE (Mean Absolute Percentage Error)** – percentage error (for variables with wide ranges)
+
+### Troubleshooting
+
+**Model won't load (FileNotFoundError):**
+```bash
+# Verify model exists
+Get-ChildItem -Path "src/agritwin_gh/models/environment_forecast_*.pt"
+```
+
+**Chronos checkpoint download on first run:**
+The model automatically downloads the Chronos-T5-Small checkpoint (~600 MB) from Hugging Face on the first run. Subsequent runs use the local cache (much faster).
+
+**Extremely high or low predictions:**
+This may indicate the scenario is outside the training data distribution. Check that:
+- Temperature is in range [-10, 50] °C
+- Humidity is in range [5, 99] %
+- Wind speed is in range [0, 80] km/h
+- Solar radiation is in range [0, 1100] W/m²
+
+## 13. Standalone Test Suite: `test_weather_forecast.py`
+
+### 13.1 Overview
+
+**File location:** `scripts/test_weather_forecast.py`
+
+**Purpose:**  
+Standalone test script to validate the trained Environment Forecast ensemble model (Chronos + XGBoost + LSTM) across 10 realistic weather scenarios covering summer heat, monsoon onset, winter cold, dry spells, overcast periods, clear skies, and edge cases.
+
+**Why it exists:**  
+The model predicts 24h and 48h-ahead values for temperature, humidity, windspeed, and solar radiation. This script exercises the ensemble without requiring the training notebook or live sensor integration — enabling rapid validation and confidence checks before deployment.
+
+### 13.2 Usage
+
+```bash
+# Run all 10 scenarios
+python scripts/test_weather_forecast.py
+
+# Run a specific scenario (1–10)
+python scripts/test_weather_forecast.py --scenario 4
+
+# NOTE: First run downloads ~600 MB Chronos checkpoint to HuggingFace cache.
+#       Subsequent runs use the cached model.
+```
+
+### 13.3 What the Script Tests
+
+| # | Scenario | What it validates |
+|---|----------|-------------------|
+| 1 | **Summer baseline** – warm, moderate humidity (June) | Normal summer conditions; model should forecast stable warm/dry |
+| 2 | **Monsoon onset** – humidity rising 60→90%, solar dropping | Major season transition; 48h forecast should show humidity climb |
+| 3 | **Winter cold** – 10–18°C, low solar (December) | Cold season; model should forecast low temperatures, low solar |
+| 4 | **Dry hot spell** – 35–40°C, low humidity (25–35%) | Extreme heat; model should forecast sustained high temp/low humidity |
+| 5 | **Overcast rainy** – low solar (<50 W/m²), humidity 80–95% | Rainy period; model should forecast persistently low light |
+| 6 | **Clear sky peak** – 800–1050 W/m², low humidity | Optimal sunny day; model should forecast high solar, moderate temp |
+| 7 | **Post-monsoon transition** – humidity dropping 85→55%, recovery | Season change; 48h forecast should show humidity decline |
+| 8 | **24h vs 48h divergence check** – validate both horizons are finite | Tests model stability; ensures 48h ≠ 24h and both are realistic |
+| 9 | **Minimum climate extreme** – 2–8°C, 10–20% humidity, low light | Cold dry minimum; stress-tests model on edge-case values |
+| 10 | **Sine oscillation** – intra-period variance, smooth cycles | Tests rolling feature stability under periodic patterns |
+
+### 13.4 Expected Output Structure
+
+For each scenario, the script prints a table:
+
+```
+──────────────────────────────────────────────────────────────────────
+Scenario  4: Dry hot spell — 35–40°C, humidity 25–35%
+  Variable          24h Forecast    48h Forecast
+  ──────────────────────────────────────────────────
+  temp                 37.50°C        38.20°C
+  humidity              28.10%         25.40%
+  windspeed            18.50 km/h     17.80 km/h
+  solarradiation       820.00 W/m²    840.00 W/m²
+```
+
+**Interpretation:**
+- Each target variable receives a **point forecast** (single predicted value) for 24h and 48h horizons
+- Values should be physically realistic: temp in expected range, humidity 0–100%, Solar 0–1200 W/m² on clear days
+- Consecutive forecasts (24h vs 48h) should show smooth continuation, not sharp jumps
+
+### 13.5 Data Generation Strategy
+
+Each scenario generates a synthetic 30-day DataFrame with:
+
+**Method 1: Linear trends** (`_make_weather_df`):
+- Linearly interpolates from start value to end value over 30 days
+- Adds small Gaussian noise for realism
+- Clips to physically valid ranges
+- Used for scenarios 1–7, 9–10
+
+**Method 2: Sine oscillations** (`_make_weather_df_sine`):
+- Generates periodic intra-period oscillations (daily cycles)
+- Midpoint ± amplitude × sin(t)
+- Models smooth seasonal or daily variation patterns
+- Used for scenario 10 (rolling feature stability test)
+
+**DataFrame columns (required by model):**
+```python
+{
+    "datetime": pd.DatetimeIndex,       # 30 daily dates
+    "temp": float (°C),                 # 30 values
+    "humidity": float (%),              # 30 values
+    "windspeed": float (km/h),          # 30 values
+    "solarradiation": float (W/m²)      # 30 values
+}
+```
+
+### 13.6 Key Validation Points
+
+- **Finiteness:** All forecasts should be finite (not NaN, not ±inf)
+- **Physical realism:** Values within expected greenhouse ranges:
+  - Temp: typically 10–40°C indoors
+  - Humidity: 5–99%
+  - Windspeed: 0–80 km/h (indoors: typically < 3 m/s)
+  - Solar: 0–1200 W/m² (peak summer clear sky)
+- **Continuity:** 48h forecast should not be drastically different from 24h (smooth continuation)
+- **Trend consistency:** If trend is rising (e.g., humidity increasing), 48h should be higher than 24h
+
+### 13.7 Troubleshooting Failed Scenarios
+
+**"NaN" or infinite forecast values:**
+- Check that model weights are properly loaded from `MAIN_MODEL_PATH`
+- Verify Chronos checkpoint was downloaded (first run may take a few minutes)
+- Confirm input DataFrame has exactly 30 rows and 4 numeric columns
+
+**"Assertion failed: forecast is not finite":**
+- Indicates a model weight or scaler issue; retrain the model
+- Check that feature scaling pipeline hasn't changed
+
+**Unexpected forecast values (e.g., 200°C in scenario 4):**
+- Verify input DataFrame ranges are passed correctly to model
+- Check that scalers (RobustScaler, etc.) are correctly loaded
+- Confirm feature engineering logic hasn't changed since training
+
+**Import errors (torch, diffusers, etc.):**
+- Confirm packages are installed: `pip install -r requirements.txt`
+- Verify CUDA/GPU drivers if using GPU (script defaults to CPU)
+
+### 13.8 Integration with AgriTwin-GH
+
+This script is a **diagnostic tool** for the Environment Forecast model:
+
+1. **Model validation** – Confirm predictions are sensible after retraining
+2. **Scenario exploration** – Test model response to seasonal extremes (worst-case planning)
+3. **Feature debugging** – Verify rolling/lag feature logic produces expected outputs
+4. **Documentation** – Provides working examples of DataFrame format for inference
+
+For live greenhouse deployment, real sensor data flows through `src/agritwin_gh/models/environment_forecast_inference.py` → REST API → control system.
+
+## 14. Glossary
 
 - **LSTM** – Long Short-Term Memory; a type of recurrent neural network designed to handle sequences and long-range dependencies
 - **XGBoost** – Extreme Gradient Boosting; a tree ensemble method that iteratively improves by correcting previous errors

@@ -27,7 +27,8 @@
 12. [Deploying the Model — Making it Useful](#12-deploying-the-model--making-it-useful)
 13. [End-to-End Flow Diagram](#13-end-to-end-flow-diagram)
 14. [Common Questions (FAQ)](#14-common-questions-faq)
-15. [Glossary](#15-glossary)
+15. [Standalone Classification Tools](#15-standalone-classification-tools)
+16. [Glossary](#16-glossary)
 
 ---
 
@@ -658,7 +659,149 @@ No model is perfect — the goal is to be accurate enough to be useful, not to r
 
 ---
 
-## 15. Glossary
+## 15. Standalone Classification Tools
+
+### 15.1 `classify_input_leaf.py` — Two-Mode Leaf Disease Classifier
+
+**File location:** `scripts/classify_input_leaf.py`
+
+**Purpose:**  
+Provides two independent workflows for leaf disease classification:
+1. **Folder mode** – Classify every image in a chosen directory (batch inference)
+2. **AI-generate mode** – Synthesise a leaf image using Stable Diffusion, display it, classify it, then discard (no disk write)
+
+**Why it exists:**  
+- Folder mode validates the model against your own images, collected datasets, or field photos
+- AI-generate mode allows testing rare disease scenarios (e.g., "what does Late Blight look like?") without needing real samples
+- Both modes run standalone — no integration with the database or control system needed
+
+### 15.2 Usage
+
+```bash
+# Interactive menu – choose folder or AI-generate mode
+python scripts/classify_input_leaf.py
+```
+
+The script prompts you:
+```
+Choose operation:
+  1 – Classify images from a folder
+  2 – Generate a synthetic leaf and classify
+Select (1 or 2): 
+```
+
+### 15.3 Mode 1: Folder Classification
+
+**Workflow:**
+1. Enter the path to an image folder (e.g., `C:\\my_leaf_photos`)
+2. Script scans for `.jpg`, `.png`, `.bmp`, `.tiff`, `.tif`, `.webp` files
+3. Loads the latest trained EfficientNetB0 model
+4. Classifies each image; prints results in a formatted table
+
+**Output example:**
+```
+Found 12 image(s) in: C:\\my_leaf_photos
+
+Loading model weights ... done  (run 20260322_141503)
+
+#    File Name                            Predicted Class             Confidence
+────────────────────────────────────────────────────────────────────────────────
+1    leaf_001.jpg                         Early Blight                98.3%
+2    leaf_002.jpg                         Healthy                     99.1%
+3    leaf_003.jpg                         Late Blight                 96.7%
+...
+────────────────────────────────────────────────────────────────────────────────
+Done. Classified 12 image(s).
+```
+
+**Validation tips:**
+- Classes: Early Blight | Late Blight | Leaf Mold | Powdery Mildew | Spider Mites | Healthy
+- Confidence < 85% may warrant manual inspection
+- If a known disease photo is misclassified, report it for model retraining
+
+### 15.4 Mode 2: AI-Generate and Classify
+
+**Workflow:**
+1. Script displays disease options (1–6 for each disease class)
+2. You select a disease (e.g., "2" for Late Blight)
+3. Script loads Stable Diffusion v1.5 pipeline (downloads ~4 GB on first run)
+4. Generates a synthetic tomato leaf image with the disease
+5. Displays the generated image in a matplotlib window
+6. Classifies the generated image
+7. Prints results; discards the image (never written to disk)
+
+**Output example:**
+```
+Available disease options:
+1. Early Blight
+2. Late Blight
+3. Leaf Mold
+4. Powdery Mildew
+5. Spider Mites
+6. Healthy
+
+Enter option number: 2
+
+Loading Stable Diffusion pipeline  (runwayml/stable-diffusion-v1-5) ...
+(First run downloads ~4 GB; subsequent runs use cache)
+
+Generating synthetic tomato leaf image  [Late Blight] ...
+[displays image in window]
+
+Loading classifier model ... done  (run 20260322_141503)
+
+Generated leaf classified as:  Late Blight  (confidence: 87.2%)
+```
+
+**Why generate images?**
+- Stress-test the model on synthetic data (does it generalise?)
+- Explore model predictions on diseases you don't have real samples of
+- Understand what features the model uses (if Stable Diffusion + model agree, we're likely detecting real disease features)
+
+**Note:** Generated images are *synthetic* — the model may or may not classify them correctly. Misclassification of AI-generated images is expected and does not necessarily indicate model failure (Stable Diffusion may not render disease details accurately).
+
+### 15.5 Model Details
+
+- **Architecture:** EfficientNetB0 (pretrained backbone + fine-tuned classification head)
+- **Input size:** 224×224 pixels, RGB
+- **Output classes:** 6 (5 diseases + 1 healthy)
+- **Model trained on:** Synthetic disease progression dataset + real-world leaf photos
+
+### 15.6 Supported Image Formats
+
+`.jpg`, `.jpeg`, `.png`, `.bmp`, `.tiff`, `.tif`, `.webp`
+
+### 15.7 Troubleshooting
+
+**"No images found in folder":**
+- Verify folder exists and contains image files with supported extensions
+- Check file permissions (script must have read access)
+
+**"Model not found" (Folder mode):**
+- Verify `src/agritwin_gh/models/` contains a `disease_*_best.keras` file
+- If missing, retrain the model first: see [Tomato Leaf Disease Classification](TOMATO_DISEASE_CLASSIFICATION.md)
+
+**"Stable Diffusion download fails" (AI-generate mode):**
+- First run requires ~4 GB; ensure sufficient space in HuggingFace cache directory (`~/.cache/huggingface/`)
+- Verify internet connection
+- If download hangs, Ctrl+C and retry (HF cache is fault-tolerant)
+
+**"CUDA out of memory" (GPU users):**
+- Script defaults to CPU; Stable Diffusion on GPU is optional
+- To force GPU: edit script line: `torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32`
+
+### 15.8 Integration with AgriTwin-GH
+
+This script is a **standalone validation tool**:
+
+1. **Field validation** – Classify photos taken in your greenhouse
+2. **Model confidence** – Check whether model predictions on new images are reliable
+3. **AI exploration** – Test model on simulated disease scenarios
+4. **Documentation** – Provides working examples of inference without the full pipeline
+
+For automated greenhouse monitoring, images flow through `src/agritwin_gh/models/disease_inference.py` → disease forecasting model → control logic.
+
+## 16. Glossary
 
 | Term | Plain-English Definition |
 |------|--------------------------|

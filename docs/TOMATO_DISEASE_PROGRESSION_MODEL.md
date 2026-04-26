@@ -53,7 +53,8 @@
 17. [How to Read One Prediction Row](#17-how-to-read-one-prediction-row)
 18. [Self-Check Exercises](#18-self-check-exercises)
 19. [Visual Concept Diagram (Mermaid)](#19-visual-concept-diagram-mermaid)
-20. [Quick Concept Snapshot (Text Diagram)](#20-quick-concept-snapshot-text-diagram)
+20. [Standalone Test Suite: `test_disease_progression.py`](#20-standalone-test-suite-testdiseaseprogressionpy)
+21. [Quick Concept Snapshot (Text Diagram)](#21-quick-concept-snapshot-text-diagram)
 
 ---
 
@@ -947,7 +948,120 @@ How to use this diagram:
 
 ---
 
-## 20. Quick Concept Snapshot (Text Diagram)
+## 20. Standalone Test Suite: `test_disease_progression.py`
+
+### 20.1 Overview
+
+**File location:** `scripts/test_disease_progression.py`
+
+**Purpose:**  
+Standalone test script to validate the trained Disease Progression model (LSTM/GRU) across 10 diverse scenarios covering disease absence, outbreak conditions, environmental stress, treatment effects, and trend verification.
+
+**Why it exists:**  
+The model predicts disease presence (yes/no per disease), future severity (24h ahead, per disease), and trend labels (absent/emerging/reducing/stable/worsening). This script exercises the model with synthetic disease scenarios without requiring the training notebook or live sensor data — enabling rapid validation and confidence checks.
+
+### 20.2 Usage
+
+```bash
+# Run all 10 scenarios
+python scripts/test_disease_progression.py
+
+# Run a specific scenario (1–10)
+python scripts/test_disease_progression.py --scenario 3
+```
+
+### 20.3 What the Script Tests
+
+| # | Scenario | What it validates |
+|---|----------|-------------------|
+| 1 | **Healthy greenhouse** – optimal conditions | Model correctly predicts all diseases absent; presence flags = 0 |
+| 2 | **High humidity / poor ventilation** – Leaf Mold risk | Model identifies emerging Leaf Mold; other diseases remain absent |
+| 3 | **Hot dry stress** – Spider Mites + Powdery Mildew risk | Model detects multiple disease risks under stress conditions |
+| 4 | **Seedling stage** – moderate conditions baseline | Model calibrated for early growth stage; low disease pressure |
+| 5 | **Ripe stage** – damp late-season conditions | Model identifies late-season disease risk (Late Blight in humid conditions) |
+| 6 | **Worsening** – Early Blight severity ramps 5→40% | Model predicts worsening trend; future severity should increase |
+| 7 | **Recovery** – Leaf Mold drops 45→5% with treatment | Treatment control flag active; model predicts reducing trend |
+| 8 | **All diseases at 60% severity** – multi-disease outbreak | Model handles simultaneous multi-disease simulation; validates independence |
+| 9 | **Nocturnal damp spell** – night humidity peak | Day/night cycle test; night conditions favour fungal diseases |
+| 10 | **Post-treatment** – Spider Mites 30% + treatment active | Validates model response to control action flags |
+
+### 20.4 Expected Output Structure
+
+For each scenario, the script prints a table:
+
+```
+──────────────────────────────────────────────────────────────────────
+Scenario  6: Worsening — Early Blight severity ramps 5→40%
+  Disease              Presence  Current %  Future 24h %  Trend
+  ──────────────────────────────────────────────────────────────────
+  early_blight             1.0        5.0         15.3  worsening
+  late_blight              0.0        0.0          0.0  absent
+  leaf_mold                0.0        0.0          0.0  absent
+  powdery_mildew           0.0        0.0          0.0  absent
+  spider_mites             0.0        0.0          0.0  absent
+```
+
+**Columns:**
+- `Presence` – (0 or 1) Is disease currently active? (binary classification output)
+- `Current %` – Current severity/infection percentage (0–100)
+- `Future 24h %` – Model-predicted 24-hour-ahead severity
+- `Trend` – Derived label: absent | emerging | reducing | stable | worsening
+
+**Trend derivation rules** (from Section 7 of main notebook):
+- `absent` — current % < floor (0.5%) AND future < floor
+- `emerging` — current < floor AND future ≥ floor + delta (3.0)
+- `reducing` — current > future + delta
+- `worsening` — current < future – delta
+- `stable` — all else (neither reducing nor worsening significantly)
+
+### 20.5 Feature Input Strategy
+
+Each scenario constructs a 24-timestep sequence (HISTORY_WINDOW) where:
+- **All timesteps** have **identical feature values** (static snapshot model)
+- Environmental features (temp, humidity, air velocity, leaf wetness) are set per scenario
+- Stage one-hot encoding reflects the growth stage (seedling, vegetative, flowering, etc.)
+- Disease severity (0–100) and presence flags (0 or 1) are set per scenario
+- Control action flags (treatment indicators) are activated for treatment scenarios
+
+**Key features set per scenario (92 total):**
+
+- `indoor_temp`, `indoor_humidity`, `air_velocity` (feats 10–12) – environment
+- `leaf_wetness_proxy`, `vpd` (feats 18, 16) – moisture and stress indicators
+- `stage_name_*` (feats 56–61) – one-hot encoded growth stage
+- `control_action_flag__*` (feats 26, 31, 36, 41, 46) – treatment active? (per disease)
+- `current_infection_pct__*` (feats 82–86) – current severity per disease
+- `disease_present_flag__*` (feats 87–91) – presence indicator per disease
+
+### 20.6 Troubleshooting Failed Scenarios
+
+**All trends show "absent":**
+- Check that severity values are above the floor threshold (0.5%); increase current % in scenario if needed
+- Verify the scaler is loaded correctly
+
+**Unexpected future severity (e.g., increases despite treatment):**
+- Confirm `control_action_flag` is set to 1.0 for the treated disease
+- Check that `current_infection_pct` is above zero (model may not predict recovery from zero)
+
+**Import errors:**
+- Confirm virtual environment is activated and dependencies installed
+- Verify model checkpoint file exists at the path shown during load phase
+
+**"Feature count mismatch" errors:**
+- Ensure exactly 92 features are present after one-hot encoding of stages
+- Check that all disease and stage columns are correctly set in `_set_disease()` and `_set_stage()`
+
+### 20.7 Integration with AgriTwin-GH
+
+This script provides a **standalone diagnostic interface** to the Disease Progression model:
+
+1. **Model validation** – After training, verify predictions are sensible across disease/stage/environment combinations
+2. **What-if analysis** – Ask "What if humidity rises to 90%?" without running a full simulation
+3. **Feature engineering debugging** – Confirm feature fill logic produces expected model responses
+4. **Documentation** – Provides working examples of sequence construction for inference
+
+For greenhouse deployment, live sensor data flows through `src/agritwin_gh/models/disease_inference.py` → REST API → greenhouse control logic.
+
+## 21. Quick Concept Snapshot (Text Diagram)
 
 Use this when Mermaid rendering is not available.
 

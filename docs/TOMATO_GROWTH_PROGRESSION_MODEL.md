@@ -39,7 +39,8 @@
 11. [Running the Notebook](#11-running-the-notebook)
 12. [End-to-End Flow Diagram](#12-end-to-end-flow-diagram)
 13. [Common Questions (FAQ)](#13-common-questions-faq)
-14. [Glossary](#14-glossary)
+14. [Standalone Test Suite: `test_growth_stage_progression.py`](#14-standalone-test-suite-testgrowthstageprogressionpy)
+15. [Glossary](#15-glossary)
 
 ---
 
@@ -890,7 +891,120 @@ A: The checkpoint (`best_model_<RUN_ID>.keras`) is saved by the `ModelCheckpoint
 
 ---
 
-## 14. Glossary
+## 14. Standalone Test Suite: `test_growth_stage_progression.py`
+
+### 14.1 Overview
+
+**File location:** `scripts/test_growth_stage_progression.py`
+
+**Purpose:**  
+Standalone test script to validate the trained Growth Stage Progression model (multi-task LSTM) across 10 diverse scenarios covering all six growth stages, transition boundaries, stress conditions, and day/night comparisons.
+
+**Why it exists:**  
+The model makes five simultaneous predictions (current stage, next stage, hours-to-transition, 24h probability, 48h probability). This script exercises the model without requiring the training notebook or integration with the full digital twin — enabling quick validation, debugging, and confidence checks.
+
+### 14.2 Usage
+
+```bash
+# Run all 10 scenarios
+python scripts/test_growth_stage_progression.py
+
+# Run a specific scenario (1–10)
+python scripts/test_growth_stage_progression.py --scenario 5
+```
+
+### 14.3 What the Script Tests
+
+| # | Scenario | What it validates |
+|---|----------|-------------------|
+| 1 | **Seedling Day 1** – freshly transplanted | Model correctly identifies stage 0 (seedling) at cycle onset |
+| 2 | **Seedling near transition** – 90% progress, ~20h to next | High `t24_prob` expected; model should detect imminent transition |
+| 3 | **Early Vegetative** – stable mid-stage (50% progress) | Low transition probabilities; model should predict stable state |
+| 4 | **Flowering Initiation** – first flower buds appearing | Model correctly identifies stage 2 (flowering initiation) |
+| 5 | **Full Flowering** – optimal conditions, peak anthesis | Model identifies stage 3 (flowering) with moderate hrs_to_next |
+| 6 | **Unripe → Ripe transition** – 85% progress, 15h remaining | High `t24_prob` and `t48_prob`; imminent stage transition |
+| 7 | **Ripe final phase** – 95% cycle progress | Model identifies stage 5 (ripe); `t24_prob` and `t48_prob` should be ≈0 |
+| 8 | **Cold stress** – Early Veg at 10°C + low light | Model should predict slower development (higher hrs_to_next vs warm scenario) |
+| 9 | **Heat stress** – Flowering at 38°C (pollen viability risk) | Model should detect stress condition; may affect transition timing |
+| 10 | **Day vs Night** – same Flowering stage, toggle day/night flag | Comparison: daytime vs nighttime should show model responsiveness to diurnal cycle |
+
+### 14.4 Expected Output Structure
+
+For each scenario, the script prints:
+
+```
+======================================================================
+Scenario  5: Full Flowering — mid-stage optimal conditions
+  Current stage      : Stage 4 – Flowering
+  Next stage         : Stage 5 – Unripe
+  Hrs to transition  : 248.3 h  (~10.3 days)
+  Transition in 24h  : 0.015  
+  Transition in 48h  : 0.042  ##
+```
+
+**Interpretation:**
+- `Current stage` — The model's classification of the current 24-timestep sequence
+- `Next stage` — Predicted next stage (deterministic: always follows the sequence order)
+- `Hrs to transition` — Regression output: minutes/hours until the transition occurs (may be negative if in final stage)
+- `Transition in 24h` — Probability (0–1) that a transition occurs within 24 hours
+- `Transition in 48h` — Probability (0–1) that a transition occurs within 48 hours
+
+**Validation tips:**
+- Scenarios 2, 6: expect high `t24_prob` (≥ 0.7) since they model near-transition conditions
+- Scenario 3: expect low transition probabilities (~0.0–0.1) since it's mid-stage
+- Scenario 7 (Ripe): both probabilities should be ~0 (no stage after ripe except harvest)
+- Scenarios 8, 9: compare against corresponding normal scenarios to validate stress response
+- Scenario 10: day/night outputs should be similar in structure but may differ in hrs_to_next due to environmental differences
+
+### 14.5 Feature Input Strategy
+
+Each scenario constructs a static 24-timestep sequence where:
+- **All 24 timesteps** have **identical feature values** (snapshot model: no temporal variation within the sequence)
+- Primary features (indices 0–32) are set based on scenario parameters (stage, progress, temperature, etc.)
+- Rolling/lag features (indices 33–357) copy primary values into 11 slots per feature (consistent with training scaler)
+
+**Key features set per scenario:**
+
+- `stage_index` (feat 6) – numeric stage ID (0–5)
+- `hours_in_current_stage` (feat 7) – how long plant has been in current stage
+- `stage_progress_pct` (feat 11) – 0–100 representing where in the stage cycle the plant is
+- `estimated_hrs_to_next_stage` (feat 14) – model's target for regression
+- `indoor_temp`, `humidity`, `solarradiation`, `vpd` (feats 16, 17, 20, 22) – environmental drivers
+- `day_night_flag` (feat 21) – 1.0 for day, 0.0 for night
+
+### 14.6 Troubleshooting Failed Scenarios
+
+**All predictions are "ripe" (Stage 6):**
+- Check that the model file exists at the path printed in the load phase
+- Verify the scaler is loaded correctly (should show `n_features_in_: 358`)
+- Known issue: verify model checkpoint is not corrupted (retrain if needed)
+
+**Import errors (TensorFlow, joblib, etc.):**
+- Confirm virtual environment is activated
+- Re-install dependencies: `pip install -r requirements.txt`
+
+**"Model input shape mismatch" errors:**
+- Verify all 24 timesteps are filled correctly (check `_fill_sequence()` output shape)
+- Confirm feature count is exactly 358 after scaler transformation
+
+**Unexpected transition probabilities (e.g., high `t24_prob` at seedling day 1):**
+- This suggests model was trained on different feature distributions; compare scenario feature values against training dataset statistics
+- Regenerate the model if dataset or feature engineering logic changed
+
+### 14.7 Integration with AgriTwin-GH
+
+This script is a **standalone diagnostic tool** — it does not interface with the REST API, database, or digital twin renderer. It is used for:
+
+1. **Model validation** – After training, before deploying to the greenhouse control system
+2. **Feature debugging** – Check whether feature fill logic produces sensible model outputs
+3. **Rapid iteration** – Test model changes without restarting the full inference pipeline
+4. **Documentation** – Provides clear examples of how to construct sequences for inference
+
+For live greenhouse deployment, sensor data flows through `src/agritwin_gh/models/growth_stage_inference.py` → REST API → digital twin.
+
+---
+
+## 15. Glossary
 
 | Term | Plain-English Definition |
 |------|--------------------------|

@@ -29,7 +29,8 @@
 14. [Deploying the Model — Making it Useful](#14-deploying-the-model--making-it-useful)
 15. [End-to-End Flow Diagram](#15-end-to-end-flow-diagram)
 16. [Common Questions (FAQ)](#16-common-questions-faq)
-17. [Glossary](#17-glossary)
+17. [Standalone Classification Tools](#17-standalone-classification-tools)
+18. [Glossary](#18-glossary)
 
 ---
 
@@ -930,7 +931,164 @@ A: One complete pass through all training images. If there are 3,000 training im
 
 ---
 
-## 17. Glossary
+## 17. Standalone Classification Tools
+
+### 17.1 `classify_growth_stage_input.py` — Two-Mode Growth Stage Classifier
+
+**File location:** `scripts/classify_growth_stage_input.py`
+
+**Purpose:**  
+Provides two independent workflows for plant growth stage classification:
+1. **Folder mode** – Classify every image in a chosen directory (batch inference)
+2. **AI-generate mode** – Synthesise a plant image using Stable Diffusion for a specific stage, display it, classify it, then discard (no disk write)
+
+**Why it exists:**  
+- Folder mode validates the model against your own photos, dataset images, or field snapshots
+- AI-generate mode allows testing all six growth stages without needing to wait for a real plant to reach each stage
+- Both modes run standalone — no integration with the digital twin or database needed
+- Enables rapid model validation and confidence assessment
+
+### 17.2 Usage
+
+```bash
+# Interactive menu – choose folder or AI-generate mode
+python scripts/classify_growth_stage_input.py
+```
+
+The script prompts you:
+```
+Choose operation:
+  1 – Classify images from a folder
+  2 – Generate a synthetic plant and classify
+Select (1 or 2): 
+```
+
+### 17.3 Mode 1: Folder Classification
+
+**Workflow:**
+1. Enter the path to an image folder (e.g., `C:\\my_plant_photos`)
+2. Script scans for `.jpg`, `.png`, `.bmp`, `.tiff`, `.tif`, `.webp` files
+3. Loads the latest trained EfficientNetB3 model
+4. Classifies each image; prints results in a formatted table
+
+**Output example:**
+```
+Found 27 image(s) in: C:\\my_plant_photos
+
+Loading model weights ... done  (run 20260315_153045)
+
+#    File Name                            Predicted Stage                 Confidence
+──────────────────────────────────────────────────────────────────────────────────
+1    plant_day_5.jpg                      Stage 1 – Seedling               98.7%
+2    plant_day_12.jpg                     Stage 2 – Early Vegetative       97.1%
+3    plant_day_28.jpg                     Stage 3 – Flowering Initiation   95.3%
+...
+──────────────────────────────────────────────────────────────────────────────────
+Done. Classified 27 image(s).
+```
+
+**Validation tips:**
+- Stages: 1 (Seedling) → 2 (Early Veg) → 3 (Flowering Init) → 4 (Flowering) → 5 (Unripe) → 6 (Ripe)
+- Images should appear in stage order if they are time-series photos of a single plant
+- Confidence < 80% may warrant manual inspection
+- If a known-stage photo is misclassified, note it for model retraining
+
+### 17.4 Mode 2: AI-Generate and Classify
+
+**Workflow:**
+1. Script displays growth stage options (1–6)
+2. You select a stage (e.g., "4" for Full Flowering)
+3. Script loads Stable Diffusion v1.5 pipeline (downloads ~4 GB on first run)
+4. Generates a synthetic tomato plant image at the selected stage
+5. Displays the generated image in a matplotlib window
+6. Classifies the generated image
+7. Prints results; discards the image (never written to disk)
+
+**Output example:**
+```
+Available growth stage options:
+1. Stage 1 – Seedling
+2. Stage 2 – Early Vegetative
+3. Stage 3 – Flowering Initiation
+4. Stage 4 – Flowering
+5. Stage 5 – Unripe
+6. Stage 6 – Ripe
+
+Enter option number: 4
+
+Loading Stable Diffusion pipeline  (runwayml/stable-diffusion-v1-5) ...
+(First run downloads ~4 GB; subsequent runs use cache)
+
+Generating synthetic tomato plant image  [Stage 4 – Flowering] ...
+[displays image in window]
+
+Loading model weights ... done  (run 20260315_153045)
+
+Generated plant classified as:  Stage 4 – Flowering  (confidence: 92.1%)
+```
+
+**Why generate images?**
+- Stress-test the model on synthetic data (does it generalise well?)
+- Explore model predictions on all six stages without waiting for a real plant to grow through them
+- Understand what visual features the model uses (if Stable Diffusion + model agree, we're likely detecting real growth stage features)
+- Quick model validation before deployment
+
+**Note:** Generated images are *synthetic* — the model may or may not classify them correctly. Occasional misclassification of AI-generated images is expected and does not necessarily indicate model failure (Stable Diffusion may not render all botanical details accurately).
+
+### 17.5 Model Details
+
+- **Architecture:** EfficientNetB3 (pretrained backbone + fine-tuned classification head)
+- **Input size:** 300×300 pixels, RGB
+- **Output classes:** 6 (one per growth stage)
+- **Model trained on:** Synthetic growth progression dataset + real-world plant photos from greenhouse monitoring
+- **Training phases:**
+  1. Warm-up phase (8 epochs) – backbone frozen, only head trains
+  2. Fine-tuning phase (15 epochs) – backbone partially unfrozen, full model updates
+  3. Progressive resizing – initial training at 224×224, final training at 300×300 for better accuracy
+
+### 17.6 Supported Image Formats
+
+`.jpg`, `.jpeg`, `.png`, `.bmp`, `.tiff`, `.tif`, `.webp`
+
+### 17.7 Troubleshooting
+
+**"No images found in folder":**
+- Verify folder exists and contains image files with supported extensions
+- Check file permissions (script must have read access)
+- Try using absolute path instead of relative path
+
+**"Model not found" (Folder mode):**
+- Verify `src/agritwin_gh/models/` contains a `growth_stage_*_best.keras` file
+- If missing, retrain the model first: use the `tomato_growth_stage_classifier_train.ipynb` notebook
+
+**"Stable Diffusion download fails" (AI-generate mode):**
+- First run requires ~4 GB; ensure sufficient disk space in HuggingFace cache (`~/.cache/huggingface/`)
+- Verify internet connectivity
+- If download hangs, press Ctrl+C and retry (HuggingFace cache handles partial downloads)
+
+**"CUDA out of memory" (GPU users):**
+- Script defaults to CPU; GPU acceleration is optional
+- Stable Diffusion on CPU will be slower but will still work
+- To explicitly use GPU: modify the script to set `torch_dtype=torch.float16` and `pipe.to("cuda")`
+
+**"Vertical flip disabled" — why?**
+- Tomato plants grow upright. An upside-down plant image represents a scenario that never occurs in a real greenhouse
+- Vertical flipping during training would teach the model an impossible orientation
+- The disease classification model (leaf discs, orientation-invariant) uses vertical flip; the stage model does not
+
+### 17.8 Integration with AgriTwin-GH
+
+This script is a **standalone validation tool**:
+
+1. **Field validation** – Classify photos taken in your greenhouse to verify stage predictions
+2. **Model confidence** – Check whether model reliably classifies new images
+3. **AI exploration** – Explore model predictions on all six stages without real plant time
+4. **Documentation** – Provides working examples of inference outside the full pipeline
+5. **Before-deployment test** – Run through all six AI-generated stages to ensure model is ready
+
+For automated greenhouse monitoring, photos flow through `src/agritwin_gh/models/growth_stage_inference.py` → growth stage progression model → digital twin state update.
+
+## 18. Glossary
 
 | Term | Plain-English Definition |
 |------|--------------------------|

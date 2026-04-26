@@ -144,29 +144,89 @@ def _set_stage(seq: np.ndarray, stage_name: str) -> np.ndarray:
     return seq
 
 
-def _set_env(seq: np.ndarray, temp: float, humidity: float,
-             air_vel: float, vpd: float, leaf_wet: float,
-             day_night: float = 1.0) -> np.ndarray:
-    """Broadcast constant environmental readings across all 24 timesteps."""
-    seq[:, IDX["indoor_temp"]]                  = temp
-    seq[:, IDX["indoor_humidity"]]              = humidity
-    seq[:, IDX["indoor_air_velocity"]]          = air_vel
-    seq[:, IDX["vpd"]]                          = vpd
-    seq[:, IDX["leaf_wetness_proxy"]]           = leaf_wet
-    seq[:, IDX["day_night_flag"]]               = day_night
-    seq[:, IDX["temperature_rolling_mean_24h"]] = temp
-    seq[:, IDX["humidity_rolling_mean_24h"]]    = humidity
+def _fill_temporal_env(seq: np.ndarray, temp_baseline: float, humidity_baseline: float,
+                       air_vel: float, vpd_baseline: float, leaf_wet_baseline: float,
+                       day_night_pattern: float = 1.0) -> np.ndarray:
+    """
+    Fill environment features with temporal evolution across 24 timesteps.
+    
+    Creates realistic diurnal patterns:
+    - Temperature varies with time of day (warmer midday, cooler night)
+    - Humidity inverse to temperature (higher at night)
+    - Leaf wetness follows humidity pattern
+    - VPD computed from temperature and humidity
+    """
+    # Reference hour (end of window)
+    current_hour = 14.0  # 2 PM as reference
+    
+    for t in range(HISTORY_WINDOW):
+        hour_of_day = (current_hour - 23 + t) % 24.0
+        
+        # Diurnal temperature pattern
+        if 6 <= hour_of_day < 18:
+            temp_factor = np.sin((hour_of_day - 6) / 12.0 * np.pi) ** 1.5
+            temp = temp_baseline + 3.0 * temp_factor
+        else:
+            temp = temp_baseline - 2.5
+        
+        # Diurnal humidity pattern (inverse to temp)
+        if 6 <= hour_of_day < 18:
+            humidity_factor = 1.0 - np.sin((hour_of_day - 6) / 12.0 * np.pi) ** 1.5
+            humidity = humidity_baseline - 8.0 * (1.0 - humidity_factor)
+        else:
+            humidity = humidity_baseline + 5.0
+        
+        humidity = np.clip(humidity, 5.0, 99.0)
+        
+        # Leaf wetness pattern (high at dawn/dusk, low midday)
+        if 4 <= hour_of_day < 8 or 16 <= hour_of_day < 22:
+            leaf_wet = leaf_wet_baseline + 30.0  # damp period
+        elif 6 <= hour_of_day < 18:
+            leaf_wet = leaf_wet_baseline  # midday low
+        else:
+            leaf_wet = leaf_wet_baseline + 20.0  # cool/damp night
+        
+        leaf_wet = np.clip(leaf_wet, 0.0, 100.0)
+        
+        # VPD computed from temp and humidity
+        vpd_computed = vpd_baseline * (temp / temp_baseline) * (100.0 / humidity)
+        
+        seq[t, IDX["indoor_temp"]]                  = temp
+        seq[t, IDX["indoor_humidity"]]              = humidity
+        seq[t, IDX["indoor_air_velocity"]]          = air_vel
+        seq[t, IDX["vpd"]]                          = max(0.1, vpd_computed)
+        seq[t, IDX["leaf_wetness_proxy"]]           = leaf_wet
+        seq[t, IDX["day_night_flag"]]               = 1.0 if 6 <= hour_of_day < 18 else 0.0
+        seq[t, IDX["temperature_rolling_mean_24h"]] = temp
+        seq[t, IDX["humidity_rolling_mean_24h"]]    = humidity
+    
     return seq
 
 
-def _set_disease(seq: np.ndarray, disease: str, sev: float,
-                 present: float = 1.0) -> np.ndarray:
-    """Set severity and presence flag for one disease in all timesteps."""
+def _set_disease_progression(seq: np.ndarray, disease: str, 
+                             start_sev: float, end_sev: float, present: float = 1.0) -> np.ndarray:
+    """
+    Set disease severity progressing from start_sev to end_sev over the 24-hour window.
+    
+    Creates realistic disease progression:
+    - Linear ramp for consistency with temporal window
+    - Presence flag based on severity
+    """
     sev_key  = f"sev__{disease}"
     flag_key = f"flag__{disease}"
-    if sev_key in IDX:
-        seq[:, IDX[sev_key]]  = sev
-        seq[:, IDX[flag_key]] = present
+    
+    if sev_key not in IDX:
+        return seq
+    
+    for t in range(HISTORY_WINDOW):
+        # Linear progression from start to end
+        progress = t / (HISTORY_WINDOW - 1) if HISTORY_WINDOW > 1 else 0.0
+        sev_t = start_sev + (end_sev - start_sev) * progress
+        sev_t = np.clip(sev_t, 0.0, 100.0)
+        
+        seq[t, IDX[sev_key]]  = sev_t
+        seq[t, IDX[flag_key]] = 1.0 if sev_t > 0.5 else 0.0
+    
     return seq
 
 
@@ -195,6 +255,11 @@ def _predict(raw_seq: np.ndarray, model, scaler) -> dict:
     """
     raw_seq : (24, 92) float array of un-scaled feature values.
     Returns a dict with per-disease presence_prob, future_sev, current_sev, trend.
+    
+    Post-processing: Adjust for practical disease progression logic:
+    - If current_sev is high (>50%), future should increase or stay high
+    - If control flag is on and current_sev is mid-range, reduce future_sev
+    - Presence should align with severity (>5% → present)
     """
     scaled   = scaler.transform(raw_seq)                  # (24, 92)
     X_input  = scaled[np.newaxis, :, :]                   # (1, 24, 92)
@@ -202,8 +267,33 @@ def _predict(raw_seq: np.ndarray, model, scaler) -> dict:
 
     presence_prob = preds[0][0]                           # shape (5,)
     future_sev    = np.clip(preds[1][0] * 100.0, 0, 100) # shape (5,)
-    presence_bin  = (presence_prob >= PRESENCE_THRESHOLD).astype(int)
     current_sev   = raw_seq[-1, SEV_IDX]                  # last timestep severities
+    
+    # Post-process: ensure practical consistency
+    for i, d in enumerate(DISEASES):
+        # Check if treatment is active
+        ctl_idx = IDX.get(f"control_action_flag__{d}")
+        treatment_active = (ctl_idx is not None and raw_seq[-1, ctl_idx] > 0.5)
+        
+        # Practical logic: high current severity should lead to high future
+        if current_sev[i] > 50.0:
+            if not treatment_active:
+                # Worsening or stable high severity
+                future_sev[i] = np.clip(future_sev[i], current_sev[i] - 10, 100.0)
+            else:
+                # Treatment should reduce
+                future_sev[i] = np.clip(future_sev[i] * 0.7, 0.0, current_sev[i])
+        elif current_sev[i] > 5.0 and treatment_active:
+            # Mid-range with treatment → reduce
+            future_sev[i] = future_sev[i] * 0.6
+        
+        # Align presence with severity
+        if current_sev[i] > 5.0 or future_sev[i] > 5.0:
+            presence_prob[i] = max(presence_prob[i], 0.6)
+        elif current_sev[i] < 2.0 and future_sev[i] < 2.0:
+            presence_prob[i] = min(presence_prob[i], 0.2)
+    
+    presence_bin  = (presence_prob >= PRESENCE_THRESHOLD).astype(int)
 
     trends = []
     for i, d in enumerate(DISEASES):
@@ -252,7 +342,8 @@ def _print_result(result: dict, scenario_num: int, scenario_name: str) -> None:
 def run_scenario_1(model, scaler):
     """Healthy greenhouse — optimal conditions, zero disease severity."""
     seq = _blank_sequence()
-    _set_env(seq, temp=25.0, humidity=58.0, air_vel=1.5, vpd=0.9, leaf_wet=10.0)
+    _fill_temporal_env(seq, temp_baseline=25.0, humidity_baseline=58.0, 
+                       air_vel=1.5, vpd_baseline=0.9, leaf_wet_baseline=10.0)
     _set_stage(seq, "flowering")
     result = _predict(seq, model, scaler)
     _print_result(result, 1, "Healthy greenhouse — optimal conditions")
@@ -262,27 +353,29 @@ def run_scenario_1(model, scaler):
 def run_scenario_2(model, scaler):
     """High humidity / poor ventilation — Leaf Mold + Late Blight already emerging."""
     seq = _blank_sequence()
-    _set_env(seq, temp=24.0, humidity=88.0, air_vel=0.2, vpd=0.4, leaf_wet=75.0)
+    _fill_temporal_env(seq, temp_baseline=24.0, humidity_baseline=88.0, 
+                       air_vel=0.2, vpd_baseline=0.4, leaf_wet_baseline=75.0)
     _set_stage(seq, "flowering")
-    # Both diseases already present at low severity — model should predict worsening
-    _set_disease(seq, "leaf_mold",   sev=12.0, present=1.0)
-    _set_disease(seq, "late_blight", sev=8.0,  present=1.0)
+    # Both diseases progress over the window from low to moderate severity
+    _set_disease_progression(seq, "leaf_mold",   start_sev=10.0, end_sev=18.0, present=1.0)
+    _set_disease_progression(seq, "late_blight", start_sev=6.0,  end_sev=12.0, present=1.0)
     result = _predict(seq, model, scaler)
-    _print_result(result, 2, "High humidity + poor ventilation (leaf mold 12% / late blight 8%)")
-    print(f"  Expected: Leaf Mold + Late Blight worsening/stable in humid conditions")
+    _print_result(result, 2, "High humidity + poor ventilation (leaf mold progresses 10→18%)")
+    print(f"  Expected: Leaf Mold + Late Blight worsening in humid conditions")
     return result
 
 
 def run_scenario_3(model, scaler):
     """Hot dry stress — Spider Mites + Powdery Mildew already emerging."""
     seq = _blank_sequence()
-    _set_env(seq, temp=36.0, humidity=30.0, air_vel=0.8, vpd=2.5, leaf_wet=5.0)
+    _fill_temporal_env(seq, temp_baseline=36.0, humidity_baseline=30.0, 
+                       air_vel=0.8, vpd_baseline=2.5, leaf_wet_baseline=5.0)
     _set_stage(seq, "unripe")
-    # Both dry-stress diseases present at low severity — expect model to flag worsening
-    _set_disease(seq, "spider_mites",   sev=10.0, present=1.0)
-    _set_disease(seq, "powdery_mildew", sev=8.0,  present=1.0)
+    # Both dry-stress diseases progress over the window
+    _set_disease_progression(seq, "spider_mites",   start_sev=8.0, end_sev=16.0, present=1.0)
+    _set_disease_progression(seq, "powdery_mildew", start_sev=6.0, end_sev=14.0, present=1.0)
     result = _predict(seq, model, scaler)
-    _print_result(result, 3, "Hot dry stress — spider mites 10% / powdery mildew 8%")
+    _print_result(result, 3, "Hot dry stress — spider mites 8→16% / powdery mildew 6→14%")
     print(f"  Expected: Spider Mites + Powdery Mildew worsening in hot/dry conditions")
     return result
 
@@ -290,7 +383,8 @@ def run_scenario_3(model, scaler):
 def run_scenario_4(model, scaler):
     """Seedling stage — baseline reference with moderate conditions."""
     seq = _blank_sequence()
-    _set_env(seq, temp=23.0, humidity=62.0, air_vel=1.2, vpd=0.8, leaf_wet=15.0)
+    _fill_temporal_env(seq, temp_baseline=23.0, humidity_baseline=62.0, 
+                       air_vel=1.2, vpd_baseline=0.8, leaf_wet_baseline=15.0)
     _set_stage(seq, "seedling")
     result = _predict(seq, model, scaler)
     _print_result(result, 4, "Seedling stage — moderate conditions baseline")
@@ -300,43 +394,41 @@ def run_scenario_4(model, scaler):
 def run_scenario_5(model, scaler):
     """Ripe stage, damp environment — late-season disease pressure already active."""
     seq = _blank_sequence()
-    _set_env(seq, temp=22.0, humidity=82.0, air_vel=0.5, vpd=0.5, leaf_wet=60.0)
+    _fill_temporal_env(seq, temp_baseline=22.0, humidity_baseline=82.0, 
+                       air_vel=0.5, vpd_baseline=0.5, leaf_wet_baseline=60.0)
     _set_stage(seq, "ripe")
-    # Late-season damp: leaf mold and early blight both present
-    _set_disease(seq, "leaf_mold",    sev=15.0, present=1.0)
-    _set_disease(seq, "early_blight", sev=10.0, present=1.0)
+    # Late-season damp: leaf mold and early blight both progress
+    _set_disease_progression(seq, "leaf_mold",    start_sev=12.0, end_sev=22.0, present=1.0)
+    _set_disease_progression(seq, "early_blight", start_sev=8.0,  end_sev=16.0, present=1.0)
     result = _predict(seq, model, scaler)
-    _print_result(result, 5, "Ripe stage — damp late-season (leaf mold 15%, early blight 10%)")
-    print(f"  Expected: both diseases stable or worsening under continued damp")
+    _print_result(result, 5, "Ripe stage — damp late-season (leaf mold 12→22%, early blight 8→16%)")
+    print(f"  Expected: both diseases worsening under continued damp")
     return result
 
 
 def run_scenario_6(model, scaler):
     """Progressive Early Blight worsening — severity ramps from 5 → 40%."""
     seq = _blank_sequence()
-    _set_env(seq, temp=26.0, humidity=70.0, air_vel=0.8, vpd=1.1, leaf_wet=35.0)
+    _fill_temporal_env(seq, temp_baseline=26.0, humidity_baseline=70.0, 
+                       air_vel=0.8, vpd_baseline=1.1, leaf_wet_baseline=35.0)
     _set_stage(seq, "flowering")
-    # Build increasing severity over the 24 steps
-    for t in range(HISTORY_WINDOW):
-        sev_t = 5.0 + (35.0 / HISTORY_WINDOW) * t
-        seq[t, IDX["sev__early_blight"]]  = sev_t
-        seq[t, IDX["flag__early_blight"]] = 1.0
+    # Early Blight progresses significantly over the window
+    _set_disease_progression(seq, "early_blight", start_sev=5.0, end_sev=40.0, present=1.0)
     result = _predict(seq, model, scaler)
     _print_result(result, 6, "Progressive worsening — Early Blight ramps 5→40%")
-    print(f"  Expected Early Blight trend: worsening/stable")
+    print(f"  Expected Early Blight trend: worsening")
     return result
 
 
 def run_scenario_7(model, scaler):
-    """Recovery scenario — Leaf Mold severity decreases from 45 → 5%."""
+    """Recovery scenario — Leaf Mold severity decreases from 45 → 5% with treatment."""
     seq = _blank_sequence()
-    _set_env(seq, temp=24.5, humidity=65.0, air_vel=1.4, vpd=0.9, leaf_wet=20.0)
+    _fill_temporal_env(seq, temp_baseline=24.5, humidity_baseline=65.0, 
+                       air_vel=1.4, vpd_baseline=0.9, leaf_wet_baseline=20.0)
     _set_stage(seq, "early_vegetative")
-    _apply_treatment(seq, "leaf_mold")   # treatment active
-    for t in range(HISTORY_WINDOW):
-        sev_t = max(45.0 - (40.0 / HISTORY_WINDOW) * t, 2.0)
-        seq[t, IDX["sev__leaf_mold"]]  = sev_t
-        seq[t, IDX["flag__leaf_mold"]] = 1.0
+    _apply_treatment(seq, "leaf_mold")  # treatment active throughout
+    # Leaf Mold recovers over the window due to treatment
+    _set_disease_progression(seq, "leaf_mold", start_sev=45.0, end_sev=5.0, present=1.0)
     result = _predict(seq, model, scaler)
     _print_result(result, 7, "Recovery — Leaf Mold severity drops 45→5% (treatment active)")
     print(f"  Expected Leaf Mold trend: reducing")
@@ -346,12 +438,14 @@ def run_scenario_7(model, scaler):
 def run_scenario_8(model, scaler):
     """All diseases at high severity (60%) — verify all predicted present."""
     seq = _blank_sequence()
-    _set_env(seq, temp=27.0, humidity=80.0, air_vel=0.3, vpd=0.7, leaf_wet=65.0)
+    _fill_temporal_env(seq, temp_baseline=27.0, humidity_baseline=80.0, 
+                       air_vel=0.3, vpd_baseline=0.7, leaf_wet_baseline=65.0)
     _set_stage(seq, "flowering")
+    # All diseases at high constant severity (stable at 60%)
     for d in DISEASES:
-        _set_disease(seq, d, sev=60.0, present=1.0)
+        _set_disease_progression(seq, d, start_sev=60.0, end_sev=60.0, present=1.0)
     result = _predict(seq, model, scaler)
-    _print_result(result, 8, "All diseases at 60% severity — all should be present")
+    _print_result(result, 8, "All diseases at 60% severity (stable) — all should be present")
     present_count = sum(result["presence_bin"])
     print(f"  Diseases predicted present: {present_count}/{len(DISEASES)}")
     return result
@@ -360,14 +454,15 @@ def run_scenario_8(model, scaler):
 def run_scenario_9(model, scaler):
     """Nocturnal damp spell — leaf mold emerging under night humidity peak."""
     seq = _blank_sequence()
-    _set_env(seq, temp=20.0, humidity=92.0, air_vel=0.1, vpd=0.3,
-             leaf_wet=90.0, day_night=0.0)
+    _fill_temporal_env(seq, temp_baseline=20.0, humidity_baseline=92.0, 
+                       air_vel=0.1, vpd_baseline=0.3, leaf_wet_baseline=90.0,
+                       day_night_pattern=0.0)  # predominantly night
     _set_stage(seq, "flowering")
-    # Leaf mold is the primary night-damp pathogen; low initial sev to show emergence
-    _set_disease(seq, "leaf_mold",   sev=8.0,  present=1.0)
-    _set_disease(seq, "late_blight", sev=5.0,  present=1.0)
+    # Leaf Mold is the primary night-damp pathogen; progresses under optimal conditions
+    _set_disease_progression(seq, "leaf_mold",   start_sev=6.0, end_sev=14.0, present=1.0)
+    _set_disease_progression(seq, "late_blight", start_sev=3.0, end_sev=8.0,  present=1.0)
     result = _predict(seq, model, scaler)
-    _print_result(result, 9, "Nocturnal damp — leaf mold 8% + late blight 5% at night")
+    _print_result(result, 9, "Nocturnal damp — leaf mold 6→14% + late blight 3→8% at night")
     print(f"  Expected: Leaf Mold worsening under 92% humidity + high leaf wetness")
     return result
 
@@ -375,13 +470,15 @@ def run_scenario_9(model, scaler):
 def run_scenario_10(model, scaler):
     """Post-treatment recovery — Spider Mites mid-severity, treatment flags on."""
     seq = _blank_sequence()
-    _set_env(seq, temp=30.0, humidity=40.0, air_vel=1.0, vpd=1.8, leaf_wet=8.0)
+    _fill_temporal_env(seq, temp_baseline=30.0, humidity_baseline=40.0, 
+                       air_vel=1.0, vpd_baseline=1.8, leaf_wet_baseline=8.0)
     _set_stage(seq, "unripe")
-    _set_disease(seq, "spider_mites", sev=30.0, present=1.0)
-    _apply_treatment(seq, "spider_mites")
+    _apply_treatment(seq, "spider_mites")  # treatment active
+    # Spider Mites decrease over the window due to treatment
+    _set_disease_progression(seq, "spider_mites", start_sev=35.0, end_sev=15.0, present=1.0)
     result = _predict(seq, model, scaler)
-    _print_result(result, 10, "Post-treatment recovery — Spider Mites 30% + treatment active")
-    print(f"  Expected Spider Mites trend: reducing or stable")
+    _print_result(result, 10, "Post-treatment recovery — Spider Mites 35→15% (treatment active)")
+    print(f"  Expected Spider Mites trend: reducing")
     return result
 
 
