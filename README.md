@@ -445,7 +445,7 @@ The AgriTwin-GH framework has been peer-reviewed and published in the **Internat
 | **ISSN** | 2455-6211 |
 | **Volume / Issue** | Volume 14, Issue 4, April 2026 |
 | **DOI** | [10.56025/IJARESM.140426327](https://doi.org/10.56025/IJARESM.140426327) |
-| **Full Text** | [Read the paper →](https://www.ijaresm.com/agritwin-gh-agricultural-digital-twin-for-smart-greenhouse-horticulture-of-tomato-cultivation) |
+| **Full Text** | [Read the paper](https://www.ijaresm.com/agritwin-gh-agricultural-digital-twin-for-smart-greenhouse-horticulture-of-tomato-cultivation) |
 | **PDF (this repo)** | [AgriTwin-GH - Journal Paper - IJARESM.pdf](docs/Documents/AgriTwin-GH%20-%20Journal%20Paper%20-%20IJARESM.pdf) |
 
 ---
