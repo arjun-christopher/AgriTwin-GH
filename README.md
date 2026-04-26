@@ -38,6 +38,7 @@
 - [Frontend Dashboard](#️-frontend-dashboard)
 - [Repository Structure](#-repository-structure)
 - [Research Areas](#-research-areas)
+- [Publication](#-publication)
 - [License](#-license)
 
 ---
@@ -432,7 +433,24 @@ AgriTwin-GH/
 
 ---
 
-## 🔬 Research Areas
+## � Publication
+
+The AgriTwin-GH framework has been peer-reviewed and published in the **International Journal of All Research Education and Scientific Methods (IJARESM)**.
+
+| Field | Details |
+|-------|---------|
+| **Title** | AgriTwin-GH: Agricultural Digital Twin for Smart Greenhouse Horticulture of Tomato Cultivation |
+| **Authors** | Amala Margret. A, Dr. V. Govindasamy, Arjun Christopher, Vantapati Raja Rajeswari, Bhuvanalakshmi. J. P |
+| **Journal** | International Journal of All Research Education and Scientific Methods (IJARESM) |
+| **ISSN** | 2455-6211 |
+| **Volume / Issue** | Volume 14, Issue 4, April 2026 |
+| **DOI** | [10.56025/IJARESM.140426327](https://doi.org/10.56025/IJARESM.140426327) |
+| **Full Text** | [Read the paper →](https://www.ijaresm.com/agritwin-gh-agricultural-digital-twin-for-smart-greenhouse-horticulture-of-tomato-cultivation) |
+| **PDF (this repo)** | [AgriTwin-GH - Journal Paper - IJARESM.pdf](docs/Documents/AgriTwin-GH%20-%20Journal%20Paper%20-%20IJARESM.pdf) |
+
+---
+
+## �🔬 Research Areas
 
 - Cyber-physical system design for controlled environment agriculture
 - Digital twin technology and physics-based simulation
