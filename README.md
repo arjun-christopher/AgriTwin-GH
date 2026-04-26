@@ -433,7 +433,7 @@ AgriTwin-GH/
 
 ---
 
-## � Publication
+## 📄 Publication
 
 The AgriTwin-GH framework has been peer-reviewed and published in the **International Journal of All Research Education and Scientific Methods (IJARESM)**.
 
@@ -450,7 +450,7 @@ The AgriTwin-GH framework has been peer-reviewed and published in the **Internat
 
 ---
 
-## �🔬 Research Areas
+## 🔬 Research Areas
 
 - Cyber-physical system design for controlled environment agriculture
 - Digital twin technology and physics-based simulation
@@ -460,7 +460,7 @@ The AgriTwin-GH framework has been peer-reviewed and published in the **Internat
 
 ---
 
-## 📄 License
+## 📜 License
 
 **⚠️ PROPRIETARY LICENSE**
 
