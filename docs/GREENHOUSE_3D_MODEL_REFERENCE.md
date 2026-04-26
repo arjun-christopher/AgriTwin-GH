@@ -24,6 +24,7 @@
 9. [Live Testing in Play Mode](#live-testing-in-play-mode)
 10. [Future FastAPI / Python Backend Integration](#future-fastapi--python-backend-integration)
 11. [Architecture & Design Patterns](#architecture--design-patterns)
+12. [Scenario Runner — `sample_greenhouse_scenarios.py`](#scenario-runner--sample_greenhouse_scenariospy)
 
 ---
 
@@ -1175,6 +1176,117 @@ Scene (lights, particles, audio)
 | - | Support for 15 crops (expandable) |
 | - | LateUpdate health persistence |
 | - | All-Ripe auto-blink override logic |
+
+---
+
+---
+
+# Scenario Runner — `sample_greenhouse_scenarios.py`
+
+## Overview
+
+`sample_greenhouse_scenarios.py` is a Python script that drives the **live WebGL greenhouse** through a curated set of 15 real-world growing conditions. It replaces manual JSON editing by POSTing each scenario directly to the FastAPI backend, which the Unity WebGL build polls every second.
+
+> **Why HTTP and not a JSON file?**  WebGL builds run inside a browser sandbox and cannot read from the local filesystem. Writing `greenhouse_state.json` on disk has no effect on the deployed scene. The script POSTs to `POST /api/greenhouse-3d/state` instead — the backend stores the state in memory and the Unity WebGL build retrieves it via `GET /api/greenhouse-3d/state`.
+
+---
+
+## Location
+
+```
+scripts/sample_greenhouse_scenarios.py
+```
+
+---
+
+## Usage
+
+```bash
+python scripts/sample_greenhouse_scenarios.py
+```
+
+### Environment Overrides
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AGRITWIN_NO_SERVER` | `0` | Set to `1` to skip launching `main.py` (use an already-running backend) |
+| `AGRITWIN_API_URL` | `http://localhost:8000` | Base URL of the FastAPI backend |
+
+---
+
+## Run Order
+
+### Phase 1 — Backend + Browser
+
+1. Starts `main.py` as a background process
+2. Waits for `GET /api/system/health` to return 200 (up to 120 s)
+3. Opens the WebGL greenhouse at `http://localhost:8000/greenhouse-3d/` in the default browser
+
+### Phase 2 — Scenario Walkthrough
+
+- Press **Enter** to apply the next scenario
+- The 3-D WebGL scene reflects each change within ≤ 1 second
+- Press **Ctrl-C** at any time to stop
+
+---
+
+## How It Works
+
+```
+sample_greenhouse_scenarios.py
+    ↓  POST /api/greenhouse-3d/state  (JSON body)
+FastAPI backend  (greenhouse_3d.py — stores state in memory)
+    ↓  GET /api/greenhouse-3d/state  (polled every 1 s)
+GreenhouseStateApplier.cs  (UnityWebRequest coroutine)
+    ↓
+Individual Controllers  (apply state)
+    ↓
+WebGL Scene  (lights, particles, audio, crop stages, sky)
+```
+
+---
+
+## Scenario Catalogue
+
+15 scenarios covering the full crop lifecycle and edge cases:
+
+| # | Name | Stage | Time | Health |
+|---|------|-------|------|--------|
+| 1 | Germination — Pre-Dawn Start | Seedling | Night | Green |
+| 2 | Seedling — Morning Warm-Up | Seedling | Morning | Green |
+| 3 | Vegetative — Peak Growth Afternoon | Vegetative | Afternoon | Green |
+| 4 | Vegetative — Mild Heat Stress Warning | Vegetative | Afternoon | Yellow |
+| 5 | Flowering Initiation — Evening Transition | FloweringInitiation | Evening | Green |
+| 6 | Full Bloom — Optimal Conditions | Flowering | Afternoon | Green |
+| 7 | Full Bloom — Disease Alert (Critical) | Flowering | Night | Red |
+| 8 | Unripe Fruit — Night Ripening Mode | Unripe | Night | Green |
+| 9 | Unripe Fruit — Water Deficit Stress | Unripe | Morning | Yellow |
+| 10 | Ripe — Harvest-Ready (Full Blink) | Ripe | Afternoon | Green |
+| 11 | Post-Harvest — Greenhouse Reset (All Off) | Seedling | Night | Green |
+| 12 | Emergency — Total System Failure | Flowering | Night | Red |
+| 13 | Cold Snap — Winter Night Protocol | Vegetative | Night | Green |
+| 14 | Heatwave — Maximum Ventilation | Flowering | Afternoon | Yellow |
+| 15 | Ideal Cycle — End-to-End Showcase | Flowering | Afternoon | Green |
+
+---
+
+## API Endpoint
+
+| Method | URL | Purpose |
+|--------|-----|---------|
+| `POST` | `/api/greenhouse-3d/state` | Script writes each scenario here |
+| `GET` | `/api/greenhouse-3d/state` | Unity WebGL polls this every second |
+
+The POST body is the standard greenhouse JSON schema (see [JSON Schema & Format](#json-schema--format)).
+
+---
+
+## Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | All scenarios applied successfully |
+| `1` | Backend failed to start or an API call failed |
 
 ---
 
