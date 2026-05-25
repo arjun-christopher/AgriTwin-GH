@@ -92,23 +92,23 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║                   PRESENTATION & VISUALISATION LAYER                     ║
 ║                                                                          ║
-║   React 19 + Tailwind v4  (Vite · port 5173)                            ║
+║   React 19 + Tailwind v4  (Vite · port 5173)                             ║
 ║   HomeDashboard · Detailed Insights · Manual Override                    ║
 ║                                                                          ║
-║   Unity WebGL 3D Scene  (src/agritwin_gh/build/ · Git LFS)              ║
+║   Unity WebGL 3D Scene  (src/agritwin_gh/build/ · Git LFS)               ║
 ║   10 Actuator Controllers · 15 Crop Plants · TimeOfDay Environment       ║
 ╚══════════════════════════╦═══════════════════════════════════════════════╝
                            ║ HTTP + JSON  (CORS · port 8000)
 ╔══════════════════════════╩═══════════════════════════════════════════════╗
 ║                         FASTAPI APPLICATION LAYER                        ║
 ║                                                                          ║
-║   Route Handlers  (thin adapters — no DB / no MPC logic)                ║
+║   Route Handlers  (thin adapters — no DB / no MPC logic)                 ║
 ║   dt · actuators · weather · intelligence · resources · media · system   ║
 ║                        ▼                                                 ║
 ║   Service Layer  (business logic)                                        ║
 ║   DashboardService · ControlService · LoopService · MediaService         ║
 ║                        ▼                                                 ║
-║   RuntimeStore  (in-process singleton — last DT step result)            ║
+║   RuntimeStore  (in-process singleton — last DT step result)             ║
 ╚══════════════════════════╦═══════════════════════════════════════════════╝
                            ║ import only (no HTTP)
 ╔══════════════════════════╩═══════════════════════════════════════════════╗
@@ -116,17 +116,17 @@ AgriTwin-GH is a comprehensive cyber-physical system combining real-time environ
 ║                                                                          ║
 ║   Input Provider              DTLoop (Orchestrator)                      ║
 ║   ─────────────               ────────────────────                       ║
-║   CSVInputProvider  ──► every 5 min:  DTEngine  (ARX physics)     ║
-║   SyntheticInputProvider       every 15 min: MPCSolver (SLSQP/CVXPY)    ║
-║   (swap with no loop change)  every 30 min: Image refresh hook          ║
+║   CSVInputProvider  ──► every 5 min:  DTEngine  (ARX physics)            ║
+║   SyntheticInputProvider       every 15 min: MPCSolver (SLSQP/CVXPY)     ║
+║   (swap with no loop change)  every 30 min: Image refresh hook           ║
 ║                                                                          ║
-║   ML Inference Pipelines  (called per DT step)                          ║
+║   ML Inference Pipelines  (called per DT step)                           ║
 ║   ──────────────────────────────────────────────                         ║
-║   Disease Classifier      EfficientNetB0  — 6-class leaf disease        ║
-║   Growth Stage Classifier EfficientNetB3  — 6-stage plant growth        ║
-║   Disease Progression     LSTM / GRU      — 24h severity + trend        ║
-║   Growth Progression      Multi-task LSTM — stage + hours to transition ║
-║   Weather Forecast        Chronos + XGBoost + LSTM — 24h / 48h climate  ║
+║   Disease Classifier      EfficientNetB0  — 6-class leaf disease         ║
+║   Growth Stage Classifier EfficientNetB3  — 6-stage plant growth         ║
+║   Disease Progression     LSTM / GRU      — 24h severity + trend         ║
+║   Growth Progression      Multi-task LSTM — stage + hours to transition  ║
+║   Weather Forecast        Chronos + XGBoost + LSTM — 24h / 48h climate   ║
 ╚══════════════════════════╦═══════════════════════════════════════════════╝
                            ║ read / write
 ╔══════════════════════════╩═══════════════════════════════════════════════╗
